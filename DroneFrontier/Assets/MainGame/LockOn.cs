@@ -1,0 +1,118 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using System.Linq;
+
+public class LockOn : MonoBehaviour
+{
+    [SerializeField] float searchRadius = 10.0f;
+
+    GameObject mainCamera;
+    public static GameObject Target { get; private set; }
+    public static float TrackingSpeed { get; set; }
+    Image image;
+    bool isTarget;
+
+    void Start()
+    {
+        mainCamera = Camera.main.gameObject;
+        TrackingSpeed = 0.1f;
+        image = GameObject.Find("Image").GetComponent<Image>();
+        image.enabled = false;
+        Target = null;
+        isTarget = false;
+    }
+
+    void Update()
+    {
+        //Shiftキーを押している間はロックオン処理
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            //何もロックオンしていない場合はロックオン対象を探す
+            if (!isTarget)
+            {
+                //取得したRaycastHit配列から各RaycastHitクラスのgameObjectを抜き取ってリスト化する
+                var hits = Physics.SphereCastAll(
+                    mainCamera.transform.position,
+                    searchRadius,
+                    mainCamera.transform.forward,
+                    0.01f).Select(h => h.transform.gameObject).ToList();
+
+                hits = FilterTargetObject(hits);
+
+                if (0 < hits.Count())
+                {
+                    float minTargetDistance = float.MaxValue;
+                    GameObject t = null;    //target
+
+                    foreach (var hit in hits)
+                    {
+                        //ビューポートに変換
+                        Vector3 targetScreenPoint = Camera.main.WorldToViewportPoint(hit.transform.position);
+
+                        //画面の中央との距離を計算
+                        float targetDistance = Vector2.Distance(
+                               new Vector2(0.5f, 0.5f),
+                               new Vector2(targetScreenPoint.x, targetScreenPoint.y));
+
+                        //距離が最小だったら更新
+                        if (targetDistance < minTargetDistance)
+                        {
+                            minTargetDistance = targetDistance;
+                            t = hit.transform.gameObject;
+                        }
+                    }
+
+                    Target = t;
+                    image.enabled = true;
+                    isTarget = true;
+                }
+            }
+            //ロックオンしているならカメラの追尾処理
+            else
+            {
+                //ロックオンの対象オブジェクトが消えていないなら継続して追尾
+                if (Target != null)
+                {
+                    GameObject camera = Camera.main.gameObject;
+                    Vector3 diff = Target.transform.position - camera.transform.position;
+                    Quaternion rotation = Quaternion.LookRotation(diff);    //ロックオンしたオブジェクトの方向
+
+                    //カメラの角度からtrackingSpeed(0～1)の速度でロックオンしたオブジェクトの角度に向く
+                    camera.transform.rotation = Quaternion.Slerp(camera.transform.rotation, rotation, TrackingSpeed);
+                }
+                //ロックオンしている最中に対象が消えたらロックオン解除
+                else
+                {
+                    isTarget = false;
+                    image.enabled = false;
+                }
+            }
+        }
+
+        //Shiftキーを離したらロックオン解除
+        if (Input.GetKeyUp(KeyCode.LeftShift))
+        {
+            if (isTarget)
+            {
+                Target = null;
+                isTarget = false;
+                image.enabled = false;
+            }
+        }
+    }
+
+    List<GameObject> FilterTargetObject(List<GameObject> hits)
+    {
+        return hits.Where(h =>
+        {
+            //各要素の座標をビューポートに変換(画面左下が0:0、右上が1:1)して条件に合うものだけリストに詰め込む
+            //タグがプレイヤーのオブジェクトに絞る
+            //操作しているプレイヤーのオブジェクト名はロックオン対象外
+            Vector3 screenPoint = Camera.main.WorldToViewportPoint(h.transform.position);
+            return screenPoint.x > 0.25f && screenPoint.x < 0.75f && screenPoint.y > 0.15f && screenPoint.y < 0.85f;
+        }).Where(h => h.tag == Player.PLAYER_TAG).Where(h => h.name != Player.ObjectName)
+         .ToList();
+    }
+}

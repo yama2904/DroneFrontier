@@ -47,31 +47,35 @@ public class ConfigButtonsController : MonoBehaviour
         sliders[(int)Type.CAMERA].value = CameraManager.GetBaseSpeed();
     }
 
+    //BGM調整
     public void MoveSliderBGM()
     {
         SoundManager.SetBaseVolumeBGM(sliders[(int)Type.BGM].value);
         valueDisplays[(int)Type.BGM].text = (sliders[(int)Type.BGM].value * 100).ToString("F0");
     }
 
+    //SE調整
     public void MoveSliderSE()
     {
         SoundManager.SetBaseVolumeSE(sliders[(int)Type.SE].value);
         valueDisplays[(int)Type.SE].text = (sliders[(int)Type.SE].value * 100).ToString("F0");
     }
 
+    //明るさ調整
     public void MoveSliderBrightness()
     {
         BrightnessManager.SetBaseAlfa(1.0f - sliders[(int)Type.BRIGHTNESS].value);
         valueDisplays[(int)Type.BRIGHTNESS].text = (sliders[(int)Type.BRIGHTNESS].value * 100).ToString("F0");
     }
 
+    //カメラ感度調整
     public void MoveSliderCamera()
     {
         CameraManager.SetBaseSpeed(sliders[(int)Type.CAMERA].value);
         valueDisplays[(int)Type.CAMERA].text = (sliders[(int)Type.CAMERA].value * 100).ToString("F0");
     }
 
-
+    //設定初期化
     public void InitSetting()
     {
         BaseScreenManager.InitConfig();

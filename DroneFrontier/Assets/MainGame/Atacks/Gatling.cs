@@ -1,0 +1,50 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Gatling : AtackBase
+{
+    [SerializeField] GameObject bullet = null; //弾のオブジェクト
+    [SerializeField] float shotPerSecond = 5.0f;   //1秒間に発射する量
+
+    List<Bullet> bullets;
+    float shotInterval; //1発ごとの間隔
+    float deltaTime;
+
+    protected override void Start()
+    {
+        ////Resourcesフォルダから弾丸をロード
+        //bullet = Resources.Load<GameObject>(FOLDER_PATH + "Bullet");
+
+        bullets = new List<Bullet>();
+        shotInterval = 1 / shotPerSecond;
+        deltaTime = 0;
+    }
+
+    protected override void Update()
+    {
+        //消滅した弾丸がないか走査
+        for(int i = 0; i < bullets.Count; i++)
+        {
+            if (bullets[i] == null)
+            {
+                bullets.RemoveAt(i);
+            }
+        }
+        
+        deltaTime += Time.deltaTime;
+    }
+
+    public override void Shot(Transform t)
+    {
+        //throw new System.NotImplementedException();
+        
+        if (deltaTime > shotInterval)
+        {
+            GameObject o = Instantiate(bullet, t.position, t.rotation) as GameObject;    //弾丸の複製
+            bullets.Add(o.GetComponent<Bullet>());
+
+            deltaTime = 0;
+        }
+    }
+}

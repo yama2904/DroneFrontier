@@ -7,13 +7,15 @@ public class GameModeSelectButtonsController : MonoBehaviour
     //バトルモード
     public void SelectBattle()
     {
-
+        MainGameManager.Mode = MainGameManager.GameMode.BATTLE;
+        BaseScreenManager.SetNextScreen(BaseScreenManager.Screen.KURIBOCCHI);
     }
 
     //レースモード
     public void SelectRace()
     {
-
+        MainGameManager.Mode = MainGameManager.GameMode.RACE;
+        BaseScreenManager.SetNextScreen(BaseScreenManager.Screen.KURIBOCCHI);
     }
 
     //設定

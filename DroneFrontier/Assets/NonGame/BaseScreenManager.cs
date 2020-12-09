@@ -12,6 +12,9 @@ public class BaseScreenManager : MonoBehaviour
         GAME_MODE_SELECT,
         HELP,
         CONFIG,
+        KURIBOCCHI,
+        CPU_SELECT,
+        WEAPON_SELECT,
 
         NONE
     }
@@ -28,6 +31,9 @@ public class BaseScreenManager : MonoBehaviour
         paths[(int)Screen.GAME_MODE_SELECT] = "GameModeSelectScreen";
         paths[(int)Screen.HELP] = "HelpScreen";
         paths[(int)Screen.CONFIG] = "ConfigScreen";
+        paths[(int)Screen.KURIBOCCHI] = "KuribocchiScreen";
+        paths[(int)Screen.CPU_SELECT] = "CPUSelectScreen";
+        paths[(int)Screen.WEAPON_SELECT] = "WeaponSelectScreen";
         for (int i = 0; i < (int)Screen.NONE; i++)
         {
             screens[i] = GameObject.Instantiate(Resources.Load(SCREEN_PATH + paths[i])) as GameObject;
@@ -40,6 +46,7 @@ public class BaseScreenManager : MonoBehaviour
         if (!isStart)
         {
             InitConfig();
+            MainGameManager.IsMulti = false;
         }
     }
 
@@ -48,6 +55,7 @@ public class BaseScreenManager : MonoBehaviour
         
     }
 
+    //新しい画面を表示する
     public static void SetNextScreen(Screen next)
     {
         screens[nowScreen].SetActive(false);
@@ -56,6 +64,7 @@ public class BaseScreenManager : MonoBehaviour
         nowScreen = (int)next;        
     }
 
+    //設定を初期化する
     public static void InitConfig()
     {
         SoundManager.SetBaseVolumeBGM(1);
