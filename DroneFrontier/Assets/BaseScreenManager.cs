@@ -10,12 +10,14 @@ public class BaseScreenManager : MonoBehaviour
     {
         TITLE,
         GAME_MODE_SELECT,
+        HELP,
+        CONFIG,
 
         NONE
     }
     static int nowScreen;
-
     static GameObject[] screens;
+    static bool isStart = false;
 
     void Start()
     {
@@ -24,6 +26,8 @@ public class BaseScreenManager : MonoBehaviour
         string[] paths = new string[(int)Screen.NONE];
         paths[(int)Screen.TITLE] = "TitleScreen";
         paths[(int)Screen.GAME_MODE_SELECT] = "GameModeSelectScreen";
+        paths[(int)Screen.HELP] = "HelpScreen";
+        paths[(int)Screen.CONFIG] = "ConfigScreen";
         for (int i = 0; i < (int)Screen.NONE; i++)
         {
             screens[i] = GameObject.Instantiate(Resources.Load(SCREEN_PATH + paths[i])) as GameObject;
@@ -32,6 +36,11 @@ public class BaseScreenManager : MonoBehaviour
 
         nowScreen = (int)Screen.TITLE;
         screens[nowScreen].SetActive(true);
+
+        if (!isStart)
+        {
+            InitConfig();
+        }
     }
 
     void Update()
@@ -45,5 +54,13 @@ public class BaseScreenManager : MonoBehaviour
 
         screens[(int)next].SetActive(true);
         nowScreen = (int)next;        
+    }
+
+    public static void InitConfig()
+    {
+        SoundManager.SetBaseVolumeBGM(1);
+        SoundManager.SetBaseVolumeSE(1);
+        BrightnessManager.SetBaseAlfa(0);
+        CameraManager.SetBaseSpeed(1);
     }
 }
