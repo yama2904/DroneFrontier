@@ -2,42 +2,32 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Missile : MonoBehaviour
+public class Bullet : MonoBehaviour
 {
-    [SerializeField] float speedPerSecond = 5.0f;
-    [SerializeField] float destroyTime = 2.0f;      //発射してから消えるまでの時間(射程)
-    [SerializeField] float trackingPower = 2.3f;    //追従力
+    [SerializeField] protected float speedPerSecond = 10.0f;
+    [SerializeField] protected float destroyTime = 1.0f;      //発射してから消えるまでの時間(射程)
+    [SerializeField] protected float trackingPower = 1.2f;    //追従力
 
-   GameObject target;
-    float totalTime;    //発射されてから経過した時間
-
-    void Start()
+    protected GameObject target;
+    protected float totalTime;    //発射されてから経過した時間
+    
+    protected virtual void Start()
     {
         target = LockOn.Target;
-        transform.Rotate(new Vector3(90, 0, 0));
         totalTime = 0;
     }
 
-    void Update()
+    protected virtual void Update()
     {
-        
-
-
         totalTime += Time.deltaTime;
-        if (totalTime > destroyTime)
+        if(totalTime > destroyTime)
         {
             Destroy(gameObject);
         }
     }
 
-    void FixedUpdate()
+    protected virtual void FixedUpdate()
     {
-        //Quaternion rotation = Quaternion.LookRotation(diff);    //ターゲットへの向き
-        //transform.rotation = Quaternion.Slerp(transform.rotation, rotation, trackingPower); 
-        //Quaternion diffRotation = rotation * Quaternion.Inverse(transform.rotation);
-
-        transform.Rotate(new Vector3(-90, 0, 0));
-
         if (target != null)
         {
             Vector3 diff = target.transform.position - transform.position;
@@ -60,21 +50,14 @@ public class Missile : MonoBehaviour
                 transform.RotateAround(transform.position, transform.right, y);
             }
         }
-        //弾丸の後ろにターゲットがいた場合
-        //if (Vector3.Dot(transform.forward, diff) < 0)
-        //{
-        //    transform.RotateAround(transform.position, Vector3.up, angleX);
-        //    transform.RotateAround(transform.position, transform.right, angleY);
-        //}
         transform.position += transform.forward * speedPerSecond * Time.deltaTime;
-        transform.Rotate(new Vector3(90, 0, 0));
     }
 
-    private void OnTriggerEnter(Collider other)
+    protected virtual void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.tag == Player.PLAYER_TAG)
         {
-            if (other.name == Player.ObjectName)
+            if(other.name == Player.ObjectName)
             {
                 return;
             }

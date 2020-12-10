@@ -43,5 +43,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99ba8943b9049044fbe59365466b20a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bullet: {fileID: 7483229619002608348, guid: 9202d9b607072324a917a9a4cf6bfc2c, type: 3}
+  bullet: {fileID: 7483229619002608348, guid: 28d3844a32c206344bb065ba45dff061, type: 3}
   shotPerSecond: 5

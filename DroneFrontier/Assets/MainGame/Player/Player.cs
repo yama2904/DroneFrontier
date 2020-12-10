@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    [SerializeField] GameObject shotgun = null;
+
     public const string PLAYER_TAG = "Player";
     [SerializeField] float moveSpeed = 0.1f;    //移動速度
 
@@ -58,8 +60,8 @@ public class Player : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
         {
             LockOn.TrackingSpeed *= 0.5f;
-            PlayerCameraManager.RotateSpeed *= 0.5f;
-            PlayerCameraManager.MoveSpeed *= 0.5f;
+            PlayerCameraController.RotateSpeed *= 0.5f;
+            PlayerCameraController.MoveSpeed *= 0.5f;
         }
         if (Input.GetKey(KeyCode.Space))
         {
@@ -68,8 +70,19 @@ public class Player : MonoBehaviour
         if (Input.GetKeyUp(KeyCode.Space))
         {
             LockOn.TrackingSpeed *= 2;
-            PlayerCameraManager.RotateSpeed *= 2;
-            PlayerCameraManager.MoveSpeed *= 2;
+            PlayerCameraController.RotateSpeed *= 2;
+            PlayerCameraController.MoveSpeed *= 2;
+        }
+
+        //ロックオン
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            LockOn.StartLockOn();
+        }
+        //ロックオン解除
+        if (Input.GetKeyUp(KeyCode.LeftShift))
+        {
+            LockOn.ReleaseLockOn();
         }
 
         //デバッグ用
@@ -103,6 +116,14 @@ public class Player : MonoBehaviour
             {
                 atack = o.GetComponent<Laser>();
             }
+        }
+
+
+        //デバッグ用
+        if (Input.GetKey(KeyCode.E))
+        {
+            //ショットガン
+            shotgun.GetComponent<Shotgun>().Shot(transform);
         }
     }
 }

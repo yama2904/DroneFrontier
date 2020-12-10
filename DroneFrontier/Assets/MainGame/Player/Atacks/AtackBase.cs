@@ -4,6 +4,8 @@ using UnityEngine;
 
 public abstract class AtackBase : MonoBehaviour
 {
+    protected float recast;         //リキャスト時間
+    protected float shotPerSecond;  //1秒間に発射する数
     protected abstract void Start();
     protected abstract void Update();
 

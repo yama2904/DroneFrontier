@@ -2,43 +2,44 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MissieShot : AtackBase
+public class Gatling : AtackBase
 {
-    [SerializeField] GameObject missile = null;
-    [SerializeField] float shotPerSecond = 2.0f;   //1秒間に発射する量
+    [SerializeField] GameObject bullet = null; //弾のオブジェクト
 
-    List<Missile> missiles;
+    List<Bullet> bullets;
     float shotInterval; //1発ごとの間隔
     float deltaTime;
 
     protected override void Start()
     {
-        missiles = new List<Missile>();
+        bullets = new List<Bullet>();
+        shotPerSecond = 5.0f;
         shotInterval = 1 / shotPerSecond;
         deltaTime = 0;
     }
 
     protected override void Update()
     {
-
         //消滅した弾丸がないか走査
-        for (int i = 0; i < missiles.Count; i++)
+        for(int i = 0; i < bullets.Count; i++)
         {
-            if (missiles[i] == null)
+            if (bullets[i] == null)
             {
-                missiles.RemoveAt(i);
+                bullets.RemoveAt(i);
             }
         }
-
+        
         deltaTime += Time.deltaTime;
     }
 
     public override void Shot(Transform t)
     {
+        //throw new System.NotImplementedException();
+        
         if (deltaTime > shotInterval)
         {
-            GameObject o = Instantiate(missile, t.position, t.rotation) as GameObject;    //ミサイルの複製
-            missiles.Add(o.GetComponent<Missile>());
+            GameObject o = Instantiate(bullet, t.position, t.rotation) as GameObject;    //弾丸の複製
+            bullets.Add(o.GetComponent<Bullet>());
 
             deltaTime = 0;
         }

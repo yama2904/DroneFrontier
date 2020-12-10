@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerCameraManager : MonoBehaviour
+public class PlayerCameraController : MonoBehaviour
 {
     GameObject mainCamera;
 
@@ -14,9 +14,6 @@ public class PlayerCameraManager : MonoBehaviour
     Vector3 screenPos;
     float scroll;           //マウスのスクロール変数
 
-    GameObject player;
-    Vector3 playerPosPrev;  //1フレーム前の座標
-
     void Start()
     {
         mainCamera = Camera.main.gameObject;
@@ -24,9 +21,6 @@ public class PlayerCameraManager : MonoBehaviour
         MoveSpeed = 5.0f;
         mousePosPrev = new Vector2(0, 0);
         screenPos = new Vector3(0, 0, 0);
-
-        player = GameObject.Find(Player.ObjectName);
-        playerPosPrev = player.transform.position;
     }
 
     void Update()
@@ -61,11 +55,5 @@ public class PlayerCameraManager : MonoBehaviour
         //カメラのズーム
         scroll = Input.GetAxis("Mouse ScrollWheel");
         mainCamera.transform.position += mainCamera.transform.forward * scroll * scrollSpeed;
-    }
-
-    void FixedUpdate()
-    {
-        mainCamera.transform.Translate(player.transform.position - playerPosPrev);
-        playerPosPrev = player.transform.position;
     }
 }

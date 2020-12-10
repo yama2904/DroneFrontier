@@ -8,43 +8,17 @@ public class CameraManager : MonoBehaviour
     const float MIN_CAMERA_SPEED = 0.2f;    //カメラ感度の最低値
     static float baseSpeed = 1.0f;        //カメラ感度(内部値)
 
-    //ノーマルなら1
-    //リバースなら-1
-    static short reverseX = 1;  //x軸
-    static short reverseY = 1;  //ÿ軸
-    public static short ReverseX
-    {
-        get { return reverseX; }
-    }
-    public static short ReverseY
-    {
-        get { return reverseY; }
-    }
-
-    //シーン間をまたいでもCameraManagerオブジェクトが消えない処理
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-    private static void InitializeBeforeSceneLoad()
-    {
-        GameObject manager = GameObject.Instantiate(Resources.Load("CameraManager")) as GameObject;
-        GameObject.DontDestroyOnLoad(manager);
-    }
-
-    void Start()
-    {        
-    }
-    
-    void Update()
-    {
-    }
+    public static short ReverseX { get; private set; } = 1;
+    public static short ReverseY { get; private set; } = 1;
 
     //カメラの感度を設定
     public static void SetBaseSpeed(float x)
     {
-        if(x < 0)
+        if (x < 0)
         {
             x = 0;
         }
-        if(x > 1.0f)
+        if (x > 1.0f)
         {
             x = 1.0f;
         }
@@ -64,6 +38,22 @@ public class CameraManager : MonoBehaviour
         get { return (baseSpeed + MIN_CAMERA_SPEED) + MAX_CAMERA_SPEED; }
     }
 
+    //シーン間をまたいでもCameraManagerオブジェクトが消えない処理
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    private static void InitializeBeforeSceneLoad()
+    {
+        GameObject manager = GameObject.Instantiate(Resources.Load("CameraManager")) as GameObject;
+        GameObject.DontDestroyOnLoad(manager);
+    }
+
+    void Start()
+    {        
+    }
+    
+    void Update()
+    {
+    }
+
     //カメラをリバースモードにするならtrue
     //ノーマルモードはfalse
     //引数1がx軸
@@ -73,20 +63,20 @@ public class CameraManager : MonoBehaviour
     {
         if (x)
         {
-            reverseX = -1;
+            ReverseX = -1;
         }
         else
         {
-            reverseX = 1;
+            ReverseX = 1;
         }
 
         if (y)
         {
-            reverseY = -1;
+            ReverseY = -1;
         }
         else
         {
-            reverseY = 1;
+            ReverseY = 1;
         }
     }
 }
