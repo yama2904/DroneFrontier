@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class AtackManager : MonoBehaviour
 {
-    const string FOLDER_PATH = "Atack/";
+    const string FOLDER_PATH = "Weapon/";
 
     public enum Weapon
     {

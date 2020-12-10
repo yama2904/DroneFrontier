@@ -15,6 +15,8 @@ public class BaseScreenManager : MonoBehaviour
         KURIBOCCHI,
         CPU_SELECT,
         WEAPON_SELECT,
+        MATCHING,
+        RESULT,
 
         NONE
     }
@@ -34,6 +36,8 @@ public class BaseScreenManager : MonoBehaviour
         paths[(int)Screen.KURIBOCCHI] = "KuribocchiScreen";
         paths[(int)Screen.CPU_SELECT] = "CPUSelectScreen";
         paths[(int)Screen.WEAPON_SELECT] = "WeaponSelectScreen";
+        paths[(int)Screen.MATCHING] = "MatchingScreen";
+        paths[(int)Screen.RESULT] = "ResultScreen";
         for (int i = 0; i < (int)Screen.NONE; i++)
         {
             screens[i] = GameObject.Instantiate(Resources.Load(SCREEN_PATH + paths[i])) as GameObject;

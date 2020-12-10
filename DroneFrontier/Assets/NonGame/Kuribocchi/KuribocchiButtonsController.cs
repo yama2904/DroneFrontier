@@ -51,7 +51,7 @@ public class KuribocchiButtonsController : MonoBehaviour
             screenMask.SetActive(false);         //後ろのボタンを押せるようにする
             BrightnessManager.SetGameAlfa(0);    //明るさを元に戻す
 
-            BaseScreenManager.SetNextScreen(BaseScreenManager.Screen.GAME_MODE_SELECT);
+            BaseScreenManager.SetNextScreen(BaseScreenManager.Screen.MATCHING);
         }
     }
 

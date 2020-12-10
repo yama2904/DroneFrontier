@@ -8,6 +8,9 @@ public class MainGameManager : MonoBehaviour
     //マルチモードか
     public static bool IsMulti { get; set; }
 
+    //アイテムを出現させるか
+    public static bool IsItem { get; set; }
+
     //ゲームモード
     public enum GameMode
     {
