@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
-    [SerializeField] protected float speedPerSecond = 10.0f;
-    [SerializeField] protected float destroyTime = 1.0f;      //発射してから消えるまでの時間(射程)
-    [SerializeField] protected float trackingPower = 1.2f;    //追従力
+    public float SpeedPerSecond { get; set; } = 0;   //1秒間に進む量
+    public float DestroyTime { get; set; } = 0;      //発射してから消えるまでの時間(射程)
+    public float TrackingPower { get; set; } = 0;    //追従力
 
     protected GameObject target;
     protected float totalTime;    //発射されてから経過した時間
@@ -20,7 +20,7 @@ public class Bullet : MonoBehaviour
     protected virtual void Update()
     {
         totalTime += Time.deltaTime;
-        if(totalTime > destroyTime)
+        if(totalTime > DestroyTime)
         {
             Destroy(gameObject);
         }
@@ -36,9 +36,9 @@ public class Bullet : MonoBehaviour
             {
                 Vector3 axis = Vector3.Cross(transform.forward, diff);
                 float angle = Vector3.Angle(transform.forward, diff);
-                if (angle > trackingPower)
+                if (angle > TrackingPower)
                 {
-                    angle = trackingPower;
+                    angle = TrackingPower;
                 }
 
                 //左右の回転
@@ -50,7 +50,7 @@ public class Bullet : MonoBehaviour
                 transform.RotateAround(transform.position, transform.right, y);
             }
         }
-        transform.position += transform.forward * speedPerSecond * Time.deltaTime;
+        transform.position += transform.forward * SpeedPerSecond * Time.deltaTime;
     }
 
     protected virtual void OnTriggerEnter(Collider other)

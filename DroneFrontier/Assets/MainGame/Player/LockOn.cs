@@ -9,10 +9,10 @@ public class LockOn : MonoBehaviour
     static GameObject mainCamera = null;
     static Image lockOnImage = null;
     static float searchRadius = 100.0f;
-    static bool isTarget;
+    static bool isTarget = false;
 
-    public static GameObject Target { get; private set; }
-    public static float TrackingSpeed { get; set; }
+    public static GameObject Target { get; private set; } = null;
+    public static float TrackingSpeed { get; set; } = 0.1f;
 
     void Start()
     {

@@ -13,7 +13,7 @@ public class Player : MonoBehaviour
     AtackBase atack;    //攻撃技
 
     //オブジェクトの名前
-    public static string ObjectName { get; private set; }
+    public static string ObjectName { get; private set; } = "";
 
     //デバッグ用
     int atackType;

@@ -262,7 +262,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   shotgun: {fileID: 1135919482}
-  moveSpeed: 0.05
+  moveSpeed: 0.1
 --- !u!54 &404189206
 Rigidbody:
   m_ObjectHideFlags: 0

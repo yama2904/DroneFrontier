@@ -6,6 +6,11 @@ public class MissieShot : AtackBase
 {
     [SerializeField] GameObject missile = null;
 
+    //弾丸のパラメータ
+    [SerializeField] float speedPerSecond = 20.0f;  //1秒間に進む量
+    [SerializeField] float destroyTime = 2.0f;      //発射してから消えるまでの時間(射程)
+    [SerializeField] float trackingPower = 2.3f;    //追従力
+
     List<MissileBullet> missiles;
     float shotInterval; //1発ごとの間隔
     float deltaTime;

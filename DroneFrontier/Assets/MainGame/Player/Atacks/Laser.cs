@@ -15,7 +15,6 @@ public class Laser : AtackBase
     [SerializeField] float chargeTime = 3.0f;       //チャージする時間
     [SerializeField] float lineRadius = 0.01f;      //レーザーの半径
     [SerializeField] float lineRange = 4.0f;        //レーザーの射程
-    [SerializeField] float trackingSpeed = 0.1f;    //ロックオン時の追従スピード
 
     ParticleSystem charge;
     ParticleSystem.EmissionModule chargeEmission;

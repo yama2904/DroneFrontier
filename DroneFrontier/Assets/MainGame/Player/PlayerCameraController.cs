@@ -6,8 +6,8 @@ public class PlayerCameraController : MonoBehaviour
 {
     GameObject mainCamera;
 
-    public static float RotateSpeed { get; set; }   //カメラの回転速度
-    public static float MoveSpeed { get; set; }    //カメラの移動速度
+    public static float RotateSpeed { get; set; } = 3.0f;   //カメラの回転速度
+    public static float MoveSpeed { get; set; } = 5.0f;     //カメラの移動速度
     [SerializeField] float scrollSpeed = 6.0f;  //カメラのズーム速度
 
     Vector2 mousePosPrev;   //1フレーム前のマウスの位置
@@ -17,8 +17,6 @@ public class PlayerCameraController : MonoBehaviour
     void Start()
     {
         mainCamera = Camera.main.gameObject;
-        RotateSpeed = 3.0f;
-        MoveSpeed = 5.0f;
         mousePosPrev = new Vector2(0, 0);
         screenPos = new Vector3(0, 0, 0);
     }

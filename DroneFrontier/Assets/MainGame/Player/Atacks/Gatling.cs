@@ -6,6 +6,11 @@ public class Gatling : AtackBase
 {
     [SerializeField] GameObject bullet = null; //弾のオブジェクト
 
+    //弾丸のパラメータ
+    [SerializeField] float speedPerSecond = 10.0f;  //1秒間に進む量
+    [SerializeField] float destroyTime = 1.0f;      //発射してから消えるまでの時間(射程)
+    [SerializeField] float trackingPower = 1.2f;    //追従力
+
     List<Bullet> bullets;
     float shotInterval; //1発ごとの間隔
     float deltaTime;

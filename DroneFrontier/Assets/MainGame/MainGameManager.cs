@@ -6,10 +6,10 @@ using UnityEngine.SceneManagement;
 public class MainGameManager : MonoBehaviour
 {
     //マルチモードか
-    public static bool IsMulti { get; set; }
+    public static bool IsMulti { get; set; } = false;
 
     //アイテムを出現させるか
-    public static bool IsItem { get; set; }
+    public static bool IsItem { get; set; } = true;
 
     //ゲームモード
     public enum GameMode
@@ -19,7 +19,7 @@ public class MainGameManager : MonoBehaviour
 
         NONE
     }
-    public static GameMode Mode { get; set; }
+    public static GameMode Mode { get; set; } = GameMode.NONE;
 
     void Start()
     {

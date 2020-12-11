@@ -4,7 +4,15 @@ using UnityEngine;
 
 public class Shotgun : AtackBase
 {
-    [SerializeField] GameObject bullet = null; //弾のオブジェクト
+    //ショットガンのパラメータ
+    [SerializeField] GameObject bullet = null;      //弾のオブジェクト
+    [SerializeField] float diffusionPower = 30.0f;  //拡散力
+    [SerializeField] float angleDiff = 3.0f;        //角度の変動量
+
+    //弾丸のパラメータ
+    [SerializeField] float speedPerSecond = 10.0f;  //1秒間に進む量
+    [SerializeField] float destroyTime = 0.3f;      //発射してから消えるまでの時間(射程)
+    [SerializeField] float trackingPower = 1.2f;    //追従力
 
     List<Bullet> bullets;
     float shotInterval; //1発ごとの間隔
@@ -38,9 +46,16 @@ public class Shotgun : AtackBase
 
         if (deltaTime > shotInterval)
         {
-            GameObject o = Instantiate(bullet, t.position, t.rotation) as GameObject;    //弾丸の複製
-            bullets.Add(o.GetComponent<Bullet>());
-
+            for (int i = -1; i <= 1; i++)
+            {
+                for (int j = -1; j <= 1; j++)
+                {
+                    GameObject o = Instantiate(bullet, t.position, t.rotation) as GameObject;    //弾丸の複製
+                    o.transform.RotateAround(o.transform.position, o.transform.right, diffusionPower * i);
+                    o.transform.RotateAround(o.transform.position, o.transform.up, diffusionPower * j);
+                    bullets.Add(o.GetComponent<Bullet>());
+                }
+            }
             deltaTime = 0;
         }
     }
