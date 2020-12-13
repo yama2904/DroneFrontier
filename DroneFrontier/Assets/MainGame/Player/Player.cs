@@ -16,6 +16,7 @@ public class Player : MonoBehaviour
 
     //デバッグ用
     int atackType;
+    bool isQ = false;
 
     void Start()
     {
@@ -38,6 +39,14 @@ public class Player : MonoBehaviour
 
     void Update()
     {
+        //デバッグ用
+        {
+            if (Input.GetKeyDown(KeyCode.Q))
+            {
+                isQ = !isQ;
+            }
+        }
+
         if (MainGameManager.IsConfig)
         {
             return;
@@ -54,12 +63,13 @@ public class Player : MonoBehaviour
                 _rigidbody.AddForce(transform.forward * moveSpeed, ForceMode.Force);
             }
 
-            //float s = 10;
-            //Vector3 diff = transform.forward * s - _rigidbody.velocity;
-            //{
-                //_rigidbody.AddForce(10 * (transform.forward * s - _rigidbody.velocity), ForceMode.Force);
-            //}
-
+            if (isQ)
+            {
+                Vector3 diff = transform.forward * moveSpeed - _rigidbody.velocity;
+                {
+                    _rigidbody.AddForce(transform.forward * moveSpeed + (transform.forward * moveSpeed - _rigidbody.velocity), ForceMode.Force);
+                }
+            }
             Debug.Log("velocity: " + velocityDistance);
             Debug.Log("max: " + maxDistance);
         }
@@ -75,6 +85,14 @@ public class Player : MonoBehaviour
             {
                 _rigidbody.AddForce(left * moveSpeed, ForceMode.Force);
             }
+
+            if (isQ)
+            {
+                Vector3 diff = left * moveSpeed - _rigidbody.velocity;
+                {
+                    _rigidbody.AddForce(transform.forward * moveSpeed + (transform.forward * moveSpeed - _rigidbody.velocity), ForceMode.Force);
+                }
+            }
         }
         if (Input.GetKey(KeyCode.S))
         {
@@ -88,6 +106,14 @@ public class Player : MonoBehaviour
             {
                 _rigidbody.AddForce(backward * moveSpeed, ForceMode.Force);
             }
+
+            if (isQ)
+            {
+                Vector3 diff = backward * moveSpeed - _rigidbody.velocity;
+                {
+                    _rigidbody.AddForce(transform.forward * moveSpeed + (transform.forward * moveSpeed - _rigidbody.velocity), ForceMode.Force);
+                }
+            }
         }
         if (Input.GetKey(KeyCode.D))
         {
@@ -100,6 +126,14 @@ public class Player : MonoBehaviour
             if (velocityDistance < maxDistance)
             {
                 _rigidbody.AddForce(right * moveSpeed, ForceMode.Force);
+            }
+
+            if (isQ)
+            {
+                Vector3 diff = right * moveSpeed - _rigidbody.velocity;
+                {
+                    _rigidbody.AddForce(transform.forward * moveSpeed + (transform.forward * moveSpeed - _rigidbody.velocity), ForceMode.Force);
+                }
             }
         }
 

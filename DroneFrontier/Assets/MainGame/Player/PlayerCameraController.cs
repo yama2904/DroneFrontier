@@ -30,23 +30,23 @@ public class PlayerCameraController : MonoBehaviour
             return;
         }
 
-        //カメラの移動
-        if (Input.GetMouseButtonDown(0))
-        {
-            mousePosPrev = Input.mousePosition;
-        }
-        if (Input.GetMouseButton(0))
-        {
-            float x = (mousePosPrev.x - Input.mousePosition.x) / Screen.width;
-            float y = (mousePosPrev.y - Input.mousePosition.y) / Screen.height;
+        ////カメラの移動
+        //if (Input.GetMouseButtonDown(0))
+        //{
+        //    mousePosPrev = Input.mousePosition;
+        //}
+        //if (Input.GetMouseButton(0))
+        //{
+        //    float x = (mousePosPrev.x - Input.mousePosition.x) / Screen.width;
+        //    float y = (mousePosPrev.y - Input.mousePosition.y) / Screen.height;
 
-            //クリックしている間mousePosPrevの更新
-            mousePosPrev = Input.mousePosition;
+        //    //クリックしている間mousePosPrevの更新
+        //    mousePosPrev = Input.mousePosition;
 
-            //カメラの向きに合わせて移動させる
-            Vector3 move = mainCamera.transform.rotation.normalized * new Vector2(x, y) * MoveSpeed;
-            mainCamera.transform.position += move;
-        }
+        //    //カメラの向きに合わせて移動させる
+        //    Vector3 move = mainCamera.transform.rotation.normalized * new Vector2(x, y) * MoveSpeed;
+        //    mainCamera.transform.position += move;
+        //}
 
         //カメラの回転
         if (Input.GetMouseButton(1))
@@ -57,8 +57,8 @@ public class PlayerCameraController : MonoBehaviour
             player.transform.RotateAround(player.transform.position, mainCamera.transform.right * -1, angle.y);
         }
 
-        //カメラのズーム
-        scroll = Input.GetAxis("Mouse ScrollWheel");
+        ////カメラのズーム
+        //scroll = Input.GetAxis("Mouse ScrollWheel");
         //mainCamera.transform.position += mainCamera.transform.forward * scroll * scrollSpeed;
     }
 }
