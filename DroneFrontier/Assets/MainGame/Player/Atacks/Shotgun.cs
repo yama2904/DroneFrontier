@@ -12,7 +12,7 @@ public class Shotgun : AtackBase
     //弾丸のパラメータ
     [SerializeField] float speedPerSecond = 10.0f;  //1秒間に進む量
     [SerializeField] float destroyTime = 0.3f;      //発射してから消えるまでの時間(射程)
-    [SerializeField] float trackingPower = 1.2f;    //追従力
+    [SerializeField] float trackingPower = 0;    //追従力
 
     List<Bullet> bullets;
     float shotInterval; //1発ごとの間隔

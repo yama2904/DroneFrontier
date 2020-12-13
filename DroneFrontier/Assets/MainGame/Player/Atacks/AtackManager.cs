@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AtackManager : MonoBehaviour
+public class AtackManager
 {
     const string FOLDER_PATH = "Weapon/";
 

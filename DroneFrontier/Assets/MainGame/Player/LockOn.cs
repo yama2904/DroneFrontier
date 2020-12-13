@@ -6,7 +6,7 @@ using System.Linq;
 
 public class LockOn : MonoBehaviour
 {
-    static GameObject mainCamera = null;
+    [SerializeField] GameObject player = null;
     static Image lockOnImage = null;
     static float searchRadius = 100.0f;
     static bool isTarget = false;
@@ -16,7 +16,6 @@ public class LockOn : MonoBehaviour
 
     void Start()
     {
-        mainCamera = Camera.main.gameObject;
         TrackingSpeed = 0.1f;
         lockOnImage = GameObject.Instantiate(Resources.Load<GameObject>("LockOnImage")).transform.Find("Image").GetComponent<Image>();
         lockOnImage.enabled = false;
@@ -37,7 +36,7 @@ public class LockOn : MonoBehaviour
                 Quaternion rotation = Quaternion.LookRotation(diff);    //ロックオンしたオブジェクトの方向
 
                 //カメラの角度からtrackingSpeed(0～1)の速度でロックオンしたオブジェクトの角度に向く
-                camera.transform.rotation = Quaternion.Slerp(camera.transform.rotation, rotation, TrackingSpeed);
+                player.transform.rotation = Quaternion.Slerp(player.transform.rotation, rotation, TrackingSpeed);
             }
             //ロックオンしている最中に対象が消えたらロックオン解除
             else
@@ -54,11 +53,14 @@ public class LockOn : MonoBehaviour
         //何もロックオンしていない場合はロックオン対象を探す
         if (!isTarget)
         {
+            //名前省略
+            GameObject camera = Camera.main.gameObject;
+
             //取得したRaycastHit配列から各RaycastHitクラスのgameObjectを抜き取ってリスト化する
             var hits = Physics.SphereCastAll(
-                mainCamera.transform.position,
+                camera.transform.position,
                 searchRadius,
-                mainCamera.transform.forward,
+                camera.transform.forward,
                 0.01f).Select(h => h.transform.gameObject).ToList();
 
             hits = FilterTargetObject(hits);

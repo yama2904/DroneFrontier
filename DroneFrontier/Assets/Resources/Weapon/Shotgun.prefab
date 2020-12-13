@@ -47,5 +47,5 @@ MonoBehaviour:
   diffusionPower: 10
   angleDiff: 3
   speedPerSecond: 10
-  destroyTime: 0.3
-  trackingPower: 1.2
+  destroyTime: 0.6
+  trackingPower: 0

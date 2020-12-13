@@ -90,9 +90,9 @@ public class ConfigButtonsController : MonoBehaviour
     public void SelectBack()
     {
         //メインゲーム中なら設定画面のを非表示
-        if (MainGameManager.isMainGaming)
+        if (MainGameManager.IsMainGaming)
         {
-            BaseScreenManager.HideScreen();
+            MainGameManager.ConfigToMainGame();
         }
         //ゲームモード選択画面に戻る
         else

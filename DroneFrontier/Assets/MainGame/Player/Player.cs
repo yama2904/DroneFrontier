@@ -5,7 +5,8 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     public const string PLAYER_TAG = "Player";
-    [SerializeField] float moveSpeed = 0.1f;    //移動速度
+    float moveSpeed = 20.0f;    //移動速度
+    float maxSpeed = 30.0f;    //最高速度
 
     Rigidbody _rigidbody;
     AtackBase atack;    //攻撃技
@@ -37,22 +38,74 @@ public class Player : MonoBehaviour
 
     void Update()
     {
+        if (MainGameManager.IsConfig)
+        {
+            return;
+        }
+
         if (Input.GetKey(KeyCode.W))
         {
-            _rigidbody.transform.Translate(0, 0, moveSpeed);
+            //_rigidbody.transform.Translate(0, 0, moveSpeed);
+
+            float velocityDistance = Vector3.Distance(transform.position, transform.position + _rigidbody.velocity);
+            float maxDistance = Vector3.Distance(transform.position, transform.position + (transform.forward * maxSpeed));
+            if (velocityDistance < maxDistance)
+            {
+                _rigidbody.AddForce(transform.forward * moveSpeed, ForceMode.Force);
+            }
+
+            //float s = 10;
+            //Vector3 diff = transform.forward * s - _rigidbody.velocity;
+            //{
+                //_rigidbody.AddForce(10 * (transform.forward * s - _rigidbody.velocity), ForceMode.Force);
+            //}
+
+            Debug.Log("velocity: " + velocityDistance);
+            Debug.Log("max: " + maxDistance);
         }
         if (Input.GetKey(KeyCode.A))
         {
-            _rigidbody.transform.Translate(moveSpeed * -1, 0, 0);
+            //_rigidbody.transform.Translate(moveSpeed * -1, 0, 0);
+
+            Quaternion leftAngle = Quaternion.Euler(0, -90, 0);
+            Vector3 left = leftAngle.normalized * transform.forward;
+            float velocityDistance = Vector3.Distance(transform.position, transform.position + _rigidbody.velocity);
+            float maxDistance = Vector3.Distance(transform.position, transform.position + (left * maxSpeed));
+            if (velocityDistance < maxDistance)
+            {
+                _rigidbody.AddForce(left * moveSpeed, ForceMode.Force);
+            }
         }
         if (Input.GetKey(KeyCode.S))
         {
-            _rigidbody.transform.Translate(0, 0, moveSpeed * -1);
+            //_rigidbody.transform.Translate(0, 0, moveSpeed * -1);
+
+            Quaternion backwardAngle = Quaternion.Euler(0, 180, 0);
+            Vector3 backward = backwardAngle.normalized * transform.forward;
+            float velocityDistance = Vector3.Distance(transform.position, transform.position + _rigidbody.velocity);
+            float maxDistance = Vector3.Distance(transform.position, transform.position + (backward * maxSpeed));
+            if (velocityDistance < maxDistance)
+            {
+                _rigidbody.AddForce(backward * moveSpeed, ForceMode.Force);
+            }
         }
         if (Input.GetKey(KeyCode.D))
         {
-            _rigidbody.transform.Translate(moveSpeed, 0, 0);
+            //_rigidbody.transform.Translate(moveSpeed, 0, 0);
+
+            Quaternion rightAngle = Quaternion.Euler(0, 90, 0);
+            Vector3 right = rightAngle.normalized * transform.forward;
+            float velocityDistance = Vector3.Distance(transform.position, transform.position + _rigidbody.velocity);
+            float maxDistance = Vector3.Distance(transform.position, transform.position + (right * maxSpeed));
+            if (velocityDistance < maxDistance)
+            {
+                _rigidbody.AddForce(right * moveSpeed, ForceMode.Force);
+            }
         }
+
+        //上下の移動
+        float scroll = Input.GetAxis("Mouse ScrollWheel");
+        _rigidbody.transform.Translate(0, Input.mouseScrollDelta.y * moveSpeed, 0);
 
         //攻撃
         if (Input.GetKeyDown(KeyCode.Space))

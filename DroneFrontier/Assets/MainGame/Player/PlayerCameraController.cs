@@ -4,15 +4,17 @@ using UnityEngine;
 
 public class PlayerCameraController : MonoBehaviour
 {
+    [SerializeField] GameObject player = null;
     GameObject mainCamera;
 
     public static float RotateSpeed { get; set; } = 3.0f;   //カメラの回転速度
     public static float MoveSpeed { get; set; } = 5.0f;     //カメラの移動速度
     [SerializeField] float scrollSpeed = 6.0f;  //カメラのズーム速度
-
+        
     Vector2 mousePosPrev;   //1フレーム前のマウスの位置
     Vector3 screenPos;
     float scroll;           //マウスのスクロール変数
+    
 
     void Start()
     {
@@ -23,6 +25,11 @@ public class PlayerCameraController : MonoBehaviour
 
     void Update()
     {
+        if (MainGameManager.IsConfig)
+        {
+            return;
+        }
+
         //カメラの移動
         if (Input.GetMouseButtonDown(0))
         {
@@ -46,12 +53,12 @@ public class PlayerCameraController : MonoBehaviour
         {
             Vector3 angle = new Vector3(Input.GetAxis("Mouse X") * RotateSpeed, Input.GetAxis("Mouse Y") * RotateSpeed, 0);
 
-            mainCamera.transform.RotateAround(mainCamera.transform.position, Vector3.up, angle.x);
-            mainCamera.transform.RotateAround(mainCamera.transform.position, mainCamera.transform.right * -1, angle.y);
+            player.transform.RotateAround(player.transform.position, Vector3.up, angle.x);
+            player.transform.RotateAround(player.transform.position, mainCamera.transform.right * -1, angle.y);
         }
 
         //カメラのズーム
         scroll = Input.GetAxis("Mouse ScrollWheel");
-        mainCamera.transform.position += mainCamera.transform.forward * scroll * scrollSpeed;
+        //mainCamera.transform.position += mainCamera.transform.forward * scroll * scrollSpeed;
     }
 }
