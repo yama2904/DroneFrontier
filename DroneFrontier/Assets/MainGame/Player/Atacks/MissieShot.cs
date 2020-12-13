@@ -18,14 +18,13 @@ public class MissieShot : AtackBase
     protected override void Start()
     {
         missiles = new List<MissileBullet>();
-        shotPerSecond = 2.0f;
+        shotPerSecond = 1.0f;
         shotInterval = 1 / shotPerSecond;
         deltaTime = 0;
     }
 
     protected override void Update()
     {
-
         //消滅した弾丸がないか走査
         for (int i = 0; i < missiles.Count; i++)
         {
@@ -43,8 +42,13 @@ public class MissieShot : AtackBase
         if (deltaTime > shotInterval)
         {
             GameObject o = Instantiate(missile, t.position, t.rotation) as GameObject;    //ミサイルの複製
-            missiles.Add(o.GetComponent<MissileBullet>());
 
+            //弾丸のパラメータ設定
+            o.GetComponent<MissileBullet>().SpeedPerSecond = speedPerSecond;
+            o.GetComponent<MissileBullet>().DestroyTime = destroyTime;
+            o.GetComponent<MissileBullet>().TrackingPower = trackingPower;
+
+            missiles.Add(o.GetComponent<MissileBullet>());
             deltaTime = 0;
         }
     }

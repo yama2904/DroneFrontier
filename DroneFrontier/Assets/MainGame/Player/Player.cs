@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    [SerializeField] GameObject shotgun = null;
-
     public const string PLAYER_TAG = "Player";
     [SerializeField] float moveSpeed = 0.1f;    //移動速度
 
@@ -23,7 +21,7 @@ public class Player : MonoBehaviour
         ObjectName = name;
         _rigidbody = GetComponent<Rigidbody>();
 
-        AtackManager.CreateAtack(out GameObject o, AtackManager.Weapon.GATLING); //Gatlingの作成
+        AtackManager.CreateAtack(out GameObject o, AtackManager.Weapon.SHOTGUN); //Gatlingの作成
         o.transform.parent = transform;  //作成したGatlingを子オブジェクトにする
 
         //位置と角度の初期設定
@@ -31,10 +29,10 @@ public class Player : MonoBehaviour
         o.transform.localRotation = Quaternion.Euler(0, 0, 0); ;
 
         //コンポーネントの取得
-        atack = o.GetComponent<Gatling>();
+        atack = o.GetComponent<AtackBase>();
 
         //デバッグ用
-        atackType = (int)AtackManager.Weapon.GATLING;
+        atackType = (int)AtackManager.Weapon.SHOTGUN;
     }
 
     void Update()
@@ -96,34 +94,14 @@ public class Player : MonoBehaviour
                 atackType = 0;
             }
             AtackManager.CreateAtack(out GameObject o, (AtackManager.Weapon)atackType);
+            atack = o.GetComponent<AtackBase>();
 
+            //Playerの子オブジェクトに設定
             o.transform.parent = transform;
 
             //位置と角度の初期設定
             o.transform.localPosition = new Vector3(0, 0, 0);
             o.transform.localRotation = Quaternion.Euler(0, 0, 0); ;
-
-            //コンポーネントの取得
-            if (atackType == (int)AtackManager.Weapon.GATLING)
-            {
-                atack = o.GetComponent<Gatling>();
-            }
-            else if (atackType == (int)AtackManager.Weapon.MISSILE)
-            {
-                atack = o.GetComponent<MissieShot>();
-            }
-            else if (atackType == (int)AtackManager.Weapon.LASER)
-            {
-                atack = o.GetComponent<Laser>();
-            }
-        }
-
-
-        //デバッグ用
-        if (Input.GetKey(KeyCode.E))
-        {
-            //ショットガン
-            shotgun.GetComponent<Shotgun>().Shot(transform);
         }
     }
 }

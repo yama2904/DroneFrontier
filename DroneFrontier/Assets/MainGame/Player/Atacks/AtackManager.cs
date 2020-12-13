@@ -21,7 +21,8 @@ public class AtackManager : MonoBehaviour
         GameObject o = null;
         if(weapon == Weapon.SHOTGUN)
         {
-
+            //ResourcesフォルダからShotgunオブジェクトを複製してロード
+            o = GameObject.Instantiate(Resources.Load(FOLDER_PATH + "Shotgun")) as GameObject;
         }
         else if (weapon == Weapon.GATLING)
         {

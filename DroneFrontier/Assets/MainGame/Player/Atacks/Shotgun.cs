@@ -6,7 +6,7 @@ public class Shotgun : AtackBase
 {
     //ショットガンのパラメータ
     [SerializeField] GameObject bullet = null;      //弾のオブジェクト
-    [SerializeField] float diffusionPower = 30.0f;  //拡散力
+    [SerializeField] float diffusionPower = 10.0f;  //拡散力
     [SerializeField] float angleDiff = 3.0f;        //角度の変動量
 
     //弾丸のパラメータ
@@ -24,6 +24,9 @@ public class Shotgun : AtackBase
         shotPerSecond = 2.0f;
         shotInterval = 1 / shotPerSecond;
         deltaTime = 0;
+
+        //乱数のシード値の設定
+        Random.InitState(System.DateTime.Now.Millisecond);
     }
 
     protected override void Update()
@@ -51,8 +54,18 @@ public class Shotgun : AtackBase
                 for (int j = -1; j <= 1; j++)
                 {
                     GameObject o = Instantiate(bullet, t.position, t.rotation) as GameObject;    //弾丸の複製
-                    o.transform.RotateAround(o.transform.position, o.transform.right, diffusionPower * i);
-                    o.transform.RotateAround(o.transform.position, o.transform.up, diffusionPower * j);
+
+                    //弾丸のパラメータ設定
+                    o.GetComponent<Bullet>().SpeedPerSecond = speedPerSecond;
+                    o.GetComponent<Bullet>().DestroyTime = destroyTime;
+                    o.GetComponent<Bullet>().TrackingPower = trackingPower;
+
+                    //弾丸の進む方向を変えて散らす処理
+                    float rotateX = (diffusionPower * i) + Random.Range(angleDiff * -1, angleDiff);
+                    float rotateY = (diffusionPower * j) + Random.Range(angleDiff * -1, angleDiff);
+                    o.transform.RotateAround(o.transform.position, o.transform.right, rotateY);
+                    o.transform.RotateAround(o.transform.position, o.transform.up, rotateX);
+
                     bullets.Add(o.GetComponent<Bullet>());
                 }
             }

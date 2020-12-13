@@ -44,8 +44,13 @@ public class Gatling : AtackBase
         if (deltaTime > shotInterval)
         {
             GameObject o = Instantiate(bullet, t.position, t.rotation) as GameObject;    //弾丸の複製
-            bullets.Add(o.GetComponent<Bullet>());
 
+            //弾丸のパラメータ設定
+            o.GetComponent<Bullet>().SpeedPerSecond = speedPerSecond;
+            o.GetComponent<Bullet>().DestroyTime = destroyTime;
+            o.GetComponent<Bullet>().TrackingPower = trackingPower;
+
+            bullets.Add(o.GetComponent<Bullet>()); 
             deltaTime = 0;
         }
     }
