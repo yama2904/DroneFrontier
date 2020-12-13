@@ -89,6 +89,6 @@ public class WeaponSelectButtonsController : MonoBehaviour
 
     public void SelectBack()
     {
-        BaseScreenManager.SetNextScreen(BaseScreenManager.Screen.CPU_SELECT);
+        BaseScreenManager.SetScreen(BaseScreenManager.Screen.CPU_SELECT);
     }
 }

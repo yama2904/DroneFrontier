@@ -21,6 +21,6 @@ public class MatchingButtonsController : MonoBehaviour
 
     public void SelectBack()
     {
-        BaseScreenManager.SetNextScreen(BaseScreenManager.Screen.KURIBOCCHI);
+        BaseScreenManager.SetScreen(BaseScreenManager.Screen.KURIBOCCHI);
     }
 }

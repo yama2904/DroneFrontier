@@ -25,6 +25,6 @@ public class HelpButtonsController : MonoBehaviour
     //戻る
     public void SelectBack()
     {
-        BaseScreenManager.SetNextScreen(BaseScreenManager.Screen.GAME_MODE_SELECT);
+        BaseScreenManager.SetScreen(BaseScreenManager.Screen.GAME_MODE_SELECT);
     }
 }

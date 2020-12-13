@@ -146,7 +146,7 @@ public class CPUSelectButtonsController : MonoBehaviour
 
     public void SelectDecision()
     {
-        BaseScreenManager.SetNextScreen(BaseScreenManager.Screen.WEAPON_SELECT);
+        BaseScreenManager.SetScreen(BaseScreenManager.Screen.WEAPON_SELECT);
     }
 
     public void SelectBack()
@@ -154,7 +154,7 @@ public class CPUSelectButtonsController : MonoBehaviour
         //ソロモードなら戻る
         if (!MainGameManager.IsMulti)
         {
-            BaseScreenManager.SetNextScreen(BaseScreenManager.Screen.KURIBOCCHI);
+            BaseScreenManager.SetScreen(BaseScreenManager.Screen.KURIBOCCHI);
         }
     }
 

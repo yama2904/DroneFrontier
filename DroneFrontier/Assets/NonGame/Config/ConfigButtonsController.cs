@@ -78,7 +78,7 @@ public class ConfigButtonsController : MonoBehaviour
     //設定初期化
     public void InitSetting()
     {
-        BaseScreenManager.InitConfig();
+        ConfigManager.InitConfig();
         sliders[(int)Type.BGM].value = SoundManager.GetBaseVolumeBGM();
         sliders[(int)Type.SE].value = SoundManager.GetBaseVolumeSE();
         sliders[(int)Type.BRIGHTNESS].value = 1.0f - BrightnessManager.GetBaseAlfa();
@@ -89,7 +89,16 @@ public class ConfigButtonsController : MonoBehaviour
     //戻る
     public void SelectBack()
     {
-        BaseScreenManager.SetNextScreen(BaseScreenManager.Screen.GAME_MODE_SELECT);
+        //メインゲーム中なら設定画面のを非表示
+        if (MainGameManager.isMainGaming)
+        {
+            BaseScreenManager.HideScreen();
+        }
+        //ゲームモード選択画面に戻る
+        else
+        {
+            BaseScreenManager.SetScreen(BaseScreenManager.Screen.GAME_MODE_SELECT);
+        }
     }
 
     //小数点切り捨て

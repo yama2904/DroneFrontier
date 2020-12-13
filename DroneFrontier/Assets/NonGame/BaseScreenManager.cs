@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BaseScreenManager : MonoBehaviour
+public class BaseScreenManager
 {
     const string SCREEN_PATH = "Screen/";
 
@@ -21,14 +21,12 @@ public class BaseScreenManager : MonoBehaviour
         NONE
     }
     static int nowScreen;
-    static GameObject[] screens;
-    static bool isStart = false;
 
-    void Start()
+    static GameObject[] screens = new GameObject[(int)Screen.NONE];
+    static string[] paths = new string[(int)Screen.NONE];
+
+    static BaseScreenManager()
     {
-        screens = new GameObject[(int)Screen.NONE];
-
-        string[] paths = new string[(int)Screen.NONE];
         paths[(int)Screen.TITLE] = "TitleScreen";
         paths[(int)Screen.GAME_MODE_SELECT] = "GameModeSelectScreen";
         paths[(int)Screen.HELP] = "HelpScreen";
@@ -38,42 +36,35 @@ public class BaseScreenManager : MonoBehaviour
         paths[(int)Screen.WEAPON_SELECT] = "WeaponSelectScreen";
         paths[(int)Screen.MATCHING] = "MatchingScreen";
         paths[(int)Screen.RESULT] = "ResultScreen";
-        for (int i = 0; i < (int)Screen.NONE; i++)
-        {
-            screens[i] = GameObject.Instantiate(Resources.Load(SCREEN_PATH + paths[i])) as GameObject;
-            screens[i].SetActive(false);                
-        }
 
-        nowScreen = (int)Screen.TITLE;
-        screens[nowScreen].SetActive(true);
-
-        if (!isStart)
-        {
-            InitConfig();
-            MainGameManager.IsMulti = false;
-        }
+        nowScreen = (int)Screen.NONE;
     }
 
-    void Update()
+    //画面をロードする
+    public static void LoadScreen(Screen screen)
     {
-        
+        screens[(int)screen] = GameObject.Instantiate(Resources.Load(SCREEN_PATH + paths[(int)screen])) as GameObject;
+        screens[(int)screen].SetActive(false);
     }
 
-    //新しい画面を表示する
-    public static void SetNextScreen(Screen next)
+    //画面を表示する
+    public static void SetScreen(Screen next)
     {
-        screens[nowScreen].SetActive(false);
+        HideScreen();
 
         screens[(int)next].SetActive(true);
-        nowScreen = (int)next;        
+        nowScreen = (int)next;
     }
 
-    //設定を初期化する
-    public static void InitConfig()
+    //画面を非表示にする
+    public static void HideScreen()
     {
-        SoundManager.SetBaseVolumeBGM(1);
-        SoundManager.SetBaseVolumeSE(1);
-        BrightnessManager.SetBaseAlfa(0);
-        CameraManager.SetBaseSpeed(1);
+        if (nowScreen < (int)Screen.NONE)
+        {
+            if (screens[nowScreen] != null)
+            {
+                screens[nowScreen].SetActive(false);
+            }
+        }
     }
 }

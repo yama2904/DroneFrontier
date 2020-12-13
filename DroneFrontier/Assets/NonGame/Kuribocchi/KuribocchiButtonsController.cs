@@ -9,7 +9,7 @@ public class KuribocchiButtonsController : MonoBehaviour
     [SerializeField] GameObject screenMask = null;  //名前入力中に後ろのボタンを押せないようにするため
     InputField inputField;
 
-    string name = "";
+    string playerName = "";
 
     void Start()
     {
@@ -23,7 +23,7 @@ public class KuribocchiButtonsController : MonoBehaviour
     //ソロ
     public void SelectBocchi()
     {
-        BaseScreenManager.SetNextScreen(BaseScreenManager.Screen.CPU_SELECT);
+        BaseScreenManager.SetScreen(BaseScreenManager.Screen.CPU_SELECT);
     }
 
     //マルチ
@@ -37,7 +37,7 @@ public class KuribocchiButtonsController : MonoBehaviour
     //戻る
     public void SelectBack()
     {
-        BaseScreenManager.SetNextScreen(BaseScreenManager.Screen.GAME_MODE_SELECT);
+        BaseScreenManager.SetScreen(BaseScreenManager.Screen.GAME_MODE_SELECT);
     }
 
 
@@ -46,12 +46,12 @@ public class KuribocchiButtonsController : MonoBehaviour
     {
         if(inputField.text != "")
         {
-            name = inputField.text;
+            playerName = inputField.text;
             inputNameObject.SetActive(false);    //名前入力の非表示
             screenMask.SetActive(false);         //後ろのボタンを押せるようにする
             BrightnessManager.SetGameAlfa(0);    //明るさを元に戻す
 
-            BaseScreenManager.SetNextScreen(BaseScreenManager.Screen.MATCHING);
+            BaseScreenManager.SetScreen(BaseScreenManager.Screen.MATCHING);
         }
     }
 
