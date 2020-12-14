@@ -46,6 +46,6 @@ MonoBehaviour:
   bullet: {fileID: 7483229619002608348, guid: 28d3844a32c206344bb065ba45dff061, type: 3}
   diffusionPower: 10
   angleDiff: 3
-  speedPerSecond: 10
+  speedPerSecond: 50
   destroyTime: 0.6
   trackingPower: 0

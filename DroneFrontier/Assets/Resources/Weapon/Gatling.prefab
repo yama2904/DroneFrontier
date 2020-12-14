@@ -44,6 +44,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bullet: {fileID: 7483229619002608348, guid: 28d3844a32c206344bb065ba45dff061, type: 3}
-  speedPerSecond: 10
+  speedPerSecond: 40
   destroyTime: 1
   trackingPower: 1.2
