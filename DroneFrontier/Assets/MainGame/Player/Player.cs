@@ -4,12 +4,27 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    /*
+     * 公開変数
+     * static string ObjectName: ドローンのオブジェクト名(Findとか用)
+     * float HP:                 ドローンのHP
+     * float MoveSpeed:          移動速度
+     * float MaxSpeed:           最高速度
+     * Barrier Barrier:          プレイヤーのバリア
+     * 
+     * 公開メソッド
+     * void Damage(float power): プレイヤーにダメージを与える
+     */
+
     public const string PLAYER_TAG = "Player";
-    float moveSpeed = 20.0f;    //移動速度
-    float maxSpeed = 30.0f;   //最高速度
+    public float HP { get; private set; } = 10;      //HP
+    public float MoveSpeed { get; set; } = 20.0f;    //移動速度
+    public float MaxSpeed { get; set; } = 30.0f;     //最高速度
 
     Rigidbody _rigidbody;
 
+
+    //武器
     enum Weapon
     {
         MAIN,
@@ -18,6 +33,33 @@ public class Player : MonoBehaviour
         NONE
     }
     AtackBase[] weapons;  //ウェポン群
+
+    //バリア
+    [SerializeField] GameObject barrierObject;
+    public Barrier Barrier { get; private set; }
+
+    //アイテム
+    enum ItemNum
+    {
+        ITEM_1,
+        ITEM_2,
+
+        NONE
+    }
+    Item[] items;
+
+
+    ////状態異常
+    //public enum Abnormal
+    //{
+    //    STUN,
+    //    JAMMING,
+    //    SPEED_DOWN,
+    //    BARRIER_WEAK,
+
+    //    NONE
+    //}
+    //bool[] isAbnormals;   //状態異常が付与されているか
 
     //オブジェクトの名前
     public static string ObjectName { get; private set; } = "";
@@ -31,6 +73,8 @@ public class Player : MonoBehaviour
         ObjectName = name;
         _rigidbody = GetComponent<Rigidbody>();
         weapons = new AtackBase[(int)Weapon.NONE];
+        Barrier = barrierObject.GetComponent<Barrier>();
+
 
         //メインウェポンの処理
         AtackManager.CreateAtack(out GameObject o, AtackManager.Weapon.GATLING);    //Gatlingの生成
@@ -41,7 +85,9 @@ public class Player : MonoBehaviour
         o.transform.localRotation = Quaternion.Euler(0, 0, 0);
 
         //コンポーネントの取得
-        weapons[(int)Weapon.MAIN] = o.GetComponent<AtackBase>();
+        AtackBase ab = o.GetComponent<AtackBase>(); //名前省略
+        ab.OwnerName = name;    //所持者の名前を設定
+        weapons[(int)Weapon.MAIN] = ab;
 
 
         //サブウェポンの処理
@@ -55,6 +101,8 @@ public class Player : MonoBehaviour
         //コンポーネントの取得
         weapons[(int)Weapon.SUB] = o.GetComponent<AtackBase>();
 
+
+        items = new Item[(int)ItemNum.NONE];
 
         //デバッグ用
         atackType = (int)AtackManager.Weapon.SHOTGUN;
@@ -76,7 +124,7 @@ public class Player : MonoBehaviour
         }
 
         //移動処理
-        Move(moveSpeed, maxSpeed);
+        Move(MoveSpeed, MaxSpeed);
 
         //攻撃処理
         UseWeapon(Weapon.MAIN);
@@ -91,6 +139,54 @@ public class Player : MonoBehaviour
         if (Input.GetKeyUp(KeyCode.LeftShift))
         {
             LockOn.ReleaseLockOn();
+        }
+
+        //レーダー使用
+        if (Input.GetKeyUp(KeyCode.Space))
+        {
+
+        }
+
+        //ブースト使用
+        if (Input.GetKeyUp(KeyCode.Q))
+        {
+            //バトルモードの場合
+            if (MainGameManager.Mode == MainGameManager.GameMode.BATTLE)
+            {
+
+            }
+
+            //レースモードの場合
+            else if (MainGameManager.Mode == MainGameManager.GameMode.RACE)
+            {
+
+            }
+        }
+
+        //アイテム使用
+        if (Input.GetKeyUp(KeyCode.Alpha1))
+        {
+            int num = (int)ItemNum.ITEM_1;
+            if (items[num] != null)
+            {
+                items[num].UseItem(this);
+
+
+                //デバッグ用
+                Debug.Log("アイテム使用");
+            }
+        }
+        if (Input.GetKeyUp(KeyCode.Alpha2))
+        {
+            int num = (int)ItemNum.ITEM_2;
+            if (items[num] != null)
+            {
+                items[num].UseItem(this);
+
+
+                //デバッグ用
+                Debug.Log("アイテム使用");
+            }
         }
 
         //デバッグ用
@@ -114,6 +210,7 @@ public class Player : MonoBehaviour
             o.transform.localRotation = Quaternion.Euler(0, 0, 0); ;
         }
     }
+
 
     void Move(float speed, float _maxSpeed)
     {
@@ -150,13 +247,13 @@ public class Player : MonoBehaviour
             {
                 if (velocityDistance < maxDistance)
                 {
-                    _rigidbody.AddForce(transform.forward * moveSpeed, ForceMode.Force);
+                    _rigidbody.AddForce(transform.forward * MoveSpeed, ForceMode.Force);
                 }
             }
             else
             {
                 {
-                    _rigidbody.AddForce(transform.forward * moveSpeed + (transform.forward * moveSpeed - _rigidbody.velocity), ForceMode.Force);
+                    _rigidbody.AddForce(transform.forward * MoveSpeed + (transform.forward * MoveSpeed - _rigidbody.velocity), ForceMode.Force);
                 }
             }
 
@@ -172,12 +269,12 @@ public class Player : MonoBehaviour
             {
                 if (velocityDistance < maxDistance)
                 {
-                    _rigidbody.AddForce(left * moveSpeed, ForceMode.Force);
+                    _rigidbody.AddForce(left * MoveSpeed, ForceMode.Force);
                 }
             }
             else
             {
-                _rigidbody.AddForce(left * moveSpeed + (left * moveSpeed - _rigidbody.velocity), ForceMode.Force);
+                _rigidbody.AddForce(left * MoveSpeed + (left * MoveSpeed - _rigidbody.velocity), ForceMode.Force);
             }
         }
         if (Input.GetKey(KeyCode.S))
@@ -191,12 +288,12 @@ public class Player : MonoBehaviour
             {
                 if (velocityDistance < maxDistance)
                 {
-                    _rigidbody.AddForce(backward * moveSpeed, ForceMode.Force);
+                    _rigidbody.AddForce(backward * MoveSpeed, ForceMode.Force);
                 }
             }
             else
             {
-                _rigidbody.AddForce(backward * moveSpeed + (backward * moveSpeed - _rigidbody.velocity), ForceMode.Force);
+                _rigidbody.AddForce(backward * MoveSpeed + (backward * MoveSpeed - _rigidbody.velocity), ForceMode.Force);
             }
         }
         if (Input.GetKey(KeyCode.D))
@@ -210,13 +307,13 @@ public class Player : MonoBehaviour
             {
                 if (velocityDistance < maxDistance)
                 {
-                    _rigidbody.AddForce(right * moveSpeed, ForceMode.Force);
+                    _rigidbody.AddForce(right * MoveSpeed, ForceMode.Force);
                 }
             }
             else
             {
                 //Vector3 diff = right * moveSpeed - _rigidbody.velocity;
-                _rigidbody.AddForce(right * moveSpeed + (right * moveSpeed - _rigidbody.velocity), ForceMode.Force);
+                _rigidbody.AddForce(right * MoveSpeed + (right * MoveSpeed - _rigidbody.velocity), ForceMode.Force);
             }
         }
 
@@ -224,7 +321,7 @@ public class Player : MonoBehaviour
         //float scroll = Input.GetAxis("Mouse ScrollWheel");
 
         //デバッグ用
-        float s = moveSpeed * 2;
+        float s = MoveSpeed * 2;
         float ms = _maxSpeed * 2;    //maxspeed
         //
 
@@ -264,7 +361,7 @@ public class Player : MonoBehaviour
                 {
                     LockOn.TrackingSpeed *= 0.5f;
                     PlayerCameraController.RotateSpeed *= 0.5f;
-                    moveSpeed *= 0.5f;
+                    MoveSpeed *= 0.5f;
                 }
             }
             //左クリックでメインウェポン攻撃
@@ -283,7 +380,7 @@ public class Player : MonoBehaviour
                 {
                     LockOn.TrackingSpeed *= 2;
                     PlayerCameraController.RotateSpeed *= 2;
-                    moveSpeed *= 2;
+                    MoveSpeed *= 2;
                 }
             }
         }
@@ -301,7 +398,7 @@ public class Player : MonoBehaviour
                 {
                     LockOn.TrackingSpeed *= 0.5f;
                     PlayerCameraController.RotateSpeed *= 0.5f;
-                    moveSpeed *= 0.5f;
+                    MoveSpeed *= 0.5f;
                 }
             }
             //右クリックでサブウェポン攻撃
@@ -320,9 +417,48 @@ public class Player : MonoBehaviour
                 {
                     LockOn.TrackingSpeed *= 2;
                     PlayerCameraController.RotateSpeed *= 2;
-                    moveSpeed *= 2;
+                    MoveSpeed *= 2;
                 }
             }
         }
+    }
+
+    //自分の周囲にTriggerを張って範囲内にアイテムがあったら探知
+    private void OnTriggerStay(Collider other)
+    {
+        //Eキーでアイテム取得
+        if (Input.GetKey(KeyCode.E))
+        {
+            if (other.tag == Item.ITEM_TAG)
+            {
+                //アイテム所持枠に空きがあるか調べる
+                int num = 0;
+                for (; num < (int)ItemNum.NONE; num++)
+                {
+                    if (items[num] == null)
+                    {
+                        break;
+                    }
+                }
+                //空きがなかったら取得しない
+                if (num >= (int)ItemNum.NONE)
+                {
+                    return;
+                }
+
+                items[num] = other.GetComponent<Item>();
+                other.gameObject.SetActive(false);  //アイテムを取得したらオブジェクトを非表示
+
+
+                //デバッグ用
+                Debug.Log("アイテム取得");
+            }
+        }
+    }
+
+    //プレイヤーにダメージを与える
+    public void Damage(float power)
+    {
+
     }
 }

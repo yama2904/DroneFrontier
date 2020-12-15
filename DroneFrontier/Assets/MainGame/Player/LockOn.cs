@@ -14,6 +14,8 @@ public class LockOn : MonoBehaviour
     public static GameObject Target { get; private set; } = null;
     public static float TrackingSpeed { get; set; } = 0.1f;
 
+    static bool useLockOn = true;   //ロックオンを使うか
+
     void Start()
     {
         TrackingSpeed = 0.1f;
@@ -50,6 +52,11 @@ public class LockOn : MonoBehaviour
     //ロックオンする
     public static void StartLockOn()
     {
+        if (!useLockOn)
+        {
+            return;
+        }
+
         //何もロックオンしていない場合はロックオン対象を探す
         if (!isTarget)
         {
@@ -116,5 +123,20 @@ public class LockOn : MonoBehaviour
             return screenPoint.x > 0.25f && screenPoint.x < 0.75f && screenPoint.y > 0.15f && screenPoint.y < 0.85f;
         }).Where(h => h.tag == Player.PLAYER_TAG).Where(h => h.name != Player.ObjectName)
          .ToList();
+    }
+
+    //ロックオンを使用するならtrue
+    //禁止するならfalse
+    public static void UseLockOn(bool use)
+    {
+        if (use)
+        {
+            useLockOn = true;
+        }
+        else
+        {
+            useLockOn = false;
+            ReleaseLockOn();
+        }
     }
 }

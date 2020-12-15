@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Radar : MonoBehaviour
+public class BarrierStrength : MonoBehaviour
 {
     void Start()
     {
@@ -12,5 +12,11 @@ public class Radar : MonoBehaviour
     void Update()
     {
         
+    }
+
+    //バリアを強化する
+    public void Strength(Barrier barrier)
+    {
+
     }
 }

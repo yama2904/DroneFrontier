@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
+    public string OwnerName { private get; set; } = "";
     public float SpeedPerSecond { get; set; } = 0;   //1秒間に進む量
     public float DestroyTime { get; set; } = 0;      //発射してから消えるまでの時間(射程)
     public float TrackingPower { get; set; } = 0;    //追従力
@@ -57,7 +58,7 @@ public class Bullet : MonoBehaviour
     {
         if (other.gameObject.tag == Player.PLAYER_TAG)
         {
-            if(other.name == Player.ObjectName)
+            if(other.name == OwnerName)
             {
                 return;
             }

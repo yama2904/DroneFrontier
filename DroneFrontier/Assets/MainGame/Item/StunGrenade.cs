@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Radar : MonoBehaviour
+public class StunGrenade : MonoBehaviour
 {
     void Start()
     {
@@ -12,5 +12,10 @@ public class Radar : MonoBehaviour
     void Update()
     {
         
+    }
+
+    public void ThrowGrenade(Transform t)
+    {
+
     }
 }

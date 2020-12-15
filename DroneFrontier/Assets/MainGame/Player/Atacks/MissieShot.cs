@@ -42,11 +42,13 @@ public class MissieShot : AtackBase
         if (deltaTime > shotInterval)
         {
             GameObject o = Instantiate(missile, t.position, t.rotation) as GameObject;    //ミサイルの複製
+            MissileBullet m = o.GetComponent<MissileBullet>();  //名前省略
 
             //弾丸のパラメータ設定
-            o.GetComponent<MissileBullet>().SpeedPerSecond = speedPerSecond;
-            o.GetComponent<MissileBullet>().DestroyTime = destroyTime;
-            o.GetComponent<MissileBullet>().TrackingPower = trackingPower;
+            m.SpeedPerSecond = speedPerSecond;
+            m.DestroyTime = destroyTime;
+            m.TrackingPower = trackingPower;
+            m.OwnerName = OwnerName;
 
             missiles.Add(o.GetComponent<MissileBullet>());
             deltaTime = 0;

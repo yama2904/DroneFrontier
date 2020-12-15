@@ -111,7 +111,7 @@ Rigidbody:
   m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 3
 --- !u!114 &3995293997800548440
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -124,6 +124,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b092c985d353cb243a2b94fb1122c64e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speedPerSecond: 5
-  destroyTime: 2
-  trackingPower: 2.3

@@ -9,21 +9,18 @@ public class PlayerCameraController : MonoBehaviour
 
     public static float RotateSpeed { get; set; } = 3.0f;   //カメラの回転速度
     [SerializeField] float limitCameraTiltX = 40.0f;        //カメラのX軸の傾き上限
-
-    Vector2 mousePosPrev;   //1フレーム前のマウスの位置
-    Vector3 screenPos;
-    float scroll;           //マウスのスクロール変数
-
+    
 
     //デバッグ用
     bool isRotate = true;
+    Vector2 mousePosPrev;   //1フレーム前のマウスの位置
+    float scroll;           //マウスのスクロール変数
 
 
     void Start()
     {
         mainCamera = Camera.main.gameObject;
         mousePosPrev = new Vector2(0, 0);
-        screenPos = new Vector3(0, 0, 0);
     }
 
     void Update()

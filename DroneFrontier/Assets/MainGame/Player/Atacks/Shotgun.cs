@@ -54,11 +54,14 @@ public class Shotgun : AtackBase
                 for (int j = -1; j <= 1; j++)
                 {
                     GameObject o = Instantiate(bullet, t.position, t.rotation) as GameObject;    //弾丸の複製
+                    Bullet b = o.GetComponent<Bullet>();    //名前省略
 
                     //弾丸のパラメータ設定
-                    o.GetComponent<Bullet>().SpeedPerSecond = speedPerSecond;
-                    o.GetComponent<Bullet>().DestroyTime = destroyTime;
-                    o.GetComponent<Bullet>().TrackingPower = trackingPower;
+                    b.SpeedPerSecond = speedPerSecond;
+                    b.DestroyTime = destroyTime;
+                    b.TrackingPower = trackingPower;
+                    b.OwnerName = OwnerName;
+
 
                     //弾丸の進む方向を変えて散らす処理
                     float rotateX = (diffusionPower * i) + Random.Range(angleDiff * -1, angleDiff);
@@ -66,7 +69,7 @@ public class Shotgun : AtackBase
                     o.transform.RotateAround(o.transform.position, o.transform.right, rotateY);
                     o.transform.RotateAround(o.transform.position, o.transform.up, rotateX);
 
-                    bullets.Add(o.GetComponent<Bullet>());
+                    bullets.Add(b);
                 }
             }
             deltaTime = 0;

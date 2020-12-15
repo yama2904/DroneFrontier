@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Radar : MonoBehaviour
+public class JammingBot : MonoBehaviour
 {
     void Start()
     {
