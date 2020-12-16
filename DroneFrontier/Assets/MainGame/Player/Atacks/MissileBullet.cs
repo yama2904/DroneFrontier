@@ -6,7 +6,6 @@ public class MissileBullet : Bullet
 {
     protected override void Start()
     {
-        target = LockOn.Target;
         transform.Rotate(new Vector3(90, 0, 0));
         totalTime = 0;
     }

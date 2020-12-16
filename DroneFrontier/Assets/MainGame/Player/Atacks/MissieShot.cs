@@ -37,7 +37,7 @@ public class MissieShot : AtackBase
         deltaTime += Time.deltaTime;
     }
 
-    public override void Shot(Transform t)
+    public override void Shot(Transform t, GameObject target = null)
     {
         if (deltaTime > shotInterval)
         {
@@ -45,10 +45,11 @@ public class MissieShot : AtackBase
             MissileBullet m = o.GetComponent<MissileBullet>();  //名前省略
 
             //弾丸のパラメータ設定
+            m.OwnerName = OwnerName;
+            m.Target = target;
             m.SpeedPerSecond = speedPerSecond;
             m.DestroyTime = destroyTime;
             m.TrackingPower = trackingPower;
-            m.OwnerName = OwnerName;
 
             missiles.Add(o.GetComponent<MissileBullet>());
             deltaTime = 0;

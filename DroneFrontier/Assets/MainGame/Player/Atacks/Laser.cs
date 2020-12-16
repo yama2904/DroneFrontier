@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class Laser : AtackBase
 {
@@ -23,7 +24,7 @@ public class Laser : AtackBase
 
     GameObject line;
     ParticleSystem lineParticle;
-    
+
     //攻撃中のフラグ
     bool[] isShots;
     enum ShotFlag
@@ -96,8 +97,10 @@ public class Laser : AtackBase
         }
     }
 
-    public override void Shot(Transform t)
+    public override void Shot(Transform t, GameObject target = null)
     {
+        isShots[(int)ShotFlag.SHOT_SHOTING] = true;
+
         //チャージ処理
         if (!isCharge)
         {
@@ -142,20 +145,37 @@ public class Laser : AtackBase
             //    line.transform.localRotation = Quaternion.Slerp(line.transform.localRotation, rotation, trackingSpeed);
             //}
 
-            //レーザーが敵に当たったか走査
-            bool isHit = Physics.SphereCast(line.transform.position, lineRadius, line.transform.forward, out RaycastHit hit, lineRange);
-            if (isHit)
+            //レーザーの射線上にヒットした全てのオブジェクトを調べる
+            var hits = Physics.SphereCastAll(
+                line.transform.position,    //レーザーの発射座標
+                lineRadius,                 //レーザーの半径
+                line.transform.forward,     //レーザーの正面
+                lineRange)                  //射程
+                .Select(h => h.transform.gameObject)        //GameObject型で取り出す
+                .Where(h => h.tag == Player.PLAYER_TAG)     //プレイヤーのタグのみ判定
+                .Where(h => h.name != OwnerName)              //当たり判定に所持者がいたらスルー
+                .ToList();  //リスト化
+
+            //ヒットした全てのオブジェクトの距離を求めて最も短い距離にあるオブジェクトにダメージを与える
+            int hit = -1;
+            float minTargetDistance = float.MaxValue;   //初期化
+            for (int i = 0; i < hits.Count; i++)
             {
-                GameObject o = hit.collider.gameObject;
-                if (o.tag == Player.PLAYER_TAG)
+                //レーザーの発射地点とオブジェクトの距離を計算
+                float distance = Vector3.Distance(line.transform.position, hits[i].transform.position);
+
+                //距離が最小だったら更新
+                if (distance < minTargetDistance)
                 {
-                    if (o.name != Player.ObjectName)
-                    {
-                        Debug.Log(o.name + "にhit");
-                    }
+                    minTargetDistance = distance;
+                    hit = i;
                 }
             }
+
+            if(hit != -1)
+            {
+                Debug.Log(hits[hit].name + "にhit");
+            }
         }
-        isShots[(int)ShotFlag.SHOT_SHOTING] = true;
     }
 }

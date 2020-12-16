@@ -9,12 +9,11 @@ public class Bullet : MonoBehaviour
     public float DestroyTime { get; set; } = 0;      //発射してから消えるまでの時間(射程)
     public float TrackingPower { get; set; } = 0;    //追従力
 
-    protected GameObject target;
+    public GameObject Target { private get; set; } = null;
     protected float totalTime;    //発射されてから経過した時間
     
     protected virtual void Start()
     {
-        target = LockOn.Target;
         totalTime = 0;
     }
 
@@ -29,9 +28,9 @@ public class Bullet : MonoBehaviour
 
     protected virtual void FixedUpdate()
     {
-        if (target != null)
+        if (Target != null)
         {
-            Vector3 diff = target.transform.position - transform.position;
+            Vector3 diff = Target.transform.position - transform.position;
             //視野内に敵がいる場合
             if (Vector3.Dot(transform.forward, diff) > 0)
             {

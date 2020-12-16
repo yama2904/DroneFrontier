@@ -12,5 +12,5 @@ public abstract class AtackBase : MonoBehaviour
     protected abstract void Start();
     protected abstract void Update();
 
-    public abstract void Shot(Transform transform, GameObject target);
+    public abstract void Shot(Transform transform, GameObject target = null);
 }

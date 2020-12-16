@@ -37,7 +37,7 @@ public class Gatling : AtackBase
         deltaTime += Time.deltaTime;
     }
 
-    public override void Shot(Transform t)
+    public override void Shot(Transform t, GameObject target = null)
     {
         //throw new System.NotImplementedException();
         
@@ -47,10 +47,11 @@ public class Gatling : AtackBase
             Bullet b = o.GetComponent<Bullet>();    //名前省略
 
             //弾丸のパラメータ設定
+            b.OwnerName = OwnerName;
+            b.Target = target;
             b.SpeedPerSecond = speedPerSecond;
             b.DestroyTime = destroyTime;
             b.TrackingPower = trackingPower;
-            b.OwnerName = OwnerName;
 
             bullets.Add(b); 
             deltaTime = 0;

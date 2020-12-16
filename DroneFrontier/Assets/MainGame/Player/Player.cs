@@ -77,29 +77,31 @@ public class Player : MonoBehaviour
 
 
         //メインウェポンの処理
-        AtackManager.CreateAtack(out GameObject o, AtackManager.Weapon.GATLING);    //Gatlingの生成
-        o.transform.parent = transform;  //作成したGatlingを子オブジェクトにする
+        AtackManager.CreateAtack(out GameObject main, AtackManager.Weapon.GATLING);    //Gatlingの生成
+        main.transform.parent = transform;  //作成したGatlingを子オブジェクトにする
 
         //位置と角度の初期設定
-        o.transform.localPosition = new Vector3(0, 0, 0);
-        o.transform.localRotation = Quaternion.Euler(0, 0, 0);
+        main.transform.localPosition = new Vector3(0, 0, 0);
+        main.transform.localRotation = Quaternion.Euler(0, 0, 0);
 
         //コンポーネントの取得
-        AtackBase ab = o.GetComponent<AtackBase>(); //名前省略
-        ab.OwnerName = name;    //所持者の名前を設定
-        weapons[(int)Weapon.MAIN] = ab;
+        AtackBase abM = main.GetComponent<AtackBase>(); //名前省略
+        abM.OwnerName = name;    //所持者の名前を設定
+        weapons[(int)Weapon.MAIN] = abM;
 
 
         //サブウェポンの処理
-        AtackManager.CreateAtack(out o, AtackManager.Weapon.SHOTGUN);    //Shotgunの作成
-        o.transform.parent = transform;  //作成したGatlingを子オブジェクトにする
+        AtackManager.CreateAtack(out GameObject sub, AtackManager.Weapon.SHOTGUN);    //Shotgunの作成
+        sub.transform.parent = transform;  //作成したGatlingを子オブジェクトにする
 
         //位置と角度の初期設定
-        o.transform.localPosition = new Vector3(0, 0, 0);
-        o.transform.localRotation = Quaternion.Euler(0, 0, 0);
+        sub.transform.localPosition = new Vector3(0, 0, 0);
+        sub.transform.localRotation = Quaternion.Euler(0, 0, 0);
 
         //コンポーネントの取得
-        weapons[(int)Weapon.SUB] = o.GetComponent<AtackBase>();
+        AtackBase abS = sub.GetComponent<AtackBase>();
+        abS.OwnerName = name;    //所持者の名前を設定
+        weapons[(int)Weapon.SUB] = abS;
 
 
         items = new Item[(int)ItemNum.NONE];
@@ -200,14 +202,17 @@ public class Player : MonoBehaviour
                 atackType = 0;
             }
             AtackManager.CreateAtack(out GameObject o, (AtackManager.Weapon)atackType);
-            weapons[(int)Weapon.SUB] = o.GetComponent<AtackBase>();
 
             //Playerの子オブジェクトに設定
             o.transform.parent = transform;
 
             //位置と角度の初期設定
             o.transform.localPosition = new Vector3(0, 0, 0);
-            o.transform.localRotation = Quaternion.Euler(0, 0, 0); ;
+            o.transform.localRotation = Quaternion.Euler(0, 0, 0);
+
+            AtackBase ab = o.GetComponent<AtackBase>();
+            ab.OwnerName = name;
+            weapons[(int)Weapon.SUB] = ab;
         }
     }
 
@@ -350,7 +355,13 @@ public class Player : MonoBehaviour
         //メインウェポン攻撃
         if (weapon == Weapon.MAIN)
         {
-            //攻撃を始めたら移動速度を下げる
+            //左クリックでメインウェポン攻撃
+            if (Input.GetMouseButton(0))
+            {
+                weapons[(int)Weapon.MAIN].Shot(transform, LockOn.Target);
+            }
+
+            //攻撃中は移動速度と回転速度低下
             if (Input.GetMouseButtonDown(0))
             {
                 if (Input.GetMouseButton(1))
@@ -363,11 +374,6 @@ public class Player : MonoBehaviour
                     PlayerCameraController.RotateSpeed *= 0.5f;
                     MoveSpeed *= 0.5f;
                 }
-            }
-            //左クリックでメインウェポン攻撃
-            if (Input.GetMouseButton(0))
-            {
-                weapons[(int)weapon].Shot(transform);
             }
             //攻撃をやめたら移動速度を元に戻す
             if (Input.GetMouseButtonUp(0))
@@ -388,6 +394,13 @@ public class Player : MonoBehaviour
         //サブウェポン攻撃
         else if (weapon == Weapon.SUB)
         {
+            //右クリックでサブウェポン攻撃
+            if (Input.GetMouseButton(1))
+            {
+                weapons[(int)Weapon.SUB].Shot(transform, LockOn.Target);
+            }
+
+            //攻撃中は移動速度と回転速度低下
             if (Input.GetMouseButtonDown(1))
             {
                 if (Input.GetMouseButton(0))
@@ -400,11 +413,6 @@ public class Player : MonoBehaviour
                     PlayerCameraController.RotateSpeed *= 0.5f;
                     MoveSpeed *= 0.5f;
                 }
-            }
-            //右クリックでサブウェポン攻撃
-            if (Input.GetMouseButton(1))
-            {
-                weapons[(int)Weapon.SUB].Shot(transform);
             }
             //攻撃をやめたら移動速度を元に戻す
             if (Input.GetMouseButtonUp(1))
