@@ -5,13 +5,13 @@ using UnityEngine;
 public class Bullet : MonoBehaviour
 {
     public string OwnerName { private get; set; } = "";
-    public float SpeedPerSecond { get; set; } = 0;   //1秒間に進む量
-    public float DestroyTime { get; set; } = 0;      //発射してから消えるまでの時間(射程)
-    public float TrackingPower { get; set; } = 0;    //追従力
+    public float SpeedPerSecond { private get; set; } = 0;   //1秒間に進む量
+    public float DestroyTime { private get; set; } = 0;      //発射してから消えるまでの時間(射程)
+    public float TrackingPower { private get; set; } = 0;    //追従力
 
     public GameObject Target { private get; set; } = null;
     protected float totalTime;    //発射されてから経過した時間
-    
+
     protected virtual void Start()
     {
         totalTime = 0;
@@ -20,7 +20,7 @@ public class Bullet : MonoBehaviour
     protected virtual void Update()
     {
         totalTime += Time.deltaTime;
-        if(totalTime > DestroyTime)
+        if (totalTime > DestroyTime)
         {
             Destroy(gameObject);
         }
@@ -55,13 +55,19 @@ public class Bullet : MonoBehaviour
 
     protected virtual void OnTriggerEnter(Collider other)
     {
+        if (other.name == OwnerName)
+        {
+            return;
+        }
+
         if (other.gameObject.tag == Player.PLAYER_TAG)
         {
-            if(other.name == OwnerName)
-            {
-                return;
-            }
-            Destroy(gameObject);
+            other.GetComponent<Player>().Damage(10);
+        }
+
+        if (other.gameObject.tag == CPUController.CPU_TAG)
+        {
+            other.GetComponent<CPUController>().Damage(10);
         }
     }
 }

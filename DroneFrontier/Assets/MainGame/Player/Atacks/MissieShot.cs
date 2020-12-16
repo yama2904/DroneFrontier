@@ -13,14 +13,15 @@ public class MissieShot : AtackBase
 
     List<MissileBullet> missiles;
     float shotInterval; //1発ごとの間隔
-    float deltaTime;
 
     protected override void Start()
     {
-        missiles = new List<MissileBullet>();
+        recast = 3.0f;
         shotPerSecond = 1.0f;
-        shotInterval = 1 / shotPerSecond;
         deltaTime = 0;
+
+        missiles = new List<MissileBullet>();
+        shotInterval = 1 / shotPerSecond;
     }
 
     protected override void Update()

@@ -13,14 +13,15 @@ public class Gatling : AtackBase
 
     List<Bullet> bullets;
     float shotInterval; //1発ごとの間隔
-    float deltaTime;
 
     protected override void Start()
     {
-        bullets = new List<Bullet>();
+        recast = 0;
         shotPerSecond = 5.0f;
-        shotInterval = 1 / shotPerSecond;
         deltaTime = 0;
+
+        bullets = new List<Bullet>();
+        shotInterval = 1 / shotPerSecond;
     }
 
     protected override void Update()

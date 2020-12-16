@@ -24,5 +24,7 @@ public class Barrier : MonoBehaviour
         {
             HP = 0;
         }
+
+        Debug.Log("バリアに" + power + "のダメージ\n残りHP: " + HP);
     }
 }

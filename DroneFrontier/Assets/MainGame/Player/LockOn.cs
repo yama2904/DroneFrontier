@@ -121,7 +121,7 @@ public class LockOn : MonoBehaviour
             //操作しているプレイヤーのオブジェクト名はロックオン対象外
             Vector3 screenPoint = Camera.main.WorldToViewportPoint(h.transform.position);
             return screenPoint.x > 0.25f && screenPoint.x < 0.75f && screenPoint.y > 0.15f && screenPoint.y < 0.85f;
-        }).Where(h => h.tag == Player.PLAYER_TAG).Where(h => h.name != Player.ObjectName)
+        }).Where(h => h.tag == Player.PLAYER_TAG || h.tag == CPUController.CPU_TAG).Where(h => h.name != Player.ObjectName)
          .ToList();
     }
 

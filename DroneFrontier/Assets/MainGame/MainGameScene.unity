@@ -131,7 +131,7 @@ GameObject:
   m_Component:
   - component: {fileID: 161261254}
   m_Layer: 0
-  m_Name: Enemys
+  m_Name: CPUs
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -672,7 +672,7 @@ GameObject:
   - component: {fileID: 1301800008}
   m_Layer: 0
   m_Name: Cube
-  m_TagString: Player
+  m_TagString: CPU
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -776,7 +776,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1301800002}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 81dd8ab068d1e394d9a067af0e6bfcb7, type: 3}
+  m_Script: {fileID: 11500000, guid: c1a7ad88ae6a575418c2e02a063abec1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 0.1

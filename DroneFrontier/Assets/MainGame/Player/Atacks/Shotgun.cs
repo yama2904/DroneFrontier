@@ -16,14 +16,15 @@ public class Shotgun : AtackBase
 
     List<Bullet> bullets;
     float shotInterval; //1発ごとの間隔
-    float deltaTime;
 
     protected override void Start()
     {
-        bullets = new List<Bullet>();
+        recast = 2.0f;
         shotPerSecond = 2.0f;
-        shotInterval = 1 / shotPerSecond;
         deltaTime = 0;
+
+        bullets = new List<Bullet>();
+        shotInterval = 1 / shotPerSecond;
 
         //乱数のシード値の設定
         Random.InitState(System.DateTime.Now.Millisecond);

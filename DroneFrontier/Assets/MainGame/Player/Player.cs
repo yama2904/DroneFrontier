@@ -467,6 +467,18 @@ public class Player : MonoBehaviour
     //プレイヤーにダメージを与える
     public void Damage(float power)
     {
-
+        if (Barrier.HP > 0)
+        {
+            Barrier.Damage(power);
+        }
+        else
+        {
+            HP -= power;
+            if(HP < 0)
+            {
+                HP = 0;
+            }
+            Debug.Log("playerに" + power + "のダメージ\n残りHP: " + HP);
+        }
     }
 }

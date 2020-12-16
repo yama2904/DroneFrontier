@@ -39,6 +39,10 @@ public class Laser : AtackBase
 
     protected override void Start()
     {
+        recast = 5.0f;
+        shotPerSecond = 5;
+        deltaTime = 0;
+
         charge = transform.Find("Charge").GetComponent<ParticleSystem>();
         charge.Stop();  //チャージエフェクトを解除
         chargeEmission = charge.emission;
@@ -156,26 +160,33 @@ public class Laser : AtackBase
                 .Where(h => h.name != OwnerName)              //当たり判定に所持者がいたらスルー
                 .ToList();  //リスト化
 
-            //ヒットした全てのオブジェクトの距離を求めて最も短い距離にあるオブジェクトにダメージを与える
-            int hit = -1;
-            float minTargetDistance = float.MaxValue;   //初期化
-            for (int i = 0; i < hits.Count; i++)
-            {
-                //レーザーの発射地点とオブジェクトの距離を計算
-                float distance = Vector3.Distance(line.transform.position, hits[i].transform.position);
+            GameObject hit = SearchNearestObject(hits);
 
-                //距離が最小だったら更新
-                if (distance < minTargetDistance)
-                {
-                    minTargetDistance = distance;
-                    hit = i;
-                }
-            }
-
-            if(hit != -1)
+            if(hit != null)
             {
-                Debug.Log(hits[hit].name + "にhit");
+                Debug.Log(hit.name + "にhit");
             }
         }
+    }
+
+    //リスト内で最も距離が近いオブジェクトを返す
+    GameObject SearchNearestObject(List<GameObject> objects)
+    {
+        GameObject o = null;
+
+        float minTargetDistance = float.MaxValue;   //初期化
+        for (int i = 0; i < objects.Count; i++)
+        {
+            //レーザーの発射地点とオブジェクトの距離を計算
+            float distance = Vector3.Distance(line.transform.position, objects[i].transform.position);
+
+            //距離が最小だったら更新
+            if (distance < minTargetDistance)
+            {
+                minTargetDistance = distance;
+                o = objects[i];
+            }
+        }
+        return o;
     }
 }

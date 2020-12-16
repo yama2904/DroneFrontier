@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Cube : MonoBehaviour
+public class CPUController : MonoBehaviour
 {
-    [SerializeField] float speed = 0.03f;
+    public const string CPU_TAG = "CPU";
+
+    [SerializeField] float speed = 0.1f;
+    public float HP { get; private set; } = 1000;
     float deltaTime = 1;
 
     AtackBase weapon;
@@ -30,5 +33,16 @@ public class Cube : MonoBehaviour
         deltaTime += Time.deltaTime;
 
         weapon.Shot(transform);
+    }
+
+    //ダメージを与える
+    public void Damage(float power)
+    {
+        HP -= power;
+        if(HP < 0)
+        {
+            HP = 0;
+        }
+        Debug.Log(name + "に" + power + "のダメージ\n残りHP: " + HP);
     }
 }
