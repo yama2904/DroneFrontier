@@ -12,19 +12,20 @@ public class Shotgun : AtackBase
     //弾丸のパラメータ
     [SerializeField] float speedPerSecond = 10.0f;  //1秒間に進む量
     [SerializeField] float destroyTime = 0.3f;      //発射してから消えるまでの時間(射程)
-    [SerializeField] float trackingPower = 0;    //追従力
+    [SerializeField] float trackingPower = 0;       //追従力
+    [SerializeField] float _recast = 2.0f;          //リキャスト時間
+    [SerializeField] float shotPerSecond = 2.0f;    //1秒間に発射する数
+    [SerializeField] int bulletsNum = 5;            //弾数
+    int bulletsRemain;    //残り弾数
 
     List<Bullet> bullets;
-    float shotInterval; //1発ごとの間隔
 
     protected override void Start()
     {
-        recast = 2.0f;
-        shotPerSecond = 2.0f;
-        deltaTime = 0;
+        InitValue(_recast, shotPerSecond);
 
         bullets = new List<Bullet>();
-        shotInterval = 1 / shotPerSecond;
+        bulletsRemain = bulletsNum;
 
         //乱数のシード値の設定
         Random.InitState(System.DateTime.Now.Millisecond);
@@ -41,14 +42,14 @@ public class Shotgun : AtackBase
             }
         }
 
-        deltaTime += Time.deltaTime;
+        base.Update();
     }
 
     public override void Shot(Transform t, GameObject target = null)
     {
         //throw new System.NotImplementedException();
 
-        if (deltaTime > shotInterval)
+        if (shotCount >= shotInterval)
         {
             for (int i = -1; i <= 1; i++)
             {
@@ -74,7 +75,7 @@ public class Shotgun : AtackBase
                     bullets.Add(b);
                 }
             }
-            deltaTime = 0;
+            shotCount = 0;
         }
     }
 }

@@ -10,18 +10,19 @@ public class Gatling : AtackBase
     [SerializeField] float speedPerSecond = 10.0f;  //1秒間に進む量
     [SerializeField] float destroyTime = 1.0f;      //発射してから消えるまでの時間(射程)
     [SerializeField] float trackingPower = 1.2f;    //追従力
+    [SerializeField] float _recast = 0;             //リキャスト時間
+    [SerializeField] float shotPerSecond = 5.0f;    //1秒間に発射する数
+    [SerializeField] int bulletsNum = 10;            //弾数
+    int bulletsRemain;    //残り弾数
 
     List<Bullet> bullets;
-    float shotInterval; //1発ごとの間隔
 
     protected override void Start()
     {
-        recast = 0;
-        shotPerSecond = 5.0f;
-        deltaTime = 0;
+        InitValue(_recast, shotPerSecond);
 
         bullets = new List<Bullet>();
-        shotInterval = 1 / shotPerSecond;
+        bulletsRemain = bulletsNum;
     }
 
     protected override void Update()
@@ -34,15 +35,15 @@ public class Gatling : AtackBase
                 bullets.RemoveAt(i);
             }
         }
-        
-        deltaTime += Time.deltaTime;
+
+        base.Update();
     }
 
     public override void Shot(Transform t, GameObject target = null)
     {
         //throw new System.NotImplementedException();
         
-        if (deltaTime > shotInterval)
+        if (shotCount >= shotInterval)
         {
             GameObject o = Instantiate(bullet, t.position, t.rotation) as GameObject;    //弾丸の複製
             Bullet b = o.GetComponent<Bullet>();    //名前省略
@@ -55,7 +56,7 @@ public class Gatling : AtackBase
             b.TrackingPower = trackingPower;
 
             bullets.Add(b); 
-            deltaTime = 0;
+            shotCount = 0;
         }
     }
 }

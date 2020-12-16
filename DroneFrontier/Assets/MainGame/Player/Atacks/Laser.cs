@@ -13,17 +13,21 @@ public class Laser : AtackBase
     const float INITIAL_ROTATION_Y = 0;
     const float INITIAL_ROTATION_Z = 0;
 
+    //チャージ用変数
+    [SerializeField] float _recast = 5.0f;          //リキャスト時間
     [SerializeField] float chargeTime = 3.0f;       //チャージする時間
-    [SerializeField] float lineRadius = 0.01f;      //レーザーの半径
-    [SerializeField] float lineRange = 4.0f;        //レーザーの射程
-
     ParticleSystem charge;
     ParticleSystem.EmissionModule chargeEmission;
     ParticleSystem.MinMaxCurve minMaxCurve;
-    bool isCharge;
+    bool isCharged;      //チャージし終わったらtrue
 
+    //レーザー用変数
+    [SerializeField] float shotPerSecond = 5.0f;    //1秒間に発射する数
+    [SerializeField] float lineRadius = 0.01f;      //レーザーの半径
+    [SerializeField] float lineRange = 4.0f;        //レーザーの射程
     GameObject line;
     ParticleSystem lineParticle;
+    float shotTime;     //発射できる最大の時間
 
     //攻撃中のフラグ
     bool[] isShots;
@@ -39,9 +43,7 @@ public class Laser : AtackBase
 
     protected override void Start()
     {
-        recast = 5.0f;
-        shotPerSecond = 5;
-        deltaTime = 0;
+        InitValue(_recast, shotPerSecond);
 
         charge = transform.Find("Charge").GetComponent<ParticleSystem>();
         charge.Stop();  //チャージエフェクトを解除
@@ -54,7 +56,7 @@ public class Laser : AtackBase
         lineParticle.Stop();
 
         rateOverTimeAdd = MAX_RATE_OVER_TIME / chargeTime;  //1秒間で増加するRateOverTime量
-        isCharge = false;
+        isCharged = false;
 
         isShots = new bool[(int)ShotFlag.NONE];
         for (int i = 0; i < (int)ShotFlag.NONE; i++)
@@ -69,13 +71,15 @@ public class Laser : AtackBase
         if (Input.GetKeyDown(KeyCode.Q))
         {
             lineParticle.Play();
-            isCharge = true;
+            isCharged = true;
         }
         if (Input.GetKeyUp(KeyCode.Q))
         {
             lineParticle.Stop();
-            isCharge = false;
+            isCharged = false;
         }
+
+        base.Update();
     }
 
     private void LateUpdate()
@@ -94,7 +98,7 @@ public class Laser : AtackBase
                 minMaxCurve.constant = 0;
                 chargeEmission.rateOverTime = minMaxCurve;
                 lineParticle.Stop();
-                isCharge = false;
+                isCharged = false;
 
                 isShots[(int)ShotFlag.SHOT_START] = false;
             }
@@ -106,7 +110,7 @@ public class Laser : AtackBase
         isShots[(int)ShotFlag.SHOT_SHOTING] = true;
 
         //チャージ処理
-        if (!isCharge)
+        if (!isCharged)
         {
             //攻撃開始時
             if (!isShots[(int)ShotFlag.SHOT_START])
@@ -126,7 +130,7 @@ public class Laser : AtackBase
                 lineParticle.Play();
 
                 Debug.Log("発射");
-                isCharge = true;
+                isCharged = true;
             }
         }
         else
