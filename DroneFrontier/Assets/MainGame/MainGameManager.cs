@@ -4,6 +4,21 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
+/*
+ * 公開変数
+ * static bool IsMulti          マルチモードか
+ * static bool IsItem           アイテムを出現させるか
+ * static bool IsMainGaming     メインゲーム中か
+ * static bool IsConfig         設定画面を開いているか
+ * static GameMode Mode         どのゲームモードを選んでいるか
+ * 
+ * 公開型
+ * enum GameMode    ゲームモード一覧
+ * 
+ * 公開メソッド
+ * static void LoadMainGameScene()  MainGameSceneへ移動する
+ * static void ConfigToMainGame()   設定画面からゲーム画面に移動する(ほとんどConfigManager専用)
+ */
 public class MainGameManager : MonoBehaviour
 {
     //マルチモードか
@@ -21,37 +36,39 @@ public class MainGameManager : MonoBehaviour
     //ゲームモード
     public enum GameMode
     {
-        BATTLE,
-        RACE,
+        BATTLE,   //バトルモード
+        RACE,     //レースモード
 
         NONE
     }
-    public static GameMode Mode { get; set; } = GameMode.NONE;
+    public static GameMode Mode { get; set; } = GameMode.NONE;  //選んでいるゲームモード
 
 
-    //画面のマスク用変数
-    static GameObject screenMask = null;
+    //設定画面移動時のマスク用変数
+    static GameObject screenMask = null;        //画面を暗くする画像を持っているオブジェクト
     const string SCREEN_MASK = "ScreenMask";    //画面のマスク用オブジェクトの名前
     const string SCREEN_MASK_CHILD = "Mask";    //子オブジェクトの名前
 
     //マスクする色
-    const float MASK_COLOR_RED = 0;
-    const float MASK_COLOR_GREEN = 0;
-    const float MASK_COLOR_BLUE = 0;
-    const float MASK_COLOR_ALFA = 0.5f;
+    const float MASK_COLOR_RED = 0;     //赤
+    const float MASK_COLOR_GREEN = 0;   //緑
+    const float MASK_COLOR_BLUE = 0;    //青
+    const float MASK_COLOR_ALFA = 0.5f; //アルファ
 
 
     void Start()
     {
         IsMainGaming = true;
-        BaseScreenManager.LoadScreen(BaseScreenManager.Screen.CONFIG);
+        BaseScreenManager.LoadScreen(BaseScreenManager.Screen.CONFIG);  //メインゲームを始めた時点で設定画面をロードする
+
+        //設定画面に移動した際のマスクの暗さと色を設定
         screenMask = GameObject.Find(SCREEN_MASK);
-        screenMask.transform.Find(SCREEN_MASK_CHILD).GetComponent<Image>().color = 
+        screenMask.transform.Find(SCREEN_MASK_CHILD).GetComponent<Image>().color =
             new Color(MASK_COLOR_RED, MASK_COLOR_GREEN, MASK_COLOR_BLUE, MASK_COLOR_ALFA);
         screenMask.SetActive(false);
         IsConfig = false;
     }
-    
+
     void Update()
     {
         //設定画面を開く
@@ -83,7 +100,7 @@ public class MainGameManager : MonoBehaviour
         }
         else
         {
-            screenMask.SetActive(true);
+            screenMask.SetActive(true);     //設定画面の背景にマスクをつける
             BaseScreenManager.SetScreen(BaseScreenManager.Screen.CONFIG);
 
             IsConfig = true;

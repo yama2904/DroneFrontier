@@ -2,33 +2,32 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/*
+ * 公開変数
+ * static string ObjectName  ドローンのオブジェクト名(Findとか用)
+ * float HP                  ドローンのHP
+ * float MoveSpeed           移動速度
+ * float MaxSpeed            最高速度
+ * Barrier Barrier           プレイヤーのバリア
+ * 
+ * 公開メソッド
+ * void Damage(float power)  プレイヤーにダメージを与える
+ */
 public class Player : MonoBehaviour
 {
-    /*
-     * 公開変数
-     * static string ObjectName: ドローンのオブジェクト名(Findとか用)
-     * float HP:                 ドローンのHP
-     * float MoveSpeed:          移動速度
-     * float MaxSpeed:           最高速度
-     * Barrier Barrier:          プレイヤーのバリア
-     * 
-     * 公開メソッド
-     * void Damage(float power): プレイヤーにダメージを与える
-     */
-
-    public const string PLAYER_TAG = "Player";
+    public const string PLAYER_TAG = "Player";       //タグ名
     public float HP { get; private set; } = 10;      //HP
     public float MoveSpeed { get; set; } = 20.0f;    //移動速度
     public float MaxSpeed { get; set; } = 30.0f;     //最高速度
 
-    Rigidbody _rigidbody;
+    Rigidbody _rigidbody = null;
 
 
     //武器
     enum Weapon
     {
-        MAIN,
-        SUB,
+        MAIN,   //メイン武器
+        SUB,    //サブ武器
 
         NONE
     }
@@ -36,13 +35,13 @@ public class Player : MonoBehaviour
 
     //バリア
     [SerializeField] GameObject barrierObject = null;
-    public Barrier Barrier { get; private set; }
+    public Barrier Barrier { get; private set; } = null;
 
     //アイテム
     enum ItemNum
     {
-        ITEM_1,
-        ITEM_2,
+        ITEM_1,   //アイテム枠1
+        ITEM_2,   //アイテム枠2
 
         NONE
     }
@@ -65,7 +64,7 @@ public class Player : MonoBehaviour
     public static string ObjectName { get; private set; } = "";
 
     //デバッグ用
-    int atackType;
+    int atackType = (int)AtackManager.Weapon.SHOTGUN;
     bool isQ = false;
 
     void Start()
@@ -103,11 +102,7 @@ public class Player : MonoBehaviour
         abS.OwnerName = name;    //所持者の名前を設定
         weapons[(int)Weapon.SUB] = abS;
 
-
         items = new Item[(int)ItemNum.NONE];
-
-        //デバッグ用
-        atackType = (int)AtackManager.Weapon.SHOTGUN;
     }
 
     void Update()
@@ -129,8 +124,8 @@ public class Player : MonoBehaviour
         Move(MoveSpeed, MaxSpeed);
 
         //攻撃処理
-        UseWeapon(Weapon.MAIN);
-        UseWeapon(Weapon.SUB);
+        UseWeapon(Weapon.MAIN);     //メインウェポン攻撃
+        UseWeapon(Weapon.SUB);      //サブウェポン攻撃
 
         //ロックオン
         if (Input.GetKey(KeyCode.LeftShift))
@@ -168,7 +163,9 @@ public class Player : MonoBehaviour
         //アイテム使用
         if (Input.GetKeyUp(KeyCode.Alpha1))
         {
-            int num = (int)ItemNum.ITEM_1;
+            int num = (int)ItemNum.ITEM_1;  //名前省略
+
+            //アイテム枠1にアイテムを持っていたら使用
             if (items[num] != null)
             {
                 items[num].UseItem(this);
@@ -180,7 +177,9 @@ public class Player : MonoBehaviour
         }
         if (Input.GetKeyUp(KeyCode.Alpha2))
         {
-            int num = (int)ItemNum.ITEM_2;
+            int num = (int)ItemNum.ITEM_2;  //名前省略
+
+            //アイテム枠2にアイテムを持っていたら使用
             if (items[num] != null)
             {
                 items[num].UseItem(this);
@@ -195,8 +194,10 @@ public class Player : MonoBehaviour
         //武器切り替え
         if (Input.GetKeyDown(KeyCode.Tab))
         {
+            //今持っているサブ武器を削除
             Destroy(weapons[(int)Weapon.SUB].gameObject);
 
+            //次の武器に切り替える
             if (++atackType >= (int)AtackManager.Weapon.NONE)
             {
                 atackType = 0;
@@ -219,8 +220,8 @@ public class Player : MonoBehaviour
 
     void Move(float speed, float _maxSpeed)
     {
-        float velocityDistance = 0;
-        float maxDistance = 0;
+        float velocityDistance = 0;   //今移動している向きに移動した場合の距離
+        float maxDistance = 0;        //最大速度で移動時の距離
         if (Input.GetKey(KeyCode.W))
         {
             ////あとで
@@ -250,6 +251,7 @@ public class Player : MonoBehaviour
             maxDistance = Vector3.Distance(transform.position, transform.position + (transform.forward * _maxSpeed));
             if (!isQ)
             {
+                //最大速度に達していなかったら移動処理
                 if (velocityDistance < maxDistance)
                 {
                     _rigidbody.AddForce(transform.forward * MoveSpeed, ForceMode.Force);
@@ -257,9 +259,7 @@ public class Player : MonoBehaviour
             }
             else
             {
-                {
-                    _rigidbody.AddForce(transform.forward * MoveSpeed + (transform.forward * MoveSpeed - _rigidbody.velocity), ForceMode.Force);
-                }
+                _rigidbody.AddForce(transform.forward * MoveSpeed + (transform.forward * MoveSpeed - _rigidbody.velocity), ForceMode.Force);
             }
 
         }
@@ -272,6 +272,7 @@ public class Player : MonoBehaviour
 
             if (!isQ)
             {
+                //最大速度に達していなかったら移動処理
                 if (velocityDistance < maxDistance)
                 {
                     _rigidbody.AddForce(left * MoveSpeed, ForceMode.Force);
@@ -291,6 +292,7 @@ public class Player : MonoBehaviour
 
             if (!isQ)
             {
+                //最大速度に達していなかったら移動処理
                 if (velocityDistance < maxDistance)
                 {
                     _rigidbody.AddForce(backward * MoveSpeed, ForceMode.Force);
@@ -310,6 +312,7 @@ public class Player : MonoBehaviour
 
             if (!isQ)
             {
+                //最大速度に達していなかったら移動処理
                 if (velocityDistance < maxDistance)
                 {
                     _rigidbody.AddForce(right * MoveSpeed, ForceMode.Force);
@@ -337,6 +340,7 @@ public class Player : MonoBehaviour
 
         if (!isQ)
         {
+            //最大速度に達していなかったら移動処理
             if (velocityDistance < maxDistance)
             {
                 _rigidbody.AddForce(upward * s * Input.mouseScrollDelta.y, ForceMode.Force);
@@ -467,14 +471,16 @@ public class Player : MonoBehaviour
     //プレイヤーにダメージを与える
     public void Damage(float power)
     {
+        //バリアが破壊されていなかったらバリアにダメージを肩代わりさせる
         if (Barrier.HP > 0)
         {
             Barrier.Damage(power);
         }
+        //バリアが破壊されていたらドローンが直接ダメージを受ける
         else
         {
             HP -= power;
-            if(HP < 0)
+            if (HP < 0)
             {
                 HP = 0;
             }

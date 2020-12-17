@@ -7,20 +7,20 @@ using System.Linq;
 public class LockOn : MonoBehaviour
 {
     [SerializeField] GameObject player = null;
-    static Image lockOnImage = null;
-    static float searchRadius = 100.0f;
-    static bool isTarget = false;
+    static Image lockOnImage = null;    //ロックオンした際に表示する画像
+    static float searchRadius = 100.0f; //ロックオンする範囲
+    public static float TrackingSpeed { get; set; } = 0.1f;     //ロックオンした際に敵にカメラを向ける速度
 
-    public static GameObject Target { get; private set; } = null;
-    public static float TrackingSpeed { get; set; } = 0.1f;
+    public static GameObject Target { get; private set; } = null;   //ロックオンしているオブジェクト
+    static bool isTarget = false;       //ロックオンしているか
 
     static bool useLockOn = true;   //ロックオンを使うか
 
     void Start()
     {
         TrackingSpeed = 0.1f;
-        lockOnImage = GameObject.Instantiate(Resources.Load<GameObject>("LockOnImage")).transform.Find("Image").GetComponent<Image>();
-        lockOnImage.enabled = false;
+        lockOnImage = GameObject.Instantiate(Resources.Load<GameObject>("LockOnImage")).transform.Find("Image").GetComponent<Image>();  //画像のロード
+        lockOnImage.enabled = false;    //ロックオンしていない際は非表示
         Target = null;
         isTarget = false;
     }
@@ -33,8 +33,8 @@ public class LockOn : MonoBehaviour
             //ロックオンの対象オブジェクトが消えていないなら継続して追尾
             if (Target != null)
             {
-                GameObject camera = Camera.main.gameObject;
-                Vector3 diff = Target.transform.position - camera.transform.position;
+                GameObject camera = Camera.main.gameObject;   //名前省略
+                Vector3 diff = Target.transform.position - camera.transform.position;   //ターゲットとの距離
                 Quaternion rotation = Quaternion.LookRotation(diff);    //ロックオンしたオブジェクトの方向
 
                 //カメラの角度からtrackingSpeed(0～1)の速度でロックオンしたオブジェクトの角度に向く
@@ -52,6 +52,7 @@ public class LockOn : MonoBehaviour
     //ロックオンする
     public static void StartLockOn()
     {
+        //ロックオンを禁止していたら処理をしない
         if (!useLockOn)
         {
             return;

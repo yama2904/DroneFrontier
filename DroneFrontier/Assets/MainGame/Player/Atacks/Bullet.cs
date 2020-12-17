@@ -8,6 +8,7 @@ public class Bullet : MonoBehaviour
     public float SpeedPerSecond { private get; set; } = 0;   //1秒間に進む量
     public float DestroyTime { private get; set; } = 0;      //発射してから消えるまでの時間(射程)
     public float TrackingPower { private get; set; } = 0;    //追従力
+    public float Power { private get; set; } = 0;            //威力
 
     public GameObject Target { private get; set; } = null;
     protected float totalTime;    //発射されてから経過した時間
@@ -62,12 +63,12 @@ public class Bullet : MonoBehaviour
 
         if (other.gameObject.tag == Player.PLAYER_TAG)
         {
-            other.GetComponent<Player>().Damage(10);
+            other.GetComponent<Player>().Damage(Power);
         }
 
         if (other.gameObject.tag == CPUController.CPU_TAG)
         {
-            other.GetComponent<CPUController>().Damage(10);
+            other.GetComponent<CPUController>().Damage(Power);
         }
     }
 }
