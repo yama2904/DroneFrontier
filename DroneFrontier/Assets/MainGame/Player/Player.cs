@@ -35,7 +35,7 @@ public class Player : MonoBehaviour
     AtackBase[] weapons;  //ウェポン群
 
     //バリア
-    [SerializeField] GameObject barrierObject;
+    [SerializeField] GameObject barrierObject = null;
     public Barrier Barrier { get; private set; }
 
     //アイテム

@@ -1,12 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using System.Linq;
 
 public class Laser : AtackBase
 {
     const int MAX_RATE_OVER_TIME = 128;
     const float ONE_SCALE_LINE_LENGTH = 1.3f;   //1スケールごとのLineの長さ
+    const float SHOT_POSSIBLE_MIN = 0.2f;       //発射可能な最低ゲージ量
 
     //角度の初期値
     const float INITIAL_ROTATION_X = 4.0f;
@@ -14,20 +16,20 @@ public class Laser : AtackBase
     const float INITIAL_ROTATION_Z = 0;
 
     //チャージ用変数
-    [SerializeField] float _recast = 5.0f;          //リキャスト時間
-    [SerializeField] float chargeTime = 3.0f;       //チャージする時間
+    [SerializeField] float chargeTime = 3.0f;     //チャージする時間
     ParticleSystem charge;
     ParticleSystem.EmissionModule chargeEmission;
     ParticleSystem.MinMaxCurve minMaxCurve;
     bool isCharged;      //チャージし終わったらtrue
 
     //レーザー用変数
-    [SerializeField] float shotPerSecond = 5.0f;    //1秒間に発射する数
     [SerializeField] float lineRadius = 0.01f;      //レーザーの半径
     [SerializeField] float lineRange = 4.0f;        //レーザーの射程
+    [SerializeField] float maxShotTime = 5;         //最大何秒発射できるか
     GameObject line;
     ParticleSystem lineParticle;
-    float shotTime;     //発射できる最大の時間
+
+    float gaugeAmout;   //ゲージ量
 
     //攻撃中のフラグ
     bool[] isShots;
@@ -41,9 +43,14 @@ public class Laser : AtackBase
 
     float rateOverTimeAdd;    //割り算は重いので先に計算させる用
 
+    //デバッグ用
+    Image image;
+
+
     protected override void Start()
     {
-        InitValue(_recast, shotPerSecond);
+        //リキャスト、1秒間にヒットする回数、弾数
+        InitValue(8.0f, 5.0f, 0);     //レーザーは弾数ではなくゲージ量で管理するので弾数の引数は0
 
         charge = transform.Find("Charge").GetComponent<ParticleSystem>();
         charge.Stop();  //チャージエフェクトを解除
@@ -63,23 +70,55 @@ public class Laser : AtackBase
         {
             isShots[i] = false;
         }
+
+        gaugeAmout = 1;
+
+
+        //デバッグ用
+        image = GameObject.Find("LaserGauge").GetComponent<Image>();
     }
 
     protected override void Update()
     {
-        //デバッグ用
-        if (Input.GetKeyDown(KeyCode.Q))
+        ////デバッグ用
+        //if (Input.GetKeyDown(KeyCode.Q))
+        //{
+        //    lineParticle.Play();
+        //    isCharged = true;
+        //}
+        //if (Input.GetKeyUp(KeyCode.Q))
+        //{
+        //    lineParticle.Stop();
+        //    isCharged = false;
+        //}
+
+        //発射間隔の管理
+        ShotCountTime += Time.deltaTime;
+        if (ShotCountTime > ShotInterval)
         {
-            lineParticle.Play();
-            isCharged = true;
-        }
-        if (Input.GetKeyUp(KeyCode.Q))
-        {
-            lineParticle.Stop();
-            isCharged = false;
+            ShotCountTime = ShotInterval;
         }
 
-        base.Update();
+        //撃っていない間はリキャストの管理
+        if (!isShots[(int)ShotFlag.SHOT_START])
+        {
+            if (gaugeAmout < 1.0f)
+            {
+                gaugeAmout += 1.0f / Recast * Time.deltaTime;
+                if (gaugeAmout > 1.0f)
+                {
+                    gaugeAmout = 1.0f;
+
+
+                    //デバッグ用
+                    Debug.Log("ゲージMAX");
+                }
+            }
+        }
+
+
+        //デバッグ用
+        image.fillAmount = gaugeAmout;
     }
 
     private void LateUpdate()
@@ -87,20 +126,15 @@ public class Laser : AtackBase
         //攻撃中かどうか
         if (isShots[(int)ShotFlag.SHOT_START])
         {
-            //フラグの更新が止まっていたら攻撃をストップ
+            //攻撃中は常にSHOT_SHOTINGの更新をかける
             if (isShots[(int)ShotFlag.SHOT_SHOTING])
             {
                 isShots[(int)ShotFlag.SHOT_SHOTING] = false;
             }
+            //フラグの更新が止まっていたら攻撃をストップ
             else
             {
-                charge.Stop();
-                minMaxCurve.constant = 0;
-                chargeEmission.rateOverTime = minMaxCurve;
-                lineParticle.Stop();
-                isCharged = false;
-
-                isShots[(int)ShotFlag.SHOT_START] = false;
+                StopShot();
             }
         }
     }
@@ -112,6 +146,12 @@ public class Laser : AtackBase
         //チャージ処理
         if (!isCharged)
         {
+            //発射に必要な最低限のゲージがないと発射しない
+            if (gaugeAmout < SHOT_POSSIBLE_MIN)
+            {
+                return;
+            }
+
             //攻撃開始時
             if (!isShots[(int)ShotFlag.SHOT_START])
             {
@@ -153,6 +193,13 @@ public class Laser : AtackBase
             //    line.transform.localRotation = Quaternion.Slerp(line.transform.localRotation, rotation, trackingSpeed);
             //}
 
+
+            //前回ヒットして発射間隔分の時間が経過していなかったら当たり判定を行わない
+            if (ShotCountTime < ShotInterval)
+            {
+                return;
+            }
+
             //レーザーの射線上にヒットした全てのオブジェクトを調べる
             var hits = Physics.SphereCastAll(
                 line.transform.position,    //レーザーの発射座標
@@ -161,14 +208,28 @@ public class Laser : AtackBase
                 lineRange)                  //射程
                 .Select(h => h.transform.gameObject)        //GameObject型で取り出す
                 .Where(h => h.tag == Player.PLAYER_TAG)     //プレイヤーのタグのみ判定
-                .Where(h => h.name != OwnerName)              //当たり判定に所持者がいたらスルー
+                .Where(h => h.name != OwnerName)            //当たり判定に所持者がいたらスルー
                 .ToList();  //リスト化
 
             GameObject hit = SearchNearestObject(hits);
 
-            if(hit != null)
+            //ヒット処理
+            if (hit != null)
             {
                 Debug.Log(hit.name + "にhit");
+                ShotCountTime = 0;
+            }
+
+
+            gaugeAmout -= 1.0f / maxShotTime * Time.deltaTime;
+            if (gaugeAmout <= 0)
+            {
+                gaugeAmout = 0;
+                StopShot();
+
+
+                //デバッグ用
+                Debug.Log("ゲージ量: " + gaugeAmout);
             }
         }
     }
@@ -192,5 +253,17 @@ public class Laser : AtackBase
             }
         }
         return o;
+    }
+
+    void StopShot()
+    {
+        charge.Stop();
+        minMaxCurve.constant = 0;
+        chargeEmission.rateOverTime = minMaxCurve;
+        lineParticle.Stop();
+        isCharged = false;
+
+        isShots[(int)ShotFlag.SHOT_START] = false;
+        isShots[(int)ShotFlag.SHOT_SHOTING] = false;
     }
 }
