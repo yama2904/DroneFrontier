@@ -16,6 +16,11 @@ public class AtackManager
         NONE
     }
 
+    /*
+     * 武器を生成する
+     * 引数1: 生成した武器を格納
+     * 引数2: 生成する武器の種類
+     */
     public static void CreateAtack(out GameObject create, Weapon weapon)
     {
         GameObject o = null;

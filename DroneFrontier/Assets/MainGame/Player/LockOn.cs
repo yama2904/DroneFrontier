@@ -35,7 +35,7 @@ public class LockOn : MonoBehaviour
             {
                 GameObject camera = Camera.main.gameObject;   //名前省略
                 Vector3 diff = Target.transform.position - camera.transform.position;   //ターゲットとの距離
-                Quaternion rotation = Quaternion.LookRotation(diff);    //ロックオンしたオブジェクトの方向
+                Quaternion rotation = Quaternion.LookRotation(diff);      //ロックオンしたオブジェクトの方向
 
                 //カメラの角度からtrackingSpeed(0～1)の速度でロックオンしたオブジェクトの角度に向く
                 player.transform.rotation = Quaternion.Slerp(player.transform.rotation, rotation, TrackingSpeed);
@@ -75,7 +75,7 @@ public class LockOn : MonoBehaviour
 
             if (0 < hits.Count())
             {
-                float minTargetDistance = float.MaxValue;
+                float minTargetDistance = float.MaxValue;   //初期化
                 GameObject t = null;    //target
 
                 foreach (var hit in hits)

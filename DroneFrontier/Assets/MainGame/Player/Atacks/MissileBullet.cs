@@ -6,7 +6,7 @@ public class MissileBullet : Bullet
 {
     protected override void Start()
     {
-        transform.Rotate(new Vector3(90, 0, 0));
+        transform.Rotate(new Vector3(90, 0, 0));    //オブジェクトを90度傾ける
         totalTime = 0;
     }
 
@@ -16,7 +16,8 @@ public class MissileBullet : Bullet
         //transform.rotation = Quaternion.Slerp(transform.rotation, rotation, trackingPower); 
         //Quaternion diffRotation = rotation * Quaternion.Inverse(transform.rotation);
 
-        transform.Rotate(new Vector3(-90, 0, 0));
+        //90度傾けたままだと誘導がバグるので一旦直す
+        transform.Rotate(new Vector3(-90, 0, 0)); 
         base.FixedUpdate();
         transform.Rotate(new Vector3(90, 0, 0));
     }

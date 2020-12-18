@@ -4,8 +4,9 @@ using UnityEngine;
 
 public class BaseScreenManager
 {
-    const string SCREEN_PATH = "Screen/";
+    const string SCREEN_PATH = "Screen/";   //Resourcesフォルダのパス
 
+    //画面一覧
     public enum Screen
     {
         TITLE,
@@ -20,10 +21,10 @@ public class BaseScreenManager
 
         NONE
     }
-    static int nowScreen;
+    static int nowScreen;   //表示中の画面
 
     static GameObject[] screens = new GameObject[(int)Screen.NONE];
-    static string[] paths = new string[(int)Screen.NONE];
+    static string[] paths = new string[(int)Screen.NONE];   //各画面をロードするパス
 
     static BaseScreenManager()
     {
@@ -43,15 +44,17 @@ public class BaseScreenManager
     //画面をロードする
     public static void LoadScreen(Screen screen)
     {
-        screens[(int)screen] = GameObject.Instantiate(Resources.Load(SCREEN_PATH + paths[(int)screen])) as GameObject;
-        screens[(int)screen].SetActive(false);
+        screens[(int)screen] = GameObject.Instantiate(Resources.Load(SCREEN_PATH + paths[(int)screen])) as GameObject;  //Resourcesフォルダからロード
+        screens[(int)screen].SetActive(false);  //一旦非表示
     }
 
     //画面を表示する
     public static void SetScreen(Screen next)
     {
+        //今表示している画面を非表示
         HideScreen();
 
+        //指定された画面を表示
         screens[(int)next].SetActive(true);
         nowScreen = (int)next;
     }
@@ -59,9 +62,9 @@ public class BaseScreenManager
     //画面を非表示にする
     public static void HideScreen()
     {
-        if (nowScreen < (int)Screen.NONE)
+        if (nowScreen < (int)Screen.NONE)   //バグ防止
         {
-            if (screens[nowScreen] != null)
+            if (screens[nowScreen] != null) //バグ防止
             {
                 screens[nowScreen].SetActive(false);
             }

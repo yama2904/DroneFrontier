@@ -16,8 +16,8 @@ public class MissieShot : AtackBase
 
     protected override void Start()
     {
-        //リキャスト、1秒間に発射する数、弾数
-        InitValue(3.0f, 1.0f, 3);
+        //リキャスト、1秒間に発射する数、弾数、威力
+        InitValue(3.0f, 1.0f, 3, 20);
 
         //missiles = new List<MissileBullet>();
     }
@@ -33,6 +33,7 @@ public class MissieShot : AtackBase
         //    }
         //}
 
+        //リキャストと発射間隔のカウント
         base.Update();
 
         //リキャスト時間経過したら弾数を1個補充
@@ -41,8 +42,8 @@ public class MissieShot : AtackBase
             //残り弾数が最大弾数に達していなかったら補充
             if (BulletsRemain < BulletsNum)
             {
-                BulletsRemain++;
-                RecastCountTime = 0;
+                BulletsRemain++;        //弾数を回復
+                RecastCountTime = 0;    //リキャストのカウントをリセット
 
 
                 //デバッグ用
@@ -69,11 +70,11 @@ public class MissieShot : AtackBase
         MissileBullet m = o.GetComponent<MissileBullet>();  //名前省略
 
         //弾丸のパラメータ設定
-        m.OwnerName = OwnerName;
-        m.Target = target;
-        m.SpeedPerSecond = speedPerSecond;
-        m.DestroyTime = destroyTime;
-        m.TrackingPower = trackingPower;
+        m.OwnerName = OwnerName;    //武器の所持者を登録
+        m.Target = target;          //ロックオン中の敵
+        m.SpeedPerSecond = speedPerSecond;  //スピード
+        m.DestroyTime = destroyTime;        //射程
+        m.TrackingPower = trackingPower;    //誘導力
 
         //missiles.Add(o.GetComponent<MissileBullet>());
         if (BulletsRemain == BulletsNum)
@@ -81,7 +82,7 @@ public class MissieShot : AtackBase
             RecastCountTime = 0;
         }
         BulletsRemain--;    //残り弾数を減らす
-        ShotCountTime = 0;
+        ShotCountTime = 0;  //発射間隔のカウントをリセット
 
 
         //デバッグ用

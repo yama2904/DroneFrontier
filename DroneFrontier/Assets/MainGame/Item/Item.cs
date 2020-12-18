@@ -4,9 +4,10 @@ using UnityEngine;
 
 public class Item : MonoBehaviour
 {
-    const string FOLDER_PATH = "Item/";
-    public const string ITEM_TAG = "Item";
+    const string FOLDER_PATH = "Item/";     //Resourcesフォルダのパス
+    public const string ITEM_TAG = "Item";  //タグ名
 
+    //アイテムの種類
     public enum ItemType
     {
         BARRIER_STRENGTH,

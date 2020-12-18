@@ -30,9 +30,9 @@ public class CPUSelectButtonsController : MonoBehaviour
         NONE
     }
     [SerializeField] GameObject CPUList = null;
-    GameObject[] lists;
-    Button[] buttons;
-    Weapon[] cpusWeapon;
+    GameObject[] CPULists;  //CPUリスト
+    Button[] buttons;       //CPUの武器を選択するボタン
+    Weapon[] CPUsWeapon;    //各CPUの武器
     
     //色用変数
     const string SELECT_BUTTON_COLOR = "#A2A2A2";       //ボタンを押したときの色の16進数
@@ -50,34 +50,46 @@ public class CPUSelectButtonsController : MonoBehaviour
         ColorUtility.TryParseHtmlString(SELECT_BUTTON_COLOR, out selectButtonColor);
         ColorUtility.TryParseHtmlString(NOT_SELECT_BUTTON_COLOR, out notSelectButtonColor);
 
-
+        //オブジェクト名
         string[] listName = new string[(int)List.NONE];
         listName[(int)List.LIST_1] = "List1";
         listName[(int)List.LIST_2] = "List2";
         listName[(int)List.LIST_3] = "List3";
 
+        //オブジェクト名
         string[] buttonName = new string[(int)Weapon.NONE];
         buttonName[(int)Weapon.SHOTGUN] = "SelectShotgun";
         buttonName[(int)Weapon.MISSILE] = "SelectMissile";
         buttonName[(int)Weapon.LASER] = "SelectLaser";
 
-        lists = new GameObject[(int)List.NONE];
-        cpusWeapon = new Weapon[(int)List.NONE];
+        CPULists = new GameObject[(int)List.NONE];
+        CPUsWeapon = new Weapon[(int)List.NONE];
         buttons = new Button[(int)List.NONE * (int)Weapon.NONE];    //2次元配列を1次元配列にまとめる
-        for(int i = 0; i < (int)List.NONE; i++)
+
+        //CPUListsとbuttonsの要素の初期化
+        for (int i = 0; i < (int)List.NONE; i++)
         {
-            lists[i] = CPUList.transform.Find(listName[i]).gameObject;
-            for(int j = 0; j < (int)Weapon.NONE; j++)
+            CPULists[i] = CPUList.transform.Find(listName[i]).gameObject;
+
+            //CPUの武器を選択するボタンを全て取得
+            for (int j = 0; j < (int)Weapon.NONE; j++)
             {
                 int index = (i * (int)List.NONE) + j;
-                buttons[index] = lists[i].transform.Find(buttonName[j]).GetComponent<Button>();
+                buttons[index] = CPULists[i].transform.Find(buttonName[j]).GetComponent<Button>();
             }
-            lists[i].SetActive(false);
+            //一旦CPUリストを非表示
+            CPULists[i].SetActive(false);
 
-            cpusWeapon[i] = Weapon.SHOTGUN;
+            //デフォルトはショットガン
+            CPUsWeapon[i] = Weapon.SHOTGUN;
             SetButtonColor((List)i, Weapon.SHOTGUN);
         }
-        lists[(int)List.LIST_1].SetActive(true);
+
+        //選択しているCPU人数の分だけリストを表示
+        for (int i = 0; i < cpuNum; i++)
+        {
+            CPULists[i].SetActive(true);
+        }
     }
 
     //CPUの数を増やす
@@ -88,7 +100,7 @@ public class CPUSelectButtonsController : MonoBehaviour
             cpuNum++;
             CPUNumText.GetComponent<Text>().text = cpuNum.ToString();
 
-            lists[cpuNum - 1].SetActive(true);
+            CPULists[cpuNum - 1].SetActive(true);
         }
     }
 
@@ -100,7 +112,7 @@ public class CPUSelectButtonsController : MonoBehaviour
             cpuNum--;
             CPUNumText.GetComponent<Text>().text = cpuNum.ToString();
 
-            lists[cpuNum].SetActive(false);
+            CPULists[cpuNum].SetActive(false);
         }
     }
 

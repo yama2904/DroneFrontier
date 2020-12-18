@@ -50,6 +50,7 @@ public class KuribocchiButtonsController : MonoBehaviour
             inputNameObject.SetActive(false);    //名前入力の非表示
             screenMask.SetActive(false);         //後ろのボタンを押せるようにする
             BrightnessManager.SetGameAlfa(0);    //明るさを元に戻す
+            MainGameManager.IsMulti = true;      //マルチモードに設定
 
             BaseScreenManager.SetScreen(BaseScreenManager.Screen.MATCHING);
         }

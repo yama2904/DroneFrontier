@@ -5,8 +5,9 @@ using UnityEngine.UI;
 
 public class ConfigButtonsController : MonoBehaviour
 {
-    const string SLIDER_NAME = "Slider";
-    const string VALUE_DISPLAY_TEXT = "ValueDisplay/Text";
+    //オブジェクト名
+    const string SLIDER_NAME = "Slider";    
+    const string VALUE_DISPLAY_TEXT = "ValueDisplay/Text";  
 
     [SerializeField] GameObject BGMConfigs = null;
     [SerializeField] GameObject SEConfigs = null;
@@ -41,6 +42,7 @@ public class ConfigButtonsController : MonoBehaviour
         valueDisplays[(int)Type.BRIGHTNESS] = BrightnessConfigs.transform.Find(VALUE_DISPLAY_TEXT).GetComponent<Text>();
         valueDisplays[(int)Type.CAMERA] = CameraConfigs.transform.Find(VALUE_DISPLAY_TEXT).GetComponent<Text>();
 
+        //Sliderの値の設定
         sliders[(int)Type.BGM].value = SoundManager.GetBaseVolumeBGM();
         sliders[(int)Type.SE].value = SoundManager.GetBaseVolumeSE();
         sliders[(int)Type.BRIGHTNESS].value = 1.0f - BrightnessManager.GetBaseAlfa();

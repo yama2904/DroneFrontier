@@ -8,11 +8,11 @@ public abstract class AtackBase : MonoBehaviour
     public string OwnerName { get; set; } = "";
 
     protected float Recast { get; private set; } = -1;       //リキャスト時間
-    protected float RecastCountTime { get; set; } = 0;
+    protected float RecastCountTime { get; set; } = 0;       //リキャスト時間をカウントする変数
     protected float ShotInterval { get; private set; } = -1; //1発ごとの間隔
-    protected float ShotCountTime { get; set; } = 0;
+    protected float ShotCountTime { get; set; } = 0;         //1発ごとの間隔をカウントする変数
     protected int BulletsNum { get; private set; } = -1;     //弾数
-    protected int BulletsRemain { get; set; } = 0;          //残り弾数
+    protected int BulletsRemain { get; set; } = 0;           //残り弾数
     protected float BulletPower { get; private set; } = -1;  //弾丸の威力
 
     protected abstract void Start();

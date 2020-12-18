@@ -6,7 +6,7 @@ using System.Linq;
 
 public class Laser : AtackBase
 {
-    const int MAX_RATE_OVER_TIME = 128;
+    const int MAX_RATE_OVER_TIME = 128;         //チャージのパーティクルのrateOverTime最大値
     const float ONE_SCALE_LINE_LENGTH = 1.3f;   //1スケールごとのLineの長さ
     const float SHOT_POSSIBLE_MIN = 0.2f;       //発射可能な最低ゲージ量
 
@@ -20,7 +20,8 @@ public class Laser : AtackBase
     ParticleSystem charge;
     ParticleSystem.EmissionModule chargeEmission;
     ParticleSystem.MinMaxCurve minMaxCurve;
-    bool isCharged;      //チャージし終わったらtrue
+    float rateovertimeAddAmout;    //割り算は重いので先に計算させる用
+    bool isCharged;     //チャージし終わったらtrue
 
     //レーザー用変数
     [SerializeField] float lineRadius = 0.01f;      //レーザーの半径
@@ -28,8 +29,7 @@ public class Laser : AtackBase
     [SerializeField] float maxShotTime = 5;         //最大何秒発射できるか
     GameObject line;
     ParticleSystem lineParticle;
-
-    float gaugeAmout;   //ゲージ量
+    
 
     //攻撃中のフラグ
     bool[] isShots;
@@ -41,41 +41,33 @@ public class Laser : AtackBase
         NONE
     }
 
-    float rateOverTimeAdd;    //割り算は重いので先に計算させる用
 
     //デバッグ用
     Image image;
+    float gaugeAmout;   //ゲージ量
 
 
     protected override void Start()
     {
-        //リキャスト、1秒間にヒットする回数、弾数
-        InitValue(8.0f, 5.0f, 0);     //レーザーは弾数ではなくゲージ量で管理するので弾数の引数は0
+        //リキャスト、1秒間にヒットする回数、弾数、威力
+        InitValue(8.0f, 5.0f, 0, 5);     //レーザーは弾数ではなくゲージ量で管理するので弾数の引数は0
 
-        charge = transform.Find("Charge").GetComponent<ParticleSystem>();
-        charge.Stop();  //チャージエフェクトを解除
-        chargeEmission = charge.emission;
-        minMaxCurve.constant = 0;
-        chargeEmission.rateOverTime = minMaxCurve;
+        //チャージ用変数
+        charge = transform.Find("Charge").GetComponent<ParticleSystem>();   //チャージのオブジェクトの取得
+        chargeEmission = charge.emission;   //チャージのパーティクルのemission構造体を取得
+        rateovertimeAddAmout = MAX_RATE_OVER_TIME / chargeTime;  //1秒間で増加するRateOverTime量
 
-        line = transform.Find("Line").gameObject;
+        //レーザー用変数
+        line = transform.Find("Line").gameObject;   //レーザーのオブジェクトの取得
         lineParticle = line.GetComponent<ParticleSystem>();
-        lineParticle.Stop();
-
-        rateOverTimeAdd = MAX_RATE_OVER_TIME / chargeTime;  //1秒間で増加するRateOverTime量
-        isCharged = false;
-
+        
         isShots = new bool[(int)ShotFlag.NONE];
-        for (int i = 0; i < (int)ShotFlag.NONE; i++)
-        {
-            isShots[i] = false;
-        }
-
-        gaugeAmout = 1;
+        StopShot();
 
 
         //デバッグ用
         image = GameObject.Find("LaserGauge").GetComponent<Image>();
+        gaugeAmout = 1;
     }
 
     protected override void Update()
@@ -102,8 +94,10 @@ public class Laser : AtackBase
         //撃っていない間はリキャストの管理
         if (!isShots[(int)ShotFlag.SHOT_START])
         {
+            //処理が無駄なのでゲージがMAXならスキップ
             if (gaugeAmout < 1.0f)
             {
+                //ゲージを回復
                 gaugeAmout += 1.0f / Recast * Time.deltaTime;
                 if (gaugeAmout > 1.0f)
                 {
@@ -139,6 +133,7 @@ public class Laser : AtackBase
         }
     }
 
+
     public override void Shot(Transform t, GameObject target = null)
     {
         isShots[(int)ShotFlag.SHOT_SHOTING] = true;
@@ -160,12 +155,13 @@ public class Laser : AtackBase
             }
 
             //徐々にチャージのエフェクトを増す
-            minMaxCurve.constant += rateOverTimeAdd * Time.deltaTime;
+            minMaxCurve.constant += rateovertimeAddAmout * Time.deltaTime;
             chargeEmission.rateOverTime = minMaxCurve;
 
             //MAX_RATE_OVER_TIME経ったら発射
             if (chargeEmission.rateOverTime.constant > MAX_RATE_OVER_TIME)
             {
+                //チャージを止めてレーザーを発射
                 charge.Stop();
                 lineParticle.Play();
 
@@ -217,12 +213,12 @@ public class Laser : AtackBase
             if (hit != null)
             {
                 Debug.Log(hit.name + "にhit");
-                ShotCountTime = 0;
+                ShotCountTime = 0;  //発射間隔のカウントをリセット
             }
 
-
+            //ゲージを減らす
             gaugeAmout -= 1.0f / maxShotTime * Time.deltaTime;
-            if (gaugeAmout <= 0)
+            if (gaugeAmout <= 0)    //ゲージがなくなったらレーザーを止める
             {
                 gaugeAmout = 0;
                 StopShot();
@@ -255,15 +251,23 @@ public class Laser : AtackBase
         return o;
     }
 
+    //チャージとレーザーを止める
     void StopShot()
     {
-        charge.Stop();
-        minMaxCurve.constant = 0;
-        chargeEmission.rateOverTime = minMaxCurve;
-        lineParticle.Stop();
-        isCharged = false;
+        charge.Stop();  //チャージを止める
 
-        isShots[(int)ShotFlag.SHOT_START] = false;
-        isShots[(int)ShotFlag.SHOT_SHOTING] = false;
+        //チャージのパーティクルの発生量の初期化
+        minMaxCurve.constant = 0;   
+        chargeEmission.rateOverTime = minMaxCurve;
+
+        //レーザーを止める
+        lineParticle.Stop();    
+
+        //フラグの初期化
+        isCharged = false;
+        for (int i = 0; i < (int)ShotFlag.NONE; i++)
+        {
+            isShots[i] = false;
+        }
     }
 }

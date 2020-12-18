@@ -4,13 +4,16 @@ using UnityEngine;
 
 public class CPUController : MonoBehaviour
 {
-    public const string CPU_TAG = "CPU";
+    public const string CPU_TAG = "CPU";    //タグ名
 
-    [SerializeField] float speed = 0.1f;
-    public float HP { get; private set; } = 1000;
-    float deltaTime = 1;
+    public float HP { get; private set; } = 1000;   //HP
 
     AtackBase weapon;
+
+
+    //デバッグ用
+    [SerializeField] float speed = 0.1f;
+    float deltaTime = 1;
 
     void Start()
     {
@@ -29,10 +32,12 @@ public class CPUController : MonoBehaviour
 
     void Update()
     {
+        weapon.Shot(transform);
+
+
+        //デバッグ用
         //transform.position += new Vector3(speed * Mathf.Sin(deltaTime), 0, 0);
         deltaTime += Time.deltaTime;
-
-        weapon.Shot(transform);
     }
 
     //ダメージを与える

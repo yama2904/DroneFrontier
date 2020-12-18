@@ -18,7 +18,7 @@ public class WeaponSelectButtonsController : MonoBehaviour
 
     //武器の説明
     [SerializeField] GameObject MessageWindowText = null;
-    Text messageText;
+    Text messageText;   //説明文
 
     //選択した武器
     AtackManager.Weapon weapon;
@@ -34,7 +34,6 @@ public class WeaponSelectButtonsController : MonoBehaviour
         messageText.text = "武器を選択してください。";
         
         weapon = AtackManager.Weapon.NONE;
-        MainGameManager.IsItem = true;
     }
 
     public void SelectShotgun()

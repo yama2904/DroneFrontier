@@ -16,8 +16,8 @@ public class Gatling : AtackBase
 
     protected override void Start()
     {
-        //リキャスト、1秒間に発射する数、弾数
-        InitValue(0, 5.0f, 10);
+        //リキャスト、1秒間に発射する数、弾数、威力
+        InitValue(0, 5.0f, 10, 3);
 
         //bullets = new List<Bullet>();
     }
@@ -33,6 +33,7 @@ public class Gatling : AtackBase
         //    }
         //}
 
+        //リキャストと発射間隔のカウント
         base.Update();
 
         //リキャスト時間経過したら弾数を1個補充
@@ -41,8 +42,8 @@ public class Gatling : AtackBase
             //残り弾数が最大弾数に達していなかったら補充
             if (BulletsRemain < BulletsNum)
             {
-                BulletsRemain++;
-                RecastCountTime = 0;
+                BulletsRemain++;        //弾数を回復
+                RecastCountTime = 0;    //リキャストのカウントをリセット
             }
         }
     }
@@ -67,18 +68,21 @@ public class Gatling : AtackBase
         Bullet b = o.GetComponent<Bullet>();    //名前省略
 
         //弾丸のパラメータ設定
-        b.OwnerName = OwnerName;
-        b.Target = target;
-        b.SpeedPerSecond = speedPerSecond;
-        b.DestroyTime = destroyTime;
-        b.TrackingPower = trackingPower;
+        b.OwnerName = OwnerName;    //武器の所持者を登録
+        b.Target = target;          //ロックオン中の敵
+        b.SpeedPerSecond = speedPerSecond;  //スピード
+        b.DestroyTime = destroyTime;        //射程
+        b.TrackingPower = trackingPower;    //誘導力
 
-        //bullets.Add(b);
+        //残り弾丸がMAXで撃つと一瞬で弾丸が1個回復するので
+        //残り弾丸がMAXで撃った場合のみリキャストを0にする
         if (BulletsRemain == BulletsNum)
         {
             RecastCountTime = 0;
         }
         BulletsRemain--;    //残り弾数を減らす
-        ShotCountTime = 0;
+        ShotCountTime = 0;  //発射間隔のカウントをリセット
+
+        //bullets.Add(b);
     }
 }
