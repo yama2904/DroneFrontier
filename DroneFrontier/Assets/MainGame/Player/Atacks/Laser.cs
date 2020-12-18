@@ -165,7 +165,6 @@ public class Laser : AtackBase
                 charge.Stop();
                 lineParticle.Play();
 
-                Debug.Log("発射");
                 isCharged = true;
             }
         }
@@ -190,6 +189,14 @@ public class Laser : AtackBase
             //}
 
 
+            //ゲージを減らす
+            gaugeAmout -= 1.0f / maxShotTime * Time.deltaTime;
+            if (gaugeAmout <= 0)    //ゲージがなくなったらレーザーを止める
+            {
+                gaugeAmout = 0;
+                StopShot();
+            }
+
             //前回ヒットして発射間隔分の時間が経過していなかったら当たり判定を行わない
             if (ShotCountTime < ShotInterval)
             {
@@ -203,29 +210,24 @@ public class Laser : AtackBase
                 line.transform.forward,     //レーザーの正面
                 lineRange)                  //射程
                 .Select(h => h.transform.gameObject)        //GameObject型で取り出す
-                .Where(h => h.tag == Player.PLAYER_TAG)     //プレイヤーのタグのみ判定
+                .Where(h => h.tag == Player.PLAYER_TAG || h.tag == CPUController.CPU_TAG)     //プレイヤーとCPUのタグのみ判定
                 .Where(h => h.name != OwnerName)            //当たり判定に所持者がいたらスルー
                 .ToList();  //リスト化
 
             GameObject hit = SearchNearestObject(hits);
-
+            
             //ヒット処理
             if (hit != null)
             {
-                Debug.Log(hit.name + "にhit");
+                if(hit.tag == Player.PLAYER_TAG)
+                {
+                    hit.GetComponent<Player>().Damage(BulletPower);
+                }
+                if(hit.tag == CPUController.CPU_TAG)
+                {
+                    hit.GetComponent<CPUController>().Damage(BulletPower);
+                }
                 ShotCountTime = 0;  //発射間隔のカウントをリセット
-            }
-
-            //ゲージを減らす
-            gaugeAmout -= 1.0f / maxShotTime * Time.deltaTime;
-            if (gaugeAmout <= 0)    //ゲージがなくなったらレーザーを止める
-            {
-                gaugeAmout = 0;
-                StopShot();
-
-
-                //デバッグ用
-                Debug.Log("ゲージ量: " + gaugeAmout);
             }
         }
     }

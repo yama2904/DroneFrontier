@@ -435,7 +435,6 @@ public class Player : MonoBehaviour
         }
     }
 
-    //自分の周囲にTriggerを張って範囲内にアイテムがあったら探知
     private void OnTriggerStay(Collider other)
     {
         //Eキーでアイテム取得
@@ -467,6 +466,7 @@ public class Player : MonoBehaviour
             }
         }
     }
+    
 
     //プレイヤーにダメージを与える
     public void Damage(float power)

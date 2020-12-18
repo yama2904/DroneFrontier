@@ -77,4 +77,6 @@ public class Bullet : MonoBehaviour
             other.GetComponent<CPUController>().Damage(Power);
         }
     }
+
+    
 }

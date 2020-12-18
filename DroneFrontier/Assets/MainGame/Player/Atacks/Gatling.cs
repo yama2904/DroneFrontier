@@ -73,6 +73,8 @@ public class Gatling : AtackBase
         b.SpeedPerSecond = speedPerSecond;  //スピード
         b.DestroyTime = destroyTime;        //射程
         b.TrackingPower = trackingPower;    //誘導力
+        b.Power = BulletPower;
+
 
         //残り弾丸がMAXで撃つと一瞬で弾丸が1個回復するので
         //残り弾丸がMAXで撃った場合のみリキャストを0にする

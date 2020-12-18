@@ -75,14 +75,16 @@ public class MissieShot : AtackBase
         m.SpeedPerSecond = speedPerSecond;  //スピード
         m.DestroyTime = destroyTime;        //射程
         m.TrackingPower = trackingPower;    //誘導力
+        m.Power = BulletPower;
 
-        //missiles.Add(o.GetComponent<MissileBullet>());
+
         if (BulletsRemain == BulletsNum)
         {
             RecastCountTime = 0;
         }
         BulletsRemain--;    //残り弾数を減らす
         ShotCountTime = 0;  //発射間隔のカウントをリセット
+        //missiles.Add(o.GetComponent<MissileBullet>());
 
 
         //デバッグ用
