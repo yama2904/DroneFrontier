@@ -17,7 +17,7 @@ public class Player : MonoBehaviour
 {
     public const string PLAYER_TAG = "Player";       //タグ名
     public float HP { get; private set; } = 10;      //HP
-    public float MoveSpeed { get; set; } = 20.0f;    //移動速度
+    public float MoveSpeed = 50.0f;    //移動速度
     public float MaxSpeed { get; set; } = 30.0f;     //最高速度
 
     Rigidbody _rigidbody = null;
@@ -65,7 +65,7 @@ public class Player : MonoBehaviour
 
     //デバッグ用
     int atackType = (int)AtackManager.Weapon.SHOTGUN;
-    bool isQ = false;
+    bool isQ = true;
 
     void Start()
     {
