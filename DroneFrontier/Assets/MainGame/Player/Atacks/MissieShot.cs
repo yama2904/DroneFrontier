@@ -75,7 +75,7 @@ public class MissieShot : AtackBase
         m.SpeedPerSecond = speedPerSecond;  //スピード
         m.DestroyTime = destroyTime;        //射程
         m.TrackingPower = trackingPower;    //誘導力
-        m.Power = BulletPower;
+        m.Power = BulletPower;              //威力
 
 
         if (BulletsRemain == BulletsNum)

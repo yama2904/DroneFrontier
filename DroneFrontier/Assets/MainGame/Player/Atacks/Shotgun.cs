@@ -88,7 +88,7 @@ public class Shotgun : AtackBase
                 b.SpeedPerSecond = speedPerSecond;   //スピード
                 b.DestroyTime = destroyTime;         //射程
                 b.TrackingPower = trackingPower;     //誘導力
-                b.Power = BulletPower;
+                b.Power = BulletPower;               //威力
 
 
                 //弾丸の進む方向を変えて散らす処理

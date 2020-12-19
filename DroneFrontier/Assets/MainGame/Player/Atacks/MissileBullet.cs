@@ -58,6 +58,7 @@ public class MissileBullet : Bullet
     void createExplosion()
     {
         GameObject o = Instantiate(explosion, transform.position, Quaternion.Euler(0, 0, 0)) as GameObject;
+        o.GetComponent<Explosion>().OwnerName = OwnerName;
         Destroy(gameObject);
     }
 }
