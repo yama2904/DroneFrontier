@@ -11,11 +11,13 @@ public class PlayerCameraController : MonoBehaviour
     
 
     //デバッグ用
-    bool isRotate = true;
+    bool isCursorLock = true;
 
 
     void Start()
     {
+        //デバッグ用
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     void Update()
@@ -27,7 +29,7 @@ public class PlayerCameraController : MonoBehaviour
         }
 
         //カメラの回転
-        if (isRotate)
+        if (isCursorLock)
         {
             Vector3 angle = new Vector3(Input.GetAxis("Mouse X") * RotateSpeed, Input.GetAxis("Mouse Y") * RotateSpeed, 0);
 
@@ -52,7 +54,15 @@ public class PlayerCameraController : MonoBehaviour
         //デバッグ用
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            isRotate = !isRotate;
+            isCursorLock = !isCursorLock;
+            if (isCursorLock)
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+            }
+            else
+            {
+                Cursor.lockState = CursorLockMode.None;
+            }
         }
     }
 }

@@ -4,11 +4,11 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
-    public string OwnerName { private get; set; } = "";      //当たり判定を行わないオブジェクトの名前
-    public float SpeedPerSecond { private get; set; } = 0;   //1秒間に進む量
-    public float DestroyTime { private get; set; } = 0;      //発射してから消えるまでの時間(射程)
-    public float TrackingPower { private get; set; } = 0;    //追従力
-    public float Power { private get; set; } = 0;            //威力
+    public string OwnerName { protected get; set; } = "";      //当たり判定を行わないオブジェクトの名前
+    public float SpeedPerSecond { protected get; set; } = 0;   //1秒間に進む量
+    public float DestroyTime { protected get; set; } = 0;      //発射してから消えるまでの時間(射程)
+    public float TrackingPower { protected get; set; } = 0;    //追従力
+    public float Power { protected get; set; } = 0;            //威力
 
     public GameObject Target { private get; set; } = null;   //誘導する対象
     protected float totalTime;    //発射されてから経過した時間
@@ -70,13 +70,13 @@ public class Bullet : MonoBehaviour
         if (other.gameObject.tag == Player.PLAYER_TAG)
         {
             other.GetComponent<Player>().Damage(Power);
+            Destroy(gameObject);
         }
 
         if (other.gameObject.tag == CPUController.CPU_TAG)
         {
             other.GetComponent<CPUController>().Damage(Power);
+            Destroy(gameObject);
         }
     }
-
-    
 }
