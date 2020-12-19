@@ -43,11 +43,12 @@ public class CPUController : MonoBehaviour
     //ダメージを与える
     public void Damage(float power)
     {
-        HP -= power;
+        float p = Useful.DecimalPointTruncation(power, 1);  //小数点第2以下切り捨て
+        HP -= p;
         if(HP < 0)
         {
             HP = 0;
         }
-        Debug.Log(name + "に" + power + "のダメージ\n残りHP: " + HP);
+        Debug.Log(name + "に" + p + "のダメージ\n残りHP: " + HP);
     }
 }

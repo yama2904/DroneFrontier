@@ -102,15 +102,4 @@ public class ConfigButtonsController : MonoBehaviour
             BaseScreenManager.SetScreen(BaseScreenManager.Screen.GAME_MODE_SELECT);
         }
     }
-
-    //小数点切り捨て
-    //引数1を引数2未満の小数点を切り捨てる
-    float DecimalPointTruncation(float value, int num)
-    {
-        float x = Mathf.Pow(10, num);
-        value *= x;
-        value = Mathf.Floor(value) / x;
-
-        return value;
-    }
 }

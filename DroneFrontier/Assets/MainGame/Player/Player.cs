@@ -471,20 +471,22 @@ public class Player : MonoBehaviour
     //プレイヤーにダメージを与える
     public void Damage(float power)
     {
+        float p = Useful.DecimalPointTruncation(power, 1);  //小数点第2以下切り捨て
+
         //バリアが破壊されていなかったらバリアにダメージを肩代わりさせる
         if (Barrier.HP > 0)
         {
-            Barrier.Damage(power);
+            Barrier.Damage(p);
         }
         //バリアが破壊されていたらドローンが直接ダメージを受ける
         else
         {
-            HP -= power;
+            HP -= p;
             if (HP < 0)
             {
                 HP = 0;
             }
-            Debug.Log("playerに" + power + "のダメージ\n残りHP: " + HP);
+            Debug.Log("playerに" + p + "のダメージ\n残りHP: " + HP);
         }
     }
 }
