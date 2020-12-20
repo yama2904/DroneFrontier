@@ -52,7 +52,7 @@ public class MissieShot : AtackBase
         }
     }
 
-    public override void Shot(Transform t, GameObject target = null)
+    public override void Shot(GameObject target = null)
     {
         //前回発射して発射間隔分の時間が経過していなかったら撃たない
         if (ShotCountTime < ShotInterval)
@@ -66,7 +66,7 @@ public class MissieShot : AtackBase
             return;
         }
 
-        GameObject o = Instantiate(missile, t.position, t.rotation) as GameObject;    //ミサイルの複製
+        GameObject o = Instantiate(missile, transform.position, transform.rotation) as GameObject;    //ミサイルの複製
         MissileBullet m = o.GetComponent<MissileBullet>();  //名前省略
 
         //弾丸のパラメータ設定

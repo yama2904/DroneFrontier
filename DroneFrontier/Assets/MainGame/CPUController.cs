@@ -13,6 +13,7 @@ public class CPUController : MonoBehaviour
 
     //デバッグ用
     [SerializeField] float speed = 0.1f;
+    [SerializeField] bool isAtack = true;
     float deltaTime = 1;
 
     void Start()
@@ -32,8 +33,10 @@ public class CPUController : MonoBehaviour
 
     void Update()
     {
-        weapon.Shot(transform);
-
+        if (isAtack)
+        {
+            weapon.Shot();
+        }
 
         //デバッグ用
         //transform.position += new Vector3(speed * Mathf.Sin(deltaTime), 0, 0);

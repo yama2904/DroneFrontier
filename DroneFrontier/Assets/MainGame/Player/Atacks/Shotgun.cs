@@ -58,7 +58,7 @@ public class Shotgun : AtackBase
         }
     }
 
-    public override void Shot(Transform t, GameObject target = null)
+    public override void Shot(GameObject target = null)
     {
         //throw new System.NotImplementedException();
 
@@ -79,7 +79,7 @@ public class Shotgun : AtackBase
         {
             for (int j = -1; j <= 1; j++)
             {
-                GameObject o = Instantiate(bullet, t.position, t.rotation) as GameObject;    //弾丸の複製
+                GameObject o = Instantiate(bullet, transform.position, transform.rotation) as GameObject;    //弾丸の複製
                 Bullet b = o.GetComponent<Bullet>();    //名前省略
 
                 //弾丸のパラメータ設定

@@ -215,6 +215,20 @@ public class Player : MonoBehaviour
             ab.OwnerName = name;
             weapons[(int)Weapon.SUB] = ab;
         }
+
+        //デバッグ用
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            LockOn.TrackingSpeed *= 0.1f;
+            PlayerCameraController.RotateSpeed *= 0.1f;
+            MoveSpeed *= 0.1f;
+        }
+        if (Input.GetKeyUp(KeyCode.Space))
+        {
+            LockOn.TrackingSpeed *= 10;
+            PlayerCameraController.RotateSpeed *= 10;
+            MoveSpeed *= 10;
+        }
     }
 
 
@@ -362,7 +376,7 @@ public class Player : MonoBehaviour
             //左クリックでメインウェポン攻撃
             if (Input.GetMouseButton(0))
             {
-                weapons[(int)Weapon.MAIN].Shot(transform, LockOn.Target);
+                weapons[(int)Weapon.MAIN].Shot(LockOn.Target);
             }
 
             //攻撃中は移動速度と回転速度低下
@@ -401,7 +415,7 @@ public class Player : MonoBehaviour
             //右クリックでサブウェポン攻撃
             if (Input.GetMouseButton(1))
             {
-                weapons[(int)Weapon.SUB].Shot(transform, LockOn.Target);
+                weapons[(int)Weapon.SUB].Shot(LockOn.Target);
             }
 
             //攻撃中は移動速度と回転速度低下

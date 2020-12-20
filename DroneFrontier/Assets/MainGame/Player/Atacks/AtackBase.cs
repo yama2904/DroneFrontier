@@ -58,5 +58,5 @@ public abstract class AtackBase : MonoBehaviour
         BulletPower = bulletPower;
     }
 
-    public abstract void Shot(Transform transform, GameObject target = null);
+    public abstract void Shot(GameObject target = null);
 }

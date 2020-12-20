@@ -4,10 +4,13 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
 
+//0.77
+//0.83
+//1.145
+//9.85
+
 public class Laser : AtackBase
 {
-    const int MAX_RATE_OVER_TIME = 128;         //チャージのパーティクルのrateOverTime最大値
-    const float ONE_SCALE_LINE_LENGTH = 1.3f;   //1スケールごとのLineの長さ
     const float SHOT_POSSIBLE_MIN = 0.2f;       //発射可能な最低ゲージ量
 
     //角度の初期値
@@ -15,7 +18,9 @@ public class Laser : AtackBase
     const float INITIAL_ROTATION_Y = 0;
     const float INITIAL_ROTATION_Z = 0;
 
-    //チャージ用変数
+    //Charge用変数
+    const string CHARGE_OBJECT_NAME = "Charge";
+    const int MAX_RATE_OVER_TIME = 128;         //チャージのパーティクルのrateOverTime最大値
     [SerializeField] float chargeTime = 3.0f;     //チャージする時間
     ParticleSystem charge;
     ParticleSystem.EmissionModule chargeEmission;
@@ -23,13 +28,28 @@ public class Laser : AtackBase
     float rateovertimeAddAmout;    //割り算は重いので先に計算させる用
     bool isCharged;     //チャージし終わったらtrue
 
-    //レーザー用変数
+    //Start用変数
+    const string START_OBJECT_NAME = "Start";
+    GameObject start;
+
+    //Midway用変数
+    const string MIDWAY_OBJECT_NAME = "Midway";
+    const string LINE_OBJECT_NAME = "Line";
+    const string THUNDER_CONTROLLER_OBJECT_NAME = "thunderController";
     [SerializeField] float lineRadius = 0.01f;      //レーザーの半径
     [SerializeField] float lineRange = 4.0f;        //レーザーの射程
     [SerializeField] float maxShotTime = 5;         //最大何秒発射できるか
     GameObject line;
-    ParticleSystem lineParticle;
-    
+    GameObject thunderController;
+    float initThunderScaleZ;    //初期のthunderの長さ(敵にレーザーが当たった際に使う)
+    float initThunderPosZ;      //初期のthunderのz座標
+
+    //End用変数
+    const string END_OBJECT_NAME = "End";
+    [SerializeField] float END_POS_DIFF = 1.15f;
+    GameObject end;
+    float[] initEndPosZs;   //初期のEndオブジェクトのZ座標
+
 
     //攻撃中のフラグ
     bool[] isShots;
@@ -50,19 +70,49 @@ public class Laser : AtackBase
     protected override void Start()
     {
         //リキャスト、1秒間にヒットする回数、弾数、威力
-        InitValue(8.0f, 5.0f, 0, 5);     //レーザーは弾数ではなくゲージ量で管理するので弾数の引数は0
+        //InitValue(8.0f, 5.0f, 0, 5);     //レーザーは弾数ではなくゲージ量で管理するので弾数の引数は0
+        //デバッグ用
+        InitValue(0, 5.0f, 0, 5);
 
-        //チャージ用変数
+        //Charge用処理//
         charge = transform.Find("Charge").GetComponent<ParticleSystem>();   //チャージのオブジェクトの取得
         chargeEmission = charge.emission;   //チャージのパーティクルのemission構造体を取得
         rateovertimeAddAmout = MAX_RATE_OVER_TIME / chargeTime;  //1秒間で増加するRateOverTime量
 
-        //レーザー用変数
-        line = transform.Find("Line").gameObject;   //レーザーのオブジェクトの取得
-        lineParticle = line.GetComponent<ParticleSystem>();
-        
+
+        //Midway用処理//
+        GameObject midway = transform.Find(MIDWAY_OBJECT_NAME).gameObject;
+
+        //Lineオブジェクト
+        line = midway.transform.Find(LINE_OBJECT_NAME).gameObject;
+
+        //thunderオブジェクト
+        thunderController = midway.transform.Find(THUNDER_CONTROLLER_OBJECT_NAME).gameObject;
+        initThunderScaleZ = thunderController.transform.GetChild(0).localScale.z;   //初期の長さを保存
+        initThunderPosZ = thunderController.transform.GetChild(0).localPosition.z;  //初期のz座標を保存
+
+
+        //Start用処理//
+        start = transform.Find(START_OBJECT_NAME).gameObject;
+        start.transform.localRotation = midway.transform.localRotation;  //Midwayと同じ向き
+
+
+        //End用処理//
+        end = transform.Find(END_OBJECT_NAME).gameObject;
+
+        //初期座標の保存
+        initEndPosZs = new float[end.transform.childCount];  
+        for (int i = 0; i < end.transform.childCount; i++)
+        {
+            Transform t = end.transform.GetChild(i).transform;  //名前省略
+            initEndPosZs[i] = t.localPosition.z;
+        }
+        end.transform.localRotation = midway.transform.localRotation;   //Midwayと同じ向き
+
+
+        ModifyLaserLength(lineRange);   //Laserの長さを設定した長さに変更
         isShots = new bool[(int)ShotFlag.NONE];
-        StopShot();
+        StopShot(); //開始時は発射させない
 
 
         //デバッグ用
@@ -134,7 +184,7 @@ public class Laser : AtackBase
     }
 
 
-    public override void Shot(Transform t, GameObject target = null)
+    public override void Shot(GameObject target = null)
     {
         isShots[(int)ShotFlag.SHOT_SHOTING] = true;
 
@@ -163,7 +213,22 @@ public class Laser : AtackBase
             {
                 //チャージを止めてレーザーを発射
                 charge.Stop();
-                lineParticle.Play();
+
+                //Startの再生
+                foreach (Transform child in start.transform)
+                {
+                    child.GetComponent<ParticleSystem>().Play();
+                }
+
+                //Midwayの再生
+                line.GetComponent<ParticleSystem>().Play();
+                thunderController.transform.GetChild(0).GetComponent<ParticleSystem>().Play();
+
+                //Endの再生
+                foreach (Transform child in end.transform)
+                {
+                    child.GetComponent<ParticleSystem>().Play();
+                }
 
                 isCharged = true;
             }
@@ -209,61 +274,122 @@ public class Laser : AtackBase
                 lineRadius,                 //レーザーの半径
                 line.transform.forward,     //レーザーの正面
                 lineRange)                  //射程
-                .Select(h => h.transform.gameObject)        //GameObject型で取り出す
-                .Where(h => h.tag == Player.PLAYER_TAG || h.tag == CPUController.CPU_TAG)     //プレイヤーとCPUのタグのみ判定
-                .Where(h => h.name != OwnerName)            //当たり判定に所持者がいたらスルー
-                .ToList();  //リスト化
+                .Where(h => h.transform.gameObject.name != OwnerName)        //当たり判定に所持者がいたらスルー
+                .Where(h => h.transform.gameObject.tag != Item.ITEM_TAG)     //アイテムもスルー
+                .Where(h => h.transform.gameObject.tag != Bullet.BULLET_TAG) //弾丸もスルー
+                .ToList();  //リスト化  
 
-            GameObject hit = SearchNearestObject(hits);
-            
+            float lineLength = lineRange;   //レーザーの長さ
             //ヒット処理
-            if (hit != null)
+            if (hits.Count > 0)
             {
-                if(hit.tag == Player.PLAYER_TAG)
+                SearchNearestObject(out RaycastHit hit, hits);
+                GameObject o = hit.transform.gameObject;
+
+                if (o.tag == Player.PLAYER_TAG)
                 {
-                    hit.GetComponent<Player>().Damage(BulletPower);
+                    o.GetComponent<Player>().Damage(BulletPower);
                 }
-                if(hit.tag == CPUController.CPU_TAG)
+                if (o.tag == CPUController.CPU_TAG)
                 {
-                    hit.GetComponent<CPUController>().Damage(BulletPower);
+
+                    o.GetComponent<CPUController>().Damage(BulletPower);
                 }
+                //ヒットしたオブジェクトの距離をレーザーの長さにする
+                lineLength = hit.distance;
+
+                Debug.Log(lineLength);
+
                 ShotCountTime = 0;  //発射間隔のカウントをリセット
+            }
+            //レーザーの長さに応じてオブジェクトの座標やサイズを変える
+            ModifyLaserLength(lineLength);
+        }
+    }
+
+    ////リスト内で最も距離が近いオブジェクトを返す
+    //GameObject SearchNearestObject(List<GameObject> objects)
+    //{
+    //    GameObject o = null;
+
+    //    float minTargetDistance = float.MaxValue;   //初期化
+    //    foreach (GameObject _object in objects)
+    //    {
+    //        //レーザーの発射地点とオブジェクトの距離を計算
+    //        float distance = Vector3.Distance(line.transform.position, _object.transform.position);
+
+    //        //距離が最小だったら更新
+    //        if (distance < minTargetDistance)
+    //        {
+    //            minTargetDistance = distance;
+    //            o = _object;
+    //        }
+    //    }
+    //    return o;
+    //}
+
+    //リスト内で最も距離が近いRaycastHitを返す
+    void SearchNearestObject(out RaycastHit hit, List<RaycastHit> hits)
+    {
+        hit = hits[0];
+        float minTargetDistance = float.MaxValue;   //初期化
+        foreach (RaycastHit h in hits)
+        {
+            //距離が最小だったら更新
+            if (h.distance < minTargetDistance)
+            {
+                minTargetDistance = h.distance;
+                hit = h;
             }
         }
     }
 
-    //リスト内で最も距離が近いオブジェクトを返す
-    GameObject SearchNearestObject(List<GameObject> objects)
+    //レーザーの長さを変える
+    void ModifyLaserLength(float length)
     {
-        GameObject o = null;
+        //Lineオブジェクト
+        Vector3 lineScale = line.transform.localScale;
+        line.transform.localScale = new Vector3(length, length, lineScale.z);
 
-        float minTargetDistance = float.MaxValue;   //初期化
-        for (int i = 0; i < objects.Count; i++)
+        //Thunderオブジェクト
+        Vector3 thunderScale = thunderController.transform.GetChild(0).localScale;
+        thunderController.transform.GetChild(0).localScale = new Vector3(thunderScale.x, thunderScale.y, initThunderScaleZ * length);
+        Vector3 thunderPos = thunderController.transform.GetChild(0).localPosition;
+        thunderController.transform.GetChild(0).localPosition = new Vector3(thunderPos.x, thunderPos.y, initThunderPosZ * length);
+
+        //Endオブジェクト
+        for (int i = 0; i < end.transform.childCount; i++)
         {
-            //レーザーの発射地点とオブジェクトの距離を計算
-            float distance = Vector3.Distance(line.transform.position, objects[i].transform.position);
-
-            //距離が最小だったら更新
-            if (distance < minTargetDistance)
-            {
-                minTargetDistance = distance;
-                o = objects[i];
-            }
+            Transform t = end.transform.GetChild(i).transform;  //名前省略
+            Vector3 pos = t.localPosition;
+            t.localPosition = new Vector3(pos.x, pos.y, initEndPosZs[i] * length) * END_POS_DIFF;
         }
-        return o;
     }
 
     //チャージとレーザーを止める
     void StopShot()
     {
-        charge.Stop();  //チャージを止める
+        charge.Stop();  //Chargeを止める
 
-        //チャージのパーティクルの発生量の初期化
-        minMaxCurve.constant = 0;   
+        //Chargeのパーティクルの発生量の初期化
+        minMaxCurve.constant = 0;
         chargeEmission.rateOverTime = minMaxCurve;
 
-        //レーザーを止める
-        lineParticle.Stop();    
+        //Startを止める
+        foreach (Transform child in start.transform)
+        {
+            child.GetComponent<ParticleSystem>().Stop();
+        }
+
+        //Midwayを止める
+        line.GetComponent<ParticleSystem>().Stop();
+        thunderController.transform.GetChild(0).GetComponent<ParticleSystem>().Stop();
+
+        //Endを止める
+        foreach (Transform child in end.transform)
+        {
+            child.GetComponent<ParticleSystem>().Stop();
+        }
 
         //フラグの初期化
         isCharged = false;

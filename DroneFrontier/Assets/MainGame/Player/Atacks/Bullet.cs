@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
+    public const string BULLET_TAG = "Bullet";
+
     public string OwnerName { protected get; set; } = "";      //当たり判定を行わないオブジェクトの名前
     public float SpeedPerSecond { protected get; set; } = 0;   //1秒間に進む量
     public float DestroyTime { protected get; set; } = 0;      //発射してから消えるまでの時間(射程)
