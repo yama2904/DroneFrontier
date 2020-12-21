@@ -362,6 +362,7 @@ public class Laser : AtackBase
         minMaxCurve.constant = 0;
         emission.rateOverTime = minMaxCurve;
 
+
         //Startを止める
         foreach (Transform child in start.transform)
         {

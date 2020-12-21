@@ -14408,7 +14408,7 @@ MonoBehaviour:
   chargeTime: 3
   lineRadius: 0.01
   lineRange: 10
-  maxShotTime: 99
+  maxShotTime: 5
 --- !u!1 &2498090457837032947
 GameObject:
   m_ObjectHideFlags: 0
@@ -14452,7 +14452,7 @@ ParticleSystem:
   lengthInSec: 5
   simulationSpeed: 1
   stopAction: 0
-  cullingMode: 1
+  cullingMode: 3
   ringBufferMode: 0
   ringBufferLoopRange: {x: 0, y: 1}
   looping: 1
@@ -19139,7 +19139,7 @@ ParticleSystemRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_RenderMode: 1
   m_SortMode: 0
   m_MinParticleSize: 0
