@@ -259,10 +259,9 @@ public class Laser : AtackBase
                 lineRadius,                 //レーザーの半径
                 line.transform.forward,     //レーザーの正面
                 lineRange)                  //射程
-                .Where(h => h.transform.gameObject.name != OwnerName)        //当たり判定に所持者がいたらスルー
-                .Where(h => h.transform.gameObject.tag != Item.ITEM_TAG)     //アイテムもスルー
-                .Where(h => h.transform.gameObject.tag != Bullet.BULLET_TAG) //弾丸もスルー
                 .ToList();  //リスト化  
+
+            hits = FilterTargetRaycast(hits);
 
             float lineLength = lineRange;   //レーザーの長さ
             //ヒット処理
@@ -285,8 +284,7 @@ public class Laser : AtackBase
 
                 //ヒットした場所にEndオブジェクトを移動させる
                 end.transform.position = hit.point;
-
-                Debug.Log(lineLength);
+                
 
                 ShotCountTime = 0;  //発射間隔のカウントをリセット
             }
@@ -320,6 +318,16 @@ public class Laser : AtackBase
     //    }
     //    return o;
     //}
+
+    //リストから必要な要素だけ抜き取る
+    List<RaycastHit> FilterTargetRaycast(List<RaycastHit> hits)
+    {
+        //所持者と弾丸とアイテムは除外する
+        return hits.Where(h => h.transform.gameObject.name != OwnerName)
+                .Where(h => h.transform.gameObject.tag != Item.ITEM_TAG) 
+                .Where(h => h.transform.gameObject.tag != Bullet.BULLET_TAG)
+                .ToList();  //リスト化 
+    }
 
     //リスト内で最も距離が近いRaycastHitを返す
     void SearchNearestObject(out RaycastHit hit, List<RaycastHit> hits)

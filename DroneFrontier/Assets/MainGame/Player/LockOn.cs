@@ -7,19 +7,20 @@ using System.Linq;
 public class LockOn : MonoBehaviour
 {
     [SerializeField] GameObject player = null;
+    const string IMAGE_NAME = "LockOnImage";
     static Image lockOnImage = null;    //ロックオンした際に表示する画像
     static float searchRadius = 100.0f; //ロックオンする範囲
     public static float TrackingSpeed { get; set; } = 0.1f;     //ロックオンした際に敵にカメラを向ける速度
 
     public static GameObject Target { get; private set; } = null;   //ロックオンしているオブジェクト
-    static bool isTarget = false;       //ロックオンしているか
+    static bool isTarget = false;   //ロックオンしているか
 
     static bool useLockOn = true;   //ロックオンを使うか
 
     void Start()
     {
         TrackingSpeed = 0.1f;
-        lockOnImage = GameObject.Instantiate(Resources.Load<GameObject>("LockOnImage")).transform.Find("Image").GetComponent<Image>();  //画像のロード
+        lockOnImage = transform.Find(IMAGE_NAME).GetComponent<Image>();  //画像のロード
         lockOnImage.enabled = false;    //ロックオンしていない際は非表示
         Target = null;
         isTarget = false;
@@ -72,8 +73,7 @@ public class LockOn : MonoBehaviour
                 0.01f).Select(h => h.transform.gameObject).ToList();
 
             hits = FilterTargetObject(hits);
-
-            if (0 < hits.Count())
+            if (hits.Count() > 0)
             {
                 float minTargetDistance = float.MaxValue;   //初期化
                 GameObject t = null;    //target
@@ -113,6 +113,19 @@ public class LockOn : MonoBehaviour
         }
     }
 
+
+    //ロックオンを使用するならtrue
+    //禁止するならfalse
+    public static void UseLockOn(bool use)
+    {
+        if (!use)
+        {
+            ReleaseLockOn();
+        }
+        useLockOn = use;
+    }
+
+    //リストから必要な要素だけ抜き取る
     static List<GameObject> FilterTargetObject(List<GameObject> hits)
     {
         return hits.Where(h =>
@@ -122,22 +135,9 @@ public class LockOn : MonoBehaviour
             //操作しているプレイヤーのオブジェクト名はロックオン対象外
             Vector3 screenPoint = Camera.main.WorldToViewportPoint(h.transform.position);
             return screenPoint.x > 0.25f && screenPoint.x < 0.75f && screenPoint.y > 0.15f && screenPoint.y < 0.85f;
-        }).Where(h => h.tag == Player.PLAYER_TAG || h.tag == CPUController.CPU_TAG).Where(h => h.name != Player.ObjectName)
-         .ToList();
-    }
-
-    //ロックオンを使用するならtrue
-    //禁止するならfalse
-    public static void UseLockOn(bool use)
-    {
-        if (use)
-        {
-            useLockOn = true;
-        }
-        else
-        {
-            useLockOn = false;
-            ReleaseLockOn();
-        }
+        }).Where(h => h.tag == Player.PLAYER_TAG)       //プレイヤーが対象
+          .Where(h => h.tag == CPUController.CPU_TAG)   //CPUが対象
+          .Where(h => h.name != Player.ObjectName)      //操作しているプレイヤーは除外
+          .ToList();
     }
 }

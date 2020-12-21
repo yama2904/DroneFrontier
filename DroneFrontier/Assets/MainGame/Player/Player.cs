@@ -34,7 +34,7 @@ public class Player : MonoBehaviour
     AtackBase[] weapons;  //ウェポン群
 
     //バリア
-    [SerializeField] GameObject barrierObject = null;
+    const string BARRIER_OBJECT_NAME = "Barrier";
     public Barrier Barrier { get; private set; } = null;
 
     //アイテム
@@ -73,7 +73,7 @@ public class Player : MonoBehaviour
         ObjectName = name;
         _rigidbody = GetComponent<Rigidbody>();
         weapons = new AtackBase[(int)Weapon.NONE];
-        Barrier = barrierObject.GetComponent<Barrier>();
+        Barrier = transform.Find(BARRIER_OBJECT_NAME).GetComponent<Barrier>();
 
 
         //メインウェポンの処理
@@ -144,9 +144,14 @@ public class Player : MonoBehaviour
         }
 
         //レーダー使用
+        if (Input.GetKey(KeyCode.Space))
+        {
+            Radar.StartRadar();
+        }
+        //レーダー使用
         if (Input.GetKeyUp(KeyCode.Space))
         {
-
+            Radar.ReleaseRadar();
         }
 
         //ブースト使用
@@ -222,18 +227,18 @@ public class Player : MonoBehaviour
         }
 
         //デバッグ用
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            LockOn.TrackingSpeed *= 0.1f;
-            PlayerCameraController.RotateSpeed *= 0.1f;
-            MoveSpeed *= 0.1f;
-        }
-        if (Input.GetKeyUp(KeyCode.Space))
-        {
-            LockOn.TrackingSpeed *= 10;
-            PlayerCameraController.RotateSpeed *= 10;
-            MoveSpeed *= 10;
-        }
+        //if (Input.GetKeyDown(KeyCode.Space))
+        //{
+        //    LockOn.TrackingSpeed *= 0.1f;
+        //    PlayerCameraController.RotateSpeed *= 0.1f;
+        //    MoveSpeed *= 0.1f;
+        //}
+        //if (Input.GetKeyUp(KeyCode.Space))
+        //{
+        //    LockOn.TrackingSpeed *= 10;
+        //    PlayerCameraController.RotateSpeed *= 10;
+        //    MoveSpeed *= 10;
+        //}
         if (Input.GetKeyDown(KeyCode.P))
         {
             transform.position = initPos;
