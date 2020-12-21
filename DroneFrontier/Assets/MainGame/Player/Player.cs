@@ -66,6 +66,7 @@ public class Player : MonoBehaviour
     //デバッグ用
     int atackType = (int)AtackManager.Weapon.SHOTGUN;
     bool isQ = true;
+    Vector3 initPos;
 
     void Start()
     {
@@ -103,6 +104,10 @@ public class Player : MonoBehaviour
         weapons[(int)Weapon.SUB] = abS;
 
         items = new Item[(int)ItemNum.NONE];
+
+
+        //デバッグ用
+        initPos = transform.position;
     }
 
     void Update()
@@ -228,6 +233,10 @@ public class Player : MonoBehaviour
             LockOn.TrackingSpeed *= 10;
             PlayerCameraController.RotateSpeed *= 10;
             MoveSpeed *= 10;
+        }
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            transform.position = initPos;
         }
     }
 

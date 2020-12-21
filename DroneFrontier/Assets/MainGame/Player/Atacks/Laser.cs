@@ -4,27 +4,20 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
 
-//0.77
-//0.83
-//1.145
-//9.85
-
 public class Laser : AtackBase
 {
     const float SHOT_POSSIBLE_MIN = 0.2f;       //発射可能な最低ゲージ量
 
-    //角度の初期値
-    const float INITIAL_ROTATION_X = 4.0f;
-    const float INITIAL_ROTATION_Y = 0;
-    const float INITIAL_ROTATION_Z = 0;
+    ////角度の初期値
+    //const float INITIAL_ROTATION_X = 4.0f;
+    //const float INITIAL_ROTATION_Y = 0;
+    //const float INITIAL_ROTATION_Z = 0;
 
     //Charge用変数
     const string CHARGE_OBJECT_NAME = "Charge";
     const int MAX_RATE_OVER_TIME = 128;         //チャージのパーティクルのrateOverTime最大値
     [SerializeField] float chargeTime = 3.0f;     //チャージする時間
     ParticleSystem charge;
-    ParticleSystem.EmissionModule chargeEmission;
-    ParticleSystem.MinMaxCurve minMaxCurve;
     float rateovertimeAddAmout;    //割り算は重いので先に計算させる用
     bool isCharged;     //チャージし終わったらtrue
 
@@ -46,9 +39,8 @@ public class Laser : AtackBase
 
     //End用変数
     const string END_OBJECT_NAME = "End";
-    [SerializeField] float END_POS_DIFF = 1.15f;
+    const float END_POS_DIFF = -0.2f;
     GameObject end;
-    float[] initEndPosZs;   //初期のEndオブジェクトのZ座標
 
 
     //攻撃中のフラグ
@@ -70,13 +62,10 @@ public class Laser : AtackBase
     protected override void Start()
     {
         //リキャスト、1秒間にヒットする回数、弾数、威力
-        //InitValue(8.0f, 5.0f, 0, 5);     //レーザーは弾数ではなくゲージ量で管理するので弾数の引数は0
-        //デバッグ用
-        InitValue(0, 5.0f, 0, 5);
+        InitValue(8.0f, 5.0f, 0, 5);     //レーザーは弾数ではなくゲージ量で管理するので弾数の引数は0
 
         //Charge用処理//
         charge = transform.Find("Charge").GetComponent<ParticleSystem>();   //チャージのオブジェクトの取得
-        chargeEmission = charge.emission;   //チャージのパーティクルのemission構造体を取得
         rateovertimeAddAmout = MAX_RATE_OVER_TIME / chargeTime;  //1秒間で増加するRateOverTime量
 
 
@@ -101,12 +90,6 @@ public class Laser : AtackBase
         end = transform.Find(END_OBJECT_NAME).gameObject;
 
         //初期座標の保存
-        initEndPosZs = new float[end.transform.childCount];  
-        for (int i = 0; i < end.transform.childCount; i++)
-        {
-            Transform t = end.transform.GetChild(i).transform;  //名前省略
-            initEndPosZs[i] = t.localPosition.z;
-        }
         end.transform.localRotation = midway.transform.localRotation;   //Midwayと同じ向き
 
 
@@ -205,11 +188,13 @@ public class Laser : AtackBase
             }
 
             //徐々にチャージのエフェクトを増す
+            ParticleSystem.EmissionModule emission = charge.emission;
+            ParticleSystem.MinMaxCurve minMaxCurve = emission.rateOverTime;
             minMaxCurve.constant += rateovertimeAddAmout * Time.deltaTime;
-            chargeEmission.rateOverTime = minMaxCurve;
+            emission.rateOverTime = minMaxCurve;
 
             //MAX_RATE_OVER_TIME経ったら発射
-            if (chargeEmission.rateOverTime.constant > MAX_RATE_OVER_TIME)
+            if (emission.rateOverTime.constant > MAX_RATE_OVER_TIME)
             {
                 //チャージを止めてレーザーを発射
                 charge.Stop();
@@ -298,9 +283,17 @@ public class Laser : AtackBase
                 //ヒットしたオブジェクトの距離をレーザーの長さにする
                 lineLength = hit.distance;
 
+                //ヒットした場所にEndオブジェクトを移動させる
+                end.transform.position = hit.point;
+
                 Debug.Log(lineLength);
 
                 ShotCountTime = 0;  //発射間隔のカウントをリセット
+            }
+            else
+            {
+                //レーザーの末端にEndオブジェクトを移動
+                end.transform.transform.position = line.transform.position + (line.transform.forward * lineRange);
             }
             //レーザーの長さに応じてオブジェクトの座標やサイズを変える
             ModifyLaserLength(lineLength);
@@ -356,14 +349,6 @@ public class Laser : AtackBase
         thunderController.transform.GetChild(0).localScale = new Vector3(thunderScale.x, thunderScale.y, initThunderScaleZ * length);
         Vector3 thunderPos = thunderController.transform.GetChild(0).localPosition;
         thunderController.transform.GetChild(0).localPosition = new Vector3(thunderPos.x, thunderPos.y, initThunderPosZ * length);
-
-        //Endオブジェクト
-        for (int i = 0; i < end.transform.childCount; i++)
-        {
-            Transform t = end.transform.GetChild(i).transform;  //名前省略
-            Vector3 pos = t.localPosition;
-            t.localPosition = new Vector3(pos.x, pos.y, initEndPosZs[i] * length) * END_POS_DIFF;
-        }
     }
 
     //チャージとレーザーを止める
@@ -372,8 +357,10 @@ public class Laser : AtackBase
         charge.Stop();  //Chargeを止める
 
         //Chargeのパーティクルの発生量の初期化
+        ParticleSystem.EmissionModule emission = charge.emission;
+        ParticleSystem.MinMaxCurve minMaxCurve = emission.rateOverTime;
         minMaxCurve.constant = 0;
-        chargeEmission.rateOverTime = minMaxCurve;
+        emission.rateOverTime = minMaxCurve;
 
         //Startを止める
         foreach (Transform child in start.transform)
