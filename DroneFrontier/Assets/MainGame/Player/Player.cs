@@ -120,17 +120,9 @@ public class Player : MonoBehaviour
             }
         }
 
-        if (MainGameManager.IsConfig)
-        {
-            return;
-        }
-
         //移動処理
         Move(MoveSpeed, MaxSpeed);
 
-        //攻撃処理
-        UseWeapon(Weapon.MAIN);     //メインウェポン攻撃
-        UseWeapon(Weapon.SUB);      //サブウェポン攻撃
 
         //ロックオン
         if (Input.GetKey(KeyCode.LeftShift))
@@ -153,6 +145,16 @@ public class Player : MonoBehaviour
         {
             Radar.ReleaseRadar();
         }
+
+        //設定画面中はここより下の処理は行わない
+        if (MainGameManager.IsConfig)
+        {
+            return;
+        }
+
+        //攻撃処理
+        UseWeapon(Weapon.MAIN);     //メインウェポン攻撃
+        UseWeapon(Weapon.SUB);      //サブウェポン攻撃
 
         //ブースト使用
         if (Input.GetKeyUp(KeyCode.Q))

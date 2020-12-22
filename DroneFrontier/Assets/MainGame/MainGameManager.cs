@@ -56,6 +56,10 @@ public class MainGameManager : MonoBehaviour
     const float MASK_COLOR_ALFA = 0.5f; //アルファ
 
 
+    //デバッグ用
+    public static bool IsCursorLock { get; private set; } = true;
+
+
     void Start()
     {
         IsMainGaming = true;
@@ -74,7 +78,29 @@ public class MainGameManager : MonoBehaviour
         //設定画面を開く
         if (Input.GetKeyDown(KeyCode.M))
         {
-            MoveConfig();
+            if (IsConfig)
+            {
+                ConfigToMainGame();
+            }
+            else
+            {
+                MainGameToConfig();
+            }
+        }
+
+
+        //デバッグ用
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            IsCursorLock = !IsCursorLock;
+            if (IsCursorLock)
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+            }
+            else
+            {
+                Cursor.lockState = CursorLockMode.None;
+            }
         }
     }
 
@@ -89,21 +115,23 @@ public class MainGameManager : MonoBehaviour
         screenMask.SetActive(false);
         BaseScreenManager.HideScreen();
 
-        IsConfig = false;
-    }
-
-    void MoveConfig()
-    {
-        if (IsConfig)
+        if (IsCursorLock)
         {
-            ConfigToMainGame();
+            Cursor.lockState = CursorLockMode.Locked;
         }
         else
         {
-            screenMask.SetActive(true);     //設定画面の背景にマスクをつける
-            BaseScreenManager.SetScreen(BaseScreenManager.Screen.CONFIG);
-
-            IsConfig = true;
+            Cursor.lockState = CursorLockMode.None;
         }
+        IsConfig = false;
+    }
+
+    void MainGameToConfig()
+    {
+        screenMask.SetActive(true);     //設定画面の背景にマスクをつける
+        BaseScreenManager.SetScreen(BaseScreenManager.Screen.CONFIG);
+
+        Cursor.lockState = CursorLockMode.None;
+        IsConfig = true;
     }
 }

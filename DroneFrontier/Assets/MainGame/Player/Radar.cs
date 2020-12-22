@@ -35,7 +35,12 @@ public class Radar : MonoBehaviour
 
     void Update()
     {
-
+        foreach(SearchData s in searchDatas)
+        {
+            Vector3 screenPoint = Camera.main.WorldToViewportPoint(s.target.transform.position);
+            s.marker.transform.GetChild(0).GetComponent<RectTransform>().position =
+                new Vector3(Screen.width * screenPoint.x, Screen.height * screenPoint.y, 0);
+        }
     }
 
     public static void StartRadar()

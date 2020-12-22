@@ -10,9 +10,6 @@ public class PlayerCameraController : MonoBehaviour
     [SerializeField] float limitCameraTiltX = 40.0f;        //カメラのX軸の傾き上限
     
 
-    //デバッグ用
-    bool isCursorLock = true;
-
 
     void Start()
     {
@@ -29,7 +26,7 @@ public class PlayerCameraController : MonoBehaviour
         }
 
         //カメラの回転
-        if (isCursorLock)
+        if (MainGameManager.IsCursorLock)
         {
             Vector3 angle = new Vector3(Input.GetAxis("Mouse X") * RotateSpeed, Input.GetAxis("Mouse Y") * RotateSpeed, 0);
 
@@ -48,21 +45,6 @@ public class PlayerCameraController : MonoBehaviour
                 localAngle.x = 360 - limitCameraTiltX;
             }
             player.transform.localEulerAngles = localAngle;
-        }
-
-
-        //デバッグ用
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            isCursorLock = !isCursorLock;
-            if (isCursorLock)
-            {
-                Cursor.lockState = CursorLockMode.Locked;
-            }
-            else
-            {
-                Cursor.lockState = CursorLockMode.None;
-            }
         }
     }
 }
