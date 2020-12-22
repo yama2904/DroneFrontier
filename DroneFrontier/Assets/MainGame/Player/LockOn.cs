@@ -73,7 +73,7 @@ public class LockOn : MonoBehaviour
                 0.01f).Select(h => h.transform.gameObject).ToList();
 
             hits = FilterTargetObject(hits);
-            if (hits.Count() > 0)
+            if (hits.Count > 0)
             {
                 float minTargetDistance = float.MaxValue;   //初期化
                 GameObject t = null;    //target
@@ -131,12 +131,9 @@ public class LockOn : MonoBehaviour
         return hits.Where(h =>
         {
             //各要素の座標をビューポートに変換(画面左下が0:0、右上が1:1)して条件に合うものだけリストに詰め込む
-            //タグがプレイヤーのオブジェクトに絞る
-            //操作しているプレイヤーのオブジェクト名はロックオン対象外
             Vector3 screenPoint = Camera.main.WorldToViewportPoint(h.transform.position);
-            return screenPoint.x > 0.25f && screenPoint.x < 0.75f && screenPoint.y > 0.15f && screenPoint.y < 0.85f;
-        }).Where(h => h.tag == Player.PLAYER_TAG)       //プレイヤーが対象
-          .Where(h => h.tag == CPUController.CPU_TAG)   //CPUが対象
+            return screenPoint.x > 0.25f && screenPoint.x < 0.75f && screenPoint.y > 0.15f && screenPoint.y < 0.85f && screenPoint.z > 0;
+        }).Where(h => h.tag == Player.PLAYER_TAG || h.tag == CPUController.CPU_TAG)       //プレイヤーとCPUが対象
           .Where(h => h.name != Player.ObjectName)      //操作しているプレイヤーは除外
           .ToList();
     }

@@ -13,21 +13,15 @@ public class Bullet : MonoBehaviour
     public float Power { protected get; set; } = 0;            //威力
 
     public GameObject Target { private get; set; } = null;   //誘導する対象
-    protected float totalTime;    //発射されてから経過した時間
+    protected float destroyTime;    //発射されてから消滅する時間
 
     protected virtual void Start()
     {
-        totalTime = 0;
+        Destroy(gameObject, destroyTime);
     }
 
     protected virtual void Update()
     {
-        //発射されて一定時間経過したら削除
-        totalTime += Time.deltaTime;
-        if (totalTime > DestroyTime)
-        {
-            Destroy(gameObject);
-        }
     }
 
     protected virtual void FixedUpdate()

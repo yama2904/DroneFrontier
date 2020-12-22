@@ -5,6 +5,7 @@ using UnityEngine;
 public class MissileBullet : Bullet
 {
     [SerializeField] GameObject explosion = null;
+    float totalTime;    //発射させてから経過した時間
 
     protected override void Start()
     {

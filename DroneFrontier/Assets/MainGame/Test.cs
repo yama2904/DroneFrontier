@@ -17,6 +17,8 @@ public class Test : MonoBehaviour
     float scroll;           //マウスのスクロール変数
     bool isMainCamera = true;
 
+    [SerializeField] GameObject cube;
+
     void Start()
     {
         deltaTime = 0;
@@ -25,7 +27,7 @@ public class Test : MonoBehaviour
         mainCamera = Camera.main.gameObject;
         mousePosPrev = new Vector2(0, 0);
     }
-    
+
     void Update()
     {
         if (isTime)
@@ -37,7 +39,7 @@ public class Test : MonoBehaviour
             }
         }
 
-        if(Input.GetKeyDown(KeyCode.K))
+        if (Input.GetKeyDown(KeyCode.K))
         {
             isMainCamera = !isMainCamera;
             if (isMainCamera)
@@ -80,50 +82,55 @@ public class Test : MonoBehaviour
             }
         }
 
-
-            //if (Input.GetMouseButtonDown(0))
-            //{
-            //    Debug.Log("左クリック押");
-            //}
-
-            //if (Input.GetMouseButtonUp(0))
-            //{
-            //    Debug.Log("左クリック離");
-            //}
+        if (Input.GetKey(KeyCode.U))
+        {
+            Debug.Log(Camera.main.WorldToViewportPoint(cube.transform.position));
+        }
 
 
-            //if (Input.GetMouseButtonDown(1))
-            //{
-            //    Debug.Log("右クリック押");
-            //}
+        //if (Input.GetMouseButtonDown(0))
+        //{
+        //    Debug.Log("左クリック押");
+        //}
 
-            //if (Input.GetMouseButtonUp(1))
-            //{
-            //    Debug.Log("右クリック離");
-            //}
+        //if (Input.GetMouseButtonUp(0))
+        //{
+        //    Debug.Log("左クリック離");
+        //}
 
-            ////カメラの移動
-            //if (Input.GetMouseButtonDown(0))
-            //{
-            //    mousePosPrev = Input.mousePosition;
-            //}
-            //if (Input.GetMouseButton(0))
-            //{
-            //    float x = (mousePosPrev.x - Input.mousePosition.x) / Screen.width;
-            //    float y = (mousePosPrev.y - Input.mousePosition.y) / Screen.height;
 
-            //    //クリックしている間mousePosPrevの更新
-            //    mousePosPrev = Input.mousePosition;
+        //if (Input.GetMouseButtonDown(1))
+        //{
+        //    Debug.Log("右クリック押");
+        //}
 
-            //    //カメラの向きに合わせて移動させる
-            //    Vector3 move = mainCamera.transform.rotation.normalized * new Vector2(x, y) * MoveSpeed;
-            //    mainCamera.transform.position += move;
-            //}
+        //if (Input.GetMouseButtonUp(1))
+        //{
+        //    Debug.Log("右クリック離");
+        //}
 
-            ////カメラのズーム
-            //scroll = Input.GetAxis("Mouse ScrollWheel");
-            //mainCamera.transform.position += mainCamera.transform.forward * scroll * ScrollSpeed;
+        ////カメラの移動
+        //if (Input.GetMouseButtonDown(0))
+        //{
+        //    mousePosPrev = Input.mousePosition;
+        //}
+        //if (Input.GetMouseButton(0))
+        //{
+        //    float x = (mousePosPrev.x - Input.mousePosition.x) / Screen.width;
+        //    float y = (mousePosPrev.y - Input.mousePosition.y) / Screen.height;
 
-            deltaTime += Time.deltaTime;
+        //    //クリックしている間mousePosPrevの更新
+        //    mousePosPrev = Input.mousePosition;
+
+        //    //カメラの向きに合わせて移動させる
+        //    Vector3 move = mainCamera.transform.rotation.normalized * new Vector2(x, y) * MoveSpeed;
+        //    mainCamera.transform.position += move;
+        //}
+
+        ////カメラのズーム
+        //scroll = Input.GetAxis("Mouse ScrollWheel");
+        //mainCamera.transform.position += mainCamera.transform.forward * scroll * ScrollSpeed;
+
+        deltaTime += Time.deltaTime;
     }
 }
