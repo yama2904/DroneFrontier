@@ -2437,7 +2437,7 @@ GameObject:
   - component: {fileID: 1976513589710317011}
   - component: {fileID: 1976513589710317012}
   m_Layer: 5
-  m_Name: CPUNum
+  m_Name: CPUNumText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3236,7 +3236,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42e6a5b9f4e5f6e48b77279f53cd0772, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CPUNumText: {fileID: 1976513589710317014}
+  CPUNumText: {fileID: 1976513589710317012}
   CPUList: {fileID: 1976513588693189998}
 --- !u!1 &1976513590206923034
 GameObject:

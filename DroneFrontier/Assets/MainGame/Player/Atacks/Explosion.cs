@@ -4,14 +4,14 @@ using UnityEngine;
 
 public class Explosion : MonoBehaviour
 {
-    public string OwnerName { private get; set; } = "";  //当たり判定を行わないオブジェクトの名前
+    public GameObject notHitObject { private get; set; } = null;  //当たり判定を行わないオブジェクト
     [SerializeField] float size = 20;    //爆発範囲
     [SerializeField] float power = 20;   //威力
     [SerializeField] float powerDownRate = 0.8f;   //中心地からの距離による威力減衰率
     [SerializeField] float notPowerDownRange = 0.25f;    //威力が減衰しない範囲
     [SerializeField] float lengthReference = 0.1f;    //威力減衰の基準の長さ
 
-    List<string> names;    //触れたプレイヤーの名前を全て格納する
+    List<GameObject> wasHitObjects;    //触れたオブジェクトを全て格納する
     const float DESTROY_TIME = 3.0f;    //生存時間
     float deltaTime;    //時間を計測する用
 
@@ -39,7 +39,7 @@ public class Explosion : MonoBehaviour
         sc.radius *= size;
         sc.center = new Vector3(0, 0, 0);
 
-        names = new List<string>();
+        wasHitObjects = new List<GameObject>();
         deltaTime = 0;
     }
 
@@ -55,30 +55,30 @@ public class Explosion : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         //当たり判定を行わないオブジェクトだったら処理をしない
-        if (other.name == OwnerName)
+        if (ReferenceEquals(other.gameObject, notHitObject))
         {
             return;
         }
 
         //既にヒット済のオブジェクトはスルー
-        foreach (string name in names)
+        foreach (GameObject o in wasHitObjects)
         {
-            if (other.name == name)
+            if (ReferenceEquals(other.gameObject, o))
             {
                 return;
             }
         }
 
-        if (other.gameObject.tag == Player.PLAYER_TAG)
+        if (other.CompareTag(Player.PLAYER_TAG))
         {
             other.GetComponent<Player>().Damage(CalcPower(other.transform.position));
-            names.Add(other.name);
+            wasHitObjects.Add(other.gameObject);
         }
 
-        if (other.gameObject.tag == CPUController.CPU_TAG)
+        if (other.CompareTag(CPUController.CPU_TAG))
         {
             other.GetComponent<CPUController>().Damage(CalcPower(other.transform.position));
-            names.Add(other.name);
+            wasHitObjects.Add(other.gameObject);
 
 
             //デバッグ用
@@ -99,12 +99,12 @@ public class Explosion : MonoBehaviour
 
         //威力が減衰しない範囲内に敵がいたらそのままの威力を返す
         distance -= notPowerDownRange;
-        if(distance <= 0)
+        if (distance <= 0)
         {
             return power;
         }
 
         //長さに応じた減衰率を適用する
-        return power * Mathf.Pow(powerDownRate, distance / lengthReference);    
+        return power * Mathf.Pow(powerDownRate, distance / lengthReference);
     }
 }

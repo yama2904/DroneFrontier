@@ -24,7 +24,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8400011875109955529}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
@@ -43,7 +43,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1d431fe32b35284cacf069ae40a509b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  missile: {fileID: 553275453682103863, guid: 008fc3087c1cc734fa65d5d016f5ecc7, type: 3}
+  missile: {fileID: 3995293997800548440, guid: 008fc3087c1cc734fa65d5d016f5ecc7, type: 3}
   speedPerSecond: 30
   destroyTime: 2
   trackingPower: 2.3

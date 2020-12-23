@@ -45,9 +45,8 @@ public class MainGameManager : MonoBehaviour
 
 
     //設定画面移動時のマスク用変数
-    static GameObject screenMask = null;        //画面を暗くする画像を持っているオブジェクト
-    const string SCREEN_MASK = "ScreenMask";    //画面のマスク用オブジェクトの名前
-    const string SCREEN_MASK_CHILD = "Mask";    //子オブジェクトの名前
+    [SerializeField] Image screenMaskImageInspector = null;  //画面を暗くする画像を持っているオブジェクト
+    static Image screenMaskImage = null;    //screenMaskImageをstaticに移す用
 
     //マスクする色
     const float MASK_COLOR_RED = 0;     //赤
@@ -59,6 +58,10 @@ public class MainGameManager : MonoBehaviour
     //デバッグ用
     public static bool IsCursorLock { get; private set; } = true;
 
+    void Awake()
+    {
+        screenMaskImage = screenMaskImageInspector;
+    }
 
     void Start()
     {
@@ -66,10 +69,8 @@ public class MainGameManager : MonoBehaviour
         BaseScreenManager.LoadScreen(BaseScreenManager.Screen.CONFIG);  //メインゲームを始めた時点で設定画面をロードする
 
         //設定画面に移動した際のマスクの暗さと色を設定
-        screenMask = GameObject.Find(SCREEN_MASK);
-        screenMask.transform.Find(SCREEN_MASK_CHILD).GetComponent<Image>().color =
-            new Color(MASK_COLOR_RED, MASK_COLOR_GREEN, MASK_COLOR_BLUE, MASK_COLOR_ALFA);
-        screenMask.SetActive(false);
+        screenMaskImage.color = new Color(MASK_COLOR_RED, MASK_COLOR_GREEN, MASK_COLOR_BLUE, MASK_COLOR_ALFA);
+        screenMaskImage.enabled = false;
         IsConfig = false;
     }
 
@@ -112,7 +113,7 @@ public class MainGameManager : MonoBehaviour
     //設定画面からメインゲームに移動する
     public static void ConfigToMainGame()
     {
-        screenMask.SetActive(false);
+        screenMaskImage.enabled = false;
         BaseScreenManager.HideScreen();
 
         if (IsCursorLock)
@@ -128,7 +129,7 @@ public class MainGameManager : MonoBehaviour
 
     void MainGameToConfig()
     {
-        screenMask.SetActive(true);     //設定画面の背景にマスクをつける
+        screenMaskImage.enabled = true;     //設定画面の背景にマスクをつける
         BaseScreenManager.SetScreen(BaseScreenManager.Screen.CONFIG);
 
         Cursor.lockState = CursorLockMode.None;

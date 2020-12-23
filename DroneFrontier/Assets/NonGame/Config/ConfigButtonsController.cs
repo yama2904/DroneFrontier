@@ -5,86 +5,76 @@ using UnityEngine.UI;
 
 public class ConfigButtonsController : MonoBehaviour
 {
-    //オブジェクト名
-    const string SLIDER_NAME = "Slider";    
-    const string VALUE_DISPLAY_TEXT = "ValueDisplay/Text";  
+    //スライダーコンポーネント
+    [SerializeField] Slider BGMSlider = null;
+    [SerializeField] Slider SESlider = null;
+    [SerializeField] Slider BrightnessSlider = null;
+    [SerializeField] Slider CameraSlider = null;
 
-    [SerializeField] GameObject BGMConfigs = null;
-    [SerializeField] GameObject SEConfigs = null;
-    [SerializeField] GameObject BrightnessConfigs = null;
-    [SerializeField] GameObject CameraConfigs = null;
-
-    enum Type
-    {
-        BGM,
-        SE,
-        BRIGHTNESS,
-        CAMERA,
-
-        NONE
-    }
-    Slider[] sliders;
-    Text[] valueDisplays;
+    //スライダーの値を表示するテキスト
+    [SerializeField] Text BGMValueText = null;
+    [SerializeField] Text SEValueText = null;
+    [SerializeField] Text BrightnessValueText = null;
+    [SerializeField] Text CameraValueText = null;
 
     void Start()
     {
-        //Sliderの初期設定
-        sliders = new Slider[(int)Type.NONE];
-        sliders[(int)Type.BGM] = BGMConfigs.transform.Find(SLIDER_NAME).GetComponent<Slider>();
-        sliders[(int)Type.SE] = SEConfigs.transform.Find(SLIDER_NAME).GetComponent<Slider>();
-        sliders[(int)Type.BRIGHTNESS] = BrightnessConfigs.transform.Find(SLIDER_NAME).GetComponent<Slider>();
-        sliders[(int)Type.CAMERA] = CameraConfigs.transform.Find(SLIDER_NAME).GetComponent<Slider>();
-
-        //ValueDisplayの初期設定
-        valueDisplays = new Text[(int)Type.NONE];
-        valueDisplays[(int)Type.BGM] = BGMConfigs.transform.Find(VALUE_DISPLAY_TEXT).GetComponent<Text>();
-        valueDisplays[(int)Type.SE] = SEConfigs.transform.Find(VALUE_DISPLAY_TEXT).GetComponent<Text>();
-        valueDisplays[(int)Type.BRIGHTNESS] = BrightnessConfigs.transform.Find(VALUE_DISPLAY_TEXT).GetComponent<Text>();
-        valueDisplays[(int)Type.CAMERA] = CameraConfigs.transform.Find(VALUE_DISPLAY_TEXT).GetComponent<Text>();
-
         //Sliderの値の設定
-        sliders[(int)Type.BGM].value = SoundManager.GetBaseVolumeBGM();
-        sliders[(int)Type.SE].value = SoundManager.GetBaseVolumeSE();
-        sliders[(int)Type.BRIGHTNESS].value = 1.0f - BrightnessManager.GetBaseAlfa();
-        sliders[(int)Type.CAMERA].value = CameraManager.GetBaseSpeed();
+        BGMSlider.value = SoundManager.GetBaseVolumeBGM();
+        SESlider.value = SoundManager.GetBaseVolumeSE();
+        BrightnessSlider.value = 1.0f - BrightnessManager.GetBaseAlfa();
+        CameraSlider.value = CameraManager.GetBaseSpeed();
+
+        //Textの設定
+        BGMValueText.text = valueToText(BGMSlider.value);
+        SEValueText.text = valueToText(SESlider.value);
+        BrightnessValueText.text = valueToText(BrightnessSlider.value);
+        CameraValueText.text = valueToText(CameraSlider.value);
     }
 
     //BGM調整
     public void MoveSliderBGM()
     {
-        SoundManager.SetBaseVolumeBGM(sliders[(int)Type.BGM].value);
-        valueDisplays[(int)Type.BGM].text = (sliders[(int)Type.BGM].value * 100).ToString("F0");
+        SoundManager.SetBaseVolumeBGM(BGMSlider.value);
+        BGMValueText.text = valueToText(BGMSlider.value);
     }
 
     //SE調整
     public void MoveSliderSE()
     {
-        SoundManager.SetBaseVolumeSE(sliders[(int)Type.SE].value);
-        valueDisplays[(int)Type.SE].text = (sliders[(int)Type.SE].value * 100).ToString("F0");
+        SoundManager.SetBaseVolumeSE(SESlider.value);
+        SEValueText.text = valueToText(SESlider.value);
     }
 
     //明るさ調整
     public void MoveSliderBrightness()
     {
-        BrightnessManager.SetBaseAlfa(1.0f - sliders[(int)Type.BRIGHTNESS].value);
-        valueDisplays[(int)Type.BRIGHTNESS].text = (sliders[(int)Type.BRIGHTNESS].value * 100).ToString("F0");
+        BrightnessManager.SetBaseAlfa(1.0f - BrightnessSlider.value);
+        BrightnessValueText.text = valueToText(BrightnessSlider.value);
     }
 
     //カメラ感度調整
     public void MoveSliderCamera()
     {
-        CameraManager.SetBaseSpeed(sliders[(int)Type.CAMERA].value);
-        valueDisplays[(int)Type.CAMERA].text = (sliders[(int)Type.CAMERA].value * 100).ToString("F0");
+        CameraManager.SetBaseSpeed(CameraSlider.value);
+        CameraValueText.text = valueToText(CameraSlider.value);
     }
 
     //設定初期化
     public void InitSetting()
     {
         ConfigManager.InitConfig();
-        sliders[(int)Type.BGM].value = SoundManager.GetBaseVolumeBGM();
-        sliders[(int)Type.SE].value = SoundManager.GetBaseVolumeSE();
-        sliders[(int)Type.BRIGHTNESS].value = 1.0f - BrightnessManager.GetBaseAlfa();
-        sliders[(int)Type.CAMERA].value = CameraManager.GetBaseSpeed();
+        //Sliderの値の設定
+        BGMSlider.value = SoundManager.GetBaseVolumeBGM();
+        SESlider.value = SoundManager.GetBaseVolumeSE();
+        BrightnessSlider.value = 1.0f - BrightnessManager.GetBaseAlfa();
+        CameraSlider.value = CameraManager.GetBaseSpeed();
+
+        //Textの設定
+        BGMValueText.text = valueToText(BGMSlider.value);
+        SEValueText.text = valueToText(SESlider.value);
+        BrightnessValueText.text = valueToText(BrightnessSlider.value);
+        CameraValueText.text = valueToText(CameraSlider.value);
     }
 
 
@@ -101,5 +91,11 @@ public class ConfigButtonsController : MonoBehaviour
         {
             BaseScreenManager.SetScreen(BaseScreenManager.Screen.GAME_MODE_SELECT);
         }
+    }
+
+    //Sliderの値をテキスト用に変換
+    string valueToText(float value)
+    {
+        return (value * 100).ToString("F0");
     }
 }

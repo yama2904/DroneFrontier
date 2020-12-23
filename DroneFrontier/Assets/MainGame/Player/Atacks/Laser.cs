@@ -8,32 +8,26 @@ public class Laser : AtackBase
 {
     const float SHOT_POSSIBLE_MIN = 0.2f;       //発射可能な最低ゲージ量
 
-    ////角度の初期値
-    //const float INITIAL_ROTATION_X = 4.0f;
-    //const float INITIAL_ROTATION_Y = 0;
-    //const float INITIAL_ROTATION_Z = 0;
-
     //Charge用変数
-    const string CHARGE_OBJECT_NAME = "Charge";
     const int MAX_RATE_OVER_TIME = 128;         //チャージのパーティクルのrateOverTime最大値
     [SerializeField] float chargeTime = 3.0f;     //チャージする時間
     ParticleSystem charge;
+    ParticleSystem.EmissionModule chargeEmission;
+    ParticleSystem.MinMaxCurve chargeMinmaxcurve;
     float rateovertimeAddAmout;    //割り算は重いので先に計算させる用
     bool isCharged;     //チャージし終わったらtrue
 
     //Start用変数
-    const string START_OBJECT_NAME = "Start";
     GameObject start;
+    ParticleSystem[] startChilds;
 
     //Midway用変数
-    const string MIDWAY_OBJECT_NAME = "Midway";
-    const string LINE_OBJECT_NAME = "Line";
-    const string THUNDER_CONTROLLER_OBJECT_NAME = "thunderController";
     [SerializeField] float lineRadius = 0.01f;      //レーザーの半径
     [SerializeField] float lineRange = 4.0f;        //レーザーの射程
     [SerializeField] float maxShotTime = 5;         //最大何秒発射できるか
-    GameObject line;
-    GameObject thunderController;
+    [SerializeField] float hitPerSecond = 5.0f;     //1秒間にヒットする回数
+    ParticleSystem line;
+    ParticleSystem thunder;
     float initThunderScaleZ;    //初期のthunderの長さ(敵にレーザーが当たった際に使う)
     float initThunderPosZ;      //初期のthunderのz座標
 
@@ -41,6 +35,7 @@ public class Laser : AtackBase
     const string END_OBJECT_NAME = "End";
     const float END_POS_DIFF = -0.2f;
     GameObject end;
+    ParticleSystem[] endChilds;
 
 
     //攻撃中のフラグ
@@ -61,33 +56,48 @@ public class Laser : AtackBase
 
     protected override void Start()
     {
-        //リキャスト、1秒間にヒットする回数、弾数、威力
-        InitValue(8.0f, 5.0f, 0, 5);     //レーザーは弾数ではなくゲージ量で管理するので弾数の引数は0
+        Recast = 8.0f;
+        ShotInterval = 1.0f / hitPerSecond;
+        ShotCountTime = ShotInterval;
+        BulletPower = 5.0f;
 
         //Charge用処理//
         charge = transform.Find("Charge").GetComponent<ParticleSystem>();   //チャージのオブジェクトの取得
+        chargeEmission = charge.emission;
+        chargeMinmaxcurve = chargeEmission.rateOverTime;
         rateovertimeAddAmout = MAX_RATE_OVER_TIME / chargeTime;  //1秒間で増加するRateOverTime量
 
 
         //Midway用処理//
-        GameObject midway = transform.Find(MIDWAY_OBJECT_NAME).gameObject;
+        GameObject midway = transform.Find("Midway").gameObject;
 
         //Lineオブジェクト
-        line = midway.transform.Find(LINE_OBJECT_NAME).gameObject;
+        line = midway.transform.Find("Line").GetComponent<ParticleSystem>();
 
         //thunderオブジェクト
-        thunderController = midway.transform.Find(THUNDER_CONTROLLER_OBJECT_NAME).gameObject;
-        initThunderScaleZ = thunderController.transform.GetChild(0).localScale.z;   //初期の長さを保存
-        initThunderPosZ = thunderController.transform.GetChild(0).localPosition.z;  //初期のz座標を保存
+        thunder = midway.transform.Find("thunderController/thunder").GetComponent<ParticleSystem>();
+        initThunderScaleZ = thunder.transform.localScale.z;   //初期の長さを保存
+        initThunderPosZ = thunder.transform.localPosition.z;  //初期のz座標を保存
 
 
         //Start用処理//
-        start = transform.Find(START_OBJECT_NAME).gameObject;
+        start = transform.Find("Start").gameObject;
+        startChilds = new ParticleSystem[start.transform.childCount];
+        for (int i = 0; i < start.transform.childCount; i++)
+        {
+            startChilds[i] = start.transform.GetChild(i).GetComponent<ParticleSystem>();
+        }
         start.transform.localRotation = midway.transform.localRotation;  //Midwayと同じ向き
 
 
         //End用処理//
         end = transform.Find(END_OBJECT_NAME).gameObject;
+        endChilds = new ParticleSystem[end.transform.childCount];
+        for (int i = 0; i < end.transform.childCount; i++)
+        {
+            endChilds[i] = end.transform.GetChild(i).GetComponent<ParticleSystem>();
+        }
+        end.transform.localRotation = midway.transform.localRotation;
 
         //初期座標の保存
         end.transform.localRotation = midway.transform.localRotation;   //Midwayと同じ向き
@@ -105,18 +115,6 @@ public class Laser : AtackBase
 
     protected override void Update()
     {
-        ////デバッグ用
-        //if (Input.GetKeyDown(KeyCode.Q))
-        //{
-        //    lineParticle.Play();
-        //    isCharged = true;
-        //}
-        //if (Input.GetKeyUp(KeyCode.Q))
-        //{
-        //    lineParticle.Stop();
-        //    isCharged = false;
-        //}
-
         //発射間隔の管理
         ShotCountTime += Time.deltaTime;
         if (ShotCountTime > ShotInterval)
@@ -188,31 +186,29 @@ public class Laser : AtackBase
             }
 
             //徐々にチャージのエフェクトを増す
-            ParticleSystem.EmissionModule emission = charge.emission;
-            ParticleSystem.MinMaxCurve minMaxCurve = emission.rateOverTime;
-            minMaxCurve.constant += rateovertimeAddAmout * Time.deltaTime;
-            emission.rateOverTime = minMaxCurve;
+            chargeMinmaxcurve.constant += rateovertimeAddAmout * Time.deltaTime;
+            chargeEmission.rateOverTime = chargeMinmaxcurve;
 
             //MAX_RATE_OVER_TIME経ったら発射
-            if (emission.rateOverTime.constant > MAX_RATE_OVER_TIME)
+            if (chargeEmission.rateOverTime.constant > MAX_RATE_OVER_TIME)
             {
                 //チャージを止めてレーザーを発射
                 charge.Stop();
 
                 //Startの再生
-                foreach (Transform child in start.transform)
+                foreach (ParticleSystem p in startChilds)
                 {
-                    child.GetComponent<ParticleSystem>().Play();
+                    p.Play();
                 }
 
                 //Midwayの再生
-                line.GetComponent<ParticleSystem>().Play();
-                thunderController.transform.GetChild(0).GetComponent<ParticleSystem>().Play();
+                line.Play();
+                thunder.Play();
 
                 //Endの再生
-                foreach (Transform child in end.transform)
+                foreach (ParticleSystem p in endChilds)
                 {
-                    child.GetComponent<ParticleSystem>().Play();
+                    p.Play();
                 }
 
                 isCharged = true;
@@ -270,11 +266,11 @@ public class Laser : AtackBase
                 SearchNearestObject(out RaycastHit hit, hits);
                 GameObject o = hit.transform.gameObject;
 
-                if (o.tag == Player.PLAYER_TAG)
+                if (o.CompareTag(Player.PLAYER_TAG))
                 {
                     o.GetComponent<Player>().Damage(BulletPower);
                 }
-                if (o.tag == CPUController.CPU_TAG)
+                else if (o.CompareTag(CPUController.CPU_TAG))
                 {
 
                     o.GetComponent<CPUController>().Damage(BulletPower);
@@ -284,7 +280,7 @@ public class Laser : AtackBase
 
                 //ヒットした場所にEndオブジェクトを移動させる
                 end.transform.position = hit.point;
-                
+
 
                 ShotCountTime = 0;  //発射間隔のカウントをリセット
             }
@@ -322,11 +318,11 @@ public class Laser : AtackBase
     //リストから必要な要素だけ抜き取る
     List<RaycastHit> FilterTargetRaycast(List<RaycastHit> hits)
     {
-        //所持者と弾丸とアイテムは除外する
-        return hits.Where(h => h.transform.gameObject.name != OwnerName)
-                .Where(h => h.transform.gameObject.tag != Item.ITEM_TAG) 
-                .Where(h => h.transform.gameObject.tag != Bullet.BULLET_TAG)
-                .ToList();  //リスト化 
+        //不要な要素を除外する
+        return hits.Where(h => !ReferenceEquals(h.transform.gameObject, notHitObject))  //当たり判定を行わないオブジェクトを除外
+                   .Where(h => !h.transform.CompareTag(Item.ITEM_TAG))      //アイテム除外
+                   .Where(h => !h.transform.CompareTag(Bullet.BULLET_TAG))  //弾丸除外
+                   .ToList();  //リスト化 
     }
 
     //リスト内で最も距離が近いRaycastHitを返す
@@ -353,10 +349,10 @@ public class Laser : AtackBase
         line.transform.localScale = new Vector3(length, length, lineScale.z);
 
         //Thunderオブジェクト
-        Vector3 thunderScale = thunderController.transform.GetChild(0).localScale;
-        thunderController.transform.GetChild(0).localScale = new Vector3(thunderScale.x, thunderScale.y, initThunderScaleZ * length);
-        Vector3 thunderPos = thunderController.transform.GetChild(0).localPosition;
-        thunderController.transform.GetChild(0).localPosition = new Vector3(thunderPos.x, thunderPos.y, initThunderPosZ * length);
+        Vector3 thunderScale = thunder.transform.localScale;
+        thunder.transform.localScale = new Vector3(thunderScale.x, thunderScale.y, initThunderScaleZ * length);
+        Vector3 thunderPos = thunder.transform.localPosition;
+        thunder.transform.localPosition = new Vector3(thunderPos.x, thunderPos.y, initThunderPosZ * length);
     }
 
     //チャージとレーザーを止める
@@ -365,26 +361,24 @@ public class Laser : AtackBase
         charge.Stop();  //Chargeを止める
 
         //Chargeのパーティクルの発生量の初期化
-        ParticleSystem.EmissionModule emission = charge.emission;
-        ParticleSystem.MinMaxCurve minMaxCurve = emission.rateOverTime;
-        minMaxCurve.constant = 0;
-        emission.rateOverTime = minMaxCurve;
+        chargeMinmaxcurve.constant = 0;
+        chargeEmission.rateOverTime = chargeMinmaxcurve;
 
 
         //Startを止める
-        foreach (Transform child in start.transform)
+        foreach (ParticleSystem p in startChilds)
         {
-            child.GetComponent<ParticleSystem>().Stop();
+            p.Stop();
         }
 
         //Midwayを止める
-        line.GetComponent<ParticleSystem>().Stop();
-        thunderController.transform.GetChild(0).GetComponent<ParticleSystem>().Stop();
+        line.Stop();
+        thunder.Stop();
 
         //Endを止める
-        foreach (Transform child in end.transform)
+        foreach (ParticleSystem p in endChilds)
         {
-            child.GetComponent<ParticleSystem>().Stop();
+            p.Stop();
         }
 
         //フラグの初期化

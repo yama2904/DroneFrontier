@@ -4,35 +4,27 @@ using UnityEngine;
 
 public class MissieShot : AtackBase
 {
-    [SerializeField] GameObject missile = null;
+    [SerializeField] MissileBullet missile = null;
 
     //弾丸のパラメータ
     [SerializeField] float speedPerSecond = 13.0f;  //1秒間に進む量
     [SerializeField] float destroyTime = 2.0f;      //発射してから消えるまでの時間(射程)
     [SerializeField] float trackingPower = 2.3f;    //追従力
+    [SerializeField] float shotPerSecond = 1.0f;    //1秒間に発射する弾数
 
-    ////撃った弾丸を全て格納する
-    //List<MissileBullet> missiles;
 
     protected override void Start()
     {
-        //リキャスト、1秒間に発射する数、弾数、威力
-        InitValue(3.0f, 1.0f, 3, 20);
-
-        //missiles = new List<MissileBullet>();
+        Recast = 3.0f;
+        ShotInterval = 1.0f / shotPerSecond;
+        ShotCountTime = ShotInterval;
+        BulletsNum = 3;
+        BulletsRemain = BulletsNum;
+        BulletPower = 20.0f;
     }
 
     protected override void Update()
     {
-        ////消滅した弾丸がないか走査
-        //for (int i = 0; i < missiles.Count; i++)
-        //{
-        //    if (missiles[i] == null)
-        //    {
-        //        missiles.RemoveAt(i);
-        //    }
-        //}
-
         //リキャストと発射間隔のカウント
         base.Update();
 
@@ -66,11 +58,10 @@ public class MissieShot : AtackBase
             return;
         }
 
-        GameObject o = Instantiate(missile, transform.position, transform.rotation) as GameObject;    //ミサイルの複製
-        MissileBullet m = o.GetComponent<MissileBullet>();  //名前省略
+        MissileBullet m = Instantiate(missile, transform.position, transform.rotation);    //ミサイルの複製
 
         //弾丸のパラメータ設定
-        m.OwnerName = OwnerName;    //武器の所持者を登録
+        m.notHitObject = notHitObject;    //武器の所持者を登録
         m.Target = target;          //ロックオン中の敵
         m.SpeedPerSecond = speedPerSecond;  //スピード
         m.DestroyTime = destroyTime;        //射程
@@ -84,7 +75,6 @@ public class MissieShot : AtackBase
         }
         BulletsRemain--;    //残り弾数を減らす
         ShotCountTime = 0;  //発射間隔のカウントをリセット
-        //missiles.Add(o.GetComponent<MissileBullet>());
 
 
         //デバッグ用

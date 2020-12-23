@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class MissileBullet : Bullet
 {
-    [SerializeField] GameObject explosion = null;
+    [SerializeField] Explosion explosion = null;
     float totalTime;    //発射させてから経過した時間
 
     protected override void Start()
@@ -38,18 +38,18 @@ public class MissileBullet : Bullet
     protected override void OnTriggerEnter(Collider other)
     {
         //当たり判定を行わないオブジェクトだったら処理をしない
-        if (other.name == OwnerName)
+        if (ReferenceEquals(other.gameObject, notHitObject))
         {
             return;
         }
 
-        if (other.gameObject.tag == Player.PLAYER_TAG)
+        if (other.CompareTag(Player.PLAYER_TAG))
         {
             other.GetComponent<Player>().Damage(Power);
             createExplosion();
         }
 
-        if (other.gameObject.tag == CPUController.CPU_TAG)
+        if (other.CompareTag(CPUController.CPU_TAG))
         {
             other.GetComponent<CPUController>().Damage(Power);
             createExplosion();
@@ -58,8 +58,8 @@ public class MissileBullet : Bullet
 
     void createExplosion()
     {
-        GameObject o = Instantiate(explosion, transform.position, Quaternion.Euler(0, 0, 0)) as GameObject;
-        o.GetComponent<Explosion>().OwnerName = OwnerName;
+        Explosion e = Instantiate(explosion, transform.position, Quaternion.Euler(0, 0, 0));
+        e.notHitObject = notHitObject;
         Destroy(gameObject);
     }
 }

@@ -6,18 +6,17 @@ public class Bullet : MonoBehaviour
 {
     public const string BULLET_TAG = "Bullet";
 
-    public string OwnerName { protected get; set; } = "";      //当たり判定を行わないオブジェクトの名前
-    public float SpeedPerSecond { protected get; set; } = 0;   //1秒間に進む量
-    public float DestroyTime { protected get; set; } = 0;      //発射してから消えるまでの時間(射程)
+    public GameObject notHitObject { protected get; set; } = null;   //当たり判定を行わないオブジェクト
+    public GameObject Target { private get; set; } = null;   //誘導する対象
     public float TrackingPower { protected get; set; } = 0;    //追従力
     public float Power { protected get; set; } = 0;            //威力
+    public float SpeedPerSecond { protected get; set; } = 0;   //1秒間に進む量
+    public float DestroyTime { protected get; set; } = 0;      //発射してから消えるまでの時間(射程)
 
-    public GameObject Target { private get; set; } = null;   //誘導する対象
-    protected float destroyTime;    //発射されてから消滅する時間
 
     protected virtual void Start()
     {
-        Destroy(gameObject, destroyTime);
+        Destroy(gameObject, DestroyTime);
     }
 
     protected virtual void Update()
@@ -58,18 +57,18 @@ public class Bullet : MonoBehaviour
     protected virtual void OnTriggerEnter(Collider other)
     {
         //当たり判定を行わないオブジェクトだったら処理をしない
-        if (other.name == OwnerName)
+        if (ReferenceEquals(other.gameObject, notHitObject))
         {
             return;
         }
 
-        if (other.gameObject.tag == Player.PLAYER_TAG)
+        if (other.CompareTag(Player.PLAYER_TAG))
         {
             other.GetComponent<Player>().Damage(Power);
             Destroy(gameObject);
         }
 
-        if (other.gameObject.tag == CPUController.CPU_TAG)
+        if (other.CompareTag(CPUController.CPU_TAG))
         {
             other.GetComponent<CPUController>().Damage(Power);
             Destroy(gameObject);

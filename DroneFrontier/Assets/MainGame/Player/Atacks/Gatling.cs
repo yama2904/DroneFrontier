@@ -4,35 +4,27 @@ using UnityEngine;
 
 public class Gatling : AtackBase
 {
-    [SerializeField] GameObject bullet = null; //弾のオブジェクト
+    [SerializeField] Bullet bullet = null; //弾のオブジェクト
 
     //弾丸のパラメータ
     [SerializeField] float speedPerSecond = 10.0f;  //1秒間に進む量
     [SerializeField] float destroyTime = 1.0f;      //発射してから消えるまでの時間(射程)
     [SerializeField] float trackingPower = 1.2f;    //追従力
+    [SerializeField] float shotPerSecond = 5.0f;    //1秒間に発射する弾数
 
-    ////撃った弾丸を全て格納する
-    //List<Bullet> bullets;
 
     protected override void Start()
     {
-        //リキャスト、1秒間に発射する数、弾数、威力
-        InitValue(0, 5.0f, 10, 3);
-
-        //bullets = new List<Bullet>();
+        Recast = 0;
+        ShotInterval = 1.0f / shotPerSecond;
+        ShotCountTime = ShotInterval;
+        BulletsNum = 10;
+        BulletsRemain = BulletsNum;
+        BulletPower = 3.0f;
     }
 
     protected override void Update()
     {
-        ////消滅した弾丸がないか走査
-        //for (int i = 0; i < bullets.Count; i++)
-        //{
-        //    if (bullets[i] == null)
-        //    {
-        //        bullets.RemoveAt(i);
-        //    }
-        //}
-
         //リキャストと発射間隔のカウント
         base.Update();
 
@@ -64,11 +56,10 @@ public class Gatling : AtackBase
             return;
         }
 
-        GameObject o = Instantiate(bullet, transform.position, transform.rotation) as GameObject;    //弾丸の複製
-        Bullet b = o.GetComponent<Bullet>();    //名前省略
+        Bullet b = Instantiate(bullet, transform.position, transform.rotation);    //弾丸の複製
 
         //弾丸のパラメータ設定
-        b.OwnerName = OwnerName;    //武器の所持者を登録
+        b.notHitObject = notHitObject;    //武器の所持者を登録
         b.Target = target;          //ロックオン中の敵
         b.SpeedPerSecond = speedPerSecond;  //スピード
         b.DestroyTime = destroyTime;        //射程
@@ -84,7 +75,5 @@ public class Gatling : AtackBase
         }
         BulletsRemain--;    //残り弾数を減らす
         ShotCountTime = 0;  //発射間隔のカウントをリセット
-
-        //bullets.Add(b);
     }
 }

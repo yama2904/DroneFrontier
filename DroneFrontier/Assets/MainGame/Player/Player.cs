@@ -4,7 +4,6 @@ using UnityEngine;
 
 /*
  * 公開変数
- * static string ObjectName  ドローンのオブジェクト名(Findとか用)
  * float HP                  ドローンのHP
  * float MoveSpeed           移動速度
  * float MaxSpeed            最高速度
@@ -15,9 +14,10 @@ using UnityEngine;
  */
 public class Player : MonoBehaviour
 {
-    public const string PLAYER_TAG = "Player";       //タグ名
+    public const string PLAYER_TAG = "Player";   //タグ名    
+
     public float HP { get; private set; } = 10;      //HP
-    public float MoveSpeed = 50.0f;    //移動速度
+    public float MoveSpeed = 50.0f;                  //移動速度
     public float MaxSpeed { get; set; } = 30.0f;     //最高速度
 
     Rigidbody _rigidbody = null;
@@ -34,7 +34,7 @@ public class Player : MonoBehaviour
     AtackBase[] weapons;  //ウェポン群
 
     //バリア
-    const string BARRIER_OBJECT_NAME = "Barrier";
+    [SerializeField] Barrier barrier = null;
     public Barrier Barrier { get; private set; } = null;
 
     //アイテム
@@ -60,8 +60,6 @@ public class Player : MonoBehaviour
     //}
     //bool[] isAbnormals;   //状態異常が付与されているか
 
-    //オブジェクトの名前
-    public static string ObjectName { get; private set; } = "";
 
     //デバッグ用
     int atackType = (int)AtackManager.Weapon.SHOTGUN;
@@ -70,10 +68,9 @@ public class Player : MonoBehaviour
 
     void Start()
     {
-        ObjectName = name;
         _rigidbody = GetComponent<Rigidbody>();
         weapons = new AtackBase[(int)Weapon.NONE];
-        Barrier = transform.Find(BARRIER_OBJECT_NAME).GetComponent<Barrier>();
+        Barrier = barrier;
 
 
         //メインウェポンの処理
@@ -86,7 +83,7 @@ public class Player : MonoBehaviour
 
         //コンポーネントの取得
         AtackBase abM = main.GetComponent<AtackBase>(); //名前省略
-        abM.OwnerName = name;    //所持者の名前を設定
+        abM.notHitObject = gameObject;    //自分をヒットさせない
         weapons[(int)Weapon.MAIN] = abM;
 
 
@@ -100,7 +97,7 @@ public class Player : MonoBehaviour
 
         //コンポーネントの取得
         AtackBase abS = sub.GetComponent<AtackBase>();
-        abS.OwnerName = name;    //所持者の名前を設定
+        abS.notHitObject = gameObject;    //自分をヒットさせない
         weapons[(int)Weapon.SUB] = abS;
 
         items = new Item[(int)ItemNum.NONE];
@@ -224,7 +221,7 @@ public class Player : MonoBehaviour
             o.transform.localRotation = Quaternion.Euler(0, 0, 0);
 
             AtackBase ab = o.GetComponent<AtackBase>();
-            ab.OwnerName = name;
+            ab.notHitObject = gameObject;
             weapons[(int)Weapon.SUB] = ab;
         }
 
@@ -250,41 +247,17 @@ public class Player : MonoBehaviour
 
     void Move(float speed, float _maxSpeed)
     {
-        float velocityDistance = 0;   //今移動している向きに移動した場合の距離
-        float maxDistance = 0;        //最大速度で移動時の距離
         if (Input.GetKey(KeyCode.W))
         {
-            ////あとで
-            //Vector3 move;
-            //if (!isQ)
-            //{
-            //    move = transform.forward * moveSpeed;
-            //}
-            //else
-            //{
-            //    move = transform.forward * moveSpeed + (transform.forward * moveSpeed - _rigidbody.velocity);
-            //}
-
-            //velocityDistance = Vector3.Distance(transform.position, transform.position + move + _rigidbody.velocity);
-            //maxDistance = Vector3.Distance(transform.position, transform.position + (transform.forward * _maxSpeed));
-            //if (velocityDistance < maxDistance)
-            //{
-            //    _rigidbody.AddForce(move, ForceMode.Force);
-            //}
-
-            //Debug.Log("velocity: " + velocityDistance);
-            //Debug.Log("max: " + maxDistance);
-            //Debug.Log("move: " + move.normalized);
-
-
-            velocityDistance = Vector3.Distance(transform.position, transform.position + _rigidbody.velocity);
-            maxDistance = Vector3.Distance(transform.position, transform.position + (transform.forward * _maxSpeed));
             if (!isQ)
             {
                 //最大速度に達していなかったら移動処理
-                if (velocityDistance < maxDistance)
+                if (_rigidbody.velocity.sqrMagnitude < Mathf.Pow(_maxSpeed, 2))
                 {
                     _rigidbody.AddForce(transform.forward * MoveSpeed, ForceMode.Force);
+
+                    Debug.Log(_rigidbody.velocity.sqrMagnitude);
+                    Debug.Log(Mathf.Pow(_maxSpeed, 2));
                 }
             }
             else
@@ -297,13 +270,10 @@ public class Player : MonoBehaviour
         {
             Quaternion leftAngle = Quaternion.Euler(0, -90, 0);
             Vector3 left = leftAngle.normalized * transform.forward;
-            velocityDistance = Vector3.Distance(transform.position, transform.position + _rigidbody.velocity);
-            maxDistance = Vector3.Distance(transform.position, transform.position + (left * _maxSpeed));
-
             if (!isQ)
             {
                 //最大速度に達していなかったら移動処理
-                if (velocityDistance < maxDistance)
+                if (_rigidbody.velocity.sqrMagnitude < Mathf.Pow(_maxSpeed, 2))
                 {
                     _rigidbody.AddForce(left * MoveSpeed, ForceMode.Force);
                 }
@@ -317,13 +287,10 @@ public class Player : MonoBehaviour
         {
             Quaternion backwardAngle = Quaternion.Euler(0, 180, 0);
             Vector3 backward = backwardAngle.normalized * transform.forward;
-            velocityDistance = Vector3.Distance(transform.position, transform.position + _rigidbody.velocity);
-            maxDistance = Vector3.Distance(transform.position, transform.position + (backward * _maxSpeed));
-
             if (!isQ)
             {
                 //最大速度に達していなかったら移動処理
-                if (velocityDistance < maxDistance)
+                if (_rigidbody.velocity.sqrMagnitude < Mathf.Pow(_maxSpeed, 2))
                 {
                     _rigidbody.AddForce(backward * MoveSpeed, ForceMode.Force);
                 }
@@ -337,20 +304,16 @@ public class Player : MonoBehaviour
         {
             Quaternion rightAngle = Quaternion.Euler(0, 90, 0);
             Vector3 right = rightAngle.normalized * transform.forward;
-            velocityDistance = Vector3.Distance(transform.position, transform.position + _rigidbody.velocity);
-            maxDistance = Vector3.Distance(transform.position, transform.position + (right * _maxSpeed));
-
             if (!isQ)
             {
                 //最大速度に達していなかったら移動処理
-                if (velocityDistance < maxDistance)
+                if (_rigidbody.velocity.sqrMagnitude < Mathf.Pow(_maxSpeed, 2))
                 {
                     _rigidbody.AddForce(right * MoveSpeed, ForceMode.Force);
                 }
             }
             else
             {
-                //Vector3 diff = right * moveSpeed - _rigidbody.velocity;
                 _rigidbody.AddForce(right * MoveSpeed + (right * MoveSpeed - _rigidbody.velocity), ForceMode.Force);
             }
         }
@@ -365,13 +328,11 @@ public class Player : MonoBehaviour
 
         Quaternion upAngle = Quaternion.Euler(-90, 0, 0);
         Vector3 upward = upAngle.normalized * Vector3.forward;
-        velocityDistance = Vector3.Distance(transform.position, transform.position + _rigidbody.velocity);
-        maxDistance = Vector3.Distance(transform.position, transform.position + (upward * ms));
 
         if (!isQ)
         {
             //最大速度に達していなかったら移動処理
-            if (velocityDistance < maxDistance)
+            if (_rigidbody.velocity.sqrMagnitude < Mathf.Pow(_maxSpeed, 2))
             {
                 _rigidbody.AddForce(upward * s * Input.mouseScrollDelta.y, ForceMode.Force);
             }
@@ -470,25 +431,19 @@ public class Player : MonoBehaviour
         //Eキーでアイテム取得
         if (Input.GetKey(KeyCode.E))
         {
-            if (other.tag == Item.ITEM_TAG)
+            if (other.CompareTag(Item.ITEM_TAG))
             {
                 //アイテム所持枠に空きがあるか調べる
-                int num = 0;
-                for (; num < (int)ItemNum.NONE; num++)
+                for (int num = 0; num < (int)ItemNum.NONE; num++)
                 {
+                    //空きがある
                     if (items[num] == null)
                     {
+                        items[num] = other.GetComponent<Item>();
+                        other.gameObject.SetActive(false);  //アイテムを取得したらオブジェクトを非表示
                         break;
                     }
                 }
-                //空きがなかったら取得しない
-                if (num >= (int)ItemNum.NONE)
-                {
-                    return;
-                }
-
-                items[num] = other.GetComponent<Item>();
-                other.gameObject.SetActive(false);  //アイテムを取得したらオブジェクトを非表示
 
 
                 //デバッグ用
@@ -496,7 +451,7 @@ public class Player : MonoBehaviour
             }
         }
     }
-    
+
 
     //プレイヤーにダメージを与える
     public void Damage(float power)
@@ -516,6 +471,9 @@ public class Player : MonoBehaviour
             {
                 HP = 0;
             }
+
+
+            //デバッグ用
             Debug.Log("playerに" + p + "のダメージ\n残りHP: " + HP);
         }
     }

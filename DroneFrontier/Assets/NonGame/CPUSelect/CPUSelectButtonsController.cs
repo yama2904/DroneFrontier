@@ -8,7 +8,7 @@ public class CPUSelectButtonsController : MonoBehaviour
     const short MAX_CPU_NUM = 3;
     const short MIN_CPU_NUM = 1;
 
-    [SerializeField] GameObject CPUNumText = null;    
+    [SerializeField] Text CPUNumText = null;    
     short cpuNum;
 
     //CPUリスト用
@@ -44,7 +44,7 @@ public class CPUSelectButtonsController : MonoBehaviour
     void Start()
     {
         cpuNum = MIN_CPU_NUM;
-        CPUNumText.GetComponent<Text>().text = cpuNum.ToString();
+        CPUNumText.text = cpuNum.ToString();
 
         //Color型に変換
         ColorUtility.TryParseHtmlString(SELECT_BUTTON_COLOR, out selectButtonColor);
@@ -98,7 +98,7 @@ public class CPUSelectButtonsController : MonoBehaviour
         if(cpuNum < MAX_CPU_NUM)
         {
             cpuNum++;
-            CPUNumText.GetComponent<Text>().text = cpuNum.ToString();
+            CPUNumText.text = cpuNum.ToString();
 
             CPULists[cpuNum - 1].SetActive(true);
         }
@@ -110,7 +110,7 @@ public class CPUSelectButtonsController : MonoBehaviour
         if(cpuNum > MIN_CPU_NUM)
         {
             cpuNum--;
-            CPUNumText.GetComponent<Text>().text = cpuNum.ToString();
+            CPUNumText.text = cpuNum.ToString();
 
             CPULists[cpuNum].SetActive(false);
         }

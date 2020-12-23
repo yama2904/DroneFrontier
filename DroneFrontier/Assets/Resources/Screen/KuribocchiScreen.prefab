@@ -1202,6 +1202,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   inputNameObject: {fileID: 1457879336352348770}
   screenMask: {fileID: 5685379462830170794}
+  inputField: {fileID: 3669581835888513616}
 --- !u!1 &8743304153311280040
 GameObject:
   m_ObjectHideFlags: 0

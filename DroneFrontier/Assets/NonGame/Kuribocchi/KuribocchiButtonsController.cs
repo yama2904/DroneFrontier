@@ -7,7 +7,7 @@ public class KuribocchiButtonsController : MonoBehaviour
 {
     [SerializeField] GameObject inputNameObject = null;
     [SerializeField] GameObject screenMask = null;  //名前入力中に後ろのボタンを押せないようにするため
-    InputField inputField;
+    [SerializeField] InputField inputField = null;
 
     string playerName = "";
 
@@ -15,8 +15,6 @@ public class KuribocchiButtonsController : MonoBehaviour
     {
         inputNameObject.SetActive(false);
         screenMask.SetActive(false);
-
-        inputField = inputNameObject.transform.Find("InputField").GetComponent<InputField>();
         inputField.characterLimit = 10;
     }
 

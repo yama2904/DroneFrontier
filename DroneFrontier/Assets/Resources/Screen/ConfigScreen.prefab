@@ -81,7 +81,7 @@ GameObject:
   - component: {fileID: 2480745006162728675}
   - component: {fileID: 2480745006162728674}
   m_Layer: 5
-  m_Name: Text
+  m_Name: SliderNameText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -307,7 +307,7 @@ GameObject:
   - component: {fileID: 2480745006469506544}
   - component: {fileID: 2480745006469506547}
   m_Layer: 5
-  m_Name: Text
+  m_Name: SEValueText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -494,7 +494,7 @@ GameObject:
   - component: {fileID: 2480745006716460451}
   - component: {fileID: 2480745006716460448}
   m_Layer: 5
-  m_Name: Slider
+  m_Name: SESlider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -669,7 +669,7 @@ GameObject:
   - component: {fileID: 2480745006744170245}
   - component: {fileID: 2480745006744170244}
   m_Layer: 5
-  m_Name: Text
+  m_Name: SliderNameText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1097,7 +1097,7 @@ GameObject:
   - component: {fileID: 2480745007008914064}
   - component: {fileID: 2480745007008914065}
   m_Layer: 5
-  m_Name: Slider
+  m_Name: CameraSlider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1449,10 +1449,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99c5cd6565a61024f948167a3782d1d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BGMConfigs: {fileID: 2480745006167412056}
-  SEConfigs: {fileID: 2480745006842265469}
-  BrightnessConfigs: {fileID: 2480745007828882704}
-  CameraConfigs: {fileID: 2480745007558146395}
+  BGMSlider: {fileID: 2480745007968092340}
+  SESlider: {fileID: 2480745006716460448}
+  BrightnessSlider: {fileID: 2480745007966714321}
+  CameraSlider: {fileID: 2480745007008914065}
+  BGMValueText: {fileID: 2480745007952465368}
+  SEValueText: {fileID: 2480745006469506547}
+  BrightnessValueText: {fileID: 2480745007944471980}
+  CameraValueText: {fileID: 2480745007485979720}
 --- !u!1 &2480745007232444495
 GameObject:
   m_ObjectHideFlags: 0
@@ -1843,7 +1847,7 @@ GameObject:
   - component: {fileID: 2480745007485979721}
   - component: {fileID: 2480745007485979720}
   m_Layer: 5
-  m_Name: Text
+  m_Name: CameraValueText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2286,7 +2290,7 @@ GameObject:
   - component: {fileID: 2480745007672285667}
   - component: {fileID: 2480745007672285666}
   m_Layer: 5
-  m_Name: Text
+  m_Name: SliderNameText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2568,7 +2572,7 @@ GameObject:
   - component: {fileID: 2480745007770402116}
   - component: {fileID: 2480745007770402119}
   m_Layer: 5
-  m_Name: Text
+  m_Name: SliderNameText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2720,7 +2724,7 @@ GameObject:
   - component: {fileID: 2480745007944471981}
   - component: {fileID: 2480745007944471980}
   m_Layer: 5
-  m_Name: Text
+  m_Name: BrightnessValueText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2798,7 +2802,7 @@ GameObject:
   - component: {fileID: 2480745007952465369}
   - component: {fileID: 2480745007952465368}
   m_Layer: 5
-  m_Name: Text
+  m_Name: BGMValueText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2953,7 +2957,7 @@ GameObject:
   - component: {fileID: 2480745007966714320}
   - component: {fileID: 2480745007966714321}
   m_Layer: 5
-  m_Name: Slider
+  m_Name: BrightnessSlider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3053,7 +3057,7 @@ GameObject:
   - component: {fileID: 2480745007968092343}
   - component: {fileID: 2480745007968092340}
   m_Layer: 5
-  m_Name: Slider
+  m_Name: BGMSlider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

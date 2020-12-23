@@ -27,7 +27,7 @@ public class CPUController : MonoBehaviour
 
         //コンポーネントの取得
         AtackBase ab = o.GetComponent<AtackBase>();
-        ab.OwnerName = name;
+        ab.notHitObject = gameObject;   //自分をヒットさせない
         weapon = ab;
     }
 

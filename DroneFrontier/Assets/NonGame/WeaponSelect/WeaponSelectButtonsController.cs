@@ -10,15 +10,14 @@ public class WeaponSelectButtonsController : MonoBehaviour
     const string LASER_TEXT = "極めて高威力だが、発動時にチャージが必要。\nまた、リキャストが最も長い。";
 
     //ボタン処理用
-    [SerializeField] GameObject onButton = null;
+    [SerializeField] Button itemOnButton = null;
     const string SELECT_BUTTON_COLOR = "#4C76FF";     //ボタンを押したときの色の16進数
     const string NOT_SELECT_BUTTON_COLOR = "#FFFFFF";    //他のボタンが押されている時の色の16進数
     Color selectButtonColor;  //16進数をColorに変換したやつ
     Color notSelectButtonColor;
 
     //武器の説明
-    [SerializeField] GameObject MessageWindowText = null;
-    Text messageText;   //説明文
+    [SerializeField] Text messageWindowText = null;
 
     //選択した武器
     AtackManager.Weapon weapon;
@@ -28,29 +27,28 @@ public class WeaponSelectButtonsController : MonoBehaviour
         //Color型に変換
         ColorUtility.TryParseHtmlString(SELECT_BUTTON_COLOR, out selectButtonColor);
         ColorUtility.TryParseHtmlString(NOT_SELECT_BUTTON_COLOR, out notSelectButtonColor);
-        onButton.GetComponent<Button>().image.color = selectButtonColor; //デフォルトでアイテムONボタンが押されているようにする
+        itemOnButton.image.color = selectButtonColor; //デフォルトでアイテムONボタンが押されているようにする
 
-        messageText = MessageWindowText.GetComponent<Text>();
-        messageText.text = "武器を選択してください。";
+        messageWindowText.text = "武器を選択してください。";
         
         weapon = AtackManager.Weapon.NONE;
     }
 
     public void SelectShotgun()
     {
-        messageText.text = SHOTGUN_TEXT;
+        messageWindowText.text = SHOTGUN_TEXT;
         weapon = AtackManager.Weapon.SHOTGUN;
     }
 
     public void SelectMissile()
     {
-        messageText.text = MISSILE_TEXT;
+        messageWindowText.text = MISSILE_TEXT;
         weapon = AtackManager.Weapon.MISSILE;
     }
 
     public void SelectLaser()
     {
-        messageText.text = LASER_TEXT;
+        messageWindowText.text = LASER_TEXT;
         weapon = AtackManager.Weapon.LASER;
     }
 
@@ -73,7 +71,7 @@ public class WeaponSelectButtonsController : MonoBehaviour
 
         //ボタンを押したらインスペクターで設定している色と被るので
         //どちらかボタンが押されたらデフォルトの色を解除
-        onButton.GetComponent<Button>().image.color = notSelectButtonColor; 
+        itemOnButton.image.color = notSelectButtonColor; 
     }
 
     public void SelectItemOff()
@@ -82,7 +80,7 @@ public class WeaponSelectButtonsController : MonoBehaviour
 
         //ボタンを押したらインスペクターで設定している色と被るので
         //どちらかボタンが押されたらデフォルトの色を解除
-        onButton.GetComponent<Button>().image.color = notSelectButtonColor;
+        itemOnButton.image.color = notSelectButtonColor;
     }
 
 
