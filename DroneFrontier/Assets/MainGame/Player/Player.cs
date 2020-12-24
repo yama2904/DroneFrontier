@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 /*
  * 公開変数
@@ -32,7 +33,8 @@ public class Player : MonoBehaviour
 
         NONE
     }
-    AtackBase[] weapons;  //ウェポン群
+    AtackBase[] weapons;      //ウェポン群
+    bool[] isUsingWeapons;    //使用中の武器
 
     //バリア
     [SerializeField] Barrier barrier = null;
@@ -69,11 +71,17 @@ public class Player : MonoBehaviour
 
     void Start()
     {
-        _rigidbody = GetComponent<Rigidbody>();
         cacheTransform = transform;
-        weapons = new AtackBase[(int)Weapon.NONE];
+        _rigidbody = GetComponent<Rigidbody>();
         Barrier = barrier;
 
+        //武器の初期化
+        weapons = new AtackBase[(int)Weapon.NONE];
+        isUsingWeapons = new bool[(int)Weapon.NONE];
+        for (int i = 0; i < (int)Weapon.NONE; i++)
+        {
+            isUsingWeapons[i] = false;
+        }
 
         //メインウェポンの処理
         AtackManager.CreateAtack(out GameObject main, AtackManager.Weapon.GATLING);    //Gatlingの生成
@@ -120,7 +128,34 @@ public class Player : MonoBehaviour
         }
 
         //移動処理
-        Move(MoveSpeed, MaxSpeed);
+        if (Input.GetKey(KeyCode.W))
+        {
+            Move(MoveSpeed, MaxSpeed, cacheTransform.forward);
+        }
+        if (Input.GetKey(KeyCode.A))
+        {
+            Quaternion leftAngle = Quaternion.Euler(0, -90, 0);
+            Vector3 left = leftAngle.normalized * cacheTransform.forward;
+            Move(MoveSpeed, MaxSpeed, left);
+        }
+        if (Input.GetKey(KeyCode.S))
+        {
+            Quaternion backwardAngle = Quaternion.Euler(0, 180, 0);
+            Vector3 backward = backwardAngle.normalized * cacheTransform.forward;
+            Move(MoveSpeed, MaxSpeed, backward);
+        }
+        if (Input.GetKey(KeyCode.D))
+        {
+            Quaternion rightAngle = Quaternion.Euler(0, 90, 0);
+            Vector3 right = rightAngle.normalized * cacheTransform.forward;
+            Move(MoveSpeed, MaxSpeed, right);
+        }
+        if (Input.mouseScrollDelta.y != 0)
+        {
+            Quaternion upAngle = Quaternion.Euler(-90, 0, 0);
+            Vector3 upward = upAngle.normalized * Vector3.forward;
+            Move(MoveSpeed * 4 * Input.mouseScrollDelta.y, MaxSpeed * 4, upward);
+        }
 
 
         //ロックオン
@@ -145,15 +180,70 @@ public class Player : MonoBehaviour
             Radar.ReleaseRadar();
         }
 
+
         //設定画面中はここより下の処理は行わない
         if (MainGameManager.IsConfig)
         {
             return;
         }
 
-        //攻撃処理
-        UseWeapon(Weapon.MAIN);     //メインウェポン攻撃
-        UseWeapon(Weapon.SUB);      //サブウェポン攻撃
+
+        //攻撃処理しか使わない簡易メソッド
+        Action<float> ModifySpeeds = (x) =>
+        {
+            MoveSpeed *= x;
+            PlayerCameraController.RotateSpeed *= x;
+            LockOn.TrackingSpeed *= x;
+        };
+
+        //メイン武器攻撃
+        if (Input.GetMouseButtonDown(0))
+        {
+            //サブ武器を使用していない場合は移動速度と回転速度とロックオンの追従速度を下げる
+            if (!isUsingWeapons[(int)Weapon.SUB])
+            {
+                ModifySpeeds(0.5f);
+                isUsingWeapons[(int)Weapon.MAIN] = true;
+            }
+        }
+        if (Input.GetMouseButton(0))
+        {
+            UseWeapon(Weapon.MAIN);     //メインウェポン攻撃
+        }
+        if (Input.GetMouseButtonUp(0))
+        {
+            //メインもサブも使用していないなら速度を戻す
+            if (!isUsingWeapons[(int)Weapon.SUB])
+            {
+                ModifySpeeds(2f);
+            }
+            isUsingWeapons[(int)Weapon.MAIN] = false;
+        }
+
+        //サブ武器攻撃
+        if (Input.GetMouseButtonDown(1))
+        {
+            //メイン武器を使用していない場合は移動速度と回転速度とロックオンの追従速度を下げる
+            if (!isUsingWeapons[(int)Weapon.MAIN])
+            {
+                ModifySpeeds(0.5f);
+                isUsingWeapons[(int)Weapon.SUB] = true;
+            }
+        }
+        if (Input.GetMouseButton(1))
+        {
+            UseWeapon(Weapon.SUB);      //サブウェポン攻撃
+        }
+        //メインもサブも使用していないなら速度を戻す
+        if (Input.GetMouseButtonUp(1))
+        {
+            if (!isUsingWeapons[(int)Weapon.MAIN])
+            {
+                ModifySpeeds(2f);
+            }
+            isUsingWeapons[(int)Weapon.SUB] = false;
+        }
+
 
         //ブースト使用
         if (Input.GetKeyUp(KeyCode.Q))
@@ -246,188 +336,35 @@ public class Player : MonoBehaviour
         }
     }
 
-
-    void Move(float speed, float _maxSpeed)
+    //移動速度、最大速度、移動する方向
+    void Move(float speed, float _maxSpeed, Vector3 direction)
     {
-        if (Input.GetKey(KeyCode.W))
-        {
-            if (!isQ)
-            {
-                //最大速度に達していなかったら移動処理
-                if (_rigidbody.velocity.sqrMagnitude < Mathf.Pow(_maxSpeed, 2))
-                {
-                    _rigidbody.AddForce(cacheTransform.forward * MoveSpeed, ForceMode.Force);
-
-                    Debug.Log(_rigidbody.velocity.sqrMagnitude);
-                    Debug.Log(Mathf.Pow(_maxSpeed, 2));
-                }
-            }
-            else
-            {
-                _rigidbody.AddForce(
-                    cacheTransform.forward * MoveSpeed + (cacheTransform.forward * MoveSpeed - _rigidbody.velocity), 
-                    ForceMode.Force);
-            }
-
-        }
-        if (Input.GetKey(KeyCode.A))
-        {
-            Quaternion leftAngle = Quaternion.Euler(0, -90, 0);
-            Vector3 left = leftAngle.normalized * cacheTransform.forward;
-            if (!isQ)
-            {
-                //最大速度に達していなかったら移動処理
-                if (_rigidbody.velocity.sqrMagnitude < Mathf.Pow(_maxSpeed, 2))
-                {
-                    _rigidbody.AddForce(left * MoveSpeed, ForceMode.Force);
-                }
-            }
-            else
-            {
-                _rigidbody.AddForce(left * MoveSpeed + (left * MoveSpeed - _rigidbody.velocity), ForceMode.Force);
-            }
-        }
-        if (Input.GetKey(KeyCode.S))
-        {
-            Quaternion backwardAngle = Quaternion.Euler(0, 180, 0);
-            Vector3 backward = backwardAngle.normalized * cacheTransform.forward;
-            if (!isQ)
-            {
-                //最大速度に達していなかったら移動処理
-                if (_rigidbody.velocity.sqrMagnitude < Mathf.Pow(_maxSpeed, 2))
-                {
-                    _rigidbody.AddForce(backward * MoveSpeed, ForceMode.Force);
-                }
-            }
-            else
-            {
-                _rigidbody.AddForce(backward * MoveSpeed + (backward * MoveSpeed - _rigidbody.velocity), ForceMode.Force);
-            }
-        }
-        if (Input.GetKey(KeyCode.D))
-        {
-            Quaternion rightAngle = Quaternion.Euler(0, 90, 0);
-            Vector3 right = rightAngle.normalized * cacheTransform.forward;
-            if (!isQ)
-            {
-                //最大速度に達していなかったら移動処理
-                if (_rigidbody.velocity.sqrMagnitude < Mathf.Pow(_maxSpeed, 2))
-                {
-                    _rigidbody.AddForce(right * MoveSpeed, ForceMode.Force);
-                }
-            }
-            else
-            {
-                _rigidbody.AddForce(right * MoveSpeed + (right * MoveSpeed - _rigidbody.velocity), ForceMode.Force);
-            }
-        }
-
-        //上下の移動
-        //float scroll = Input.GetAxis("Mouse ScrollWheel");
-
-        //デバッグ用
-        float s = MoveSpeed * 4;
-        float ms = _maxSpeed * 4;    //maxspeed
-        //
-
-        Quaternion upAngle = Quaternion.Euler(-90, 0, 0);
-        Vector3 upward = upAngle.normalized * Vector3.forward;
-
         if (!isQ)
         {
             //最大速度に達していなかったら移動処理
             if (_rigidbody.velocity.sqrMagnitude < Mathf.Pow(_maxSpeed, 2))
             {
-                _rigidbody.AddForce(upward * s * Input.mouseScrollDelta.y, ForceMode.Force);
+                _rigidbody.AddForce(direction * speed, ForceMode.Force);
+
+
+                //デバッグ用
+                Debug.Log(Mathf.Pow(_maxSpeed, 2));
             }
         }
         else
         {
-            Vector3 diff = upward * s - _rigidbody.velocity;
-            _rigidbody.AddForce(upward * s * Input.mouseScrollDelta.y + (upward * s * Input.mouseScrollDelta.y - _rigidbody.velocity), ForceMode.Force);
+            _rigidbody.AddForce(direction * speed + (direction * speed - _rigidbody.velocity), ForceMode.Force);
         }
+
+
+        //デバッグ用
+        Debug.Log(_rigidbody.velocity.sqrMagnitude);
     }
 
-
+    //攻撃
     void UseWeapon(Weapon weapon)
     {
-        //メインウェポン攻撃
-        if (weapon == Weapon.MAIN)
-        {
-            //左クリックでメインウェポン攻撃
-            if (Input.GetMouseButton(0))
-            {
-                weapons[(int)Weapon.MAIN].Shot(LockOn.Target);
-            }
-
-            //攻撃中は移動速度と回転速度低下
-            if (Input.GetMouseButtonDown(0))
-            {
-                if (Input.GetMouseButton(1))
-                {
-                    //サブウェポンを使用中なら処理を行わない
-                }
-                else
-                {
-                    LockOn.TrackingSpeed *= 0.5f;
-                    PlayerCameraController.RotateSpeed *= 0.5f;
-                    MoveSpeed *= 0.5f;
-                }
-            }
-            //攻撃をやめたら移動速度を元に戻す
-            if (Input.GetMouseButtonUp(0))
-            {
-                if (Input.GetMouseButton(1))
-                {
-                    //サブウェポンを使用中なら処理を行わない
-                }
-                else
-                {
-                    LockOn.TrackingSpeed *= 2;
-                    PlayerCameraController.RotateSpeed *= 2;
-                    MoveSpeed *= 2;
-                }
-            }
-        }
-
-        //サブウェポン攻撃
-        else if (weapon == Weapon.SUB)
-        {
-            //右クリックでサブウェポン攻撃
-            if (Input.GetMouseButton(1))
-            {
-                weapons[(int)Weapon.SUB].Shot(LockOn.Target);
-            }
-
-            //攻撃中は移動速度と回転速度低下
-            if (Input.GetMouseButtonDown(1))
-            {
-                if (Input.GetMouseButton(0))
-                {
-                    //メインウェポンを使用中なら処理を行わない
-                }
-                else
-                {
-                    LockOn.TrackingSpeed *= 0.5f;
-                    PlayerCameraController.RotateSpeed *= 0.5f;
-                    MoveSpeed *= 0.5f;
-                }
-            }
-            //攻撃をやめたら移動速度を元に戻す
-            if (Input.GetMouseButtonUp(1))
-            {
-                if (Input.GetMouseButton(0))
-                {
-                    //メインウェポンを使用中なら処理を行わない
-                }
-                else
-                {
-                    LockOn.TrackingSpeed *= 2;
-                    PlayerCameraController.RotateSpeed *= 2;
-                    MoveSpeed *= 2;
-                }
-            }
-        }
+        weapons[(int)weapon].Shot(LockOn.Target);
     }
 
     private void OnTriggerStay(Collider other)
