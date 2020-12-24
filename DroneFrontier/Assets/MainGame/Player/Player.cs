@@ -21,6 +21,7 @@ public class Player : MonoBehaviour
     public float MaxSpeed { get; set; } = 30.0f;     //最高速度
 
     Rigidbody _rigidbody = null;
+    Transform cacheTransform = null;
 
 
     //武器
@@ -69,13 +70,14 @@ public class Player : MonoBehaviour
     void Start()
     {
         _rigidbody = GetComponent<Rigidbody>();
+        cacheTransform = transform;
         weapons = new AtackBase[(int)Weapon.NONE];
         Barrier = barrier;
 
 
         //メインウェポンの処理
         AtackManager.CreateAtack(out GameObject main, AtackManager.Weapon.GATLING);    //Gatlingの生成
-        main.transform.parent = transform;  //作成したGatlingを子オブジェクトにする
+        main.transform.parent = cacheTransform;  //作成したGatlingを子オブジェクトにする
 
         //位置と角度の初期設定
         main.transform.localPosition = new Vector3(0, 0, 0);
@@ -89,7 +91,7 @@ public class Player : MonoBehaviour
 
         //サブウェポンの処理
         AtackManager.CreateAtack(out GameObject sub, AtackManager.Weapon.SHOTGUN);    //Shotgunの作成
-        sub.transform.parent = transform;  //作成したGatlingを子オブジェクトにする
+        sub.transform.parent = cacheTransform;  //作成したGatlingを子オブジェクトにする
 
         //位置と角度の初期設定
         sub.transform.localPosition = new Vector3(0, 0, 0);
@@ -104,7 +106,7 @@ public class Player : MonoBehaviour
 
 
         //デバッグ用
-        initPos = transform.position;
+        initPos = cacheTransform.position;
     }
 
     void Update()
@@ -214,7 +216,7 @@ public class Player : MonoBehaviour
             AtackManager.CreateAtack(out GameObject o, (AtackManager.Weapon)atackType);
 
             //Playerの子オブジェクトに設定
-            o.transform.parent = transform;
+            o.transform.parent = cacheTransform;
 
             //位置と角度の初期設定
             o.transform.localPosition = new Vector3(0, 0, 0);
@@ -240,7 +242,7 @@ public class Player : MonoBehaviour
         //}
         if (Input.GetKeyDown(KeyCode.P))
         {
-            transform.position = initPos;
+            cacheTransform.position = initPos;
         }
     }
 
@@ -254,7 +256,7 @@ public class Player : MonoBehaviour
                 //最大速度に達していなかったら移動処理
                 if (_rigidbody.velocity.sqrMagnitude < Mathf.Pow(_maxSpeed, 2))
                 {
-                    _rigidbody.AddForce(transform.forward * MoveSpeed, ForceMode.Force);
+                    _rigidbody.AddForce(cacheTransform.forward * MoveSpeed, ForceMode.Force);
 
                     Debug.Log(_rigidbody.velocity.sqrMagnitude);
                     Debug.Log(Mathf.Pow(_maxSpeed, 2));
@@ -262,14 +264,16 @@ public class Player : MonoBehaviour
             }
             else
             {
-                _rigidbody.AddForce(transform.forward * MoveSpeed + (transform.forward * MoveSpeed - _rigidbody.velocity), ForceMode.Force);
+                _rigidbody.AddForce(
+                    cacheTransform.forward * MoveSpeed + (cacheTransform.forward * MoveSpeed - _rigidbody.velocity), 
+                    ForceMode.Force);
             }
 
         }
         if (Input.GetKey(KeyCode.A))
         {
             Quaternion leftAngle = Quaternion.Euler(0, -90, 0);
-            Vector3 left = leftAngle.normalized * transform.forward;
+            Vector3 left = leftAngle.normalized * cacheTransform.forward;
             if (!isQ)
             {
                 //最大速度に達していなかったら移動処理
@@ -286,7 +290,7 @@ public class Player : MonoBehaviour
         if (Input.GetKey(KeyCode.S))
         {
             Quaternion backwardAngle = Quaternion.Euler(0, 180, 0);
-            Vector3 backward = backwardAngle.normalized * transform.forward;
+            Vector3 backward = backwardAngle.normalized * cacheTransform.forward;
             if (!isQ)
             {
                 //最大速度に達していなかったら移動処理
@@ -303,7 +307,7 @@ public class Player : MonoBehaviour
         if (Input.GetKey(KeyCode.D))
         {
             Quaternion rightAngle = Quaternion.Euler(0, 90, 0);
-            Vector3 right = rightAngle.normalized * transform.forward;
+            Vector3 right = rightAngle.normalized * cacheTransform.forward;
             if (!isQ)
             {
                 //最大速度に達していなかったら移動処理
@@ -322,8 +326,8 @@ public class Player : MonoBehaviour
         //float scroll = Input.GetAxis("Mouse ScrollWheel");
 
         //デバッグ用
-        float s = MoveSpeed * 2;
-        float ms = _maxSpeed * 2;    //maxspeed
+        float s = MoveSpeed * 4;
+        float ms = _maxSpeed * 4;    //maxspeed
         //
 
         Quaternion upAngle = Quaternion.Euler(-90, 0, 0);

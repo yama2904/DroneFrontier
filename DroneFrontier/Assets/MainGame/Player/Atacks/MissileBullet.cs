@@ -9,7 +9,8 @@ public class MissileBullet : Bullet
 
     protected override void Start()
     {
-        transform.Rotate(new Vector3(90, 0, 0));    //オブジェクトを90度傾ける
+        cacheTransform = transform;
+        cacheTransform.Rotate(new Vector3(90, 0, 0));    //オブジェクトを90度傾ける
         totalTime = 0;
     }
 
@@ -30,9 +31,9 @@ public class MissileBullet : Bullet
         //Quaternion diffRotation = rotation * Quaternion.Inverse(transform.rotation);
 
         //90度傾けたままだと誘導がバグるので一旦直す
-        transform.Rotate(new Vector3(-90, 0, 0)); 
+        cacheTransform.Rotate(new Vector3(-90, 0, 0)); 
         base.FixedUpdate();
-        transform.Rotate(new Vector3(90, 0, 0));
+        cacheTransform.Rotate(new Vector3(90, 0, 0));
     }
 
     protected override void OnTriggerEnter(Collider other)
@@ -58,7 +59,7 @@ public class MissileBullet : Bullet
 
     void createExplosion()
     {
-        Explosion e = Instantiate(explosion, transform.position, Quaternion.Euler(0, 0, 0));
+        Explosion e = Instantiate(explosion, cacheTransform.position, Quaternion.Euler(0, 0, 0));
         e.notHitObject = notHitObject;
         Destroy(gameObject);
     }

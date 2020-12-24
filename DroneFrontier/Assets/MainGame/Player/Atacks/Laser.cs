@@ -26,8 +26,10 @@ public class Laser : AtackBase
     [SerializeField] float lineRange = 4.0f;        //レーザーの射程
     [SerializeField] float maxShotTime = 5;         //最大何秒発射できるか
     [SerializeField] float hitPerSecond = 5.0f;     //1秒間にヒットする回数
-    ParticleSystem line;
-    ParticleSystem thunder;
+    ParticleSystem lineParticle;
+    Transform lineTransform;
+    ParticleSystem thunderParticle;
+    Transform thunderTransform;
     float initThunderScaleZ;    //初期のthunderの長さ(敵にレーザーが当たった際に使う)
     float initThunderPosZ;      //初期のthunderのz座標
 
@@ -35,6 +37,7 @@ public class Laser : AtackBase
     const string END_OBJECT_NAME = "End";
     const float END_POS_DIFF = -0.2f;
     GameObject end;
+    Transform endTransform;
     ParticleSystem[] endChilds;
 
 
@@ -61,46 +64,52 @@ public class Laser : AtackBase
         ShotCountTime = ShotInterval;
         BulletPower = 5.0f;
 
+        Transform cacheTransform = transform;   //処理の軽量化用キャッシュ
+
         //Charge用処理//
-        charge = transform.Find("Charge").GetComponent<ParticleSystem>();   //チャージのオブジェクトの取得
+        charge = cacheTransform.Find("Charge").GetComponent<ParticleSystem>();   //チャージのオブジェクトの取得
         chargeEmission = charge.emission;
         chargeMinmaxcurve = chargeEmission.rateOverTime;
         rateovertimeAddAmout = MAX_RATE_OVER_TIME / chargeTime;  //1秒間で増加するRateOverTime量
 
 
         //Midway用処理//
-        GameObject midway = transform.Find("Midway").gameObject;
+        Transform midwayTransform = cacheTransform.Find("Midway").transform;
 
         //Lineオブジェクト
-        line = midway.transform.Find("Line").GetComponent<ParticleSystem>();
+        lineParticle = midwayTransform.Find("Line").GetComponent<ParticleSystem>();
+        lineTransform = lineParticle.transform;
 
         //thunderオブジェクト
-        thunder = midway.transform.Find("thunderController/thunder").GetComponent<ParticleSystem>();
-        initThunderScaleZ = thunder.transform.localScale.z;   //初期の長さを保存
-        initThunderPosZ = thunder.transform.localPosition.z;  //初期のz座標を保存
+        thunderParticle = midwayTransform.Find("thunderController/thunder").GetComponent<ParticleSystem>();
+        thunderTransform = thunderParticle.transform;
+        initThunderScaleZ = thunderTransform.localScale.z;   //初期の長さを保存
+        initThunderPosZ = thunderTransform.localPosition.z;  //初期のz座標を保存
 
 
         //Start用処理//
-        start = transform.Find("Start").gameObject;
-        startChilds = new ParticleSystem[start.transform.childCount];
-        for (int i = 0; i < start.transform.childCount; i++)
+        start = cacheTransform.Find("Start").gameObject;
+        Transform startTransform = start.transform;
+        startChilds = new ParticleSystem[startTransform.childCount];
+        for (int i = 0; i < startTransform.childCount; i++)
         {
-            startChilds[i] = start.transform.GetChild(i).GetComponent<ParticleSystem>();
+            startChilds[i] = startTransform.GetChild(i).GetComponent<ParticleSystem>();
         }
-        start.transform.localRotation = midway.transform.localRotation;  //Midwayと同じ向き
+        startTransform.localRotation = midwayTransform.localRotation;  //Midwayと同じ向き
 
 
         //End用処理//
-        end = transform.Find(END_OBJECT_NAME).gameObject;
-        endChilds = new ParticleSystem[end.transform.childCount];
-        for (int i = 0; i < end.transform.childCount; i++)
+        end = cacheTransform.Find(END_OBJECT_NAME).gameObject;
+        endTransform = end.transform;
+        endChilds = new ParticleSystem[endTransform.childCount];
+        for (int i = 0; i < endTransform.childCount; i++)
         {
-            endChilds[i] = end.transform.GetChild(i).GetComponent<ParticleSystem>();
+            endChilds[i] = endTransform.GetChild(i).GetComponent<ParticleSystem>();
         }
-        end.transform.localRotation = midway.transform.localRotation;
+        endTransform.localRotation = midwayTransform.localRotation;
 
         //初期座標の保存
-        end.transform.localRotation = midway.transform.localRotation;   //Midwayと同じ向き
+        endTransform.localRotation = midwayTransform.localRotation;   //Midwayと同じ向き
 
 
         ModifyLaserLength(lineRange);   //Laserの長さを設定した長さに変更
@@ -202,8 +211,8 @@ public class Laser : AtackBase
                 }
 
                 //Midwayの再生
-                line.Play();
-                thunder.Play();
+                lineParticle.Play();
+                thunderParticle.Play();
 
                 //Endの再生
                 foreach (ParticleSystem p in endChilds)
@@ -251,9 +260,9 @@ public class Laser : AtackBase
 
             //レーザーの射線上にヒットした全てのオブジェクトを調べる
             var hits = Physics.SphereCastAll(
-                line.transform.position,    //レーザーの発射座標
+                lineTransform.position,    //レーザーの発射座標
                 lineRadius,                 //レーザーの半径
-                line.transform.forward,     //レーザーの正面
+                lineTransform.forward,     //レーザーの正面
                 lineRange)                  //射程
                 .ToList();  //リスト化  
 
@@ -279,7 +288,7 @@ public class Laser : AtackBase
                 lineLength = hit.distance;
 
                 //ヒットした場所にEndオブジェクトを移動させる
-                end.transform.position = hit.point;
+                endTransform.position = hit.point;
 
 
                 ShotCountTime = 0;  //発射間隔のカウントをリセット
@@ -287,7 +296,7 @@ public class Laser : AtackBase
             else
             {
                 //レーザーの末端にEndオブジェクトを移動
-                end.transform.transform.position = line.transform.position + (line.transform.forward * lineRange);
+                endTransform.position = lineTransform.position + (lineTransform.forward * lineRange);
             }
             //レーザーの長さに応じてオブジェクトの座標やサイズを変える
             ModifyLaserLength(lineLength);
@@ -345,14 +354,14 @@ public class Laser : AtackBase
     void ModifyLaserLength(float length)
     {
         //Lineオブジェクト
-        Vector3 lineScale = line.transform.localScale;
-        line.transform.localScale = new Vector3(length, length, lineScale.z);
+        Vector3 lineScale = lineTransform.localScale;
+        lineTransform.localScale = new Vector3(length, length, lineScale.z);
 
         //Thunderオブジェクト
-        Vector3 thunderScale = thunder.transform.localScale;
-        thunder.transform.localScale = new Vector3(thunderScale.x, thunderScale.y, initThunderScaleZ * length);
-        Vector3 thunderPos = thunder.transform.localPosition;
-        thunder.transform.localPosition = new Vector3(thunderPos.x, thunderPos.y, initThunderPosZ * length);
+        Vector3 thunderScale = thunderTransform.localScale;
+        thunderTransform.localScale = new Vector3(thunderScale.x, thunderScale.y, initThunderScaleZ * length);
+        Vector3 thunderPos = thunderTransform.localPosition;
+        thunderTransform.localPosition = new Vector3(thunderPos.x, thunderPos.y, initThunderPosZ * length);
     }
 
     //チャージとレーザーを止める
@@ -372,8 +381,8 @@ public class Laser : AtackBase
         }
 
         //Midwayを止める
-        line.Stop();
-        thunder.Stop();
+        lineParticle.Stop();
+        thunderParticle.Stop();
 
         //Endを止める
         foreach (ParticleSystem p in endChilds)

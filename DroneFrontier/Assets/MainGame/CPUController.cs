@@ -19,11 +19,12 @@ public class CPUController : MonoBehaviour
     void Start()
     {
         AtackManager.CreateAtack(out GameObject o, AtackManager.Weapon.GATLING);    //Gatlingの生成
-        o.transform.parent = transform;  //作成したGatlingを子オブジェクトにする
+        Transform t = o.transform;  //キャッシュ
+        t.parent = transform;  //作成したGatlingを子オブジェクトにする
 
         //位置と角度の初期設定
-        o.transform.localPosition = new Vector3(0, 0, 0);
-        o.transform.localRotation = Quaternion.Euler(0, 0, 0);
+        t.localPosition = new Vector3(0, 0, 0);
+        t.localRotation = Quaternion.Euler(0, 0, 0);
 
         //コンポーネントの取得
         AtackBase ab = o.GetComponent<AtackBase>();

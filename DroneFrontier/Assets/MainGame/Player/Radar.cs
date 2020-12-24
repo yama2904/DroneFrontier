@@ -9,6 +9,7 @@ public class Radar : MonoBehaviour
     [SerializeField] GameObject playerInspector = null;
     static GameObject player = null;
     static Camera mainCamera = null;
+    static Transform mainCameraTransform = null;
 
     static Image radarMask = null;
     static GameObject enemyMarker = null;
@@ -16,7 +17,7 @@ public class Radar : MonoBehaviour
 
     struct SearchData
     {
-        public GameObject target;
+        public Transform target;
         public RectTransform marker;
     }
     static List<SearchData> searchDatas = new List<SearchData>();
@@ -32,6 +33,7 @@ public class Radar : MonoBehaviour
     void Start()
     {
         mainCamera = Camera.main;
+        mainCameraTransform = mainCamera.transform;
         GameObject o = transform.Find("RadarMask/Image").gameObject;
         o.SetActive(true);
         radarMask = o.GetComponent<Image>();
@@ -46,7 +48,7 @@ public class Radar : MonoBehaviour
     {
         foreach(SearchData s in searchDatas)
         {
-            Vector3 screenPoint = mainCamera.WorldToViewportPoint(s.target.transform.position);
+            Vector3 screenPoint = mainCamera.WorldToViewportPoint(s.target.position);
             s.marker.position = new Vector3(Screen.width * screenPoint.x, Screen.height * screenPoint.y, 0);
         }
     }
@@ -60,9 +62,9 @@ public class Radar : MonoBehaviour
 
         //取得したRaycastHit配列から各RaycastHitクラスのgameObjectを抜き取ってリスト化する
         var hits = Physics.SphereCastAll(
-            mainCamera.transform.position,
+            mainCameraTransform.position,
             searchRadius,
-            mainCamera.transform.forward,
+            mainCameraTransform.forward,
             0.01f).Select(h => h.transform.gameObject).ToList();        
 
         int count = searchDatas.Count;  //hitsの要素を追加する前の要素数を保持
@@ -80,7 +82,7 @@ public class Radar : MonoBehaviour
             foreach (GameObject hit in hits)
             {
                 //既に照射済か調べる
-                int index = searchDatas.FindIndex(s => ReferenceEquals(hit, s.target));
+                int index = searchDatas.FindIndex(s => ReferenceEquals(hit, s.target.gameObject));
                 if (index >= 0 && index < count)
                 {
                     isTargetings[index] = true;
@@ -88,7 +90,7 @@ public class Radar : MonoBehaviour
                 }
 
                 SearchData sd = new SearchData();
-                sd.target = hit;
+                sd.target = hit.transform;
                 //プレイヤーかCPUなら赤い表示
                 if (hit.CompareTag(Player.PLAYER_TAG) || hit.CompareTag(CPUController.CPU_TAG))
                 {
@@ -98,6 +100,11 @@ public class Radar : MonoBehaviour
                 {
                     sd.marker = Instantiate(itemMarker).transform.GetChild(0).GetComponent<RectTransform>();
                 }
+
+                //マーカーを移動させる
+                Vector3 screenPoint = mainCamera.WorldToViewportPoint(sd.target.position);
+                sd.marker.position = new Vector3(Screen.width * screenPoint.x, Screen.height * screenPoint.y, 0);
+
                 searchDatas.Add(sd);
             }
         }

@@ -8,12 +8,16 @@ public class LockOn : MonoBehaviour
 {
     [SerializeField] GameObject playerInspector = null;
     static GameObject player = null;
+    static Transform playerTransform = null;
     static Camera mainCamera = null;
+    static Transform mainCameraTransform = null;
+
     static Image lockOnImage = null;    //ロックオンした際に表示する画像
     static float searchRadius = 100.0f; //ロックオンする範囲
     public static float TrackingSpeed { get; set; } = 0.1f;     //ロックオンした際に敵にカメラを向ける速度
 
     public static GameObject Target { get; private set; } = null;   //ロックオンしているオブジェクト
+    static Transform targetTransform = null;
     static bool isTarget = false;   //ロックオンしているか
     static bool useLockOn = true;   //ロックオンを使うか
 
@@ -24,11 +28,14 @@ public class LockOn : MonoBehaviour
 
     void Start()
     {
+        playerTransform = player.transform;
         mainCamera = Camera.main;
+        mainCameraTransform = mainCamera.transform;
         TrackingSpeed = 0.1f;
         lockOnImage = transform.Find("LockOnImage").GetComponent<Image>();  //画像のロード
         lockOnImage.enabled = false;    //ロックオンしていない際は非表示
         Target = null;
+        targetTransform = null;
         isTarget = false;
     }
 
@@ -40,11 +47,11 @@ public class LockOn : MonoBehaviour
             //ロックオンの対象オブジェクトが消えていないなら継続して追尾
             if (Target != null)
             {
-                Vector3 diff = Target.transform.position - mainCamera.transform.position;   //ターゲットとの距離
+                Vector3 diff = targetTransform.position - mainCameraTransform.position;   //ターゲットとの距離
                 Quaternion rotation = Quaternion.LookRotation(diff);      //ロックオンしたオブジェクトの方向
 
                 //カメラの角度からtrackingSpeed(0～1)の速度でロックオンしたオブジェクトの角度に向く
-                playerInspector.transform.rotation = Quaternion.Slerp(playerInspector.transform.rotation, rotation, TrackingSpeed);
+                playerTransform.rotation = Quaternion.Slerp(playerTransform.rotation, rotation, TrackingSpeed);
             }
             //ロックオンしている最中に対象が消えたらロックオン解除
             else
@@ -69,9 +76,9 @@ public class LockOn : MonoBehaviour
         {
             //取得したRaycastHit配列から各RaycastHitクラスのgameObjectを抜き取ってリスト化する
             var hits = Physics.SphereCastAll(
-                mainCamera.transform.position,
+                mainCameraTransform.position,
                 searchRadius,
-                mainCamera.transform.forward,
+                mainCameraTransform.forward,
                 0.01f).Select(h => h.transform.gameObject).ToList();
 
             hits = FilterTargetObject(hits);
@@ -92,10 +99,11 @@ public class LockOn : MonoBehaviour
                     if (targetDistance < minTargetDistance)
                     {
                         minTargetDistance = targetDistance;
-                        t = hit.transform.gameObject;
+                        t = hit.gameObject;
                     }
                 }
                 Target = t;
+                targetTransform = t.transform;
                 lockOnImage.enabled = true;
                 isTarget = true;
             }
@@ -107,6 +115,7 @@ public class LockOn : MonoBehaviour
         if (isTarget)
         {
             Target = null;
+            targetTransform = null;
             isTarget = false;
             lockOnImage.enabled = false;
         }

@@ -72,6 +72,7 @@ public class Shotgun : AtackBase
             for (int j = -1; j <= 1; j++)
             {
                 Bullet b = Instantiate(bullet, transform.position, transform.rotation);    //弾丸の複製
+                Transform t = b.transform;  //キャッシュ
 
                 //弾丸のパラメータ設定
                 b.notHitObject = notHitObject;    //武器の所持者を登録
@@ -85,8 +86,8 @@ public class Shotgun : AtackBase
                 //弾丸の進む方向を変えて散らす処理
                 float rotateX = (diffusionPower * i) + Random.Range(angleDiff * -1, angleDiff); 　//左右の角度
                 float rotateY = (diffusionPower * j) + Random.Range(angleDiff * -1, angleDiff);   //上下の角度
-                b.transform.RotateAround(b.transform.position, b.transform.right, rotateY);
-                b.transform.RotateAround(b.transform.position, b.transform.up, rotateX);
+                t.RotateAround(t.position, t.right, rotateY);
+                t.RotateAround(t.position, t.up, rotateX);
             }
         }
         //残り弾丸がMAXで撃つと一瞬で弾丸が1個回復するので

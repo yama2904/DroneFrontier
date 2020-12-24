@@ -13,9 +13,12 @@ public class Bullet : MonoBehaviour
     public float SpeedPerSecond { protected get; set; } = 0;   //1秒間に進む量
     public float DestroyTime { protected get; set; } = 0;      //発射してから消えるまでの時間(射程)
 
+    protected Transform cacheTransform;
+
 
     protected virtual void Start()
     {
+        cacheTransform = transform;
         Destroy(gameObject, DestroyTime);
     }
 
@@ -27,12 +30,12 @@ public class Bullet : MonoBehaviour
     {
         if (Target != null)
         {
-            Vector3 diff = Target.transform.position - transform.position;  //座標の差
+            Vector3 diff = Target.transform.position - cacheTransform.position;  //座標の差
             //視野内に敵がいる場合
-            if (Vector3.Dot(transform.forward, diff) > 0)
+            if (Vector3.Dot(cacheTransform.forward, diff) > 0)
             {
                 //自分の方向から見た敵の位置の角度
-                float angle = Vector3.Angle(transform.forward, diff);
+                float angle = Vector3.Angle(cacheTransform.forward, diff);
                 if (angle > TrackingPower)
                 {
                     //誘導力以上の角度がある場合は修正
@@ -40,18 +43,18 @@ public class Bullet : MonoBehaviour
                 }
 
                 //+値と-値のどちらに回転するか上下と左右ごとに判断する
-                Vector3 axis = Vector3.Cross(transform.forward, diff);
+                Vector3 axis = Vector3.Cross(cacheTransform.forward, diff);
                 //左右の回転
                 float x = angle * (axis.y < 0 ? -1 : 1);
-                transform.RotateAround(transform.position, Vector3.up, x);
+                cacheTransform.RotateAround(cacheTransform.position, Vector3.up, x);
 
                 //上下の回転
                 float y = angle * (axis.x < 0 ? -1 : 1);
-                transform.RotateAround(transform.position, Vector3.right, y);
+                cacheTransform.RotateAround(cacheTransform.position, Vector3.right, y);
             }
         }
         //移動
-        transform.position += transform.forward * SpeedPerSecond * Time.deltaTime;
+        cacheTransform.position += cacheTransform.forward * SpeedPerSecond * Time.deltaTime;
     }
 
     protected virtual void OnTriggerEnter(Collider other)
