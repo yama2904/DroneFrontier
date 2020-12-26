@@ -1,11 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using System;
 
 /*
  * 公開変数
- * float HP                  ドローンのHP
+ * float HP                  ローンのHP
  * float MoveSpeed           移動速度
  * float MaxSpeed            最高速度
  * Barrier Barrier           プレイヤーのバリア
@@ -18,8 +19,16 @@ public class Player : BasePlayer
     public const string PLAYER_TAG = "Player";  //タグ名    
     [SerializeField] Barrier barrier = null;    //バリア
     Transform cacheTransform = null;            //キャッシュ用
-    bool[] isUsingWeapons;    //使用中の武器    
 
+    bool[] isUsingWeapons;    //使用中の武器
+
+    //ブースト用変数
+    const float BOOST_POSSIBLE_MIN = 0.2f;       //ブースト可能な最低ゲージ量
+    Image boostImage;
+    [SerializeField] float boostAccele = 2.0f;  //ブーストの加速度
+    [SerializeField] float maxBoostTime = 5.0f; //ブーストできる最大の時間
+    [SerializeField] float boostRecastTime = 6.0f;  //ブーストのリキャスト時間
+    bool isBoost;
 
     ////状態異常
     //public enum Abnormal
@@ -87,6 +96,9 @@ public class Player : BasePlayer
         weapons[(int)Weapon.SUB] = abS;
 
         items = new Item[(int)ItemNum.NONE];
+        boostImage = GameObject.Find("BoostGauge").GetComponent<Image>();
+        boostImage.fillAmount = 1;
+        isBoost = false;
 
 
         //デバッグ用
@@ -100,6 +112,7 @@ public class Player : BasePlayer
             if (Input.GetKeyDown(KeyCode.M))
             {
                 isQ = !isQ;
+                Debug.Log("移動処理切り替え");
             }
         }
 
@@ -224,20 +237,75 @@ public class Player : BasePlayer
         //ブースト使用
         if (Input.GetKeyDown(KeyCode.Q))
         {
-            //バトルモードの場合
-            if (MainGameManager.Mode == MainGameManager.GameMode.BATTLE)
+            //ブーストが使用可能なゲージ量ならブースト使用
+            if (boostImage.fillAmount >= BOOST_POSSIBLE_MIN)
             {
+                //バトルモードの場合
+                if (MainGameManager.Mode == MainGameManager.GameMode.BATTLE)
+                {
 
+                }
+
+                //レースモードの場合
+                else if (MainGameManager.Mode == MainGameManager.GameMode.RACE)
+                {
+
+                }
+
+                ModifySpeed(boostAccele);
+                isBoost = true;
+
+
+                //デバッグ用
+                Debug.Log("ブースト使用");
             }
-
-            //レースモードの場合
-            else if (MainGameManager.Mode == MainGameManager.GameMode.RACE)
-            {
-
-            }
-
-            StartCoroutine(UseBoost(2.0f, 5.0f));
         }
+        //ブースト使用中の処理
+        if (isBoost)
+        {
+            //キーを押し続けている間はゲージ消費
+            if (Input.GetKey(KeyCode.Q))
+            {
+                boostImage.fillAmount -= 1.0f / maxBoostTime * Time.deltaTime;
+
+                //ゲージが空になったらブースト停止
+                if (boostImage.fillAmount <= 0)
+                {
+                    boostImage.fillAmount = 0;
+
+                    ModifySpeed(1 / boostAccele);
+                    isBoost = false;
+
+
+                    //デバッグ用
+                    Debug.Log("ブースト終了");
+                }
+            }
+            //キーを離したらブースト停止
+            if (Input.GetKeyUp(KeyCode.Q))
+            {
+                ModifySpeed(1 / boostAccele);
+                isBoost = false;
+
+
+                //デバッグ用
+                Debug.Log("ブースト終了");
+            }
+        }
+
+        //ブースト未使用時にゲージ回復
+        if (!isBoost)
+        {
+            if (boostImage.fillAmount < 1.0f)
+            {
+                boostImage.fillAmount += 1.0f / boostRecastTime * Time.deltaTime;
+                if (boostImage.fillAmount >= 1.0f)
+                {
+                    boostImage.fillAmount = 1;
+                }
+            }
+        }
+
 
         //アイテム使用
         if (Input.GetKeyUp(KeyCode.Alpha1))
@@ -345,24 +413,34 @@ public class Player : BasePlayer
         weapons[(int)weapon].Shot(LockOn.Target);
     }
 
-    //ブースト使用
-    IEnumerator UseBoost(float speedMgnf, float time)
+    //スピードを変更する
+    void ModifySpeed(float speedMgnf)
     {
+        MoveSpeed *= speedMgnf;
+        MaxSpeed *= speedMgnf;
+    }
+
+    //ブースト使用
+    protected override IEnumerator UseBoost(float speedMgnf, float time)
+    {
+        ModifySpeed(speedMgnf);
+        isBoost = true;
+
+
         //デバッグ用
         Debug.Log("ブースト使用");
 
-
-        MoveSpeed *= speedMgnf;
-        MaxSpeed *= speedMgnf;
-
-        //time秒後に速度を戻す
-        yield return new WaitForSeconds(time);
-        MoveSpeed /= speedMgnf;
-        MaxSpeed /= speedMgnf;
+        if (time >= 0)
+        {
+            //time秒後に速度を戻す
+            yield return new WaitForSeconds(time);
+            ModifySpeed(1 / speedMgnf);
+            isBoost = false;
 
 
-        //デバッグ用
-        Debug.Log("ブースト終了");
+            //デバッグ用
+            Debug.Log("ブースト終了");
+        }
     }
 
     private void OnTriggerStay(Collider other)

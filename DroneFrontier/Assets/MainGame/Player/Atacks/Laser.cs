@@ -7,6 +7,8 @@ using System.Linq;
 public class Laser : AtackBase
 {
     const float SHOT_POSSIBLE_MIN = 0.2f;       //発射可能な最低ゲージ量
+    Image laserImage;
+    [SerializeField] float maxShotTime = 5;         //最大何秒発射できるか
 
     //Charge用変数
     const int MAX_RATE_OVER_TIME = 128;         //チャージのパーティクルのrateOverTime最大値
@@ -24,7 +26,6 @@ public class Laser : AtackBase
     //Midway用変数
     [SerializeField] float lineRadius = 0.01f;      //レーザーの半径
     [SerializeField] float lineRange = 4.0f;        //レーザーの射程
-    [SerializeField] float maxShotTime = 5;         //最大何秒発射できるか
     [SerializeField] float hitPerSecond = 5.0f;     //1秒間にヒットする回数
     ParticleSystem lineParticle;
     Transform lineTransform;
@@ -50,11 +51,6 @@ public class Laser : AtackBase
 
         NONE
     }
-
-
-    //デバッグ用
-    Image image;
-    float gaugeAmout;   //ゲージ量
 
 
     protected override void Start()
@@ -118,8 +114,8 @@ public class Laser : AtackBase
 
 
         //デバッグ用
-        image = GameObject.Find("LaserGauge").GetComponent<Image>();
-        gaugeAmout = 1;
+        laserImage = GameObject.Find("LaserGauge").GetComponent<Image>();
+        laserImage.fillAmount = 1;
     }
 
     protected override void Update()
@@ -135,13 +131,13 @@ public class Laser : AtackBase
         if (!isShots[(int)ShotFlag.SHOT_START])
         {
             //処理が無駄なのでゲージがMAXならスキップ
-            if (gaugeAmout < 1.0f)
+            if (laserImage.fillAmount < 1.0f)
             {
                 //ゲージを回復
-                gaugeAmout += 1.0f / Recast * Time.deltaTime;
-                if (gaugeAmout > 1.0f)
+                laserImage.fillAmount += 1.0f / Recast * Time.deltaTime;
+                if (laserImage.fillAmount > 1.0f)
                 {
-                    gaugeAmout = 1.0f;
+                    laserImage.fillAmount = 1.0f;
 
 
                     //デバッグ用
@@ -149,10 +145,6 @@ public class Laser : AtackBase
                 }
             }
         }
-
-
-        //デバッグ用
-        image.fillAmount = gaugeAmout;
     }
 
     private void LateUpdate()
@@ -182,7 +174,7 @@ public class Laser : AtackBase
         if (!isCharged)
         {
             //発射に必要な最低限のゲージがないと発射しない
-            if (gaugeAmout < SHOT_POSSIBLE_MIN)
+            if (laserImage.fillAmount < SHOT_POSSIBLE_MIN)
             {
                 return;
             }
@@ -245,10 +237,10 @@ public class Laser : AtackBase
 
 
             //ゲージを減らす
-            gaugeAmout -= 1.0f / maxShotTime * Time.deltaTime;
-            if (gaugeAmout <= 0)    //ゲージがなくなったらレーザーを止める
+            laserImage.fillAmount -= 1.0f / maxShotTime * Time.deltaTime;
+            if (laserImage.fillAmount <= 0)    //ゲージがなくなったらレーザーを止める
             {
-                gaugeAmout = 0;
+                laserImage.fillAmount = 0;
                 StopShot();
             }
 

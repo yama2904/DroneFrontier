@@ -97,10 +97,12 @@ public class MainGameManager : MonoBehaviour
             if (IsCursorLock)
             {
                 Cursor.lockState = CursorLockMode.Locked;
+                Debug.Log("カメラロック");
             }
             else
             {
                 Cursor.lockState = CursorLockMode.None;
+                Debug.Log("カメラロック解除");
             }
         }
     }

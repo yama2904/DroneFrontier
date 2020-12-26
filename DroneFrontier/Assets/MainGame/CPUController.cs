@@ -78,6 +78,17 @@ public class CPUController : BasePlayer
         
     }
 
+    protected override IEnumerator UseBoost(float speedMgnf, float time)
+    {
+        MoveSpeed *= speedMgnf;
+        MaxSpeed *= speedMgnf;
+
+        //time秒後に速度を戻す
+        yield return new WaitForSeconds(time);
+        MoveSpeed /= speedMgnf;
+        MaxSpeed /= speedMgnf;
+    }
+
     //ダメージを与える
     public override void Damage(float power)
     {

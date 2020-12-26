@@ -36,5 +36,6 @@ public abstract class BasePlayer : MonoBehaviour
 
     protected abstract void Move(float speed, float _maxSpeed, Vector3 direction);  //移動処理
     protected abstract void UseWeapon(Weapon weapon);   //攻撃処理
+    protected abstract IEnumerator UseBoost(float speedMgnf, float time);   //ブースト処理
     public abstract void Damage(float power);
 }
