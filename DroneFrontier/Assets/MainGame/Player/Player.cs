@@ -13,42 +13,12 @@ using System;
  * 公開メソッド
  * void Damage(float power)  プレイヤーにダメージを与える
  */
-public class Player : MonoBehaviour
+public class Player : BasePlayer
 {
-    public const string PLAYER_TAG = "Player";   //タグ名    
-
-    public float HP { get; private set; } = 10;      //HP
-    public float MoveSpeed = 50.0f;                  //移動速度
-    public float MaxSpeed { get; set; } = 30.0f;     //最高速度
-
-    Rigidbody _rigidbody = null;
-    Transform cacheTransform = null;
-
-
-    //武器
-    enum Weapon
-    {
-        MAIN,   //メイン武器
-        SUB,    //サブ武器
-
-        NONE
-    }
-    AtackBase[] weapons;      //ウェポン群
-    bool[] isUsingWeapons;    //使用中の武器
-
-    //バリア
-    [SerializeField] Barrier barrier = null;
-    public Barrier Barrier { get; private set; } = null;
-
-    //アイテム
-    enum ItemNum
-    {
-        ITEM_1,   //アイテム枠1
-        ITEM_2,   //アイテム枠2
-
-        NONE
-    }
-    Item[] items;
+    public const string PLAYER_TAG = "Player";  //タグ名    
+    [SerializeField] Barrier barrier = null;    //バリア
+    Transform cacheTransform = null;            //キャッシュ用
+    bool[] isUsingWeapons;    //使用中の武器    
 
 
     ////状態異常
@@ -69,11 +39,15 @@ public class Player : MonoBehaviour
     bool isQ = true;
     Vector3 initPos;
 
-    void Start()
+    protected override void Start()
     {
         cacheTransform = transform;
         _rigidbody = GetComponent<Rigidbody>();
         Barrier = barrier;
+
+        HP = 10;
+        MoveSpeed = 20.0f;
+        MaxSpeed = 30.0f;
 
         //武器の初期化
         weapons = new AtackBase[(int)Weapon.NONE];
@@ -85,11 +59,12 @@ public class Player : MonoBehaviour
 
         //メインウェポンの処理
         AtackManager.CreateAtack(out GameObject main, AtackManager.Weapon.GATLING);    //Gatlingの生成
-        main.transform.parent = cacheTransform;  //作成したGatlingを子オブジェクトにする
+        Transform mainTransform = main.transform;   //キャッシュ
+        mainTransform.parent = cacheTransform;      //作成したGatlingを子オブジェクトにする
 
         //位置と角度の初期設定
-        main.transform.localPosition = new Vector3(0, 0, 0);
-        main.transform.localRotation = Quaternion.Euler(0, 0, 0);
+        mainTransform.localPosition = new Vector3(0, 0, 0);
+        mainTransform.localRotation = Quaternion.Euler(0, 0, 0);
 
         //コンポーネントの取得
         AtackBase abM = main.GetComponent<AtackBase>(); //名前省略
@@ -99,11 +74,12 @@ public class Player : MonoBehaviour
 
         //サブウェポンの処理
         AtackManager.CreateAtack(out GameObject sub, AtackManager.Weapon.SHOTGUN);    //Shotgunの作成
-        sub.transform.parent = cacheTransform;  //作成したGatlingを子オブジェクトにする
+        Transform subTransform = sub.transform; //キャッシュ
+        subTransform.parent = cacheTransform;   //作成したGatlingを子オブジェクトにする
 
         //位置と角度の初期設定
-        sub.transform.localPosition = new Vector3(0, 0, 0);
-        sub.transform.localRotation = Quaternion.Euler(0, 0, 0);
+        subTransform.localPosition = new Vector3(0, 0, 0);
+        subTransform.localRotation = Quaternion.Euler(0, 0, 0);
 
         //コンポーネントの取得
         AtackBase abS = sub.GetComponent<AtackBase>();
@@ -117,11 +93,11 @@ public class Player : MonoBehaviour
         initPos = cacheTransform.position;
     }
 
-    void Update()
+    protected override void Update()
     {
         //デバッグ用
         {
-            if (Input.GetKeyDown(KeyCode.Q))
+            if (Input.GetKeyDown(KeyCode.M))
             {
                 isQ = !isQ;
             }
@@ -246,7 +222,7 @@ public class Player : MonoBehaviour
 
 
         //ブースト使用
-        if (Input.GetKeyUp(KeyCode.Q))
+        if (Input.GetKeyDown(KeyCode.Q))
         {
             //バトルモードの場合
             if (MainGameManager.Mode == MainGameManager.GameMode.BATTLE)
@@ -259,6 +235,8 @@ public class Player : MonoBehaviour
             {
 
             }
+
+            StartCoroutine(UseBoost(2.0f, 5.0f));
         }
 
         //アイテム使用
@@ -337,7 +315,7 @@ public class Player : MonoBehaviour
     }
 
     //移動速度、最大速度、移動する方向
-    void Move(float speed, float _maxSpeed, Vector3 direction)
+    protected override void Move(float speed, float _maxSpeed, Vector3 direction)
     {
         if (!isQ)
         {
@@ -348,7 +326,7 @@ public class Player : MonoBehaviour
 
 
                 //デバッグ用
-                Debug.Log(Mathf.Pow(_maxSpeed, 2));
+                //Debug.Log(Mathf.Pow(_maxSpeed, 2));
             }
         }
         else
@@ -358,13 +336,33 @@ public class Player : MonoBehaviour
 
 
         //デバッグ用
-        Debug.Log(_rigidbody.velocity.sqrMagnitude);
+        //Debug.Log(_rigidbody.velocity.sqrMagnitude);
     }
 
     //攻撃
-    void UseWeapon(Weapon weapon)
+    protected override void UseWeapon(Weapon weapon)
     {
         weapons[(int)weapon].Shot(LockOn.Target);
+    }
+
+    //ブースト使用
+    IEnumerator UseBoost(float speedMgnf, float time)
+    {
+        //デバッグ用
+        Debug.Log("ブースト使用");
+
+
+        MoveSpeed *= speedMgnf;
+        MaxSpeed *= speedMgnf;
+
+        //time秒後に速度を戻す
+        yield return new WaitForSeconds(time);
+        MoveSpeed /= speedMgnf;
+        MaxSpeed /= speedMgnf;
+
+
+        //デバッグ用
+        Debug.Log("ブースト終了");
     }
 
     private void OnTriggerStay(Collider other)
@@ -394,8 +392,9 @@ public class Player : MonoBehaviour
     }
 
 
+
     //プレイヤーにダメージを与える
-    public void Damage(float power)
+    public override void Damage(float power)
     {
         float p = Useful.DecimalPointTruncation(power, 1);  //小数点第2以下切り捨て
 

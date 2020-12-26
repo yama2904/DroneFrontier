@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class BasePlayer
+public abstract class BasePlayer : MonoBehaviour
 {
-    public float HP { get; private set; } = 10;      //HP
-    public float MoveSpeed = 50.0f;                  //移動速度
-    public float MaxSpeed { get; set; } = 30.0f;     //最高速度
+    public float HP { get; protected set; } = 0;      //HP
+    public float MoveSpeed = 0;                  //移動速度
+    public float MaxSpeed { get; set; } = 0;     //最高速度
 
     protected Rigidbody _rigidbody = null;
-    public Barrier Barrier { get; private set; } = null;
+    public Barrier Barrier { get; protected set; } = null;
 
     //武器
     protected enum Weapon
@@ -36,4 +36,5 @@ public abstract class BasePlayer
 
     protected abstract void Move(float speed, float _maxSpeed, Vector3 direction);  //移動処理
     protected abstract void UseWeapon(Weapon weapon);   //攻撃処理
+    public abstract void Damage(float power);
 }

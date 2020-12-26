@@ -46,7 +46,7 @@ public class Radar : MonoBehaviour
 
     void Update()
     {
-        foreach(SearchData s in searchDatas)
+        foreach (SearchData s in searchDatas)
         {
             Vector3 screenPoint = mainCamera.WorldToViewportPoint(s.target.position);
             s.marker.position = new Vector3(Screen.width * screenPoint.x, Screen.height * screenPoint.y, 0);
@@ -65,18 +65,17 @@ public class Radar : MonoBehaviour
             mainCameraTransform.position,
             searchRadius,
             mainCameraTransform.forward,
-            0.01f).Select(h => h.transform.gameObject).ToList();        
-
-        int count = searchDatas.Count;  //hitsの要素を追加する前の要素数を保持
-        bool[] isTargetings = new bool[count];  //前回はレーダーに照射されていたが今回は照射されていないオブジェクトがある場合は要素を保持しておく
-        for (int i = 0; i < count; i++)
-        {
-            isTargetings[i] = false;
-        }
+            0.01f).Select(h => h.transform.gameObject).ToList();
 
         hits = FilterTargetObject(hits);
         if (hits.Count > 0)
         {
+            int count = searchDatas.Count;  //hitsの要素を追加する前の要素数を保持
+            bool[] isTargetings = new bool[count];  //前回はレーダーに照射されていたが今回は照射されていないオブジェクトがある場合は要素を保持しておく
+            for (int i = 0; i < count; i++)
+            {
+                isTargetings[i] = false;
+            }
 
             //hitsの中で既に照射済のものはスルーして新しいものだけ処理を行う
             foreach (GameObject hit in hits)
@@ -107,17 +106,30 @@ public class Radar : MonoBehaviour
 
                 searchDatas.Add(sd);
             }
-        }
 
-        //前回はレーダーに照射されていたが今回は照射されていないオブジェクトを削除
-        for (int i = count - 1; i >= 0; i--)
-        {
-            if (!isTargetings[i])
+            //前回はレーダーに照射されていたが今回は照射されていないオブジェクトを削除
+            for (int i = count - 1; i >= 0; i--)
             {
-                Destroy(searchDatas[i].marker.parent.gameObject);
-                searchDatas.RemoveAt(i);
+                if (!isTargetings[i])
+                {
+                    Destroy(searchDatas[i].marker.parent.gameObject);
+                    searchDatas.RemoveAt(i);
+                }
             }
         }
+        else
+        {
+            //何もレーダーに照射されていない場合はリストとマーカーを削除
+            if (searchDatas.Count > 0)
+            {
+                foreach(SearchData sd in searchDatas)
+                {
+                    Destroy(sd.marker.parent.gameObject);
+                }
+                searchDatas.Clear();
+            }
+        }
+
         radarMask.enabled = true;
     }
 

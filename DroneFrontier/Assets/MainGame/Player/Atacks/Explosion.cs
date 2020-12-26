@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class Explosion : MonoBehaviour
 {
@@ -13,9 +14,8 @@ public class Explosion : MonoBehaviour
 
     List<GameObject> wasHitObjects;    //触れたオブジェクトを全て格納する
     const float DESTROY_TIME = 3.0f;    //生存時間
-    float deltaTime;    //時間を計測する用
 
-    void Start()
+    IEnumerator Start()
     {
         //サイズに応じて変数の値も変える
         notPowerDownRange *= size;
@@ -40,16 +40,14 @@ public class Explosion : MonoBehaviour
         sc.center = new Vector3(0, 0, 0);
 
         wasHitObjects = new List<GameObject>();
-        deltaTime = 0;
+
+        //一定時間後に消滅
+        yield return new WaitForSeconds(DESTROY_TIME);
+        Destroy(gameObject);
     }
 
     void Update()
     {
-        deltaTime += Time.deltaTime;
-        if (deltaTime > DESTROY_TIME)
-        {
-            Destroy(gameObject);
-        }
     }
 
     private void OnTriggerEnter(Collider other)
