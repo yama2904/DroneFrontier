@@ -35,7 +35,6 @@ public class Radar : MonoBehaviour
         mainCamera = Camera.main;
         mainCameraTransform = mainCamera.transform;
         GameObject o = transform.Find("RadarMask/Image").gameObject;
-        o.SetActive(true);
         radarMask = o.GetComponent<Image>();
         radarMask.enabled = false;
         searchDatas.Clear();

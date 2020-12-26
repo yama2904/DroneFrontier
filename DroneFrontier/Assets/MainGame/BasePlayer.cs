@@ -4,12 +4,13 @@ using UnityEngine;
 
 public abstract class BasePlayer : MonoBehaviour
 {
-    public float HP { get; protected set; } = 0;      //HP
+    public float HP { get; protected set; } = 0; //HP
     public float MoveSpeed = 0;                  //移動速度
     public float MaxSpeed { get; set; } = 0;     //最高速度
 
-    protected Rigidbody _rigidbody = null;
-    public Barrier Barrier { get; protected set; } = null;
+    protected Rigidbody _Rigidbody = null;
+    public Barrier _Barrier { get; protected set; } = null;
+    public LockOn _LockOn { get; protected set; } = null;
 
     //武器
     protected enum Weapon

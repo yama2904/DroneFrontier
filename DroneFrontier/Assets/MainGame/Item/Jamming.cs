@@ -21,4 +21,9 @@ public class Jamming : MonoBehaviour
     {
 
     }
+
+    private void OnTriggerStay(Collider other)
+    {
+        
+    }
 }

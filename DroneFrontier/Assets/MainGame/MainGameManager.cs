@@ -21,6 +21,10 @@ using UnityEngine.SceneManagement;
  */
 public class MainGameManager : MonoBehaviour
 {
+    //操作しているプレイヤー
+    [SerializeField] GameObject mainPlayer = null;
+    public static GameObject MainPlayer { get; private set; } = null;
+
     //マルチモードか
     public static bool IsMulti { get; set; } = false;
 
@@ -60,6 +64,7 @@ public class MainGameManager : MonoBehaviour
 
     void Awake()
     {
+        MainPlayer = mainPlayer;
         screenMaskImage = screenMaskImageInspector;
     }
 

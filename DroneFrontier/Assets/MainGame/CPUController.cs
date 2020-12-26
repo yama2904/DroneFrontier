@@ -15,7 +15,7 @@ public class CPUController : BasePlayer
     protected override void Start()
     {
         cacheTransform = transform;
-        _rigidbody = GetComponent<Rigidbody>();
+        _Rigidbody = GetComponent<Rigidbody>();
 
         HP = 1000;
         MoveSpeed = speed;

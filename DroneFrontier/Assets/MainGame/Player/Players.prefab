@@ -244,6 +244,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MoveSpeed: 20
   barrier: {fileID: 7138142555913813786}
+  lockOn: {fileID: 0}
+  boostAccele: 2
+  maxBoostTime: 5
+  boostRecastTime: 6
 --- !u!1 &7450029337900604501
 GameObject:
   m_ObjectHideFlags: 0
@@ -306,6 +310,11 @@ PrefabInstance:
       propertyPath: playerInspector
       value: 
       objectReference: {fileID: 4344538155817353626}
+    - target: {fileID: -6448315863739955425, guid: 91d8e6a89aac70841992369d1ad764f2,
+        type: 3}
+      propertyPath: cameraInspector
+      value: 
+      objectReference: {fileID: 675253715182538940}
     - target: {fileID: 8166928397808152342, guid: 91d8e6a89aac70841992369d1ad764f2,
         type: 3}
       propertyPath: m_Name
@@ -419,6 +428,11 @@ PrefabInstance:
     - target: {fileID: 8166928397808152346, guid: 91d8e6a89aac70841992369d1ad764f2,
         type: 3}
       propertyPath: m_Pivot.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8166928398101119079, guid: 91d8e6a89aac70841992369d1ad764f2,
+        type: 3}
+      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents:

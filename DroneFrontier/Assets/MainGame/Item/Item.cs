@@ -24,7 +24,7 @@ public class Item : MonoBehaviour
         //バリア強化
         if(itemType == ItemType.BARRIER_STRENGTH)
         {
-            BarrierStrength.Strength(player.Barrier);
+            BarrierStrength.Strength(player._Barrier);
         }
 
         //ジャミング

@@ -18,6 +18,7 @@ public class Player : BasePlayer
 {
     public const string PLAYER_TAG = "Player";  //タグ名    
     [SerializeField] Barrier barrier = null;    //バリア
+    [SerializeField] LockOn lockOn = null;      //ロックオン
     Transform cacheTransform = null;            //キャッシュ用
 
     bool[] isUsingWeapons;    //使用中の武器
@@ -51,8 +52,9 @@ public class Player : BasePlayer
     protected override void Start()
     {
         cacheTransform = transform;
-        _rigidbody = GetComponent<Rigidbody>();
-        Barrier = barrier;
+        _Rigidbody = GetComponent<Rigidbody>();
+        _Barrier = barrier;
+        _LockOn = lockOn;
 
         HP = 10;
         MoveSpeed = 20.0f;
@@ -109,7 +111,7 @@ public class Player : BasePlayer
     {
         //デバッグ用
         {
-            if (Input.GetKeyDown(KeyCode.M))
+            if (Input.GetKeyDown(KeyCode.V))
             {
                 isQ = !isQ;
                 Debug.Log("移動処理切り替え");
@@ -150,12 +152,12 @@ public class Player : BasePlayer
         //ロックオン
         if (Input.GetKey(KeyCode.LeftShift))
         {
-            LockOn.StartLockOn();
+            _LockOn.StartLockOn();
         }
         //ロックオン解除
         if (Input.GetKeyUp(KeyCode.LeftShift))
         {
-            LockOn.ReleaseLockOn();
+            _LockOn.ReleaseLockOn();
         }
 
         //レーダー使用
@@ -182,7 +184,7 @@ public class Player : BasePlayer
         {
             MoveSpeed *= x;
             PlayerCameraController.RotateSpeed *= x;
-            LockOn.TrackingSpeed *= x;
+            _LockOn.TrackingSpeed *= x;
         };
 
         //メイン武器攻撃
@@ -366,13 +368,13 @@ public class Player : BasePlayer
         //デバッグ用
         if (Input.GetKeyDown(KeyCode.LeftControl))
         {
-            LockOn.TrackingSpeed *= 0.1f;
+            _LockOn.TrackingSpeed *= 0.1f;
             PlayerCameraController.RotateSpeed *= 0.1f;
             MoveSpeed *= 0.1f;
         }
         if (Input.GetKeyUp(KeyCode.LeftControl))
         {
-            LockOn.TrackingSpeed *= 10;
+            _LockOn.TrackingSpeed *= 10;
             PlayerCameraController.RotateSpeed *= 10;
             MoveSpeed *= 10;
         }
@@ -388,9 +390,9 @@ public class Player : BasePlayer
         if (!isQ)
         {
             //最大速度に達していなかったら移動処理
-            if (_rigidbody.velocity.sqrMagnitude < Mathf.Pow(_maxSpeed, 2))
+            if (_Rigidbody.velocity.sqrMagnitude < Mathf.Pow(_maxSpeed, 2))
             {
-                _rigidbody.AddForce(direction * speed, ForceMode.Force);
+                _Rigidbody.AddForce(direction * speed, ForceMode.Force);
 
 
                 //デバッグ用
@@ -399,7 +401,7 @@ public class Player : BasePlayer
         }
         else
         {
-            _rigidbody.AddForce(direction * speed + (direction * speed - _rigidbody.velocity), ForceMode.Force);
+            _Rigidbody.AddForce(direction * speed + (direction * speed - _Rigidbody.velocity), ForceMode.Force);
         }
 
 
@@ -410,7 +412,7 @@ public class Player : BasePlayer
     //攻撃
     protected override void UseWeapon(Weapon weapon)
     {
-        weapons[(int)weapon].Shot(LockOn.Target);
+        weapons[(int)weapon].Shot(_LockOn.Target);
     }
 
     //スピードを変更する
@@ -477,9 +479,9 @@ public class Player : BasePlayer
         float p = Useful.DecimalPointTruncation(power, 1);  //小数点第2以下切り捨て
 
         //バリアが破壊されていなかったらバリアにダメージを肩代わりさせる
-        if (Barrier.HP > 0)
+        if (_Barrier.HP > 0)
         {
-            Barrier.Damage(p);
+            _Barrier.Damage(p);
         }
         //バリアが破壊されていたらドローンが直接ダメージを受ける
         else

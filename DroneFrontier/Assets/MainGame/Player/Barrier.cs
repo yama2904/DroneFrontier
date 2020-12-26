@@ -26,6 +26,7 @@ public class Barrier : MonoBehaviour
             HP = 0;
         }
 
+
         Debug.Log("バリアに" + power * reduction + "のダメージ\n残りHP: " + HP);
     }
 
@@ -38,6 +39,7 @@ public class Barrier : MonoBehaviour
     {
         reduction = 1 - strengthRate;
         StartCoroutine(EndStrength(time));
+
 
         //デバッグ用
         Debug.Log("バリア強化");
