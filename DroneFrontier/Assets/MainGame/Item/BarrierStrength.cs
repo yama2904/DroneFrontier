@@ -4,19 +4,12 @@ using UnityEngine;
 
 public class BarrierStrength : MonoBehaviour
 {
-    void Start()
-    {
-        
-    }
-    
-    void Update()
-    {
-        
-    }
+    static float strengthRate = 0.8f;    //バリアのダメージ軽減率
+    static float strengthTime = 10.0f;   //強化時間
 
     //バリアを強化する
-    public void Strength(Barrier barrier)
+    public static void Strength(Barrier barrier)
     {
-
+        barrier.BarrierStrength(strengthRate, strengthTime);
     }
 }

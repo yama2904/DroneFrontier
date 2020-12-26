@@ -364,18 +364,18 @@ public class Player : BasePlayer
         }
 
         //デバッグ用
-        //if (Input.GetKeyDown(KeyCode.Space))
-        //{
-        //    LockOn.TrackingSpeed *= 0.1f;
-        //    PlayerCameraController.RotateSpeed *= 0.1f;
-        //    MoveSpeed *= 0.1f;
-        //}
-        //if (Input.GetKeyUp(KeyCode.Space))
-        //{
-        //    LockOn.TrackingSpeed *= 10;
-        //    PlayerCameraController.RotateSpeed *= 10;
-        //    MoveSpeed *= 10;
-        //}
+        if (Input.GetKeyDown(KeyCode.LeftControl))
+        {
+            LockOn.TrackingSpeed *= 0.1f;
+            PlayerCameraController.RotateSpeed *= 0.1f;
+            MoveSpeed *= 0.1f;
+        }
+        if (Input.GetKeyUp(KeyCode.LeftControl))
+        {
+            LockOn.TrackingSpeed *= 10;
+            PlayerCameraController.RotateSpeed *= 10;
+            MoveSpeed *= 10;
+        }
         if (Input.GetKeyDown(KeyCode.P))
         {
             cacheTransform.position = initPos;

@@ -19,13 +19,12 @@ public class Item : MonoBehaviour
     [SerializeField] ItemType itemType = ItemType.NONE;
 
     //アイテムを使用する
-    public void UseItem(Player player)
+    public void UseItem(BasePlayer player)
     {
         //バリア強化
         if(itemType == ItemType.BARRIER_STRENGTH)
         {
-            GameObject o = Instantiate(Resources.Load(FOLDER_PATH + "BarrierStrength")) as GameObject;
-            o.GetComponent<BarrierStrength>().Strength(player.Barrier);
+            BarrierStrength.Strength(player.Barrier);
         }
 
         //ジャミング
