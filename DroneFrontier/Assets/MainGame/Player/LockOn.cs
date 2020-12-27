@@ -24,6 +24,7 @@ public class LockOn : MonoBehaviour
 
     //ロックオン処理用変数
     [SerializeField] Image lockOnImage = null;    //ロックオンした際に表示する画像
+    List<GameObject> notLockOnObjects = new List<GameObject>();
     float searchRadius = 100.0f; //ロックオンする範囲
     public float TrackingSpeed { get; set; } = 0.1f;     //ロックオンした際に敵にカメラを向ける速度
     bool useLockOn = true;   //ロックオンを使うか
@@ -42,14 +43,19 @@ public class LockOn : MonoBehaviour
         {
             isMainPlayer = true;
         }
-
         playerTransform = player.transform;
         cameraTransform = _camera.transform;
-        TrackingSpeed = 0.1f;
-        lockOnImage.enabled = false;    //ロックオンしていない際は非表示
+
+        //ターゲット用変数
         Target = null;
         targetTransform = null;
         isTarget = false;
+
+        //ロックオン処理用変数
+        List<GameObject> notLockOnObjects = new List<GameObject>();
+        TrackingSpeed = 0.1f;
+        lockOnImage.enabled = false;    //ロックオンしていない際は非表示
+        useLockOn = true;
     }
 
     void Update()
@@ -74,6 +80,29 @@ public class LockOn : MonoBehaviour
             }
         }
     }
+
+    //リストから必要な要素だけ抜き取る
+    List<GameObject> FilterTargetObject(List<GameObject> hits)
+    {
+        return hits.Where(h =>
+        {
+            //各要素の座標をビューポートに変換(画面左下が0:0、右上が1:1)して条件に合うものだけリストに詰め込む
+            Vector3 screenPoint = _camera.WorldToViewportPoint(h.transform.position);
+            return screenPoint.x > 0.25f && screenPoint.x < 0.75f && screenPoint.y > 0.15f && screenPoint.y < 0.85f && screenPoint.z > 0;
+        }).Where(h => !ReferenceEquals(h, player))      //操作しているプレイヤーは除外
+          .Where(h => h.CompareTag(Player.PLAYER_TAG) || h.CompareTag(CPUController.CPU_TAG) ||   //ロックオン対象を選択
+           h.CompareTag(JammingBot.JAMMING_BOT_TAG))
+           .Where(h =>   //notLockOnObjects内のオブジェクトがある場合は除外
+           {
+               if(notLockOnObjects.FindIndex(o => ReferenceEquals(o, h.gameObject)) == -1)
+               {
+                   return true;
+               }
+               return false;
+           })
+          .ToList();
+    }
+
 
     //ロックオンする
     public void StartLockOn()
@@ -146,17 +175,23 @@ public class LockOn : MonoBehaviour
         useLockOn = use;
     }
 
-    //リストから必要な要素だけ抜き取る
-    List<GameObject> FilterTargetObject(List<GameObject> hits)
+    //ロックオンしないオブジェクトを設定
+    public void AddNotLockOnObject(GameObject o)
     {
-        return hits.Where(h =>
+        //既にオブジェクトが含まれている場合はスルー
+        if (notLockOnObjects.FindIndex(listObject => ReferenceEquals(listObject, o)) == -1)
         {
-            //各要素の座標をビューポートに変換(画面左下が0:0、右上が1:1)して条件に合うものだけリストに詰め込む
-            Vector3 screenPoint = _camera.WorldToViewportPoint(h.transform.position);
-            return screenPoint.x > 0.25f && screenPoint.x < 0.75f && screenPoint.y > 0.15f && screenPoint.y < 0.85f && screenPoint.z > 0;
-        }).Where(h => !ReferenceEquals(h, player))      //操作しているプレイヤーは除外
-          .Where(h => h.CompareTag(Player.PLAYER_TAG) || h.CompareTag(CPUController.CPU_TAG) ||   //ロックオン対象を選択
-           h.CompareTag(JammingBot.JAMMING_BOT_TAG))
-          .ToList();
+        notLockOnObjects.Add(o);
+        }
+    }
+
+    //AddNotLockOnObjectで設定したオブジェクトをロックオンするように設定
+    public void RemoveNotLockOnObject(GameObject o)
+    {
+        int index = notLockOnObjects.FindIndex(listObject => ReferenceEquals(listObject, o));
+        if(index >= 0)
+        {
+            notLockOnObjects.RemoveAt(index);
+        }
     }
 }

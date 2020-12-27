@@ -5,7 +5,7 @@ using System;
 
 public class Explosion : MonoBehaviour
 {
-    public GameObject notHitObject { private get; set; } = null;  //当たり判定を行わないオブジェクト
+    public BasePlayer Shooter { private get; set; } = null;  //撃ったプレイヤー
     [SerializeField] float size = 20;    //爆発範囲
     [SerializeField] float power = 20;   //威力
     [SerializeField] float powerDownRate = 0.8f;   //中心地からの距離による威力減衰率
@@ -51,24 +51,24 @@ public class Explosion : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        //当たり判定を行わないオブジェクトだったら処理をしない
-        if (ReferenceEquals(other.gameObject, notHitObject))
+        if (other.CompareTag(Player.PLAYER_TAG) || other.CompareTag(CPUController.CPU_TAG))
         {
-            return;
-        }
+            BasePlayer bp = other.GetComponent<BasePlayer>();
 
-        //既にヒット済のオブジェクトはスルー
-        foreach (GameObject o in wasHitObjects)
-        {
-            if (ReferenceEquals(other.gameObject, o))
+            //当たり判定を行わないオブジェクトだったら処理をしない
+            if (ReferenceEquals(bp, Shooter))
             {
                 return;
             }
-        }
-
-        if (other.CompareTag(Player.PLAYER_TAG) || other.CompareTag(CPUController.CPU_TAG))
-        {
-            other.GetComponent<BasePlayer>().Damage(CalcPower(other.transform.position));
+            //既にヒット済のオブジェクトはスルー
+            foreach (GameObject o in wasHitObjects)
+            {
+                if (ReferenceEquals(other.gameObject, o))
+                {
+                    return;
+                }
+            }
+            bp.Damage(CalcPower(other.transform.position));
             wasHitObjects.Add(other.gameObject);
 
 
@@ -77,7 +77,20 @@ public class Explosion : MonoBehaviour
         }
         else if (other.CompareTag(JammingBot.JAMMING_BOT_TAG))
         {
-            other.GetComponent<JammingBot>().Damage(CalcPower(other.transform.position));
+            JammingBot jb = other.GetComponent<JammingBot>();
+            if (ReferenceEquals(jb.CreatedPlayer, Shooter))
+            {
+                return;
+            }
+            //既にヒット済のオブジェクトはスルー
+            foreach (GameObject o in wasHitObjects)
+            {
+                if (ReferenceEquals(other.gameObject, o))
+                {
+                    return;
+                }
+            }
+            jb.Damage(CalcPower(other.transform.position));
             wasHitObjects.Add(other.gameObject);
 
 

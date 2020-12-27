@@ -4,20 +4,19 @@ using UnityEngine;
 
 public class Jamming : MonoBehaviour
 {
+    BasePlayer createdPlayer;
+
     [SerializeField] GameObject jammingBot = null;
-    JammingBot createBot;
-    List<BasePlayer> jamingObjects;
+    [SerializeField] Transform jammingBotPosition = null;
+    JammingBot createBot = null; 
+    List<BasePlayer> jamingObjects = new List<BasePlayer>();
 
     [SerializeField] float destroyTime = 60.0f;
-    float deltaTime;
-    bool isEndCoroutine;
+    float deltaTime = 0;
+    bool isEndCoroutine = false;
 
     void Start()
     {
-        createBot = null;
-        jamingObjects = new List<BasePlayer>();
-        deltaTime = 0;
-        isEndCoroutine = false;
     }
 
     void Update()
@@ -28,10 +27,10 @@ public class Jamming : MonoBehaviour
             if (createBot == null)
             {
                 //ジャミングを解除する
-                foreach(BasePlayer bp in jamingObjects)
+                foreach (BasePlayer bp in jamingObjects)
                 {
                     bp._LockOn.UseLockOn(true);
-                }
+                }                
                 Radar.UseRadar(true);
 
                 Destroy(gameObject);
@@ -40,13 +39,15 @@ public class Jamming : MonoBehaviour
     }
 
     //ジャミングボットを生成する
-    public void CreateBot(Transform t)
+    public void CreateBot(BasePlayer player)
     {
-        transform.position = t.position;
+        createdPlayer = player;
+        transform.position = player.transform.position;
 
-        Vector3 pos = transform.position;   //名前省略        
-        createBot = Instantiate(jammingBot, //ボットを生成
-            new Vector3(pos.x, pos.y + 2.0f, pos.z), Quaternion.Euler(0, 0, 0)).GetComponent<JammingBot>();
+        //ボット生成
+        createBot = Instantiate(jammingBot,
+            transform.position + jammingBotPosition.localPosition, Quaternion.Euler(0, 0, 0)).GetComponent<JammingBot>();
+        createBot.CreatedPlayer = player;
         createBot.transform.SetParent(transform);   //ボットを子に設定
 
 
@@ -63,14 +64,14 @@ public class Jamming : MonoBehaviour
         while (true)
         {
             //一定時間経過したらbotを破壊してコルーチンを抜ける
-            if(deltaTime >= time)
+            if (deltaTime >= time)
             {
                 bot.DestroyBot();
                 isEndCoroutine = true;
                 yield break;
             }
             //botが破壊されたらコルーチンを抜ける
-            if(bot == null)
+            if (bot == null)
             {
                 isEndCoroutine = true;
                 yield break;
@@ -83,55 +84,44 @@ public class Jamming : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        bool isBasePlayer = false;
-        BasePlayer bp = null;
+        if (other.CompareTag(Player.PLAYER_TAG) || other.CompareTag(CPUController.CPU_TAG))
+        {
+            BasePlayer bp = other.GetComponent<BasePlayer>();
+            if (ReferenceEquals(bp, createdPlayer))   //ジャミングを付与しないプレイヤーならスキップ
+            {
+                return;
+            }
 
-        if (other.CompareTag(Player.PLAYER_TAG))
-        {
-            bp = other.GetComponent<BasePlayer>();
             bp._LockOn.UseLockOn(false);
-            Radar.UseRadar(false);
-            isBasePlayer = true;
-        }
-        else if (other.CompareTag(CPUController.CPU_TAG))
-        {
-            bp = other.GetComponent<BasePlayer>();
-            bp._LockOn.UseLockOn(false);
-            isBasePlayer = true;
-        }
-
-        //ジャミング内に入ったプレイヤーをリストに追加
-        if (isBasePlayer)
-        {
             jamingObjects.Add(bp);    //リストに追加
+
+            if (other.CompareTag(Player.PLAYER_TAG))
+            {
+                Radar.UseRadar(false);
+            }
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        bool isBasePlayer = false;
-        BasePlayer bp = null;
-        if (other.CompareTag(Player.PLAYER_TAG))
+        if (other.CompareTag(Player.PLAYER_TAG) || other.CompareTag(CPUController.CPU_TAG))
         {
-            bp = other.GetComponent<BasePlayer>();
-            bp._LockOn.UseLockOn(true);
-            Radar.UseRadar(true);
-            isBasePlayer = true;
-        }
-        else if (other.CompareTag(CPUController.CPU_TAG))
-        {
-            bp = other.GetComponent<BasePlayer>();
-            bp._LockOn.UseLockOn(true);
-            isBasePlayer = true;
-        }
+            BasePlayer bp = other.GetComponent<BasePlayer>();
+            if (ReferenceEquals(bp, createdPlayer))   //ジャミングを付与しないプレイヤーならスキップ
+            {
+                return;
+            }
 
-        //ジャミングから出たプレイヤーをリストから削除
-        if (isBasePlayer)
-        {
+            bp._LockOn.UseLockOn(true);
             int index = jamingObjects.FindIndex(o => ReferenceEquals(bp, o));
             if (index >= 0)
             {
                 jamingObjects.RemoveAt(index);
+            }
+
+            if (other.CompareTag(Player.PLAYER_TAG))
+            {
+                Radar.UseRadar(true);
             }
         }
     }

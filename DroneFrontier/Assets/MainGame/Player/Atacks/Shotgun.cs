@@ -75,7 +75,7 @@ public class Shotgun : AtackBase
                 Transform t = b.transform;  //キャッシュ
 
                 //弾丸のパラメータ設定
-                b.notHitObject = notHitObject;    //武器の所持者を登録
+                b.Shooter = Shooter;    //撃ったプレイヤーを登録
                 b.Target = target;          //ロックオン中の敵
                 b.SpeedPerSecond = speedPerSecond;   //スピード
                 b.DestroyTime = destroyTime;         //射程

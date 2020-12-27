@@ -273,7 +273,7 @@ public class Laser : AtackBase
                 }
                 else if (o.CompareTag(JammingBot.JAMMING_BOT_TAG))
                 {
-                    o.GetComponent<JammingBot>().Damage(BulletPower);
+                    o.GetComponent<JammingBot>().Damage(BulletPower);   
                 }
 
                 //ヒットしたオブジェクトの距離をレーザーの長さにする
@@ -320,9 +320,24 @@ public class Laser : AtackBase
     List<RaycastHit> FilterTargetRaycast(List<RaycastHit> hits)
     {
         //不要な要素を除外する
-        return hits.Where(h => !ReferenceEquals(h.transform.gameObject, notHitObject))  //当たり判定を行わないオブジェクトを除外
-                   .Where(h => !h.transform.CompareTag(Item.ITEM_TAG))      //アイテム除外
+        return hits.Where(h => !h.transform.CompareTag(Item.ITEM_TAG))      //アイテム除外
                    .Where(h => !h.transform.CompareTag(Bullet.BULLET_TAG))  //弾丸除外
+                   .Where(h =>  //撃ったプレイヤーは当たり判定から除外
+                   {
+                       if (h.transform.CompareTag(Player.PLAYER_TAG) || h.transform.CompareTag(CPUController.CPU_TAG))
+                       {
+                           return !ReferenceEquals(h.transform.GetComponent<BasePlayer>(), Shooter);
+                       }
+                       return true;
+                   })
+                   .Where(h =>  //ジャミングボットを生成したプレイヤーと打ったプレイヤーが同じなら除外
+                   {
+                       if (h.transform.CompareTag(JammingBot.JAMMING_BOT_TAG))
+                       {
+                           return !ReferenceEquals(h.transform.GetComponent<JammingBot>().CreatedPlayer, Shooter);
+                       }
+                       return true;
+                   })
                    .ToList();  //リスト化 
     }
 

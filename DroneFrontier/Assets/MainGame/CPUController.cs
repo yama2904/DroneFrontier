@@ -37,7 +37,7 @@ public class CPUController : BasePlayer
 
         //コンポーネントの取得
         AtackBase abM = main.GetComponent<AtackBase>(); //名前省略
-        abM.notHitObject = gameObject;    //自分をヒットさせない
+        abM.Shooter = this;    //自分をヒットさせない
         weapons[(int)Weapon.MAIN] = abM;
 
 
@@ -52,7 +52,7 @@ public class CPUController : BasePlayer
 
         //コンポーネントの取得
         AtackBase abS = sub.GetComponent<AtackBase>();
-        abS.notHitObject = gameObject;    //自分をヒットさせない
+        abS.Shooter = this;    //自分をヒットさせない
         weapons[(int)Weapon.SUB] = abS;
 
         items = new Item[(int)ItemNum.NONE];

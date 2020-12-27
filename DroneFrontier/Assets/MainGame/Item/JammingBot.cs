@@ -5,13 +5,15 @@ using UnityEngine;
 public class JammingBot : MonoBehaviour
 {
     public const string JAMMING_BOT_TAG = "JammingBot";
+    public BasePlayer CreatedPlayer { get; set; } = null;
     [SerializeField] float HP = 30.0f;
 
     void Start()
     {
-        
+        //生成した自分のジャミングボットをプレイヤーがロックオンしないように設定
+        CreatedPlayer._LockOn.AddNotLockOnObject(gameObject);
     }
-    
+
     void Update()
     {
         
@@ -23,6 +25,7 @@ public class JammingBot : MonoBehaviour
         Debug.Log("ジャミングボット破壊");
 
 
+        CreatedPlayer._LockOn.RemoveNotLockOnObject(gameObject);
         Destroy(gameObject);
     }
 

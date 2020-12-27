@@ -6,7 +6,7 @@ using System;
 
 /*
  * 公開変数
- * float HP                  ローンのHP
+ * float HP                  ドローンのHP
  * float MoveSpeed           移動速度
  * float MaxSpeed            最高速度
  * Barrier Barrier           プレイヤーのバリア
@@ -79,7 +79,7 @@ public class Player : BasePlayer
 
         //コンポーネントの取得
         AtackBase abM = main.GetComponent<AtackBase>(); //名前省略
-        abM.notHitObject = gameObject;    //自分をヒットさせない
+        abM.Shooter = this;    //自分をヒットさせない
         weapons[(int)Weapon.MAIN] = abM;
 
 
@@ -94,7 +94,7 @@ public class Player : BasePlayer
 
         //コンポーネントの取得
         AtackBase abS = sub.GetComponent<AtackBase>();
-        abS.notHitObject = gameObject;    //自分をヒットさせない
+        abS.Shooter = this;    //自分をヒットさせない
         weapons[(int)Weapon.SUB] = abS;
 
         items = new Item[(int)ItemNum.NONE];
@@ -361,7 +361,7 @@ public class Player : BasePlayer
             o.transform.localRotation = Quaternion.Euler(0, 0, 0);
 
             AtackBase ab = o.GetComponent<AtackBase>();
-            ab.notHitObject = gameObject;
+            ab.Shooter = this;
             weapons[(int)Weapon.SUB] = ab;
         }
 

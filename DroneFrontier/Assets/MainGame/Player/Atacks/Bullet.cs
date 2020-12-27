@@ -6,8 +6,8 @@ public class Bullet : MonoBehaviour
 {
     public const string BULLET_TAG = "Bullet";
 
-    public GameObject notHitObject { protected get; set; } = null;   //当たり判定を行わないオブジェクト
-    public GameObject Target { private get; set; } = null;   //誘導する対象
+    public BasePlayer Shooter { protected get; set; } = null;  //撃ったプレイヤー
+    public GameObject Target { private get; set; } = null;     //誘導する対象
     public float TrackingPower { protected get; set; } = 0;    //追従力
     public float Power { protected get; set; } = 0;            //威力
     public float SpeedPerSecond { protected get; set; } = 0;   //1秒間に進む量
@@ -59,20 +59,27 @@ public class Bullet : MonoBehaviour
 
     protected virtual void OnTriggerEnter(Collider other)
     {
-        //当たり判定を行わないオブジェクトだったら処理をしない
-        if (ReferenceEquals(other.gameObject, notHitObject))
-        {
-            return;
-        }
-
+        //プレイヤーかCPUの当たり判定
         if (other.CompareTag(Player.PLAYER_TAG) || other.CompareTag(CPUController.CPU_TAG))
         {
-            other.GetComponent<BasePlayer>().Damage(Power);
+            //撃ったプレイヤーなら当たり判定を行わない
+            BasePlayer bp = other.GetComponent<BasePlayer>();
+            if (ReferenceEquals(bp, Shooter))
+            {
+                return;
+            }
+
+            bp.Damage(Power);
             Destroy(gameObject);
         }
         else if (other.CompareTag(JammingBot.JAMMING_BOT_TAG))
         {
-            other.GetComponent<JammingBot>().Damage(Power);
+            JammingBot jb = other.GetComponent<JammingBot>();
+            if (ReferenceEquals(jb.CreatedPlayer, Shooter))
+            {
+                return;
+            }
+            jb.Damage(Power);
             Destroy(gameObject);
         }
     }

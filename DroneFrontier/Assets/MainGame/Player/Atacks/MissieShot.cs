@@ -61,7 +61,7 @@ public class MissieShot : AtackBase
         MissileBullet m = Instantiate(missile, transform.position, transform.rotation);    //ミサイルの複製
 
         //弾丸のパラメータ設定
-        m.notHitObject = notHitObject;    //武器の所持者を登録
+        m.Shooter = Shooter;    //撃ったプレイヤーを登録
         m.Target = target;          //ロックオン中の敵
         m.SpeedPerSecond = speedPerSecond;  //スピード
         m.DestroyTime = destroyTime;        //射程

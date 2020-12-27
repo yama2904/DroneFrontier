@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class BarrierStrength : MonoBehaviour
 {
-    static float strengthRate = 0.8f;    //バリアのダメージ軽減率
+    static float strengthRate = 0.5f;    //バリアのダメージ軽減率
     static float strengthTime = 10.0f;   //強化時間
 
     //バリアを強化する

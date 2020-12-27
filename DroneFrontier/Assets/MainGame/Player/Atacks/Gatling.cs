@@ -59,8 +59,8 @@ public class Gatling : AtackBase
         Bullet b = Instantiate(bullet, transform.position, transform.rotation);    //弾丸の複製
 
         //弾丸のパラメータ設定
-        b.notHitObject = notHitObject;    //武器の所持者を登録
-        b.Target = target;          //ロックオン中の敵
+        b.Shooter = Shooter;    //撃ったプレイヤーを登録
+        b.Target = target;      //ロックオン中の敵
         b.SpeedPerSecond = speedPerSecond;  //スピード
         b.DestroyTime = destroyTime;        //射程
         b.TrackingPower = trackingPower;    //誘導力

@@ -38,20 +38,26 @@ public class MissileBullet : Bullet
 
     protected override void OnTriggerEnter(Collider other)
     {
-        //当たり判定を行わないオブジェクトだったら処理をしない
-        if (ReferenceEquals(other.gameObject, notHitObject))
-        {
-            return;
-        }
-
         if (other.CompareTag(Player.PLAYER_TAG) || other.CompareTag(CPUController.CPU_TAG))
         {
-            other.GetComponent<Player>().Damage(Power);
+            BasePlayer bp = other.GetComponent<BasePlayer>();
+            //当たり判定を行わないオブジェクトだったら処理をしない
+            if (ReferenceEquals(bp, Shooter))
+            {
+                return;
+            }
+
+            bp.Damage(Power);
             createExplosion();
         }
         else if (other.CompareTag(JammingBot.JAMMING_BOT_TAG))
         {
-            other.GetComponent<JammingBot>().Damage(Power);
+            JammingBot jb = other.GetComponent<JammingBot>();
+            if(jb.CreatedPlayer == Shooter)
+            {
+                return;
+            }
+            jb.Damage(Power);
             createExplosion();
         }
     }
@@ -59,7 +65,7 @@ public class MissileBullet : Bullet
     void createExplosion()
     {
         Explosion e = Instantiate(explosion, cacheTransform.position, Quaternion.Euler(0, 0, 0));
-        e.notHitObject = notHitObject;
+        e.Shooter = Shooter;
         Destroy(gameObject);
     }
 }

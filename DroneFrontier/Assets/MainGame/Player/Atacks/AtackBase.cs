@@ -4,10 +4,10 @@ using UnityEngine;
 
 public abstract class AtackBase : MonoBehaviour
 {
-    public GameObject notHitObject { get; set; } = null;  //当たり判定を行わないオブジェクト
-    protected float RecastCountTime { get; set; } = 0;    //リキャスト時間をカウントする変数
-    protected float ShotCountTime { get; set; } = 0;      //1発ごとの間隔をカウントする変数
-    protected float BulletPower { get; set; } = -1;       //弾丸の威力
+    public BasePlayer Shooter { get; set; } = null;      //撃ったプレイヤー
+    protected float RecastCountTime { get; set; } = 0;   //リキャスト時間をカウントする変数
+    protected float ShotCountTime { get; set; } = 0;     //1発ごとの間隔をカウントする変数
+    protected float BulletPower { get; set; } = -1;      //弾丸の威力
 
     //プロパティ用
     float recast = 0;
