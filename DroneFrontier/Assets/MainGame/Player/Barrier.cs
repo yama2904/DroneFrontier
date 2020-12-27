@@ -20,14 +20,15 @@ public class Barrier : MonoBehaviour
     //バリアに引数分のダメージを与える
     public void Damage(float power)
     {
-        HP -= power * reduction;
+        float p = Useful.DecimalPointTruncation(power * reduction, 1);  //小数点第2以下切り捨て
+        HP -= p;
         if(HP < 0)
         {
             HP = 0;
         }
 
 
-        Debug.Log("バリアに" + power * reduction + "のダメージ\n残りHP: " + HP);
+        Debug.Log("バリアに" + p + "のダメージ\n残りHP: " + HP);
     }
 
     /*

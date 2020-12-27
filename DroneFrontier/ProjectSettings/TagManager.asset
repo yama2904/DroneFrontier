@@ -7,6 +7,7 @@ TagManager:
   - Item
   - CPU
   - Bullet
+  - JammingBot
   layers:
   - Default
   - TransparentFX

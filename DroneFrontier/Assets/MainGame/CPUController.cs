@@ -6,6 +6,7 @@ public class CPUController : BasePlayer
 {
     public const string CPU_TAG = "CPU";    //タグ名
     Transform cacheTransform = null;
+    [SerializeField] LockOn lockOn = null;      //ロックオン
 
     //デバッグ用
     [SerializeField] float speed = 0.1f;
@@ -16,6 +17,7 @@ public class CPUController : BasePlayer
     {
         cacheTransform = transform;
         _Rigidbody = GetComponent<Rigidbody>();
+        _LockOn = lockOn;
 
         HP = 1000;
         MoveSpeed = speed;
@@ -27,7 +29,7 @@ public class CPUController : BasePlayer
         //メインウェポンの処理
         AtackManager.CreateAtack(out GameObject main, AtackManager.Weapon.GATLING);    //Gatlingの生成
         Transform mainTransform = main.transform;   //キャッシュ
-        mainTransform.parent = cacheTransform;      //作成したGatlingを子オブジェクトにする
+        mainTransform.SetParent(cacheTransform);      //作成したGatlingを子オブジェクトにする
 
         //位置と角度の初期設定
         mainTransform.localPosition = new Vector3(0, 0, 0);
@@ -42,7 +44,7 @@ public class CPUController : BasePlayer
         //サブウェポンの処理
         AtackManager.CreateAtack(out GameObject sub, AtackManager.Weapon.SHOTGUN);    //Shotgunの作成
         Transform subTransform = sub.transform; //キャッシュ
-        subTransform.parent = cacheTransform;   //作成したGatlingを子オブジェクトにする
+        subTransform.SetParent(cacheTransform);   //作成したGatlingを子オブジェクトにする
 
         //位置と角度の初期設定
         subTransform.localPosition = new Vector3(0, 0, 0);

@@ -267,15 +267,15 @@ public class Laser : AtackBase
                 SearchNearestObject(out RaycastHit hit, hits);
                 GameObject o = hit.transform.gameObject;
 
-                if (o.CompareTag(Player.PLAYER_TAG))
+                if (o.CompareTag(Player.PLAYER_TAG) || o.CompareTag(CPUController.CPU_TAG))
                 {
-                    o.GetComponent<Player>().Damage(BulletPower);
+                    o.GetComponent<BasePlayer>().Damage(BulletPower);
                 }
-                else if (o.CompareTag(CPUController.CPU_TAG))
+                else if (o.CompareTag(JammingBot.JAMMING_BOT_TAG))
                 {
+                    o.GetComponent<JammingBot>().Damage(BulletPower);
+                }
 
-                    o.GetComponent<CPUController>().Damage(BulletPower);
-                }
                 //ヒットしたオブジェクトの距離をレーザーの長さにする
                 lineLength = hit.distance;
 

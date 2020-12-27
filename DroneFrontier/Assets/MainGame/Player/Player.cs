@@ -71,7 +71,7 @@ public class Player : BasePlayer
         //メインウェポンの処理
         AtackManager.CreateAtack(out GameObject main, AtackManager.Weapon.GATLING);    //Gatlingの生成
         Transform mainTransform = main.transform;   //キャッシュ
-        mainTransform.parent = cacheTransform;      //作成したGatlingを子オブジェクトにする
+        mainTransform.SetParent(cacheTransform);      //作成したGatlingを子オブジェクトにする
 
         //位置と角度の初期設定
         mainTransform.localPosition = new Vector3(0, 0, 0);
@@ -86,7 +86,7 @@ public class Player : BasePlayer
         //サブウェポンの処理
         AtackManager.CreateAtack(out GameObject sub, AtackManager.Weapon.SHOTGUN);    //Shotgunの作成
         Transform subTransform = sub.transform; //キャッシュ
-        subTransform.parent = cacheTransform;   //作成したGatlingを子オブジェクトにする
+        subTransform.SetParent(cacheTransform);   //作成したGatlingを子オブジェクトにする
 
         //位置と角度の初期設定
         subTransform.localPosition = new Vector3(0, 0, 0);
@@ -354,7 +354,7 @@ public class Player : BasePlayer
             AtackManager.CreateAtack(out GameObject o, (AtackManager.Weapon)atackType);
 
             //Playerの子オブジェクトに設定
-            o.transform.parent = cacheTransform;
+            o.transform.SetParent(cacheTransform);
 
             //位置と角度の初期設定
             o.transform.localPosition = new Vector3(0, 0, 0);

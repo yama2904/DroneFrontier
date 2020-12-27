@@ -15,7 +15,7 @@ public class Explosion : MonoBehaviour
     List<GameObject> wasHitObjects;    //触れたオブジェクトを全て格納する
     const float DESTROY_TIME = 3.0f;    //生存時間
 
-    IEnumerator Start()
+    void Start()
     {
         //サイズに応じて変数の値も変える
         notPowerDownRange *= size;
@@ -42,8 +42,7 @@ public class Explosion : MonoBehaviour
         wasHitObjects = new List<GameObject>();
 
         //一定時間後に消滅
-        yield return new WaitForSeconds(DESTROY_TIME);
-        Destroy(gameObject);
+        Destroy(gameObject, DESTROY_TIME);
     }
 
     void Update()
@@ -67,15 +66,18 @@ public class Explosion : MonoBehaviour
             }
         }
 
-        if (other.CompareTag(Player.PLAYER_TAG))
+        if (other.CompareTag(Player.PLAYER_TAG) || other.CompareTag(CPUController.CPU_TAG))
         {
-            other.GetComponent<Player>().Damage(CalcPower(other.transform.position));
+            other.GetComponent<BasePlayer>().Damage(CalcPower(other.transform.position));
             wasHitObjects.Add(other.gameObject);
-        }
 
-        if (other.CompareTag(CPUController.CPU_TAG))
+
+            //デバッグ用
+            Debug.Log("威力: " + CalcPower(other.transform.position));
+        }
+        else if (other.CompareTag(JammingBot.JAMMING_BOT_TAG))
         {
-            other.GetComponent<CPUController>().Damage(CalcPower(other.transform.position));
+            other.GetComponent<JammingBot>().Damage(CalcPower(other.transform.position));
             wasHitObjects.Add(other.gameObject);
 
 

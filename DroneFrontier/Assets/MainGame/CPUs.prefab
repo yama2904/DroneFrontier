@@ -200,6 +200,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MoveSpeed: 0
+  lockOn: {fileID: 7107612377659270603}
   speed: 0.1
   isAtack: 0
 --- !u!1 &3405057424940411893

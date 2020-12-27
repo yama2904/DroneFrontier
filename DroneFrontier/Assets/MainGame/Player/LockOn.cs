@@ -155,7 +155,8 @@ public class LockOn : MonoBehaviour
             Vector3 screenPoint = _camera.WorldToViewportPoint(h.transform.position);
             return screenPoint.x > 0.25f && screenPoint.x < 0.75f && screenPoint.y > 0.15f && screenPoint.y < 0.85f && screenPoint.z > 0;
         }).Where(h => !ReferenceEquals(h, player))      //操作しているプレイヤーは除外
-          .Where(h => h.CompareTag(Player.PLAYER_TAG) || h.CompareTag(CPUController.CPU_TAG))       //プレイヤーとCPUが対象
+          .Where(h => h.CompareTag(Player.PLAYER_TAG) || h.CompareTag(CPUController.CPU_TAG) ||   //ロックオン対象を選択
+           h.CompareTag(JammingBot.JAMMING_BOT_TAG))
           .ToList();
     }
 }

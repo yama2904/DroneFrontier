@@ -65,15 +65,14 @@ public class Bullet : MonoBehaviour
             return;
         }
 
-        if (other.CompareTag(Player.PLAYER_TAG))
+        if (other.CompareTag(Player.PLAYER_TAG) || other.CompareTag(CPUController.CPU_TAG))
         {
-            other.GetComponent<Player>().Damage(Power);
+            other.GetComponent<BasePlayer>().Damage(Power);
             Destroy(gameObject);
         }
-
-        if (other.CompareTag(CPUController.CPU_TAG))
+        else if (other.CompareTag(JammingBot.JAMMING_BOT_TAG))
         {
-            other.GetComponent<CPUController>().Damage(Power);
+            other.GetComponent<JammingBot>().Damage(Power);
             Destroy(gameObject);
         }
     }
