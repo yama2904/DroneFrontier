@@ -49,6 +49,11 @@ public class Player : BasePlayer
     bool isQ = true;
     Vector3 initPos;
 
+    protected override void Awake()
+    {
+        base.Awake();
+    }
+
     protected override void Start()
     {
         cacheTransform = transform;
@@ -56,48 +61,17 @@ public class Player : BasePlayer
         _Barrier = barrier;
         _LockOn = lockOn;
 
-        HP = 10;
+        HP = 30;
         MoveSpeed = 20.0f;
         MaxSpeed = 30.0f;
 
         //武器の初期化
-        weapons = new AtackBase[(int)Weapon.NONE];
         isUsingWeapons = new bool[(int)Weapon.NONE];
         for (int i = 0; i < (int)Weapon.NONE; i++)
         {
             isUsingWeapons[i] = false;
         }
 
-        //メインウェポンの処理
-        AtackManager.CreateAtack(out GameObject main, AtackManager.Weapon.GATLING);    //Gatlingの生成
-        Transform mainTransform = main.transform;   //キャッシュ
-        mainTransform.SetParent(cacheTransform);      //作成したGatlingを子オブジェクトにする
-
-        //位置と角度の初期設定
-        mainTransform.localPosition = new Vector3(0, 0, 0);
-        mainTransform.localRotation = Quaternion.Euler(0, 0, 0);
-
-        //コンポーネントの取得
-        AtackBase abM = main.GetComponent<AtackBase>(); //名前省略
-        abM.Shooter = this;    //自分をヒットさせない
-        weapons[(int)Weapon.MAIN] = abM;
-
-
-        //サブウェポンの処理
-        AtackManager.CreateAtack(out GameObject sub, AtackManager.Weapon.SHOTGUN);    //Shotgunの作成
-        Transform subTransform = sub.transform; //キャッシュ
-        subTransform.SetParent(cacheTransform);   //作成したGatlingを子オブジェクトにする
-
-        //位置と角度の初期設定
-        subTransform.localPosition = new Vector3(0, 0, 0);
-        subTransform.localRotation = Quaternion.Euler(0, 0, 0);
-
-        //コンポーネントの取得
-        AtackBase abS = sub.GetComponent<AtackBase>();
-        abS.Shooter = this;    //自分をヒットさせない
-        weapons[(int)Weapon.SUB] = abS;
-
-        items = new Item[(int)ItemNum.NONE];
         boostImage = GameObject.Find("BoostGauge").GetComponent<Image>();
         boostImage.fillAmount = 1;
         isBoost = false;
@@ -360,7 +334,7 @@ public class Player : BasePlayer
             o.transform.localPosition = new Vector3(0, 0, 0);
             o.transform.localRotation = Quaternion.Euler(0, 0, 0);
 
-            AtackBase ab = o.GetComponent<AtackBase>();
+            BaseAtack ab = o.GetComponent<BaseAtack>();
             ab.Shooter = this;
             weapons[(int)Weapon.SUB] = ab;
         }
@@ -407,12 +381,6 @@ public class Player : BasePlayer
 
         //デバッグ用
         //Debug.Log(_rigidbody.velocity.sqrMagnitude);
-    }
-
-    //攻撃
-    protected override void UseWeapon(Weapon weapon)
-    {
-        weapons[(int)weapon].Shot(_LockOn.Target);
     }
 
     //スピードを変更する
@@ -468,33 +436,6 @@ public class Player : BasePlayer
                 //デバッグ用
                 Debug.Log("アイテム取得");
             }
-        }
-    }
-
-
-
-    //プレイヤーにダメージを与える
-    public override void Damage(float power)
-    {
-        float p = Useful.DecimalPointTruncation(power, 1);  //小数点第2以下切り捨て
-
-        //バリアが破壊されていなかったらバリアにダメージを肩代わりさせる
-        if (_Barrier.HP > 0)
-        {
-            _Barrier.Damage(p);
-        }
-        //バリアが破壊されていたらドローンが直接ダメージを受ける
-        else
-        {
-            HP -= p;
-            if (HP < 0)
-            {
-                HP = 0;
-            }
-
-
-            //デバッグ用
-            Debug.Log("playerに" + p + "のダメージ\n残りHP: " + HP);
         }
     }
 }

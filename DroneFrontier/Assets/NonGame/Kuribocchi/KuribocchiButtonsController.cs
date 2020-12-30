@@ -28,7 +28,7 @@ public class KuribocchiButtonsController : MonoBehaviour
     public void SelectRiajuu()
     {  
         inputNameObject.SetActive(true);  //名前入力の表示
-        screenMask.SetActive(true); //後ろのボタンを押せなくする
+        screenMask.SetActive(true);       //後ろのボタンを押せなくする
         BrightnessManager.SetGameAlfa(0.7f);    //後ろを暗くする
     }
 

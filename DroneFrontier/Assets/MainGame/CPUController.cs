@@ -5,8 +5,9 @@ using UnityEngine;
 public class CPUController : BasePlayer
 {
     public const string CPU_TAG = "CPU";    //タグ名
-    Transform cacheTransform = null;
+    [SerializeField] Barrier barrier = null;    //バリア
     [SerializeField] LockOn lockOn = null;      //ロックオン
+    Transform cacheTransform = null;
 
     //デバッグ用
     [SerializeField] float speed = 0.1f;
@@ -17,45 +18,12 @@ public class CPUController : BasePlayer
     {
         cacheTransform = transform;
         _Rigidbody = GetComponent<Rigidbody>();
+        _Barrier = barrier;
         _LockOn = lockOn;
 
-        HP = 1000;
+        HP = 30;
         MoveSpeed = speed;
         MaxSpeed = 30.0f;
-
-        //武器の初期化
-        weapons = new AtackBase[(int)Weapon.NONE];
-
-        //メインウェポンの処理
-        AtackManager.CreateAtack(out GameObject main, AtackManager.Weapon.GATLING);    //Gatlingの生成
-        Transform mainTransform = main.transform;   //キャッシュ
-        mainTransform.SetParent(cacheTransform);      //作成したGatlingを子オブジェクトにする
-
-        //位置と角度の初期設定
-        mainTransform.localPosition = new Vector3(0, 0, 0);
-        mainTransform.localRotation = Quaternion.Euler(0, 0, 0);
-
-        //コンポーネントの取得
-        AtackBase abM = main.GetComponent<AtackBase>(); //名前省略
-        abM.Shooter = this;    //自分をヒットさせない
-        weapons[(int)Weapon.MAIN] = abM;
-
-
-        //サブウェポンの処理
-        AtackManager.CreateAtack(out GameObject sub, AtackManager.Weapon.SHOTGUN);    //Shotgunの作成
-        Transform subTransform = sub.transform; //キャッシュ
-        subTransform.SetParent(cacheTransform);   //作成したGatlingを子オブジェクトにする
-
-        //位置と角度の初期設定
-        subTransform.localPosition = new Vector3(0, 0, 0);
-        subTransform.localRotation = Quaternion.Euler(0, 0, 0);
-
-        //コンポーネントの取得
-        AtackBase abS = sub.GetComponent<AtackBase>();
-        abS.Shooter = this;    //自分をヒットさせない
-        weapons[(int)Weapon.SUB] = abS;
-
-        items = new Item[(int)ItemNum.NONE];
     }
 
     protected override void Update()
@@ -70,14 +38,9 @@ public class CPUController : BasePlayer
         deltaTime += Time.deltaTime;
     }
 
-    protected override void UseWeapon(Weapon weapon)
-    {
-        weapons[(int)weapon].Shot();
-    }
-
     protected override void Move(float speed, float _maxSpeed, Vector3 direction)
     {
-        
+
     }
 
     protected override IEnumerator UseBoost(float speedMgnf, float time)
@@ -89,17 +52,5 @@ public class CPUController : BasePlayer
         yield return new WaitForSeconds(time);
         MoveSpeed /= speedMgnf;
         MaxSpeed /= speedMgnf;
-    }
-
-    //ダメージを与える
-    public override void Damage(float power)
-    {
-        float p = Useful.DecimalPointTruncation(power, 1);  //小数点第2以下切り捨て
-        HP -= p;
-        if(HP < 0)
-        {
-            HP = 0;
-        }
-        Debug.Log(name + "に" + p + "のダメージ\n残りHP: " + HP);
     }
 }

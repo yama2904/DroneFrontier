@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class AtackBase : MonoBehaviour
+public abstract class BaseAtack : MonoBehaviour
 {
     public BasePlayer Shooter { get; set; } = null;      //撃ったプレイヤー
     protected float RecastCountTime { get; set; } = 0;   //リキャスト時間をカウントする変数

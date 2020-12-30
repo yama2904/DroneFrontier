@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
 
-public class Laser : AtackBase
+public class Laser : BaseAtack
 {
     const float SHOT_POSSIBLE_MIN = 0.2f;       //発射可能な最低ゲージ量
     Image laserImage;

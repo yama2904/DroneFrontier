@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Shotgun : AtackBase
+public class Shotgun : BaseAtack
 {
     //ショットガンのパラメータ
     [SerializeField] Bullet bullet = null;      //弾のオブジェクト

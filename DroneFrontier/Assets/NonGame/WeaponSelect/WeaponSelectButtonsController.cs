@@ -52,6 +52,7 @@ public class WeaponSelectButtonsController : MonoBehaviour
         weapon = AtackManager.Weapon.LASER;
     }
 
+    //決定
     public void SelectDecision()
     {
         if(weapon == AtackManager.Weapon.NONE)
@@ -60,7 +61,13 @@ public class WeaponSelectButtonsController : MonoBehaviour
         }
         if (!MainGameManager.IsMulti)
         {
-            MainGameManager.LoadMainGameScene();
+            MainGameManager.PlayerData pd = new MainGameManager.PlayerData();
+            pd.name = "Player";
+            pd.weapon = weapon;
+            pd.isPlayer = true;
+            MainGameManager.playerDatas.Add(pd);
+
+            NonGameManager.LoadMainGameScene();
         }
     }
 

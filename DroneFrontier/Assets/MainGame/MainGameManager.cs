@@ -16,14 +16,12 @@ using UnityEngine.SceneManagement;
  * enum GameMode    ゲームモード一覧
  * 
  * 公開メソッド
- * static void LoadMainGameScene()  MainGameSceneへ移動する
  * static void ConfigToMainGame()   設定画面からゲーム画面に移動する(ほとんどConfigManager専用)
  */
 public class MainGameManager : MonoBehaviour
 {
     //操作しているプレイヤー
-    [SerializeField] GameObject mainPlayer = null;
-    public static GameObject MainPlayer { get; private set; } = null;
+    public static GameObject MainPlayer { get; set; } = null;
 
     //マルチモードか
     public static bool IsMulti { get; set; } = false;
@@ -47,6 +45,22 @@ public class MainGameManager : MonoBehaviour
     }
     public static GameMode Mode { get; set; } = GameMode.NONE;  //選んでいるゲームモード
 
+    //NonGameSceneからプレイヤー・CPUを追加する用
+    public class PlayerData
+    {
+        public string name;
+        public AtackManager.Weapon weapon;
+        public bool isPlayer;
+    }
+    public static List<PlayerData> playerDatas = new List<PlayerData>();
+
+    //ゲーム上のプレイヤー・CPU情報
+    [SerializeField] BasePlayer playerInspector = null;
+    [SerializeField] BasePlayer cpuInspector = null;
+    static BasePlayer player = null;
+    static BasePlayer cpu = null;
+    static List<BasePlayer> basePlayers = new List<BasePlayer>();
+
 
     //設定画面移動時のマスク用変数
     [SerializeField] Image screenMaskImageInspector = null;  //画面を暗くする画像を持っているオブジェクト
@@ -64,7 +78,8 @@ public class MainGameManager : MonoBehaviour
 
     void Awake()
     {
-        MainPlayer = mainPlayer;
+        player = playerInspector;
+        cpu = cpuInspector;
         screenMaskImage = screenMaskImageInspector;
     }
 
@@ -77,6 +92,26 @@ public class MainGameManager : MonoBehaviour
         screenMaskImage.color = new Color(MASK_COLOR_RED, MASK_COLOR_GREEN, MASK_COLOR_BLUE, MASK_COLOR_ALFA);
         screenMaskImage.enabled = false;
         IsConfig = false;
+
+
+        //プレイヤーとCPUを配置
+        for (int i = 0; i < playerDatas.Count; i++)
+        {
+            BasePlayer p;
+            if (playerDatas[i].isPlayer)
+            {
+                p = Instantiate(player);
+            }
+            else
+            {
+                p = Instantiate(cpu);
+            }
+            p.transform.Translate(0, 0, i * 2.0f);
+            p.name = playerDatas[i].name;
+            p.SetWeapon(playerDatas[i].weapon);
+
+            basePlayers.Add(p);
+        }
     }
 
     void Update()
@@ -112,10 +147,15 @@ public class MainGameManager : MonoBehaviour
         }
     }
 
-    public static void LoadMainGameScene()
+    void MainGameToConfig()
     {
-        SceneManager.LoadScene("MainGameScene");
+        screenMaskImage.enabled = true;     //設定画面の背景にマスクをつける
+        BaseScreenManager.SetScreen(BaseScreenManager.Screen.CONFIG);
+
+        Cursor.lockState = CursorLockMode.None;
+        IsConfig = true;
     }
+
 
     //設定画面からメインゲームに移動する
     public static void ConfigToMainGame()
@@ -132,14 +172,5 @@ public class MainGameManager : MonoBehaviour
             Cursor.lockState = CursorLockMode.None;
         }
         IsConfig = false;
-    }
-
-    void MainGameToConfig()
-    {
-        screenMaskImage.enabled = true;     //設定画面の背景にマスクをつける
-        BaseScreenManager.SetScreen(BaseScreenManager.Screen.CONFIG);
-
-        Cursor.lockState = CursorLockMode.None;
-        IsConfig = true;
     }
 }

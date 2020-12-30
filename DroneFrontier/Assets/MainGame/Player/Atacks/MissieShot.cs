@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MissieShot : AtackBase
+public class MissieShot : BaseAtack
 {
     [SerializeField] MissileBullet missile = null;
 

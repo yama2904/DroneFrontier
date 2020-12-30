@@ -29,6 +29,7 @@ public class CPUSelectButtonsController : MonoBehaviour
 
         NONE
     }
+
     [SerializeField] GameObject CPUList = null;
     GameObject[] CPULists;  //CPUリスト
     Button[] buttons;       //CPUの武器を選択するボタン
@@ -119,45 +120,63 @@ public class CPUSelectButtonsController : MonoBehaviour
 
     public void SelectCPU1Shotgun()
     {
+        CPUsWeapon[(int)List.LIST_1] = Weapon.SHOTGUN;
         SetButtonColor(List.LIST_1, Weapon.SHOTGUN);
     }
     public void SelectCPU1Missile()
     {
+        CPUsWeapon[(int)List.LIST_1] = Weapon.MISSILE;
         SetButtonColor(List.LIST_1, Weapon.MISSILE);
     }
     public void SelectCPU1Laser()
     {
+        CPUsWeapon[(int)List.LIST_1] = Weapon.LASER;
         SetButtonColor(List.LIST_1, Weapon.LASER);
     }
 
     public void SelectCPU2Shotgun()
     {
+        CPUsWeapon[(int)List.LIST_2] = Weapon.SHOTGUN;
         SetButtonColor(List.LIST_2, Weapon.SHOTGUN);
     }
     public void SelectCPU2Missile()
     {
+        CPUsWeapon[(int)List.LIST_2] = Weapon.MISSILE;
         SetButtonColor(List.LIST_2, Weapon.MISSILE);
     }
     public void SelectCPU2Laser()
     {
+        CPUsWeapon[(int)List.LIST_2] = Weapon.LASER;
         SetButtonColor(List.LIST_2, Weapon.LASER);
     }
 
     public void SelectCPU3Shotgun()
     {
+        CPUsWeapon[(int)List.LIST_3] = Weapon.SHOTGUN;
         SetButtonColor(List.LIST_3, Weapon.SHOTGUN);
     }
     public void SelectCPU3Missile()
     {
+        CPUsWeapon[(int)List.LIST_3] = Weapon.MISSILE;
         SetButtonColor(List.LIST_3, Weapon.MISSILE);
     }
     public void SelectCPU3Laser()
     {
+        CPUsWeapon[(int)List.LIST_3] = Weapon.LASER;
         SetButtonColor(List.LIST_3, Weapon.LASER);
     }
 
+    //決定
     public void SelectDecision()
     {
+        for(int i = 0; i < cpuNum; i++)
+        {
+            MainGameManager.PlayerData pd = new MainGameManager.PlayerData();
+            pd.name = "CPU" + (i + 1);
+            pd.weapon = ConverWeaponToAtackManagerWeapon(CPUsWeapon[i]);
+            pd.isPlayer = false;
+            MainGameManager.playerDatas.Add(pd);
+        }
         BaseScreenManager.SetScreen(BaseScreenManager.Screen.WEAPON_SELECT);
     }
 
@@ -166,6 +185,7 @@ public class CPUSelectButtonsController : MonoBehaviour
         //ソロモードなら戻る
         if (!MainGameManager.IsMulti)
         {
+            MainGameManager.playerDatas.Clear();
             BaseScreenManager.SetScreen(BaseScreenManager.Screen.KURIBOCCHI);
         }
     }
@@ -190,5 +210,23 @@ public class CPUSelectButtonsController : MonoBehaviour
     int GetIndex(List l, Weapon w)
     {
         return ((int)l * (int)List.NONE) + (int)w;
+    }
+
+    AtackManager.Weapon ConverWeaponToAtackManagerWeapon(Weapon weapon)
+    {
+        int w = (int)weapon;
+        if(w == (int)AtackManager.Weapon.SHOTGUN)
+        {
+            return AtackManager.Weapon.SHOTGUN;
+        }
+        else if (w == (int)AtackManager.Weapon.MISSILE)
+        {
+            return AtackManager.Weapon.MISSILE;
+        }
+        else if (w == (int)AtackManager.Weapon.LASER)
+        {
+            return AtackManager.Weapon.LASER;
+        }
+        return AtackManager.Weapon.NONE;
     }
 }
