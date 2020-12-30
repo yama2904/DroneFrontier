@@ -5,7 +5,7 @@ using UnityEngine;
 public class Shotgun : BaseAtack
 {
     //ショットガンのパラメータ
-    [SerializeField] Bullet bullet = null;      //弾のオブジェクト
+    [SerializeField] Bullet bullet = null;          //弾のオブジェクト
     [SerializeField] float diffusionPower = 10.0f;  //拡散力
     [SerializeField] float angleDiff = 3.0f;        //角度の変動量
 

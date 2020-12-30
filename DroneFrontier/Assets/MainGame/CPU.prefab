@@ -187,7 +187,7 @@ Rigidbody:
   m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 3
 --- !u!114 &8144674656803707232
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -205,6 +205,7 @@ MonoBehaviour:
   lockOn: {fileID: 7107612377659270603}
   speed: 0.1
   isAtack: 1
+  isMove: 1
 --- !u!1 &5030925782722277086
 GameObject:
   m_ObjectHideFlags: 0
@@ -426,6 +427,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac108096e504c104b8be64881239cda1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  regeneTime: 8
+  regeneValue: 5
+  repairBarrierTime: 15
 --- !u!1 &9092863741187852823
 GameObject:
   m_ObjectHideFlags: 0

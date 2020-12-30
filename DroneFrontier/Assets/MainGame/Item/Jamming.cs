@@ -9,7 +9,7 @@ public class Jamming : MonoBehaviour
     [SerializeField] GameObject jammingBot = null;
     [SerializeField] Transform jammingBotPosition = null;
     JammingBot createBot = null; 
-    List<BasePlayer> jamingObjects = new List<BasePlayer>();
+    List<BasePlayer> jamingPlayers = new List<BasePlayer>();
 
     [SerializeField] float destroyTime = 60.0f;
     float deltaTime = 0;
@@ -27,7 +27,7 @@ public class Jamming : MonoBehaviour
             if (createBot == null)
             {
                 //ジャミングを解除する
-                foreach (BasePlayer bp in jamingObjects)
+                foreach (BasePlayer bp in jamingPlayers)
                 {
                     bp._LockOn.UseLockOn(true);
                 }                
@@ -93,7 +93,7 @@ public class Jamming : MonoBehaviour
             }
 
             bp._LockOn.UseLockOn(false);
-            jamingObjects.Add(bp);    //リストに追加
+            jamingPlayers.Add(bp);    //リストに追加
 
             if (other.CompareTag(Player.PLAYER_TAG))
             {
@@ -113,10 +113,10 @@ public class Jamming : MonoBehaviour
             }
 
             bp._LockOn.UseLockOn(true);
-            int index = jamingObjects.FindIndex(o => ReferenceEquals(bp, o));
+            int index = jamingPlayers.FindIndex(o => ReferenceEquals(bp, o));
             if (index >= 0)
             {
-                jamingObjects.RemoveAt(index);
+                jamingPlayers.RemoveAt(index);
             }
 
             if (other.CompareTag(Player.PLAYER_TAG))

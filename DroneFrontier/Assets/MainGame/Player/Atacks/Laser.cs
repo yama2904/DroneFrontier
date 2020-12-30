@@ -8,7 +8,7 @@ public class Laser : BaseAtack
 {
     const float SHOT_POSSIBLE_MIN = 0.2f;       //発射可能な最低ゲージ量
     Image laserImage;
-    [SerializeField] float maxShotTime = 5;         //最大何秒発射できるか
+    [SerializeField] float maxShotTime = 5;     //最大何秒発射できるか
     float gaugeAmout = 1.0f;
 
     //Charge用変数
@@ -83,7 +83,7 @@ public class Laser : BaseAtack
         lineTransform = lineParticle.transform;
 
         //thunderオブジェクト
-        thunderParticle = midwayTransform.Find("thunderController/thunder").GetComponent<ParticleSystem>();
+        thunderParticle = midwayTransform.Find("thunder").GetComponent<ParticleSystem>();
         thunderTransform = thunderParticle.transform;
         initThunderScaleZ = thunderTransform.localScale.z;   //初期の長さを保存
         initThunderPosZ = thunderTransform.localPosition.z;  //初期のz座標を保存
@@ -108,8 +108,6 @@ public class Laser : BaseAtack
         {
             endChilds[i] = endTransform.GetChild(i).GetComponent<ParticleSystem>();
         }
-        endTransform.localRotation = midwayTransform.localRotation;
-
         //初期座標の保存
         endTransform.localRotation = midwayTransform.localRotation;   //Midwayと同じ向き
 
@@ -262,9 +260,9 @@ public class Laser : BaseAtack
             //レーザーの射線上にヒットした全てのオブジェクトを調べる
             var hits = Physics.SphereCastAll(
                 lineTransform.position,    //レーザーの発射座標
-                lineRadius,                 //レーザーの半径
+                lineRadius,                //レーザーの半径
                 lineTransform.forward,     //レーザーの正面
-                lineRange)                  //射程
+                lineRange)                 //射程
                 .ToList();  //リスト化  
 
             hits = FilterTargetRaycast(hits);

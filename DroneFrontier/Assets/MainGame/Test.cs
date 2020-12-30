@@ -13,9 +13,11 @@ public class Test : MonoBehaviour
     //GameObject mainCamera;
     bool isMainCamera = true;
 
-    [SerializeField] bool isWeaponDebug = false;
     [SerializeField] BasePlayer player;
     [SerializeField] BasePlayer cpu;
+    [SerializeField] bool isWeaponDebug = false;
+    [SerializeField] AtackManager.Weapon playerWeapon = AtackManager.Weapon.SHOTGUN;
+    [SerializeField] AtackManager.Weapon cpuWeapon = AtackManager.Weapon.SHOTGUN;
 
     void Start()
     {
@@ -24,8 +26,8 @@ public class Test : MonoBehaviour
 
         if (isWeaponDebug)
         {
-            player.SetWeapon(AtackManager.Weapon.MISSILE);
-            cpu.SetWeapon(AtackManager.Weapon.LASER);
+            player.SetWeapon(playerWeapon);
+            cpu.SetWeapon(cpuWeapon);
         }
 
         //mainCamera = Camera.main.gameObject;
