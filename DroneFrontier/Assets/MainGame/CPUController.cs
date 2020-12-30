@@ -12,6 +12,7 @@ public class CPUController : BasePlayer
     //デバッグ用
     [SerializeField] float speed = 0.1f;
     [SerializeField] bool isAtack = true;
+    [SerializeField] bool isMove = true;
     float deltaTime = 1;
 
     protected override void Start()
@@ -30,11 +31,14 @@ public class CPUController : BasePlayer
     {
         if (isAtack)
         {
-            UseWeapon(Weapon.MAIN);
+            UseWeapon(Weapon.SUB);
         }
 
         //デバッグ用
-        //transform.position += new Vector3(MoveSpeed * Mathf.Sin(deltaTime), 0, 0);
+        if (isMove)
+        {
+            transform.position += new Vector3(MoveSpeed * Mathf.Sin(deltaTime), 0, 0);
+        }
         deltaTime += Time.deltaTime;
     }
 

@@ -13,12 +13,20 @@ public class Test : MonoBehaviour
     //GameObject mainCamera;
     bool isMainCamera = true;
 
-    
+    [SerializeField] bool isWeaponDebug = false;
+    [SerializeField] BasePlayer player;
+    [SerializeField] BasePlayer cpu;
 
     void Start()
     {
         deltaTime = 0;
         count = 0;
+
+        if (isWeaponDebug)
+        {
+            player.SetWeapon(AtackManager.Weapon.MISSILE);
+            cpu.SetWeapon(AtackManager.Weapon.LASER);
+        }
 
         //mainCamera = Camera.main.gameObject;
     }

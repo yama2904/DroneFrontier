@@ -9,6 +9,7 @@ public class Laser : BaseAtack
     const float SHOT_POSSIBLE_MIN = 0.2f;       //発射可能な最低ゲージ量
     Image laserImage;
     [SerializeField] float maxShotTime = 5;         //最大何秒発射できるか
+    float gaugeAmout = 1.0f;
 
     //Charge用変数
     const int MAX_RATE_OVER_TIME = 128;         //チャージのパーティクルのrateOverTime最大値
@@ -55,10 +56,15 @@ public class Laser : BaseAtack
 
     protected override void Start()
     {
+        //スーパークラスの変数
         Recast = 8.0f;
         ShotInterval = 1.0f / hitPerSecond;
         ShotCountTime = ShotInterval;
         BulletPower = 5.0f;
+
+        laserImage = GameObject.Find("LaserGauge").GetComponent<Image>();
+        laserImage.fillAmount = 1.0f;
+        gaugeAmout = 1.0f;
 
         Transform cacheTransform = transform;   //処理の軽量化用キャッシュ
 
@@ -111,11 +117,6 @@ public class Laser : BaseAtack
         ModifyLaserLength(lineRange);   //Laserの長さを設定した長さに変更
         isShots = new bool[(int)ShotFlag.NONE];
         StopShot(); //開始時は発射させない
-
-
-        //デバッグ用
-        laserImage = GameObject.Find("LaserGauge").GetComponent<Image>();
-        laserImage.fillAmount = 1;
     }
 
     protected override void Update()
@@ -131,19 +132,27 @@ public class Laser : BaseAtack
         if (!isShots[(int)ShotFlag.SHOT_START])
         {
             //処理が無駄なのでゲージがMAXならスキップ
-            if (laserImage.fillAmount < 1.0f)
+            if (gaugeAmout < 1.0f)
             {
                 //ゲージを回復
-                laserImage.fillAmount += 1.0f / Recast * Time.deltaTime;
-                if (laserImage.fillAmount > 1.0f)
+                gaugeAmout += 1.0f / Recast * Time.deltaTime;
+                if (gaugeAmout > 1.0f)
                 {
-                    laserImage.fillAmount = 1.0f;
+                    gaugeAmout = 1.0f;
 
 
                     //デバッグ用
                     Debug.Log("ゲージMAX");
                 }
             }
+        }
+
+
+        //あとで直す
+        //プレイヤーの場合のみUIのゲージ消費
+        if (Shooter.CompareTag(Player.PLAYER_TAG))
+        {
+            laserImage.fillAmount = gaugeAmout;
         }
     }
 
@@ -174,7 +183,7 @@ public class Laser : BaseAtack
         if (!isCharged)
         {
             //発射に必要な最低限のゲージがないと発射しない
-            if (laserImage.fillAmount < SHOT_POSSIBLE_MIN)
+            if (gaugeAmout < SHOT_POSSIBLE_MIN)
             {
                 return;
             }
@@ -237,10 +246,10 @@ public class Laser : BaseAtack
 
 
             //ゲージを減らす
-            laserImage.fillAmount -= 1.0f / maxShotTime * Time.deltaTime;
-            if (laserImage.fillAmount <= 0)    //ゲージがなくなったらレーザーを止める
+            gaugeAmout -= 1.0f / maxShotTime * Time.deltaTime;
+            if (gaugeAmout <= 0)    //ゲージがなくなったらレーザーを止める
             {
-                laserImage.fillAmount = 0;
+                gaugeAmout = 0;
                 StopShot();
             }
 

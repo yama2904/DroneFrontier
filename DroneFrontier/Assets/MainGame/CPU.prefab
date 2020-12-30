@@ -204,7 +204,7 @@ MonoBehaviour:
   barrier: {fileID: 458129881166742028}
   lockOn: {fileID: 7107612377659270603}
   speed: 0.1
-  isAtack: 0
+  isAtack: 1
 --- !u!1 &5030925782722277086
 GameObject:
   m_ObjectHideFlags: 0

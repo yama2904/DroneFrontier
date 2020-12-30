@@ -12,6 +12,8 @@ public abstract class BasePlayer : MonoBehaviour
     public Barrier _Barrier { get; protected set; } = null;
     public LockOn _LockOn { get; protected set; } = null;
 
+    public float AtackingDecreaseSpeed { protected get; set; } = 0.5f;   //攻撃中の移動速度の低下率
+
     //武器
     protected enum Weapon
     {

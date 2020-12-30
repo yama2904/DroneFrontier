@@ -16,7 +16,7 @@ using System;
  */
 public class Player : BasePlayer
 {
-    public const string PLAYER_TAG = "Player";  //タグ名    
+    public const string PLAYER_TAG = "Player";  //タグ名
     [SerializeField] Barrier barrier = null;    //バリア
     [SerializeField] LockOn lockOn = null;      //ロックオン
     Transform cacheTransform = null;            //キャッシュ用
@@ -167,7 +167,7 @@ public class Player : BasePlayer
             //サブ武器を使用していない場合は移動速度と回転速度とロックオンの追従速度を下げる
             if (!isUsingWeapons[(int)Weapon.SUB])
             {
-                ModifySpeeds(0.5f);
+                ModifySpeeds(AtackingDecreaseSpeed);
                 isUsingWeapons[(int)Weapon.MAIN] = true;
             }
         }
@@ -180,7 +180,7 @@ public class Player : BasePlayer
             //メインもサブも使用していないなら速度を戻す
             if (!isUsingWeapons[(int)Weapon.SUB])
             {
-                ModifySpeeds(2f);
+                ModifySpeeds(1 / AtackingDecreaseSpeed);
             }
             isUsingWeapons[(int)Weapon.MAIN] = false;
         }
@@ -191,7 +191,7 @@ public class Player : BasePlayer
             //メイン武器を使用していない場合は移動速度と回転速度とロックオンの追従速度を下げる
             if (!isUsingWeapons[(int)Weapon.MAIN])
             {
-                ModifySpeeds(0.5f);
+                ModifySpeeds(AtackingDecreaseSpeed);
                 isUsingWeapons[(int)Weapon.SUB] = true;
             }
         }
@@ -204,7 +204,7 @@ public class Player : BasePlayer
         {
             if (!isUsingWeapons[(int)Weapon.MAIN])
             {
-                ModifySpeeds(2f);
+                ModifySpeeds(1 / AtackingDecreaseSpeed);
             }
             isUsingWeapons[(int)Weapon.SUB] = false;
         }
