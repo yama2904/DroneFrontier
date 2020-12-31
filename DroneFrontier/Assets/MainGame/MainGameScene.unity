@@ -156,7 +156,7 @@ MonoBehaviour:
   cpu: {fileID: 973596507}
   isWeaponDebug: 1
   playerWeapon: 3
-  cpuWeapon: 0
+  cpuWeapon: 1
 --- !u!4 &368702361
 Transform:
   m_ObjectHideFlags: 0
@@ -483,7 +483,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &802274048
 Transform:
   m_ObjectHideFlags: 0
@@ -515,6 +515,8 @@ MonoBehaviour:
   lineParticle: {fileID: 1772439731}
   thunderParticle: {fileID: 1651725256}
   lineRadius: 0.01
+  lineRange: 1000
+  barrierWeakTime: 15
 --- !u!1 &845985091
 GameObject:
   m_ObjectHideFlags: 0
@@ -10587,7 +10589,7 @@ PrefabInstance:
     - target: {fileID: 5672577718144898233, guid: 0d7f3964dc7ef5d44b37f6d18923755e,
         type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5929291292695623215, guid: 0d7f3964dc7ef5d44b37f6d18923755e,
         type: 3}
@@ -10647,6 +10649,11 @@ PrefabInstance:
     - target: {fileID: 5993988190775103734, guid: 0d7f3964dc7ef5d44b37f6d18923755e,
         type: 3}
       propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7450029337900604501, guid: 0d7f3964dc7ef5d44b37f6d18923755e,
+        type: 3}
+      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7723932609892601403, guid: 0d7f3964dc7ef5d44b37f6d18923755e,

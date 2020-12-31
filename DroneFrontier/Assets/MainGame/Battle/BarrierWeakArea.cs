@@ -87,7 +87,7 @@ public class BarrierWeakArea : MonoBehaviour
                 if (index == -1)
                 {
                     //存在していなかったらバリアを弱体化させてリストに追加
-                    bp._Barrier.HP *= -0.5f;
+                    //bp._Barrier.HP *= -0.5f;
 
 
                     HitPlayerData h = new HitPlayerData();

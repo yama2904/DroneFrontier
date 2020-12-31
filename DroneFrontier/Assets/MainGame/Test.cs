@@ -35,15 +35,6 @@ public class Test : MonoBehaviour
 
     void Update()
     {
-        if (isTime)
-        {
-            if (deltaTime >= 1.0f)
-            {
-                Debug.Log(++count + "秒");
-                deltaTime = 0;
-            }
-        }
-
         if (Input.GetKeyDown(KeyCode.K))
         {
             isMainCamera = !isMainCamera;
@@ -86,7 +77,18 @@ public class Test : MonoBehaviour
                 subCamera.transform.Translate(0, -0.01f, 0);
             }
         }
+    }
 
+    private void FixedUpdate()
+    {
+        if (isTime)
+        {
+            if (deltaTime >= 1.0f)
+            {
+                Debug.Log(++count + "秒");
+                deltaTime = 0;
+            }
+        }
         deltaTime += Time.deltaTime;
     }
 }

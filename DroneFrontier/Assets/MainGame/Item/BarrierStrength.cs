@@ -8,8 +8,8 @@ public class BarrierStrength : MonoBehaviour
     static float strengthTime = 10.0f;   //強化時間
 
     //バリアを強化する
-    public static void Strength(Barrier barrier)
+    public static void Strength(BasePlayer player)
     {
-        barrier.BarrierStrength(strengthRate, strengthTime);
+        player.SetBarrierStrength(strengthRate, strengthTime);
     }
 }

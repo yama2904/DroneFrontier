@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Barrier : MonoBehaviour
+public class Barrier : MonoBehaviour, IBarrier, IBarrierStatus
 {
     const float MAX_HP = 100;
     public float HP { get; set; } = MAX_HP;
@@ -103,7 +103,6 @@ public class Barrier : MonoBehaviour
         //デバッグ用
         Debug.Log("バリア強化");
     }
-
     //time秒後にバリア強化を終了させる
     IEnumerator EndStrength(float time)
     {
@@ -113,5 +112,11 @@ public class Barrier : MonoBehaviour
 
         //デバッグ用
         Debug.Log("バリア強化解除");
+    }
+
+    //バリア弱体化
+    public void BarrierWeak(float time)
+    {
+
     }
 }

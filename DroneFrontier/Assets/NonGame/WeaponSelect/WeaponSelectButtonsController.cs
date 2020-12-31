@@ -20,7 +20,7 @@ public class WeaponSelectButtonsController : MonoBehaviour
     [SerializeField] Text messageWindowText = null;
 
     //選択した武器
-    AtackManager.Weapon weapon;
+    AtackManager.Weapon weapon = AtackManager.Weapon.NONE;
 
     void Start()
     {
@@ -30,8 +30,6 @@ public class WeaponSelectButtonsController : MonoBehaviour
         itemOnButton.image.color = selectButtonColor; //デフォルトでアイテムONボタンが押されているようにする
 
         messageWindowText.text = "武器を選択してください。";
-        
-        weapon = AtackManager.Weapon.NONE;
     }
 
     public void SelectShotgun()

@@ -11,7 +11,7 @@ public class JammingBot : MonoBehaviour
     void Start()
     {
         //生成した自分のジャミングボットをプレイヤーがロックオンしないように設定
-        CreatedPlayer._LockOn.AddNotLockOnObject(gameObject);
+        //CreatedPlayer._LockOn.AddNotLockOnObject(gameObject);
     }
 
     void Update()
@@ -25,7 +25,7 @@ public class JammingBot : MonoBehaviour
         Debug.Log("ジャミングボット破壊");
 
 
-        CreatedPlayer._LockOn.RemoveNotLockOnObject(gameObject);
+        //CreatedPlayer._LockOn.RemoveNotLockOnObject(gameObject);
         Destroy(gameObject);
     }
 

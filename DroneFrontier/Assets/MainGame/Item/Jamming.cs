@@ -29,7 +29,7 @@ public class Jamming : MonoBehaviour
                 //ジャミングを解除する
                 foreach (BasePlayer bp in jamingPlayers)
                 {
-                    bp._LockOn.UseLockOn(true);
+                    //bp._LockOn.UseLockOn(true);
                 }                
                 Radar.UseRadar(true);
 
@@ -92,7 +92,7 @@ public class Jamming : MonoBehaviour
                 return;
             }
 
-            bp._LockOn.UseLockOn(false);
+            //bp._LockOn.UseLockOn(false);
             jamingPlayers.Add(bp);    //リストに追加
 
             if (other.CompareTag(Player.PLAYER_TAG))
@@ -112,7 +112,7 @@ public class Jamming : MonoBehaviour
                 return;
             }
 
-            bp._LockOn.UseLockOn(true);
+            //bp._LockOn.UseLockOn(true);
             int index = jamingPlayers.FindIndex(o => ReferenceEquals(bp, o));
             if (index >= 0)
             {

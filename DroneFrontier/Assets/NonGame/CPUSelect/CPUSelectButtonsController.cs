@@ -31,9 +31,9 @@ public class CPUSelectButtonsController : MonoBehaviour
     }
 
     [SerializeField] GameObject CPUList = null;
-    GameObject[] CPULists;  //CPUリスト
-    Button[] buttons;       //CPUの武器を選択するボタン
-    Weapon[] CPUsWeapon;    //各CPUの武器
+    GameObject[] CPULists = new GameObject[(int)List.NONE];  //CPUリスト
+    Weapon[] CPUsWeapon = new Weapon[(int)List.NONE];    //各CPUの武器
+    Button[] buttons = new Button[(int)List.NONE * (int)Weapon.NONE];  //CPUの武器を選択するボタン(2次元配列を1次元にまとめる)
     
     //色用変数
     const string SELECT_BUTTON_COLOR = "#A2A2A2";       //ボタンを押したときの色の16進数
@@ -62,10 +62,7 @@ public class CPUSelectButtonsController : MonoBehaviour
         buttonName[(int)Weapon.SHOTGUN] = "SelectShotgun";
         buttonName[(int)Weapon.MISSILE] = "SelectMissile";
         buttonName[(int)Weapon.LASER] = "SelectLaser";
-
-        CPULists = new GameObject[(int)List.NONE];
-        CPUsWeapon = new Weapon[(int)List.NONE];
-        buttons = new Button[(int)List.NONE * (int)Weapon.NONE];    //2次元配列を1次元配列にまとめる
+        
 
         //CPUListsとbuttonsの要素の初期化
         for (int i = 0; i < (int)List.NONE; i++)

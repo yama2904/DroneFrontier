@@ -5,8 +5,6 @@ using UnityEngine;
 public class CPUController : BasePlayer
 {
     public const string CPU_TAG = "CPU";    //タグ名
-    [SerializeField] Barrier barrier = null;    //バリア
-    [SerializeField] LockOn lockOn = null;      //ロックオン
     Transform cacheTransform = null;
 
     //デバッグ用
@@ -18,9 +16,6 @@ public class CPUController : BasePlayer
     protected override void Start()
     {
         cacheTransform = transform;
-        _Rigidbody = GetComponent<Rigidbody>();
-        _Barrier = barrier;
-        _LockOn = lockOn;
 
         HP = 30;
         MoveSpeed = speed;
@@ -29,6 +24,8 @@ public class CPUController : BasePlayer
 
     protected override void Update()
     {
+        base.Update();
+
         if (isAtack)
         {
             UseWeapon(Weapon.SUB);
@@ -40,21 +37,5 @@ public class CPUController : BasePlayer
             transform.position += new Vector3(MoveSpeed * Mathf.Sin(deltaTime), 0, 0);
         }
         deltaTime += Time.deltaTime;
-    }
-
-    protected override void Move(float speed, float _maxSpeed, Vector3 direction)
-    {
-
-    }
-
-    protected override IEnumerator UseBoost(float speedMgnf, float time)
-    {
-        MoveSpeed *= speedMgnf;
-        MaxSpeed *= speedMgnf;
-
-        //time秒後に速度を戻す
-        yield return new WaitForSeconds(time);
-        MoveSpeed /= speedMgnf;
-        MaxSpeed /= speedMgnf;
     }
 }

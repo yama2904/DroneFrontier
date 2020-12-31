@@ -46,14 +46,7 @@ public class LockOn : MonoBehaviour
         playerTransform = player.transform;
         cameraTransform = _camera.transform;
 
-        //ターゲット用変数
-        Target = null;
-        targetTransform = null;
-        isTarget = false;
-
         //ロックオン処理用変数
-        List<GameObject> notLockOnObjects = new List<GameObject>();
-        TrackingSpeed = 0.1f;
         lockOnImage.enabled = false;    //ロックオンしていない際は非表示
         useLockOn = true;
     }

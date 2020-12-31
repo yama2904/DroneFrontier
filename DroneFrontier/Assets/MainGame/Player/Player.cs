@@ -6,68 +6,79 @@ using System;
 
 /*
  * 公開変数
- * float HP                  ドローンのHP
- * float MoveSpeed           移動速度
- * float MaxSpeed            最高速度
- * Barrier Barrier           プレイヤーのバリア
+ * 
  * 
  * 公開メソッド
- * void Damage(float power)  プレイヤーにダメージを与える
+ * 
  */
 public class Player : BasePlayer
 {
     public const string PLAYER_TAG = "Player";  //タグ名
-    [SerializeField] Barrier barrier = null;    //バリア
-    [SerializeField] LockOn lockOn = null;      //ロックオン
     Transform cacheTransform = null;            //キャッシュ用
 
-    bool[] isUsingWeapons;    //使用中の武器
+    bool[] isUsingWeapons = new bool[(int)Weapon.NONE];    //使用中の武器
 
     //ブースト用変数
-    const float BOOST_POSSIBLE_MIN = 0.2f;       //ブースト可能な最低ゲージ量
-    Image boostImage;
-    [SerializeField] float boostAccele = 2.0f;  //ブーストの加速度
-    [SerializeField] float maxBoostTime = 5.0f; //ブーストできる最大の時間
-    [SerializeField] float boostRecastTime = 6.0f;  //ブーストのリキャスト時間
-    bool isBoost;
+    Image boostImage = null;
+    
 
-    //弱体や強化などの状態
-    public enum Status
+
+    //ICameraControllerインタフェース
+    ICameraController GetCameraController()
     {
-        BARRIER_STRENGTH,   //バリア強化
-        STUN,               //スタン
-        JAMMING,            //ジャミング
-        SPEED_DOWN,         //移動・攻撃中のスピードダウン
-        BARRIER_WEAK,       //バリア弱体化
-
-        NONE
+        ICameraController cameraController = this;
+        return cameraController;
     }
-    bool[] isStatus = new bool[(int)Status.NONE];   //状態異常が付与されているか
+
+    float ICameraController.RotateSpeed { get; set; } = 3.0f;
+    float ICameraController.LimitCameraTiltX { get; set; } = 40.0f;
+
+    void ICameraController.Rotate(float speed)
+    {
+        //カメラの回転
+        if (MainGameManager.IsCursorLock)
+        {
+            if (MainGameManager.IsConfig)
+            {
+                return;
+            }
+            ICameraController c = GetCameraController();
+
+            Vector3 angle = new Vector3(Input.GetAxis("Mouse X") * c.RotateSpeed, Input.GetAxis("Mouse Y") * c.RotateSpeed, 0);
+
+            //カメラの左右回転
+            cacheTransform.RotateAround(cacheTransform.position, Vector3.up, angle.x);
+
+            //カメラの上下の回転に制限をかける
+            Vector3 localAngle = cacheTransform.localEulerAngles;
+            localAngle.x += angle.y * -1;
+            if (localAngle.x > c.LimitCameraTiltX && localAngle.x < 180)
+            {
+                localAngle.x = c.LimitCameraTiltX;
+            }
+            if (localAngle.x < 360 - c.LimitCameraTiltX && localAngle.x > 180)
+            {
+                localAngle.x = 360 - c.LimitCameraTiltX;
+            }
+            cacheTransform.localEulerAngles = localAngle;
+        }
+    }
 
 
     //デバッグ用
     int atackType = (int)AtackManager.Weapon.SHOTGUN;
-    bool isQ = true;
     Vector3 initPos;
-
-    protected override void Awake()
-    {
-        base.Awake();
-    }
+    
 
     protected override void Start()
     {
         cacheTransform = transform;
-        _Rigidbody = GetComponent<Rigidbody>();
-        _Barrier = barrier;
-        _LockOn = lockOn;
 
         HP = 30;
         MoveSpeed = 20.0f;
         MaxSpeed = 30.0f;
 
-        //武器の初期化
-        isUsingWeapons = new bool[(int)Weapon.NONE];
+        //配列初期化
         for (int i = 0; i < (int)Weapon.NONE; i++)
         {
             isUsingWeapons[i] = false;
@@ -75,13 +86,6 @@ public class Player : BasePlayer
 
         boostImage = GameObject.Find("BoostGauge").GetComponent<Image>();
         boostImage.fillAmount = 1;
-        isBoost = false;
-
-        isStatus = new bool[(int)Status.NONE];
-        for(int i = 0; i < (int)Status.NONE; i++)
-        {
-            isStatus[i] = false;
-        }
 
 
         //デバッグ用
@@ -90,13 +94,12 @@ public class Player : BasePlayer
 
     protected override void Update()
     {
-        //デバッグ用
+        base.Update();
+
+        if (MainGameManager.IsCursorLock)
         {
-            if (Input.GetKeyDown(KeyCode.V))
-            {
-                isQ = !isQ;
-                Debug.Log("移動処理切り替え");
-            }
+            //回転処理
+            GetCameraController().Rotate(GetCameraController().RotateSpeed);
         }
 
         //移動処理
@@ -133,12 +136,12 @@ public class Player : BasePlayer
         //ロックオン
         if (Input.GetKey(KeyCode.LeftShift))
         {
-            _LockOn.StartLockOn();
+            GetLockOn().StartLockOn();
         }
         //ロックオン解除
         if (Input.GetKeyUp(KeyCode.LeftShift))
         {
-            _LockOn.ReleaseLockOn();
+            GetLockOn().ReleaseLockOn();
         }
 
         //レーダー使用
@@ -153,19 +156,22 @@ public class Player : BasePlayer
         }
 
 
+        //
         //設定画面中はここより下の処理は行わない
         if (MainGameManager.IsConfig)
         {
             return;
         }
-
+        //
+        //
+        
 
         //攻撃処理しか使わない簡易メソッド
         Action<float> ModifySpeeds = (x) =>
         {
             MoveSpeed *= x;
-            PlayerCameraController.RotateSpeed *= x;
-            _LockOn.TrackingSpeed *= x;
+            GetCameraController().RotateSpeed *= x;
+            GetLockOn().TrackingSpeed *= x;
         };
 
         //メイン武器攻撃
@@ -215,7 +221,7 @@ public class Player : BasePlayer
             }
             isUsingWeapons[(int)Weapon.SUB] = false;
         }
-
+        
 
         //ブースト使用
         if (Input.GetKeyDown(KeyCode.Q))
@@ -293,32 +299,13 @@ public class Player : BasePlayer
         //アイテム使用
         if (Input.GetKeyUp(KeyCode.Alpha1))
         {
-            int num = (int)ItemNum.ITEM_1;  //名前省略
-
-            //アイテム枠1にアイテムを持っていたら使用
-            if (items[num] != null)
-            {
-                items[num].UseItem(this);
-
-
-                //デバッグ用
-                Debug.Log("アイテム使用");
-            }
+            UseItem(ItemNum.ITEM_1);
         }
         if (Input.GetKeyUp(KeyCode.Alpha2))
         {
-            int num = (int)ItemNum.ITEM_2;  //名前省略
-
-            //アイテム枠2にアイテムを持っていたら使用
-            if (items[num] != null)
-            {
-                items[num].UseItem(this);
-
-
-                //デバッグ用
-                Debug.Log("アイテム使用");
-            }
+            UseItem(ItemNum.ITEM_2);
         }
+
 
         //デバッグ用
         //武器切り替え
@@ -349,13 +336,13 @@ public class Player : BasePlayer
         //デバッグ用
         if (Input.GetKeyDown(KeyCode.LeftControl))
         {
-            _LockOn.TrackingSpeed *= 0.1f;
+            GetLockOn().TrackingSpeed *= 0.1f;
             PlayerCameraController.RotateSpeed *= 0.1f;
             MoveSpeed *= 0.1f;
         }
         if (Input.GetKeyUp(KeyCode.LeftControl))
         {
-            _LockOn.TrackingSpeed *= 10;
+            GetLockOn().TrackingSpeed *= 10;
             PlayerCameraController.RotateSpeed *= 10;
             MoveSpeed *= 10;
         }
@@ -363,31 +350,6 @@ public class Player : BasePlayer
         {
             cacheTransform.position = initPos;
         }
-    }
-
-    //移動速度、最大速度、移動する方向
-    protected override void Move(float speed, float _maxSpeed, Vector3 direction)
-    {
-        if (!isQ)
-        {
-            //最大速度に達していなかったら移動処理
-            if (_Rigidbody.velocity.sqrMagnitude < Mathf.Pow(_maxSpeed, 2))
-            {
-                _Rigidbody.AddForce(direction * speed, ForceMode.Force);
-
-
-                //デバッグ用
-                //Debug.Log(Mathf.Pow(_maxSpeed, 2));
-            }
-        }
-        else
-        {
-            _Rigidbody.AddForce(direction * speed + (direction * speed - _Rigidbody.velocity), ForceMode.Force);
-        }
-
-
-        //デバッグ用
-        //Debug.Log(_rigidbody.velocity.sqrMagnitude);
     }
 
     //スピードを変更する
@@ -444,20 +406,5 @@ public class Player : BasePlayer
                 Debug.Log("アイテム取得");
             }
         }
-    }
-
-
-    //バリア強化
-    public void BarrierStrength(float strengthValue)
-    {
-        if(strengthValue > 1.0f)
-        {
-            strengthValue = 1.0f;
-        }
-        if(strengthValue < 0)
-        {
-            strengthValue = 0;
-        }
-
     }
 }

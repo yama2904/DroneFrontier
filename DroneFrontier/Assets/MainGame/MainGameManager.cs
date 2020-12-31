@@ -91,7 +91,6 @@ public class MainGameManager : MonoBehaviour
         //設定画面に移動した際のマスクの暗さと色を設定
         screenMaskImage.color = new Color(MASK_COLOR_RED, MASK_COLOR_GREEN, MASK_COLOR_BLUE, MASK_COLOR_ALFA);
         screenMaskImage.enabled = false;
-        IsConfig = false;
 
 
         //プレイヤーとCPUを配置
@@ -112,6 +111,10 @@ public class MainGameManager : MonoBehaviour
 
             basePlayers.Add(p);
         }
+
+
+        //デバッグ用
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     void Update()

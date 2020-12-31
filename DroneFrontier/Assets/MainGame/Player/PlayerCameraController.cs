@@ -15,8 +15,6 @@ public class PlayerCameraController : MonoBehaviour
     void Start()
     {
         playerTransform = player.transform;
-        //デバッグ用
-        Cursor.lockState = CursorLockMode.Locked;
     }
 
     void Update()
