@@ -5,7 +5,7 @@ using UnityEngine;
 public class Barrier : MonoBehaviour
 {
     const float MAX_HP = 100;
-    public float HP { get; private set; } = MAX_HP;
+    public float HP { get; set; } = MAX_HP;
 
     //バリアの回復用変数
     [SerializeField] float regeneTime = 8.0f;   //バリアが回復しだす時間

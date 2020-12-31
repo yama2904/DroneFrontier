@@ -31,17 +31,18 @@ public class Player : BasePlayer
     [SerializeField] float boostRecastTime = 6.0f;  //ブーストのリキャスト時間
     bool isBoost;
 
-    ////状態異常
-    //public enum Abnormal
-    //{
-    //    STUN,
-    //    JAMMING,
-    //    SPEED_DOWN,
-    //    BARRIER_WEAK,
+    //弱体や強化などの状態
+    public enum Status
+    {
+        BARRIER_STRENGTH,   //バリア強化
+        STUN,               //スタン
+        JAMMING,            //ジャミング
+        SPEED_DOWN,         //移動・攻撃中のスピードダウン
+        BARRIER_WEAK,       //バリア弱体化
 
-    //    NONE
-    //}
-    //bool[] isAbnormals;   //状態異常が付与されているか
+        NONE
+    }
+    bool[] isStatus = new bool[(int)Status.NONE];   //状態異常が付与されているか
 
 
     //デバッグ用
@@ -75,6 +76,12 @@ public class Player : BasePlayer
         boostImage = GameObject.Find("BoostGauge").GetComponent<Image>();
         boostImage.fillAmount = 1;
         isBoost = false;
+
+        isStatus = new bool[(int)Status.NONE];
+        for(int i = 0; i < (int)Status.NONE; i++)
+        {
+            isStatus[i] = false;
+        }
 
 
         //デバッグ用
@@ -437,5 +444,20 @@ public class Player : BasePlayer
                 Debug.Log("アイテム取得");
             }
         }
+    }
+
+
+    //バリア強化
+    public void BarrierStrength(float strengthValue)
+    {
+        if(strengthValue > 1.0f)
+        {
+            strengthValue = 1.0f;
+        }
+        if(strengthValue < 0)
+        {
+            strengthValue = 0;
+        }
+
     }
 }

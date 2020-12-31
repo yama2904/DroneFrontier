@@ -266,13 +266,13 @@ public class Laser : BaseAtack
                 .ToList();  //リスト化  
 
             hits = FilterTargetRaycast(hits);
-
             float lineLength = lineRange;   //レーザーの長さ
+
             //ヒット処理
             if (hits.Count > 0)
             {
                 SearchNearestObject(out RaycastHit hit, hits);
-                GameObject o = hit.transform.gameObject;
+                GameObject o = hit.transform.gameObject;    //名前省略
 
                 if (o.CompareTag(Player.PLAYER_TAG) || o.CompareTag(CPUController.CPU_TAG))
                 {
@@ -283,7 +283,7 @@ public class Laser : BaseAtack
                     o.GetComponent<JammingBot>().Damage(BulletPower);   
                 }
 
-                //ヒットしたオブジェクトの距離をレーザーの長さにする
+                //ヒットしたオブジェクトの距離とレーザーの長さを合わせる
                 lineLength = hit.distance;
 
                 //ヒットした場所にEndオブジェクトを移動させる

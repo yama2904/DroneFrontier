@@ -152,9 +152,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isTime: 1
   subCamera: {fileID: 1905727313}
-  isWeaponDebug: 1
   player: {fileID: 1716425315}
   cpu: {fileID: 973596507}
+  isWeaponDebug: 1
+  playerWeapon: 3
+  cpuWeapon: 0
 --- !u!4 &368702361
 Transform:
   m_ObjectHideFlags: 0
@@ -474,6 +476,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 802274048}
+  - component: {fileID: 802274049}
   m_Layer: 0
   m_Name: BarrierWeakArea
   m_TagString: Untagged
@@ -488,15 +491,30 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 802274047}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: 0.018697111, w: 0.9998252}
   m_LocalPosition: {x: 4.44, y: 0, z: -9.71}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1772439729}
-  - {fileID: 1788133869}
+  - {fileID: 1651725254}
   m_Father: {fileID: 0}
   m_RootOrder: 9
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 2.1430001}
+--- !u!114 &802274049
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 802274047}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fe965b7019bff34c8351968bc9cb865, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lineParticle: {fileID: 1772439731}
+  thunderParticle: {fileID: 1651725256}
+  lineRadius: 0.01
 --- !u!1 &845985091
 GameObject:
   m_ObjectHideFlags: 0
@@ -880,11 +898,11 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1651725253}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0, z: 0.487}
+  m_LocalPosition: {x: 0, y: 0, z: 0.48700047}
   m_LocalScale: {x: 0.13, y: 0.13, z: 0.1}
   m_Children: []
-  m_Father: {fileID: 1788133869}
-  m_RootOrder: 0
+  m_Father: {fileID: 802274048}
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!199 &1651725255
 ParticleSystemRenderer:
@@ -10386,37 +10404,6 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
     vectorLabel1_3: W
---- !u!1 &1788133868
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1788133869}
-  m_Layer: 0
-  m_Name: thunderController
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1788133869
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1788133868}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children:
-  - {fileID: 1651725254}
-  m_Father: {fileID: 802274048}
-  m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1905727313
 GameObject:
   m_ObjectHideFlags: 0
