@@ -31,7 +31,7 @@ public class Jamming : MonoBehaviour
                 {
                     //bp._LockOn.UseLockOn(true);
                 }                
-                Radar.UseRadar(true);
+                //Radar.UseRadar(true);
 
                 Destroy(gameObject);
             }
@@ -97,7 +97,7 @@ public class Jamming : MonoBehaviour
 
             if (other.CompareTag(Player.PLAYER_TAG))
             {
-                Radar.UseRadar(false);
+                //Radar.UseRadar(false);
             }
         }
     }
@@ -121,7 +121,7 @@ public class Jamming : MonoBehaviour
 
             if (other.CompareTag(Player.PLAYER_TAG))
             {
-                Radar.UseRadar(true);
+                //Radar.UseRadar(true);
             }
         }
     }

@@ -4,36 +4,30 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
 
-public class Radar : MonoBehaviour
+public class Radar : MonoBehaviour, IRadar
 {
-    [SerializeField] GameObject playerInspector = null;
-    static GameObject player = null;
-    static Camera mainCamera = null;
-    static Transform mainCameraTransform = null;
+    [SerializeField] GameObject player = null;
+    [SerializeField] Camera _camera = null;
+    Transform cameraTransform = null;
 
-    static Image radarMask = null;
-    static GameObject enemyMarker = null;
-    static GameObject itemMarker = null;
+    Image radarMask = null;
+    GameObject enemyMarker = null;
+    GameObject itemMarker = null;
 
     struct SearchData
     {
         public Transform target;
         public RectTransform marker;
     }
-    static List<SearchData> searchDatas = new List<SearchData>();
+    List<SearchData> searchDatas = new List<SearchData>();
 
-    static float searchRadius = 100.0f; //ロックオンする範囲
-    static bool useRadar = true;        //ロックオンを使うか
+    float searchRadius = 100.0f; //ロックオンする範囲
+    bool useRadar = true;        //ロックオンを使うか
+
 
     void Awake()
     {
-        player = playerInspector;
-    }
-
-    void Start()
-    {
-        mainCamera = Camera.main;
-        mainCameraTransform = mainCamera.transform;
+        cameraTransform = _camera.transform;
         GameObject o = transform.Find("RadarMask/Image").gameObject;
         radarMask = o.GetComponent<Image>();
         radarMask.enabled = false;
@@ -47,12 +41,12 @@ public class Radar : MonoBehaviour
     {
         foreach (SearchData s in searchDatas)
         {
-            Vector3 screenPoint = mainCamera.WorldToViewportPoint(s.target.position);
+            Vector3 screenPoint = _camera.WorldToViewportPoint(s.target.position);
             s.marker.position = new Vector3(Screen.width * screenPoint.x, Screen.height * screenPoint.y, 0);
         }
     }
 
-    public static void StartRadar()
+    public void StartRadar()
     {
         if (!useRadar)
         {
@@ -61,9 +55,9 @@ public class Radar : MonoBehaviour
 
         //取得したRaycastHit配列から各RaycastHitクラスのgameObjectを抜き取ってリスト化する
         var hits = Physics.SphereCastAll(
-            mainCameraTransform.position,
+            cameraTransform.position,
             searchRadius,
-            mainCameraTransform.forward,
+            cameraTransform.forward,
             0.01f).Select(h => h.transform.gameObject).ToList();
 
         hits = FilterTargetObject(hits);
@@ -100,7 +94,7 @@ public class Radar : MonoBehaviour
                 }
 
                 //マーカーを移動させる
-                Vector3 screenPoint = mainCamera.WorldToViewportPoint(sd.target.position);
+                Vector3 screenPoint = _camera.WorldToViewportPoint(sd.target.position);
                 sd.marker.position = new Vector3(Screen.width * screenPoint.x, Screen.height * screenPoint.y, 0);
 
                 searchDatas.Add(sd);
@@ -132,7 +126,7 @@ public class Radar : MonoBehaviour
         radarMask.enabled = true;
     }
 
-    public static void ReleaseRadar()
+    public void ReleaseRadar()
     {
         radarMask.enabled = false;
 
@@ -146,7 +140,7 @@ public class Radar : MonoBehaviour
 
     //レーダーを使用するならtrue
     //禁止するならfalse
-    public static void UseRadar(bool use)
+    public void UseRadar(bool use)
     {
         if (!use)
         {
@@ -156,12 +150,12 @@ public class Radar : MonoBehaviour
     }
 
     //リストから必要な要素だけ抜き取る
-    static List<GameObject> FilterTargetObject(List<GameObject> hits)
+    List<GameObject> FilterTargetObject(List<GameObject> hits)
     {
         return hits.Where(h =>
         {
             //各要素の座標をビューポートに変換(画面左下が0:0、右上が1:1)して条件に合うものだけリストに詰め込む
-            Vector3 screenPoint = mainCamera.WorldToViewportPoint(h.transform.position);
+            Vector3 screenPoint = _camera.WorldToViewportPoint(h.transform.position);
             return screenPoint.x > 0 && screenPoint.x < 1 && screenPoint.y > 0 && screenPoint.y < 1 && screenPoint.z > 0;
         }).Where(h => !ReferenceEquals(h, player))   //操作しているプレイヤーは除外
           .Where(h => h.CompareTag(Player.PLAYER_TAG) || h.CompareTag(CPUController.CPU_TAG) || h.CompareTag(Item.ITEM_TAG))  //プレイヤーとCPUとアイテムが対象          

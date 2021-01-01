@@ -5,7 +5,6 @@ using UnityEngine;
 public class CPUController : BasePlayer
 {
     public const string CPU_TAG = "CPU";    //タグ名
-    Transform cacheTransform = null;
 
     //デバッグ用
     [SerializeField] float speed = 0.1f;
@@ -15,8 +14,6 @@ public class CPUController : BasePlayer
 
     protected override void Start()
     {
-        cacheTransform = transform;
-
         HP = 30;
         MoveSpeed = speed;
         MaxSpeed = 30.0f;

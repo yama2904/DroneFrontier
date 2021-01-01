@@ -4,6 +4,9 @@ using UnityEngine;
 
 public interface IBarrierStatus
 {
+    bool isStrength { get; }
+    bool isWeak { get; }
+
     /*
      * バリア強化
      * 引数1: バリアのダメージ軽減率(0～1)

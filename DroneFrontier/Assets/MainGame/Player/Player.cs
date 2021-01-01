@@ -14,55 +14,13 @@ using System;
 public class Player : BasePlayer
 {
     public const string PLAYER_TAG = "Player";  //タグ名
-    Transform cacheTransform = null;            //キャッシュ用
-
     bool[] isUsingWeapons = new bool[(int)Weapon.NONE];    //使用中の武器
+
+    [SerializeField] Radar radar = null;
+
 
     //ブースト用変数
     Image boostImage = null;
-    
-
-
-    //ICameraControllerインタフェース
-    ICameraController GetCameraController()
-    {
-        ICameraController cameraController = this;
-        return cameraController;
-    }
-
-    float ICameraController.RotateSpeed { get; set; } = 3.0f;
-    float ICameraController.LimitCameraTiltX { get; set; } = 40.0f;
-
-    void ICameraController.Rotate(float speed)
-    {
-        //カメラの回転
-        if (MainGameManager.IsCursorLock)
-        {
-            if (MainGameManager.IsConfig)
-            {
-                return;
-            }
-            ICameraController c = GetCameraController();
-
-            Vector3 angle = new Vector3(Input.GetAxis("Mouse X") * c.RotateSpeed, Input.GetAxis("Mouse Y") * c.RotateSpeed, 0);
-
-            //カメラの左右回転
-            cacheTransform.RotateAround(cacheTransform.position, Vector3.up, angle.x);
-
-            //カメラの上下の回転に制限をかける
-            Vector3 localAngle = cacheTransform.localEulerAngles;
-            localAngle.x += angle.y * -1;
-            if (localAngle.x > c.LimitCameraTiltX && localAngle.x < 180)
-            {
-                localAngle.x = c.LimitCameraTiltX;
-            }
-            if (localAngle.x < 360 - c.LimitCameraTiltX && localAngle.x > 180)
-            {
-                localAngle.x = 360 - c.LimitCameraTiltX;
-            }
-            cacheTransform.localEulerAngles = localAngle;
-        }
-    }
 
 
     //デバッグ用
@@ -72,8 +30,6 @@ public class Player : BasePlayer
 
     protected override void Start()
     {
-        cacheTransform = transform;
-
         HP = 30;
         MoveSpeed = 20.0f;
         MaxSpeed = 30.0f;
@@ -99,7 +55,9 @@ public class Player : BasePlayer
         if (MainGameManager.IsCursorLock)
         {
             //回転処理
-            GetCameraController().Rotate(GetCameraController().RotateSpeed);
+            float x = Input.GetAxis("Mouse X");
+            float y = Input.GetAxis("Mouse Y");
+            Rotate(x, y, RotateSpeed);
         }
 
         //移動処理
@@ -136,23 +94,27 @@ public class Player : BasePlayer
         //ロックオン
         if (Input.GetKey(KeyCode.LeftShift))
         {
-            GetLockOn().StartLockOn();
+            ILockOn l = _LockOn;
+            l.StartLockOn(LockOnTrackingSpeed);
         }
         //ロックオン解除
         if (Input.GetKeyUp(KeyCode.LeftShift))
         {
-            GetLockOn().ReleaseLockOn();
+            ILockOn l = _LockOn;
+            l.ReleaseLockOn();
         }
 
         //レーダー使用
         if (Input.GetKey(KeyCode.Space))
         {
-            Radar.StartRadar();
+            IRadar r = radar;
+            r.StartRadar();
         }
         //レーダー使用
         if (Input.GetKeyUp(KeyCode.Space))
         {
-            Radar.ReleaseRadar();
+            IRadar r = radar;
+            r.ReleaseRadar();
         }
 
 
@@ -170,8 +132,8 @@ public class Player : BasePlayer
         Action<float> ModifySpeeds = (x) =>
         {
             MoveSpeed *= x;
-            GetCameraController().RotateSpeed *= x;
-            GetLockOn().TrackingSpeed *= x;
+            RotateSpeed *= x;
+            LockOnTrackingSpeed *= x;
         };
 
         //メイン武器攻撃
@@ -336,13 +298,13 @@ public class Player : BasePlayer
         //デバッグ用
         if (Input.GetKeyDown(KeyCode.LeftControl))
         {
-            GetLockOn().TrackingSpeed *= 0.1f;
+           LockOnTrackingSpeed *= 0.1f;
             PlayerCameraController.RotateSpeed *= 0.1f;
             MoveSpeed *= 0.1f;
         }
         if (Input.GetKeyUp(KeyCode.LeftControl))
         {
-            GetLockOn().TrackingSpeed *= 10;
+            LockOnTrackingSpeed *= 10;
             PlayerCameraController.RotateSpeed *= 10;
             MoveSpeed *= 10;
         }

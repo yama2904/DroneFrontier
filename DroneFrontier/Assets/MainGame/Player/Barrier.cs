@@ -5,7 +5,10 @@ using UnityEngine;
 public class Barrier : MonoBehaviour, IBarrier, IBarrierStatus
 {
     const float MAX_HP = 100;
-    public float HP { get; set; } = MAX_HP;
+    public float HP { get; private set; } = MAX_HP;
+
+    public bool isStrength { get; private set; } = false;
+    public bool isWeak { get; private set; } = false;
 
     //バリアの回復用変数
     [SerializeField] float regeneTime = 8.0f;   //バリアが回復しだす時間
@@ -99,6 +102,8 @@ public class Barrier : MonoBehaviour, IBarrier, IBarrierStatus
         reduction = 1 - strengthRate;
         StartCoroutine(EndStrength(time));
 
+        isStrength = true;
+
 
         //デバッグ用
         Debug.Log("バリア強化");
@@ -108,6 +113,8 @@ public class Barrier : MonoBehaviour, IBarrier, IBarrierStatus
     {
         yield return new WaitForSeconds(time);
         reduction = 1;
+
+        isStrength = false;
 
 
         //デバッグ用
