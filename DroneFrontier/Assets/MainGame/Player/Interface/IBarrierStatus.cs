@@ -4,8 +4,8 @@ using UnityEngine;
 
 public interface IBarrierStatus
 {
-    bool isStrength { get; }
-    bool isWeak { get; }
+    bool IsStrength { get; }
+    bool IsWeak { get; }
 
     /*
      * バリア強化

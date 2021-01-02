@@ -21,8 +21,7 @@ public class Radar : MonoBehaviour, IRadar
     }
     List<SearchData> searchDatas = new List<SearchData>();
 
-    float searchRadius = 100.0f; //ロックオンする範囲
-    bool useRadar = true;        //ロックオンを使うか
+    float searchRadius = 100.0f; //照射する範囲
 
 
     void Awake()
@@ -48,11 +47,6 @@ public class Radar : MonoBehaviour, IRadar
 
     public void StartRadar()
     {
-        if (!useRadar)
-        {
-            return;
-        }
-
         //取得したRaycastHit配列から各RaycastHitクラスのgameObjectを抜き取ってリスト化する
         var hits = Physics.SphereCastAll(
             cameraTransform.position,
@@ -136,17 +130,6 @@ public class Radar : MonoBehaviour, IRadar
             Destroy(s.marker.parent.gameObject);
         }
         searchDatas.Clear();
-    }
-
-    //レーダーを使用するならtrue
-    //禁止するならfalse
-    public void UseRadar(bool use)
-    {
-        if (!use)
-        {
-            ReleaseRadar();
-        }
-        useRadar = use;
     }
 
     //リストから必要な要素だけ抜き取る

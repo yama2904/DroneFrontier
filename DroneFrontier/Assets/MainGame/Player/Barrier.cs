@@ -7,8 +7,8 @@ public class Barrier : MonoBehaviour, IBarrier, IBarrierStatus
     const float MAX_HP = 100;
     public float HP { get; private set; } = MAX_HP;
 
-    public bool isStrength { get; private set; } = false;
-    public bool isWeak { get; private set; } = false;
+    public bool IsStrength { get; private set; } = false;
+    public bool IsWeak { get; private set; } = false;
 
     //バリアの回復用変数
     [SerializeField] float regeneTime = 8.0f;   //バリアが回復しだす時間
@@ -29,9 +29,9 @@ public class Barrier : MonoBehaviour, IBarrier, IBarrierStatus
 
     void Update()
     {
-        if(HP <= 0)
+        if (HP <= 0)
         {
-            if(deltaTime >= repairBarrierTime)
+            if (deltaTime >= repairBarrierTime)
             {
                 Debug.Log("バリア修復");
 
@@ -64,7 +64,7 @@ public class Barrier : MonoBehaviour, IBarrier, IBarrierStatus
             }
 
             HP += value;
-            if(HP >= MAX_HP)
+            if (HP >= MAX_HP)
             {
                 HP = MAX_HP;
                 Debug.Log("バリアHPMAX: " + HP);
@@ -102,7 +102,7 @@ public class Barrier : MonoBehaviour, IBarrier, IBarrierStatus
         reduction = 1 - strengthRate;
         StartCoroutine(EndStrength(time));
 
-        isStrength = true;
+        IsStrength = true;
 
 
         //デバッグ用
@@ -112,18 +112,21 @@ public class Barrier : MonoBehaviour, IBarrier, IBarrierStatus
     IEnumerator EndStrength(float time)
     {
         yield return new WaitForSeconds(time);
-        reduction = 1;
+        if (!IsWeak)
+        {
+            reduction = 1;
+            IsStrength = false;
 
-        isStrength = false;
 
-
-        //デバッグ用
-        Debug.Log("バリア強化解除");
+            //デバッグ用
+            Debug.Log("バリア強化解除");
+        }
     }
 
     //バリア弱体化
     public void BarrierWeak(float time)
     {
-
+        IsStrength = false;
+        IsWeak = true;
     }
 }

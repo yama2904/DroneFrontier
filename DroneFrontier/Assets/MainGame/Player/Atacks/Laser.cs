@@ -337,7 +337,7 @@ public class Laser : BaseWeapon
                    {
                        if (h.transform.CompareTag(JammingBot.JAMMING_BOT_TAG))
                        {
-                           return !ReferenceEquals(h.transform.GetComponent<JammingBot>().CreatedPlayer, shooter);
+                           return !ReferenceEquals(h.transform.GetComponent<JammingBot>().Creater, shooter);
                        }
                        return true;
                    })

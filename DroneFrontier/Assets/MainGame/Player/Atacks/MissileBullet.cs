@@ -54,7 +54,7 @@ public class MissileBullet : Bullet
         else if (other.CompareTag(JammingBot.JAMMING_BOT_TAG))
         {
             JammingBot jb = other.GetComponent<JammingBot>();
-            if(jb.CreatedPlayer == Shooter)
+            if(jb.Creater == Shooter)
             {
                 return;
             }

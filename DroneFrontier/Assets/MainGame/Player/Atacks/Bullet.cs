@@ -75,7 +75,7 @@ public class Bullet : MonoBehaviour
         else if (other.CompareTag(JammingBot.JAMMING_BOT_TAG))
         {
             JammingBot jb = other.GetComponent<JammingBot>();
-            if (ReferenceEquals(jb.CreatedPlayer, Shooter))
+            if (ReferenceEquals(jb.Creater, Shooter))
             {
                 return;
             }

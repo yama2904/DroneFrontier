@@ -18,7 +18,7 @@ public class StunGrenade : MonoBehaviour
 
     void Update()
     {
-        if(deltaTime >= impactTime)
+        if (deltaTime >= impactTime)
         {
             CreateImpact();
         }
@@ -48,13 +48,14 @@ public class StunGrenade : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if(other.CompareTag(Player.PLAYER_TAG) || other.CompareTag(CPUController.CPU_TAG))
+        //投げたプレイヤーなら当たり判定から除外
+        if (ReferenceEquals(other.gameObject, thrower))
         {
-            BasePlayer bp = other.GetComponent<BasePlayer>();
-            if(ReferenceEquals(bp, thrower))    //投げたプレイヤーなら当たり判定から除外
-            {
-                return;
-            }
+            return;
+        }
+
+        if (other.CompareTag(Player.PLAYER_TAG) || other.CompareTag(CPUController.CPU_TAG))
+        {
             CreateImpact();
         }
     }

@@ -29,9 +29,9 @@ public class Jamming : MonoBehaviour
                 //ジャミングを解除する
                 foreach (BasePlayer bp in jamingPlayers)
                 {
-                    //bp._LockOn.UseLockOn(true);
+                    IPlayerStatus ps = bp;
+                    ps.UnSetJamming();
                 }                
-                //Radar.UseRadar(true);
 
                 Destroy(gameObject);
             }
@@ -45,9 +45,14 @@ public class Jamming : MonoBehaviour
         transform.position = creater.transform.position;
 
         //ボット生成
-        createBot = Instantiate(jammingBot,
-            transform.position + jammingBotPosition.localPosition, Quaternion.Euler(0, 0, 0)).GetComponent<JammingBot>();
-        createBot.CreatedPlayer = creater;
+        createBot = Instantiate(jammingBot, jammingBotPosition).GetComponent<JammingBot>();
+
+        //ボットの向きを変える
+        Vector3 angle = createBot.transform.localEulerAngles;
+        angle.y += creater.transform.localEulerAngles.y;
+        createBot.transform.localEulerAngles = angle;
+
+        createBot.Creater = creater;
         createBot.transform.SetParent(transform);   //ボットを子に設定
 
 
@@ -87,18 +92,16 @@ public class Jamming : MonoBehaviour
         if (other.CompareTag(Player.PLAYER_TAG) || other.CompareTag(CPUController.CPU_TAG))
         {
             BasePlayer bp = other.GetComponent<BasePlayer>();
-            if (ReferenceEquals(bp, creater))   //ジャミングを付与しないプレイヤーならスキップ
+            if (ReferenceEquals(bp.gameObject, creater))   //ジャミングを付与しないプレイヤーならスキップ
             {
                 return;
             }
 
-            //bp._LockOn.UseLockOn(false);
-            jamingPlayers.Add(bp);    //リストに追加
+            //ジャミング付与
+            IPlayerStatus ps = bp;
+            ps.SetJamming();
 
-            if (other.CompareTag(Player.PLAYER_TAG))
-            {
-                //Radar.UseRadar(false);
-            }
+            jamingPlayers.Add(bp);    //リストに追加
         }
     }
 
@@ -107,21 +110,20 @@ public class Jamming : MonoBehaviour
         if (other.CompareTag(Player.PLAYER_TAG) || other.CompareTag(CPUController.CPU_TAG))
         {
             BasePlayer bp = other.GetComponent<BasePlayer>();
-            if (ReferenceEquals(bp, creater))   //ジャミングを付与しないプレイヤーならスキップ
+            if (ReferenceEquals(bp.gameObject, creater))   //ジャミングを付与しないプレイヤーならスキップ
             {
                 return;
             }
 
-            //bp._LockOn.UseLockOn(true);
+            //ジャミング解除
+            IPlayerStatus ps = bp;
+            ps.UnSetJamming();
+
+            //解除したプレイヤーをリストから削除
             int index = jamingPlayers.FindIndex(o => ReferenceEquals(bp, o));
             if (index >= 0)
             {
                 jamingPlayers.RemoveAt(index);
-            }
-
-            if (other.CompareTag(Player.PLAYER_TAG))
-            {
-                //Radar.UseRadar(true);
             }
         }
     }

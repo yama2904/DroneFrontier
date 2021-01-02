@@ -24,7 +24,11 @@ public class Item : MonoBehaviour
         //バリア強化
         if(itemType == ItemType.BARRIER_STRENGTH)
         {
-            BarrierStrength.Strength(player);
+            //強化できなかったらアイテムを消去しない
+            if (!BarrierStrength.Strength(player))
+            {
+                return;
+            }
         }
 
         //ジャミング
@@ -40,6 +44,10 @@ public class Item : MonoBehaviour
             GameObject o = Instantiate(Resources.Load(FOLDER_PATH + "StunGrenade")) as GameObject;
             o.GetComponent<StunGrenade>().ThrowGrenade(player.gameObject);
         }
+
+        //デバッグ用
+        Debug.Log("アイテム使用");
+
 
         //アイテムを使用したら消去
         Destroy(gameObject);

@@ -87,8 +87,11 @@ public class Player : BasePlayer
         //ロックオン
         if (Input.GetKey(KeyCode.LeftShift))
         {
-            ILockOn l = _LockOn;
-            l.StartLockOn(LockOnTrackingSpeed);
+            if (!isStatus[(int)Status.JAMMING])
+            {
+                ILockOn l = _LockOn;
+                l.StartLockOn(LockOnTrackingSpeed);
+            }
         }
         //ロックオン解除
         if (Input.GetKeyUp(KeyCode.LeftShift))
@@ -100,8 +103,11 @@ public class Player : BasePlayer
         //レーダー使用
         if (Input.GetKey(KeyCode.Space))
         {
-            IRadar r = radar;
-            r.StartRadar();
+            if (!isStatus[(int)Status.JAMMING])
+            {
+                IRadar r = radar;
+                r.StartRadar();
+            }
         }
         //レーダー使用
         if (Input.GetKeyUp(KeyCode.Space))
@@ -333,6 +339,19 @@ public class Player : BasePlayer
             //デバッグ用
             Debug.Log("ブースト終了");
         }
+    }
+
+    public override void SetJamming()
+    {
+        base.SetJamming();
+        IRadar r = radar;
+        r.ReleaseRadar();
+    }
+
+    public override void SetStun(float time)
+    {
+        base.SetStun(time);
+        StunScreenMask.CreateStunMask(time);
     }
 
     private void OnTriggerStay(Collider other)

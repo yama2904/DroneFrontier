@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
 
-public abstract class BasePlayer : MonoBehaviour
+public abstract class BasePlayer : MonoBehaviour, IPlayerStatus
 {
     public float HP { get; protected set; } = 0; //HP
     protected Rigidbody _Rigidbody = null;
@@ -105,6 +105,10 @@ public abstract class BasePlayer : MonoBehaviour
     protected virtual void Start() { }
     protected virtual void Update()
     {
+        IBarrierStatus b = _Barrier;
+        isStatus[(int)Status.BARRIER_STRENGTH] = b.IsStrength;
+        isStatus[(int)Status.BARRIER_WEAK] = b.IsWeak;
+
         if (Input.GetKeyDown(KeyCode.V))
         {
             isQ = !isQ;
@@ -191,10 +195,6 @@ public abstract class BasePlayer : MonoBehaviour
         if (items[num] != null)
         {
             items[num].UseItem(this);
-
-
-            //デバッグ用
-            Debug.Log("アイテム使用");
         }
     }
 
@@ -239,6 +239,21 @@ public abstract class BasePlayer : MonoBehaviour
         weapons[(int)Weapon.SUB] = o.GetComponent<BaseWeapon>();
     }
 
+    //ロックオンしない対象を設定
+    public void SetNotLockOnObject(GameObject o)
+    {
+        ILockOn l = _LockOn;
+        l.SetNotLockOnObject(o);
+    }
+
+    //SetNotLockOnObjectで設定したオブジェクトを解除
+    public void UnSetNotLockOnObject(GameObject o)
+    {
+        ILockOn l = _LockOn;
+        l.UnSetNotLockOnObject(o);
+    }
+
+
     //指定したプレイヤーの状態状態を返す
     public bool GetStatus(Status status)
     {
@@ -246,24 +261,62 @@ public abstract class BasePlayer : MonoBehaviour
     }
 
     //バリア強化
-    public virtual void SetBarrierStrength(float strengthValue, float time)
+    public virtual bool SetBarrierStrength(float strengthValue, float time)
     {
-        IBarrierStatus barrier = _Barrier;
-        if (barrier.isStrength)
+        IBarrier b = _Barrier;
+        IBarrierStatus s = _Barrier;
+
+        //既に強化中なら強化しない
+        if (s.IsStrength)
         {
-            return;
+            return false;
         }
-        barrier.BarrierStrength(strengthValue, time);
+        //バリア弱体化中なら強化しない
+        if (s.IsWeak)
+        {
+            return false;
+        }
+        //バリアが破壊されていたら強化しない
+        if(b.HP <= 0)
+        {
+            return false;
+        }
+
+        s.BarrierStrength(strengthValue, time);
+        isStatus[(int)Status.BARRIER_STRENGTH] = true;
+
+        return true;
     }
 
     //バリア弱体化
     public virtual void SetBarrierWeak(float time)
     {
         IBarrierStatus barrier = _Barrier;
-        if (barrier.isWeak)
+        if (barrier.IsWeak)
         {
             return;
         }
         barrier.BarrierWeak(time);
+        isStatus[(int)Status.BARRIER_WEAK] = true;
+    }
+
+    //ジャミング
+    public virtual void SetJamming()
+    {
+        ILockOn l = _LockOn;
+        l.ReleaseLockOn();
+        isStatus[(int)Status.JAMMING] = true;
+    }
+
+    //ジャミング解除
+    public virtual void UnSetJamming()
+    {
+        isStatus[(int)Status.JAMMING] = false;
+    }
+
+    //スタン
+    public virtual void SetStun(float time)
+    {
+        isStatus[(int)Status.STUN] = true;
     }
 }

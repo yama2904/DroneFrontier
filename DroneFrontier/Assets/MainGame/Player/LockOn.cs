@@ -25,7 +25,6 @@ public class LockOn : MonoBehaviour, ILockOn
     List<GameObject> notLockOnObjects = new List<GameObject>();
     float searchRadius = 100.0f; //ロックオンする範囲
     public float TrackingSpeed { get; set; } = 0;     //ロックオンした際に敵にカメラを向ける速度
-    bool useLockOn = true;   //ロックオンを使うか
 
 
     void Awake()
@@ -40,7 +39,6 @@ public class LockOn : MonoBehaviour, ILockOn
 
         //ロックオン処理用変数
         lockOnImage.enabled = false;    //ロックオンしていない際は非表示
-        useLockOn = true;
 
         //自分をロックオンしない対象に入れる
         notLockOnObjects.Add(player);
@@ -96,12 +94,6 @@ public class LockOn : MonoBehaviour, ILockOn
     {
         TrackingSpeed = speed;
 
-        //ロックオンを禁止していたら処理をしない
-        if (!useLockOn)
-        {
-            return;
-        }
-
         //何もロックオンしていない場合はロックオン対象を探す
         if (!isTarget)
         {
@@ -152,20 +144,8 @@ public class LockOn : MonoBehaviour, ILockOn
         }
     }
 
-
-    //ロックオンを使用するならtrue
-    //禁止するならfalse
-    public void UseLockOn(bool use)
-    {
-        if (!use)
-        {
-            ReleaseLockOn();
-        }
-        useLockOn = use;
-    }
-
     //ロックオンしないオブジェクトを設定
-    public void AddNotLockOnObject(GameObject o)
+    public void SetNotLockOnObject(GameObject o)
     {
         //既にオブジェクトが含まれている場合はスルー
         if (notLockOnObjects.FindIndex(listObject => ReferenceEquals(listObject, o)) == -1)
@@ -174,8 +154,8 @@ public class LockOn : MonoBehaviour, ILockOn
         }
     }
 
-    //AddNotLockOnObjectで設定したオブジェクトをロックオンするように設定
-    public void RemoveNotLockOnObject(GameObject o)
+    //SetNotLockOnObjectで設定したオブジェクトをロックオンするように設定
+    public void UnSetNotLockOnObject(GameObject o)
     {
         int index = notLockOnObjects.FindIndex(listObject => ReferenceEquals(listObject, o));
         if(index >= 0)
