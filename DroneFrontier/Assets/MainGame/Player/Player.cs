@@ -4,13 +4,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using System;
 
-/*
- * 公開変数
- * 
- * 
- * 公開メソッド
- * 
- */
 public class Player : BasePlayer
 {
     public const string PLAYER_TAG = "Player";  //タグ名
@@ -24,9 +17,9 @@ public class Player : BasePlayer
 
 
     //デバッグ用
-    int atackType = (int)AtackManager.Weapon.SHOTGUN;
+    int atackType = (int)BaseWeapon.Weapon.SHOTGUN;
     Vector3 initPos;
-    
+
 
     protected override void Start()
     {
@@ -126,7 +119,7 @@ public class Player : BasePlayer
         }
         //
         //
-        
+
 
         //攻撃処理しか使わない簡易メソッド
         Action<float> ModifySpeeds = (x) =>
@@ -183,7 +176,7 @@ public class Player : BasePlayer
             }
             isUsingWeapons[(int)Weapon.SUB] = false;
         }
-        
+
 
         //ブースト使用
         if (Input.GetKeyDown(KeyCode.Q))
@@ -277,35 +270,33 @@ public class Player : BasePlayer
             Destroy(weapons[(int)Weapon.SUB].gameObject);
 
             //次の武器に切り替える
-            if (++atackType >= (int)AtackManager.Weapon.NONE)
+            if (++atackType >= (int)BaseWeapon.Weapon.NONE)
             {
                 atackType = 0;
             }
-            AtackManager.CreateAtack(out GameObject o, (AtackManager.Weapon)atackType);
 
-            //Playerの子オブジェクトに設定
-            o.transform.SetParent(cacheTransform);
+            GameObject o = BaseWeapon.CreateWeapon(gameObject, (BaseWeapon.Weapon)atackType);     //武器の作成
+            Transform t = o.transform;  //キャッシュ用
+            t.SetParent(transform);     //作成した武器を子オブジェクトにする
 
             //位置と角度の初期設定
-            o.transform.localPosition = new Vector3(0, 0, 0);
-            o.transform.localRotation = Quaternion.Euler(0, 0, 0);
+            t.localPosition = new Vector3(0, 0, 0);
+            t.localRotation = Quaternion.Euler(0, 0, 0);
 
-            BaseAtack ab = o.GetComponent<BaseAtack>();
-            ab.Shooter = this;
-            weapons[(int)Weapon.SUB] = ab;
+            weapons[(int)Weapon.SUB] = o.GetComponent<BaseWeapon>();
         }
 
         //デバッグ用
         if (Input.GetKeyDown(KeyCode.LeftControl))
         {
-           LockOnTrackingSpeed *= 0.1f;
-            PlayerCameraController.RotateSpeed *= 0.1f;
+            LockOnTrackingSpeed *= 0.1f;
+            RotateSpeed *= 0.1f;
             MoveSpeed *= 0.1f;
         }
         if (Input.GetKeyUp(KeyCode.LeftControl))
         {
             LockOnTrackingSpeed *= 10;
-            PlayerCameraController.RotateSpeed *= 10;
+            RotateSpeed *= 10;
             MoveSpeed *= 10;
         }
         if (Input.GetKeyDown(KeyCode.P))

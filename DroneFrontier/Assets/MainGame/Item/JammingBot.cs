@@ -5,7 +5,7 @@ using UnityEngine;
 public class JammingBot : MonoBehaviour
 {
     public const string JAMMING_BOT_TAG = "JammingBot";
-    public BasePlayer CreatedPlayer { get; set; } = null;
+    public GameObject CreatedPlayer { get; set; } = null;
     [SerializeField] float HP = 30.0f;
 
     void Start()

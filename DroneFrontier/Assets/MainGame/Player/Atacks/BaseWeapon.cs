@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class BaseAtack : MonoBehaviour
+public abstract class BaseWeapon : MonoBehaviour, IWeapon
 {
-    public BasePlayer Shooter { get; set; } = null;      //撃ったプレイヤー
+    protected GameObject Shooter { get; set; } = null;   //武器の所持者
     protected float RecastCountTime { get; set; } = 0;   //リキャスト時間をカウントする変数
     protected float ShotCountTime { get; set; } = 0;     //1発ごとの間隔をカウントする変数
     protected float BulletPower { get; set; } = -1;      //弾丸の威力
@@ -87,4 +87,46 @@ public abstract class BaseAtack : MonoBehaviour
     }
 
     public abstract void Shot(GameObject target = null);
+
+    public enum Weapon
+    {
+        SHOTGUN,
+        GATLING,
+        MISSILE,
+        LASER,
+
+        NONE
+    }
+    public static GameObject CreateWeapon(GameObject shooter, Weapon weapon)
+    {
+        const string FOLDER_PATH = "Weapon/";
+        GameObject o = null;
+        if (weapon == Weapon.SHOTGUN)
+        {
+            //ResourcesフォルダからShotgunオブジェクトを複製してロード
+           o = Instantiate(Resources.Load(FOLDER_PATH + "Shotgun")) as GameObject;
+        }
+        else if (weapon == Weapon.GATLING)
+        {
+            //ResourcesフォルダからGatlingオブジェクトを複製してロード
+            o = Instantiate(Resources.Load(FOLDER_PATH + "Gatling")) as GameObject;
+        }
+        else if (weapon == Weapon.MISSILE)
+        {
+            //ResourcesフォルダからMissileShotオブジェクトを複製してロード
+            o = Instantiate(Resources.Load(FOLDER_PATH + "MissileShot")) as GameObject;
+        }
+        else if (weapon == Weapon.LASER)
+        {
+            //ResourcesフォルダからLaserオブジェクトを複製してロード
+            o = Instantiate(Resources.Load(FOLDER_PATH + "Laser")) as GameObject;
+        }
+        else
+        {
+            //エラー
+            Application.Quit();
+        }
+        o.GetComponent<BaseWeapon>().Shooter = shooter;
+        return o;
+    }
 }

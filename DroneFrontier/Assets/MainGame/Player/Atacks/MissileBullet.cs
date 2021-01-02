@@ -38,15 +38,16 @@ public class MissileBullet : Bullet
 
     protected override void OnTriggerEnter(Collider other)
     {
+        //当たり判定を行わないオブジェクトだったら処理をしない
+        if (ReferenceEquals(other.gameObject, Shooter))
+        {
+            return;
+        }
+
         if (other.CompareTag(Player.PLAYER_TAG) || other.CompareTag(CPUController.CPU_TAG))
         {
             BasePlayer bp = other.GetComponent<BasePlayer>();
-            //当たり判定を行わないオブジェクトだったら処理をしない
-            if (ReferenceEquals(bp, Shooter))
-            {
-                return;
-            }
-
+            
             bp.Damage(Power);
             createExplosion();
         }

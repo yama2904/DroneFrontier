@@ -16,8 +16,8 @@ public class Test : MonoBehaviour
     [SerializeField] BasePlayer player;
     [SerializeField] BasePlayer cpu;
     [SerializeField] bool isWeaponDebug = false;
-    [SerializeField] AtackManager.Weapon playerWeapon = AtackManager.Weapon.SHOTGUN;
-    [SerializeField] AtackManager.Weapon cpuWeapon = AtackManager.Weapon.SHOTGUN;
+    [SerializeField] BaseWeapon.Weapon playerWeapon = BaseWeapon.Weapon.SHOTGUN;
+    [SerializeField] BaseWeapon.Weapon cpuWeapon = BaseWeapon.Weapon.SHOTGUN;
 
     void Start()
     {

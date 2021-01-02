@@ -209,21 +209,21 @@ public class CPUSelectButtonsController : MonoBehaviour
         return ((int)l * (int)List.NONE) + (int)w;
     }
 
-    AtackManager.Weapon ConverWeaponToAtackManagerWeapon(Weapon weapon)
+    BaseWeapon.Weapon ConverWeaponToAtackManagerWeapon(Weapon weapon)
     {
         int w = (int)weapon;
-        if(w == (int)AtackManager.Weapon.SHOTGUN)
+        if(w == (int)BaseWeapon.Weapon.SHOTGUN)
         {
-            return AtackManager.Weapon.SHOTGUN;
+            return BaseWeapon.Weapon.SHOTGUN;
         }
-        else if (w == (int)AtackManager.Weapon.MISSILE)
+        else if (w == (int)BaseWeapon.Weapon.MISSILE)
         {
-            return AtackManager.Weapon.MISSILE;
+            return BaseWeapon.Weapon.MISSILE;
         }
-        else if (w == (int)AtackManager.Weapon.LASER)
+        else if (w == (int)BaseWeapon.Weapon.LASER)
         {
-            return AtackManager.Weapon.LASER;
+            return BaseWeapon.Weapon.LASER;
         }
-        return AtackManager.Weapon.NONE;
+        return BaseWeapon.Weapon.NONE;
     }
 }

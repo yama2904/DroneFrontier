@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Gatling : BaseAtack
+public class Gatling : BaseWeapon
 {
     [SerializeField] Bullet bullet = null; //弾のオブジェクト
 

@@ -31,14 +31,14 @@ public class Item : MonoBehaviour
         else if(itemType == ItemType.JAMMING)
         {
             GameObject o = Instantiate(Resources.Load(FOLDER_PATH + "Jamming")) as GameObject;
-            o.GetComponent<Jamming>().CreateBot(player);
+            o.GetComponent<Jamming>().CreateBot(player.gameObject);
         }
 
         //スタングレネード
         else if(itemType == ItemType.STUN_GRENADE)
         {
             GameObject o = Instantiate(Resources.Load(FOLDER_PATH + "StunGrenade")) as GameObject;
-            o.GetComponent<StunGrenade>().ThrowGrenade(player);
+            o.GetComponent<StunGrenade>().ThrowGrenade(player.gameObject);
         }
 
         //アイテムを使用したら消去

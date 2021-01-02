@@ -4,10 +4,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
 
-public class Laser : BaseAtack
+public class Laser : BaseWeapon
 {
     const float SHOT_POSSIBLE_MIN = 0.2f;       //発射可能な最低ゲージ量
-    Image laserImage;
+    Image laserGaugeImage;
     [SerializeField] float maxShotTime = 5;     //最大何秒発射できるか
     float gaugeAmout = 1.0f;
 
@@ -62,8 +62,8 @@ public class Laser : BaseAtack
         ShotCountTime = ShotInterval;
         BulletPower = 5.0f;
 
-        laserImage = GameObject.Find("LaserGauge").GetComponent<Image>();
-        laserImage.fillAmount = 1.0f;
+        laserGaugeImage = GameObject.Find("LaserGauge").GetComponent<Image>();
+        laserGaugeImage.fillAmount = 1.0f;
         gaugeAmout = 1.0f;
 
         Transform cacheTransform = transform;   //処理の軽量化用キャッシュ
@@ -147,10 +147,10 @@ public class Laser : BaseAtack
 
 
         //あとで直す
-        //プレイヤーの場合のみUIのゲージ消費
+        //プレイヤーならUIのゲージを変動させる
         if (Shooter.CompareTag(Player.PLAYER_TAG))
         {
-            laserImage.fillAmount = gaugeAmout;
+            laserGaugeImage.fillAmount = gaugeAmout;
         }
     }
 
@@ -265,7 +265,7 @@ public class Laser : BaseAtack
                 lineRange)                 //射程
                 .ToList();  //リスト化  
 
-            hits = FilterTargetRaycast(hits);
+            hits = FilterTargetRaycast(hits, Shooter);
             float lineLength = lineRange;   //レーザーの長さ
 
             //ヒット処理
@@ -280,7 +280,7 @@ public class Laser : BaseAtack
                 }
                 else if (o.CompareTag(JammingBot.JAMMING_BOT_TAG))
                 {
-                    o.GetComponent<JammingBot>().Damage(BulletPower);   
+                    o.GetComponent<JammingBot>().Damage(BulletPower);
                 }
 
                 //ヒットしたオブジェクトの距離とレーザーの長さを合わせる
@@ -324,24 +324,20 @@ public class Laser : BaseAtack
     //}
 
     //リストから必要な要素だけ抜き取る
-    List<RaycastHit> FilterTargetRaycast(List<RaycastHit> hits)
+    List<RaycastHit> FilterTargetRaycast(List<RaycastHit> hits, GameObject shooter)
     {
         //不要な要素を除外する
         return hits.Where(h => !h.transform.CompareTag(Item.ITEM_TAG))      //アイテム除外
                    .Where(h => !h.transform.CompareTag(Bullet.BULLET_TAG))  //弾丸除外
                    .Where(h =>  //撃ったプレイヤーは当たり判定から除外
                    {
-                       if (h.transform.CompareTag(Player.PLAYER_TAG) || h.transform.CompareTag(CPUController.CPU_TAG))
-                       {
-                           return !ReferenceEquals(h.transform.GetComponent<BasePlayer>(), Shooter);
-                       }
-                       return true;
+                       return !ReferenceEquals(h.transform.gameObject, shooter);
                    })
                    .Where(h =>  //ジャミングボットを生成したプレイヤーと打ったプレイヤーが同じなら除外
                    {
                        if (h.transform.CompareTag(JammingBot.JAMMING_BOT_TAG))
                        {
-                           return !ReferenceEquals(h.transform.GetComponent<JammingBot>().CreatedPlayer, Shooter);
+                           return !ReferenceEquals(h.transform.GetComponent<JammingBot>().CreatedPlayer, shooter);
                        }
                        return true;
                    })

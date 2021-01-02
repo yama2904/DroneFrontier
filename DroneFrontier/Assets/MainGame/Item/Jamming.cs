@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Jamming : MonoBehaviour
 {
-    BasePlayer createdPlayer;
+    GameObject creater;
 
     [SerializeField] GameObject jammingBot = null;
     [SerializeField] Transform jammingBotPosition = null;
@@ -39,15 +39,15 @@ public class Jamming : MonoBehaviour
     }
 
     //ジャミングボットを生成する
-    public void CreateBot(BasePlayer player)
+    public void CreateBot(GameObject creater)
     {
-        createdPlayer = player;
-        transform.position = player.transform.position;
+        this.creater = creater;
+        transform.position = creater.transform.position;
 
         //ボット生成
         createBot = Instantiate(jammingBot,
             transform.position + jammingBotPosition.localPosition, Quaternion.Euler(0, 0, 0)).GetComponent<JammingBot>();
-        createBot.CreatedPlayer = player;
+        createBot.CreatedPlayer = creater;
         createBot.transform.SetParent(transform);   //ボットを子に設定
 
 
@@ -87,7 +87,7 @@ public class Jamming : MonoBehaviour
         if (other.CompareTag(Player.PLAYER_TAG) || other.CompareTag(CPUController.CPU_TAG))
         {
             BasePlayer bp = other.GetComponent<BasePlayer>();
-            if (ReferenceEquals(bp, createdPlayer))   //ジャミングを付与しないプレイヤーならスキップ
+            if (ReferenceEquals(bp, creater))   //ジャミングを付与しないプレイヤーならスキップ
             {
                 return;
             }
@@ -107,7 +107,7 @@ public class Jamming : MonoBehaviour
         if (other.CompareTag(Player.PLAYER_TAG) || other.CompareTag(CPUController.CPU_TAG))
         {
             BasePlayer bp = other.GetComponent<BasePlayer>();
-            if (ReferenceEquals(bp, createdPlayer))   //ジャミングを付与しないプレイヤーならスキップ
+            if (ReferenceEquals(bp, creater))   //ジャミングを付与しないプレイヤーならスキップ
             {
                 return;
             }

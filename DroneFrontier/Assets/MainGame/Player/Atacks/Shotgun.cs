@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Shotgun : BaseAtack
+public class Shotgun : BaseWeapon
 {
     //ショットガンのパラメータ
     [SerializeField] Bullet bullet = null;          //弾のオブジェクト
@@ -76,7 +76,7 @@ public class Shotgun : BaseAtack
 
                 //弾丸のパラメータ設定
                 b.Shooter = Shooter;    //撃ったプレイヤーを登録
-                b.Target = target;          //ロックオン中の敵
+                b.Target = target;     //ロックオン中の敵
                 b.SpeedPerSecond = speedPerSecond;   //スピード
                 b.DestroyTime = destroyTime;         //射程
                 b.TrackingPower = trackingPower;     //誘導力

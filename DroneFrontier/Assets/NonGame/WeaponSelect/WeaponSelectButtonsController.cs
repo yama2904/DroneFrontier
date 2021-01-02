@@ -20,7 +20,7 @@ public class WeaponSelectButtonsController : MonoBehaviour
     [SerializeField] Text messageWindowText = null;
 
     //選択した武器
-    AtackManager.Weapon weapon = AtackManager.Weapon.NONE;
+    BaseWeapon.Weapon weapon = BaseWeapon.Weapon.NONE;
 
     void Start()
     {
@@ -35,25 +35,25 @@ public class WeaponSelectButtonsController : MonoBehaviour
     public void SelectShotgun()
     {
         messageWindowText.text = SHOTGUN_TEXT;
-        weapon = AtackManager.Weapon.SHOTGUN;
+        weapon = BaseWeapon.Weapon.SHOTGUN;
     }
 
     public void SelectMissile()
     {
         messageWindowText.text = MISSILE_TEXT;
-        weapon = AtackManager.Weapon.MISSILE;
+        weapon = BaseWeapon.Weapon.MISSILE;
     }
 
     public void SelectLaser()
     {
         messageWindowText.text = LASER_TEXT;
-        weapon = AtackManager.Weapon.LASER;
+        weapon = BaseWeapon.Weapon.LASER;
     }
 
     //決定
     public void SelectDecision()
     {
-        if(weapon == AtackManager.Weapon.NONE)
+        if(weapon == BaseWeapon.Weapon.NONE)
         {
             return;
         }

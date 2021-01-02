@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class StunGrenade : MonoBehaviour
 {
-    BasePlayer throwPlayer = null;
+    GameObject thrower = null;
     [SerializeField] StunImpact stunImpact = null;
     [SerializeField] Transform throwRotate = null;
 
@@ -25,14 +25,14 @@ public class StunGrenade : MonoBehaviour
         deltaTime += Time.deltaTime;
     }
 
-    public void ThrowGrenade(BasePlayer player)
+    public void ThrowGrenade(GameObject thrower)
     {
         Transform cacheTransform = transform;   //キャッシュ用
-        throwPlayer = player;
+        this.thrower = thrower;
 
         //playerの座標と向きのコピー
-        cacheTransform.position = player.transform.position;
-        cacheTransform.rotation = player.transform.rotation;
+        cacheTransform.position = thrower.transform.position;
+        cacheTransform.rotation = thrower.transform.rotation;
 
         //Vector3 force = Vector3.Scale(cacheTransform.forward, throwRotate.forward);
         GetComponent<Rigidbody>().AddForce(throwRotate.forward * throwPower, ForceMode.Impulse);
@@ -42,7 +42,7 @@ public class StunGrenade : MonoBehaviour
     void CreateImpact()
     {
         StunImpact s = Instantiate(stunImpact, transform.position, Quaternion.Euler(0, 0, 0)).GetComponent<StunImpact>();
-        s.ThrowPlayer = throwPlayer;
+        s.Thrower = thrower;
         Destroy(gameObject);
     }
 
@@ -51,7 +51,7 @@ public class StunGrenade : MonoBehaviour
         if(other.CompareTag(Player.PLAYER_TAG) || other.CompareTag(CPUController.CPU_TAG))
         {
             BasePlayer bp = other.GetComponent<BasePlayer>();
-            if(ReferenceEquals(bp, throwPlayer))    //投げたプレイヤーなら当たり判定から除外
+            if(ReferenceEquals(bp, thrower))    //投げたプレイヤーなら当たり判定から除外
             {
                 return;
             }

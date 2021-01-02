@@ -43,7 +43,7 @@ public abstract class BasePlayer : MonoBehaviour
 
         NONE
     }
-    protected BaseAtack[] weapons = new BaseAtack[(int)Weapon.NONE];  //ウェポン群
+    protected BaseWeapon[] weapons = new BaseWeapon[(int)Weapon.NONE];  //ウェポン群
 
 
     //アイテム
@@ -83,20 +83,18 @@ public abstract class BasePlayer : MonoBehaviour
         _Barrier = barrierInspector;
         _LockOn = lockOnInspector;
 
-        //武器の初期化
-        //メインウェポンの処理
-        AtackManager.CreateAtack(out GameObject main, AtackManager.Weapon.GATLING);    //Gatlingの生成
-        Transform mainTransform = main.transform;   //キャッシュ
-        mainTransform.SetParent(transform);         //作成したGatlingを子オブジェクトにする
+
+        //メインウェポンの初期化
+        GameObject o = BaseWeapon.CreateWeapon(gameObject, BaseWeapon.Weapon.GATLING);    //Gatlingの生成
+        Transform t = o.transform;   //キャッシュ
+        t.SetParent(transform);         //作成したGatlingを子オブジェクトにする
 
         //位置と角度の初期設定
-        mainTransform.localPosition = new Vector3(0, 0, 0);
-        mainTransform.localRotation = Quaternion.Euler(0, 0, 0);
+        t.localPosition = new Vector3(0, 0, 0);
+        t.localRotation = Quaternion.Euler(0, 0, 0);
 
-        //コンポーネントの取得
-        BaseAtack ba = main.GetComponent<BaseAtack>(); //名前省略
-        ba.Shooter = this;    //自分をヒットさせない
-        weapons[(int)Weapon.MAIN] = ba;
+        weapons[(int)Weapon.MAIN] = o.GetComponent<BaseWeapon>();
+
 
         //配列初期化
         for (int i = 0; i < (int)Status.NONE; i++)
@@ -180,7 +178,8 @@ public abstract class BasePlayer : MonoBehaviour
     protected virtual void UseWeapon(Weapon weapon)
     {
         ILockOn l = _LockOn;
-        weapons[(int)weapon].Shot(l.Target);
+        IWeapon w = weapons[(int)weapon];
+        w.Shot(l.Target);
     }
 
     //アイテム使用
@@ -226,21 +225,18 @@ public abstract class BasePlayer : MonoBehaviour
     }
 
     //サブウェポンをセットする
-    public virtual void SetWeapon(AtackManager.Weapon weapon)
+    public virtual void SetWeapon(BaseWeapon.Weapon weapon)
     {
         //サブウェポンの処理
-        AtackManager.CreateAtack(out GameObject sub, weapon);    //武器の作成
-        Transform subTransform = sub.transform; //キャッシュ
-        subTransform.SetParent(transform);   //作成したGatlingを子オブジェクトにする
+        GameObject o = BaseWeapon.CreateWeapon(gameObject, weapon);     //武器の作成
+        Transform t = o.transform;  //キャッシュ用
+        t.SetParent(transform);       //作成した武器を子オブジェクトにする
 
         //位置と角度の初期設定
-        subTransform.localPosition = new Vector3(0, 0, 0);
-        subTransform.localRotation = Quaternion.Euler(0, 0, 0);
+        t.localPosition = new Vector3(0, 0, 0);
+        t.localRotation = Quaternion.Euler(0, 0, 0);
 
-        //コンポーネントの取得
-        BaseAtack ba = sub.GetComponent<BaseAtack>();
-        ba.Shooter = this;    //自分をヒットさせない
-        weapons[(int)Weapon.SUB] = ba;
+        weapons[(int)Weapon.SUB] = o.GetComponent<BaseWeapon>();
     }
 
     //指定したプレイヤーの状態状態を返す

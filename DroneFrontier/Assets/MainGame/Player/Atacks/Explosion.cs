@@ -5,7 +5,7 @@ using System;
 
 public class Explosion : MonoBehaviour
 {
-    public BasePlayer Shooter { private get; set; } = null;  //撃ったプレイヤー
+    public GameObject Shooter { private get; set; } = null;  //撃ったプレイヤー
     [SerializeField] float size = 20;    //爆発範囲
     [SerializeField] float power = 20;   //威力
     [SerializeField] float powerDownRate = 0.8f;   //中心地からの距離による威力減衰率
@@ -51,15 +51,16 @@ public class Explosion : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        //当たり判定を行わないオブジェクトだったら処理をしない
+        if (ReferenceEquals(other.gameObject, Shooter))
+        {
+            return;
+        }
+
         if (other.CompareTag(Player.PLAYER_TAG) || other.CompareTag(CPUController.CPU_TAG))
         {
             BasePlayer bp = other.GetComponent<BasePlayer>();
-
-            //当たり判定を行わないオブジェクトだったら処理をしない
-            if (ReferenceEquals(bp, Shooter))
-            {
-                return;
-            }
+                        
             //既にヒット済のオブジェクトはスルー
             foreach (GameObject o in wasHitObjects)
             {

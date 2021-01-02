@@ -6,7 +6,7 @@ public class Bullet : MonoBehaviour
 {
     public const string BULLET_TAG = "Bullet";
 
-    public BasePlayer Shooter { protected get; set; } = null;  //撃ったプレイヤー
+    public GameObject Shooter { protected get; set; } = null;  //撃ったプレイヤー
     public GameObject Target { private get; set; } = null;     //誘導する対象
     public float TrackingPower { protected get; set; } = 0;    //追従力
     public float Power { protected get; set; } = 0;            //威力
@@ -59,16 +59,16 @@ public class Bullet : MonoBehaviour
 
     protected virtual void OnTriggerEnter(Collider other)
     {
+        //撃ったプレイヤーなら当たり判定を行わない
+        if (ReferenceEquals(other.gameObject, Shooter))
+        {
+            return;
+        }
+
         //プレイヤーかCPUの当たり判定
         if (other.CompareTag(Player.PLAYER_TAG) || other.CompareTag(CPUController.CPU_TAG))
-        {
-            //撃ったプレイヤーなら当たり判定を行わない
+        {            
             BasePlayer bp = other.GetComponent<BasePlayer>();
-            if (ReferenceEquals(bp, Shooter))
-            {
-                return;
-            }
-
             bp.Damage(Power);
             Destroy(gameObject);
         }

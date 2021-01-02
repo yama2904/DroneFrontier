@@ -49,7 +49,7 @@ public class MainGameManager : MonoBehaviour
     public class PlayerData
     {
         public string name;
-        public AtackManager.Weapon weapon;
+        public BaseWeapon.Weapon weapon;
         public bool isPlayer;
     }
     public static List<PlayerData> playerDatas = new List<PlayerData>();
