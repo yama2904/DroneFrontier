@@ -47,15 +47,22 @@ public class BarrierWeakArea : MonoBehaviour
 
     void Update()
     {
-        foreach(HitPlayerData h in hitPlayerDatas)
+        for (int i = hitPlayerDatas.Count - 1; i >= 0; i--)
         {
-            if(h.deltaTime >= barrierWeakTime)
+            HitPlayerData h = hitPlayerDatas[i];  //名前省略
+            if (h.deltaTime >= barrierWeakTime)
             {
                 //バリアの弱体化をやめる
+                IPlayerStatus ps = h.player;
+                ps.UnSetBarrierWeak();
 
+                //リストから削除
+                hitPlayerDatas.RemoveAt(i);
             }
-
-            h.deltaTime += Time.deltaTime;
+            else
+            {
+                h.deltaTime += Time.deltaTime;
+            }
         }
     }
 
@@ -87,7 +94,8 @@ public class BarrierWeakArea : MonoBehaviour
                 if (index == -1)
                 {
                     //存在していなかったらバリアを弱体化させてリストに追加
-                    //bp._Barrier.HP *= -0.5f;
+                    IPlayerStatus ps = bp;
+                    ps.SetBarrierWeak();
 
 
                     HitPlayerData h = new HitPlayerData();

@@ -25,7 +25,7 @@ public abstract class BasePlayer : MonoBehaviour, IPlayerStatus
     protected LockOn _LockOn { get; private set; } = null;
     protected float LockOnTrackingSpeed { get; set; } = 0.1f;
 
-    public float AtackingDecreaseSpeed { get; set; } = 0.5f;   //攻撃中の移動速度の低下率
+    protected float AtackingDownSpeed { get; set; } = 0.5f;   //攻撃中の移動速度の低下率
 
     //ブースト用
     protected const float BOOST_POSSIBLE_MIN = 0.2f;  //ブースト可能な最低ゲージ量
@@ -61,15 +61,15 @@ public abstract class BasePlayer : MonoBehaviour, IPlayerStatus
     public enum Status
     {
         BARRIER_STRENGTH,   //バリア強化
+        BARRIER_WEAK,       //バリア弱体化
         STUN,               //スタン
         JAMMING,            //ジャミング
-        SPEED_DOWN,         //移動・攻撃中のスピードダウン
-        BARRIER_WEAK,       //バリア弱体化
+        SPEED_DOWN,         //スピードダウン
 
         NONE
     }
     protected bool[] isStatus = new bool[(int)Status.NONE];   //状態異常が付与されているか
-
+    float speedPercent = 1;
 
     //デバッグ用
     bool isQ = true;
@@ -106,8 +106,8 @@ public abstract class BasePlayer : MonoBehaviour, IPlayerStatus
     protected virtual void Update()
     {
         IBarrierStatus b = _Barrier;
-        isStatus[(int)Status.BARRIER_STRENGTH] = b.IsStrength;
-        isStatus[(int)Status.BARRIER_WEAK] = b.IsWeak;
+        SetStatus(Status.BARRIER_STRENGTH, b.IsStrength);
+        SetStatus(Status.BARRIER_WEAK, b.IsWeak);
 
         if (Input.GetKeyDown(KeyCode.V))
         {
@@ -254,14 +254,20 @@ public abstract class BasePlayer : MonoBehaviour, IPlayerStatus
     }
 
 
-    //指定したプレイヤーの状態状態を返す
+    //指定したプレイヤーの状態を返す
     public bool GetStatus(Status status)
     {
         return isStatus[(int)status];
     }
 
+    //状態を更新
+    void SetStatus(Status status, bool flag)
+    {
+        isStatus[(int)status] = flag;
+    }
+
     //バリア強化
-    public virtual bool SetBarrierStrength(float strengthValue, float time)
+    public virtual bool SetBarrierStrength(float strengthPercent, float time)
     {
         IBarrier b = _Barrier;
         IBarrierStatus s = _Barrier;
@@ -282,22 +288,30 @@ public abstract class BasePlayer : MonoBehaviour, IPlayerStatus
             return false;
         }
 
-        s.BarrierStrength(strengthValue, time);
-        isStatus[(int)Status.BARRIER_STRENGTH] = true;
+        s.BarrierStrength(strengthPercent, time);
+        SetStatus(Status.BARRIER_STRENGTH, true);
 
         return true;
     }
 
     //バリア弱体化
-    public virtual void SetBarrierWeak(float time)
+    public virtual void SetBarrierWeak()
     {
         IBarrierStatus barrier = _Barrier;
         if (barrier.IsWeak)
         {
             return;
         }
-        barrier.BarrierWeak(time);
-        isStatus[(int)Status.BARRIER_WEAK] = true;
+        barrier.BarrierWeak();
+        SetStatus(Status.BARRIER_WEAK, true);
+    }
+
+    //バリア弱体化解除
+    public virtual void UnSetBarrierWeak()
+    {
+        IBarrierStatus barrier = _Barrier;
+        barrier.ReleaseBarrierWeak();
+        SetStatus(Status.BARRIER_WEAK, false);
     }
 
     //ジャミング
@@ -305,18 +319,38 @@ public abstract class BasePlayer : MonoBehaviour, IPlayerStatus
     {
         ILockOn l = _LockOn;
         l.ReleaseLockOn();
-        isStatus[(int)Status.JAMMING] = true;
+        SetStatus(Status.JAMMING, true);
     }
 
     //ジャミング解除
     public virtual void UnSetJamming()
     {
-        isStatus[(int)Status.JAMMING] = false;
+        SetStatus(Status.JAMMING, false);
     }
 
     //スタン
     public virtual void SetStun(float time)
     {
-        isStatus[(int)Status.STUN] = true;
+        SetStatus(Status.STUN, true);
+    }
+
+    //スピードダウン
+    public virtual void SetSpeedDown(float downPercent)
+    {
+        speedPercent *= 1 - downPercent;
+        MoveSpeed *= speedPercent;
+        MaxSpeed *= speedPercent;
+
+        SetStatus(Status.SPEED_DOWN, true);
+    }
+
+    //スピードダウン解除
+    public virtual void UnSetSpeedDown()
+    {
+        MoveSpeed /= speedPercent;
+        MaxSpeed /= speedPercent;
+
+        speedPercent = 1;
+        SetStatus(Status.SPEED_DOWN, false);
     }
 }

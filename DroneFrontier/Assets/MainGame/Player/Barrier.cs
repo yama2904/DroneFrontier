@@ -97,9 +97,9 @@ public class Barrier : MonoBehaviour, IBarrier, IBarrierStatus
      * 引数1: 軽減する割合(0～1)
      * 引数2: 軽減する時間(秒数)
      */
-    public void BarrierStrength(float strengthRate, float time)
+    public void BarrierStrength(float strengthPrercent, float time)
     {
-        reduction = 1 - strengthRate;
+        reduction = 1 - strengthPrercent;
         StartCoroutine(EndStrength(time));
 
         IsStrength = true;
@@ -124,9 +124,15 @@ public class Barrier : MonoBehaviour, IBarrier, IBarrierStatus
     }
 
     //バリア弱体化
-    public void BarrierWeak(float time)
+    public void BarrierWeak()
     {
         IsStrength = false;
         IsWeak = true;
+    }
+
+    //バリア弱体化解除
+    public void ReleaseBarrierWeak()
+    {
+        IsWeak = false;
     }
 }

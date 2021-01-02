@@ -141,7 +141,7 @@ public class Player : BasePlayer
             //サブ武器を使用していない場合は移動速度と回転速度とロックオンの追従速度を下げる
             if (!isUsingWeapons[(int)Weapon.SUB])
             {
-                ModifySpeeds(AtackingDecreaseSpeed);
+                ModifySpeeds(AtackingDownSpeed);
                 isUsingWeapons[(int)Weapon.MAIN] = true;
             }
         }
@@ -154,7 +154,7 @@ public class Player : BasePlayer
             //メインもサブも使用していないなら速度を戻す
             if (!isUsingWeapons[(int)Weapon.SUB])
             {
-                ModifySpeeds(1 / AtackingDecreaseSpeed);
+                ModifySpeeds(1 / AtackingDownSpeed);
             }
             isUsingWeapons[(int)Weapon.MAIN] = false;
         }
@@ -165,7 +165,7 @@ public class Player : BasePlayer
             //メイン武器を使用していない場合は移動速度と回転速度とロックオンの追従速度を下げる
             if (!isUsingWeapons[(int)Weapon.MAIN])
             {
-                ModifySpeeds(AtackingDecreaseSpeed);
+                ModifySpeeds(AtackingDownSpeed);
                 isUsingWeapons[(int)Weapon.SUB] = true;
             }
         }
@@ -178,7 +178,7 @@ public class Player : BasePlayer
         {
             if (!isUsingWeapons[(int)Weapon.MAIN])
             {
-                ModifySpeeds(1 / AtackingDecreaseSpeed);
+                ModifySpeeds(1 / AtackingDownSpeed);
             }
             isUsingWeapons[(int)Weapon.SUB] = false;
         }

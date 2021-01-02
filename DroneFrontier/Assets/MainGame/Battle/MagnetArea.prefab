@@ -57,4 +57,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eabfbfd1c89ba10428bc3413b01cc1ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  downMgnf: 0.3
+  downPercent: 0.7
