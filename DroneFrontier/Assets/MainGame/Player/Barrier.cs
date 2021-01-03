@@ -11,81 +11,109 @@ public class Barrier : MonoBehaviour, IBarrier, IBarrierStatus
     public bool IsWeak { get; private set; } = false;
 
     //バリアの回復用変数
-    [SerializeField] float regeneTime = 8.0f;   //バリアが回復しだす時間
-    [SerializeField] float regeneValue = 5.0f;  //バリアが毎秒回復する量
-    [SerializeField] float repairBarrierTime = 15.0f;   //バリアが破壊されてから修復される時間
-    float deltaTime;    //計測用
+    [SerializeField] float regeneStartTime = 8.0f;   //バリアが回復しだす時間
+    [SerializeField] float regeneInterval = 1.0f;    //回復する間隔
+    [SerializeField] float regeneValue = 5.0f;       //バリアが回復する量
+    [SerializeField] float resurrectBarrierTime = 15.0f;   //バリアが破壊されてから修復される時間
+    [SerializeField] float resurrectBarrierHP = 10.0f;     //バリアが復活した際のHP
+    float regeneCountTime;    //計測用
     bool isRegene;      //回復中か
 
-    float reduction;    //軽減率
+    float damagePercent;    //ダメージ倍率
 
     void Start()
     {
         HP = MAX_HP;
-        reduction = 1;
-        deltaTime = 0;
+        damagePercent = 1;
+        regeneCountTime = 0;
         isRegene = true;    //ゲーム開始時はHPMAXで回復の必要がないのでtrue
     }
 
     void Update()
     {
+        //バリア弱体化中は回復処理を行わない
+        if (IsWeak)
+        {
+            return;
+        }
+
+        //バリアが破壊されていたら修復処理
         if (HP <= 0)
         {
-            if (deltaTime >= repairBarrierTime)
+            if (regeneCountTime >= resurrectBarrierTime)
             {
-                Debug.Log("バリア修復");
-
-
-                HP = 5;
-                isRegene = true;
-                StartCoroutine(Regene(regeneValue));
+                ResurrectBarrier(resurrectBarrierHP);
             }
         }
+        //バリアが回復を始めるまで待つ
         else if (!isRegene)
         {
-            if (deltaTime >= regeneTime)
+            if (regeneCountTime >= regeneStartTime)
             {
                 isRegene = true;
-                StartCoroutine(Regene(regeneValue));
+                regeneCountTime = 0;
             }
         }
-        deltaTime += Time.deltaTime;
-    }
-
-    //毎秒value値HPを回復する
-    IEnumerator Regene(float value)
-    {
-        while (true)
+        //バリアの回復処理
+        else
         {
-            //攻撃を受けたら処理をやめる
-            if (!isRegene)
+            if (regeneCountTime >= regeneInterval)
             {
-                yield break;
+                if(HP < MAX_HP)
+                {
+                    Regene(regeneValue);
+                }
+                regeneCountTime = 0;
             }
+        }
+        regeneCountTime += Time.deltaTime;
+    }
 
-            HP += value;
-            if (HP >= MAX_HP)
-            {
-                HP = MAX_HP;
-                Debug.Log("バリアHPMAX: " + HP);
-                yield break;
-            }
+    //HPを回復する
+    void Regene(float value)
+    {
+        HP += regeneValue;
+        if (HP >= MAX_HP)
+        {
+            HP = MAX_HP;
+            Debug.Log("バリアHPMAX: " + HP);
+        }
+        //デバッグ用
+        else
+        {
             Debug.Log("リジェネ後バリアHP: " + HP);
-
-            yield return new WaitForSeconds(1.0f);
         }
     }
+
+    //バリアを復活させる
+    void ResurrectBarrier(float resurrectHP)
+    {
+        if(HP > 0)
+        {
+            return;
+        }
+        HP = resurrectHP;
+
+        //修復したら回復処理に移る
+        isRegene = true;
+        regeneCountTime = 0;
+
+
+        //デバッグ用
+        Debug.Log("バリア修復");
+    }
+
 
     //バリアに引数分のダメージを与える
     public void Damage(float power)
     {
-        float p = Useful.DecimalPointTruncation(power * reduction, 1);  //小数点第2以下切り捨て
+        float p = Useful.DecimalPointTruncation(power * damagePercent, 1);  //小数点第2以下切り捨て
         HP -= p;
         if (HP < 0)
         {
             HP = 0;
         }
-        deltaTime = 0;
+        regeneCountTime = 0;
         isRegene = false;
 
 
@@ -99,7 +127,7 @@ public class Barrier : MonoBehaviour, IBarrier, IBarrierStatus
      */
     public void BarrierStrength(float strengthPrercent, float time)
     {
-        reduction = 1 - strengthPrercent;
+        damagePercent = 1 - strengthPrercent;
         StartCoroutine(EndStrength(time));
 
         IsStrength = true;
@@ -114,7 +142,7 @@ public class Barrier : MonoBehaviour, IBarrier, IBarrierStatus
         yield return new WaitForSeconds(time);
         if (!IsWeak)
         {
-            reduction = 1;
+            damagePercent = 1;
             IsStrength = false;
 
 
@@ -126,13 +154,46 @@ public class Barrier : MonoBehaviour, IBarrier, IBarrierStatus
     //バリア弱体化
     public void BarrierWeak()
     {
-        IsStrength = false;
+        //デバッグ用
+        Debug.Log("バリア弱体化");
+
+
+        if (IsStrength)
+        {
+            damagePercent = 1;
+            IsStrength = false;
+
+
+            //デバッグ用
+            Debug.Log("バリア強化解除");
+        }
+        else
+        {
+            HP *= 0.5f;
+
+
+            //デバッグ用
+            Debug.Log("バリアHP: " + HP);
+        }
+
+        isRegene = false;
+        regeneCountTime = 0;
+
         IsWeak = true;
     }
 
     //バリア弱体化解除
     public void ReleaseBarrierWeak()
     {
+        if(HP <= 0)
+        {
+            ResurrectBarrier(resurrectBarrierHP);
+        }
+
         IsWeak = false;
+
+
+        //デバッグ用
+        Debug.Log("バリア弱体化解除");
     }
 }

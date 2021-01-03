@@ -201,12 +201,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MoveSpeed: 0
-  barrierObject: {fileID: 8739107095481877009}
-  _camera: {fileID: 5112431286240113488}
-  lockOnImage: {fileID: 4302605856866542105}
+  barrierInspector: {fileID: 458129881166742028}
+  lockOnInspector: {fileID: 7107612377659270603}
   speed: 0.1
-  isAtack: 1
-  isMove: 1
+  isAtack: 0
+  isMove: 0
 --- !u!1 &5030925782722277086
 GameObject:
   m_ObjectHideFlags: 0
@@ -218,7 +217,6 @@ GameObject:
   - component: {fileID: 8095052375901828315}
   - component: {fileID: 6472400311113905456}
   - component: {fileID: 2861906802037119123}
-  - component: {fileID: 433463677245961967}
   - component: {fileID: 7107612377659270603}
   m_Layer: 5
   m_Name: LockOn
@@ -290,7 +288,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
---- !u!114 &433463677245961967
+--- !u!114 &7107612377659270603
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -299,28 +297,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 5030925782722277086}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_IgnoreReversedGraphics: 1
-  m_BlockingObjects: 0
-  m_BlockingMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
---- !u!114 &7107612377659270603
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5030925782722277086}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e594f97b6e1a64a45acecd98f8ec3877, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerInspector: {fileID: 3405057424940411893}
-  cameraInspector: {fileID: 5112431286240113488}
+  player: {fileID: 3405057424940411893}
+  _camera: {fileID: 5112431286240113488}
   lockOnImage: {fileID: 4302605856866542105}
 --- !u!1 &8739107095481877009
 GameObject:
@@ -428,9 +409,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac108096e504c104b8be64881239cda1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  regeneTime: 8
+  regeneStartTime: 8
+  regeneInterval: 1
   regeneValue: 5
-  repairBarrierTime: 15
+  resurrectBarrierTime: 15
+  resurrectBarrierHP: 10
 --- !u!1 &9092863741187852823
 GameObject:
   m_ObjectHideFlags: 0

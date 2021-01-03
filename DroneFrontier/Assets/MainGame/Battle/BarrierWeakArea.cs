@@ -5,19 +5,12 @@ using System.Linq;
 
 public class BarrierWeakArea : MonoBehaviour
 {
-    [SerializeField] ParticleSystem lineParticle = null;
-    [SerializeField] ParticleSystem thunderParticle = null;
     [SerializeField] float lineRadius = 0.01f;  //レーザーの半径
-    [SerializeField] float lineRange = 1000;    //射程
+    [SerializeField] float lineRange = 100;    //射程
     [SerializeField] float barrierWeakTime = 15.0f;  //バリアの弱体化時間
 
     //キャッシュ用のtransform
-    Transform cacheTransform = null;    
-    Transform lineTransform = null;     
-    Transform thunderTransform = null;
-
-    float initThunderScaleZ;    //初期のthunderの長さ(敵にレーザーが当たった際に使う)
-    float initThunderPosZ;      //初期のthunderのz座標
+    Transform cacheTransform = null;
 
     class HitPlayerData
     {
@@ -32,12 +25,6 @@ public class BarrierWeakArea : MonoBehaviour
     {
         //キャッシュ用
         cacheTransform = transform;
-        lineTransform = lineParticle.transform;
-        thunderTransform = thunderParticle.transform;
-
-        //初期値の保存
-        initThunderPosZ = thunderTransform.localPosition.z;
-        initThunderScaleZ = thunderTransform.localScale.z;
 
         //リスト初期化
         hitPlayerDatas.Clear();
@@ -120,14 +107,8 @@ public class BarrierWeakArea : MonoBehaviour
     void ModifyLaserLength(float length)
     {
         //Lineオブジェクト
-        Vector3 lineScale = lineTransform.localScale;
-        lineTransform.localScale = new Vector3(length, length, lineScale.z);
-
-        //Thunderオブジェクト
-        Vector3 thunderScale = thunderTransform.localScale;
-        thunderTransform.localScale = new Vector3(thunderScale.x, thunderScale.y, initThunderScaleZ * length);
-        Vector3 thunderPos = thunderTransform.localPosition;
-        thunderTransform.localPosition = new Vector3(thunderPos.x, thunderPos.y, initThunderPosZ * length);
+        Vector3 lineScale = cacheTransform.localScale;
+        cacheTransform.localScale = new Vector3(length, length, lineScale.z);
     }
 
     //リストから必要な要素だけ抜き取る

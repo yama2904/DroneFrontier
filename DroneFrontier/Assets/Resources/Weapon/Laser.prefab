@@ -14547,8 +14547,8 @@ ParticleSystem:
     startSpeed:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 20
-      minScalar: 5
+      scalar: -18
+      minScalar: -3
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -15125,7 +15125,7 @@ ParticleSystem:
     sphericalDirectionAmount: 0
     randomPositionAmount: 0
     radius:
-      value: 0.3
+      value: 1.5
       mode: 0
       spread: 0
       speed:
