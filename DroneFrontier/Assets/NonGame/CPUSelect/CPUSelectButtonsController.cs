@@ -168,11 +168,9 @@ public class CPUSelectButtonsController : MonoBehaviour
     {
         for(int i = 0; i < cpuNum; i++)
         {
-            MainGameManager.PlayerData pd = new MainGameManager.PlayerData();
-            pd.name = "CPU" + (i + 1);
-            pd.weapon = ConverWeaponToAtackManagerWeapon(CPUsWeapon[i]);
-            pd.isPlayer = false;
-            MainGameManager.playerDatas.Add(pd);
+            string cpuName = "CPU" + (i + 1);
+            BaseWeapon.Weapon cpuWeapon = ConverWeaponToBaseWepon(CPUsWeapon[i]);
+            NonGameManager.SetPlayer(cpuName, cpuWeapon, false);
         }
         BaseScreenManager.SetScreen(BaseScreenManager.Screen.WEAPON_SELECT);
     }
@@ -182,7 +180,7 @@ public class CPUSelectButtonsController : MonoBehaviour
         //ソロモードなら戻る
         if (!MainGameManager.IsMulti)
         {
-            MainGameManager.playerDatas.Clear();
+            NonGameManager.ClearSetedPlayers();
             BaseScreenManager.SetScreen(BaseScreenManager.Screen.KURIBOCCHI);
         }
     }
@@ -209,7 +207,7 @@ public class CPUSelectButtonsController : MonoBehaviour
         return ((int)l * (int)List.NONE) + (int)w;
     }
 
-    BaseWeapon.Weapon ConverWeaponToAtackManagerWeapon(Weapon weapon)
+    BaseWeapon.Weapon ConverWeaponToBaseWepon(Weapon weapon)
     {
         int w = (int)weapon;
         if(w == (int)BaseWeapon.Weapon.SHOTGUN)

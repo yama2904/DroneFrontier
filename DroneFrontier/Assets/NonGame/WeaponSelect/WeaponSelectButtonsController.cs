@@ -59,12 +59,7 @@ public class WeaponSelectButtonsController : MonoBehaviour
         }
         if (!MainGameManager.IsMulti)
         {
-            MainGameManager.PlayerData pd = new MainGameManager.PlayerData();
-            pd.name = "Player";
-            pd.weapon = weapon;
-            pd.isPlayer = true;
-            MainGameManager.playerDatas.Add(pd);
-
+            NonGameManager.SetPlayer("Player", weapon, true);
             NonGameManager.LoadMainGameScene();
         }
     }

@@ -52,7 +52,7 @@ public class MainGameManager : MonoBehaviour
         public BaseWeapon.Weapon weapon;
         public bool isPlayer;
     }
-    public static List<PlayerData> playerDatas = new List<PlayerData>();
+    static List<PlayerData> playerDatas = new List<PlayerData>();
 
     //ゲーム上のプレイヤー・CPU情報
     [SerializeField] BasePlayer playerInspector = null;
@@ -175,5 +175,22 @@ public class MainGameManager : MonoBehaviour
             Cursor.lockState = CursorLockMode.None;
         }
         IsConfig = false;
+    }
+
+    //プレイヤー又はCPUを追加する
+    public static void SetPlayer(string name, BaseWeapon.Weapon weapon, bool isPlayer)
+    {
+        //不正な値なら弾く
+        if(name == "" || weapon == BaseWeapon.Weapon.NONE)
+        {
+            return;
+        }
+
+        PlayerData pd = new PlayerData();
+        pd.name = name;
+        pd.weapon = weapon;
+        pd.isPlayer = isPlayer;
+
+        playerDatas.Add(pd);
     }
 }

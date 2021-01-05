@@ -86,13 +86,8 @@ public abstract class BasePlayer : MonoBehaviour, IPlayerStatus
 
         //メインウェポンの初期化
         GameObject o = BaseWeapon.CreateWeapon(gameObject, BaseWeapon.Weapon.GATLING);    //Gatlingの生成
-        Transform t = o.transform;   //キャッシュ
-        t.SetParent(transform);         //作成したGatlingを子オブジェクトにする
-
-        //位置と角度の初期設定
-        t.localPosition = new Vector3(0, 0, 0);
-        t.localRotation = Quaternion.Euler(0, 0, 0);
-
+        BaseWeapon bw = o.GetComponent<BaseWeapon>();
+        bw.SetChild(cacheTransform);
         weapons[(int)Weapon.MAIN] = o.GetComponent<BaseWeapon>();
 
 
@@ -228,15 +223,10 @@ public abstract class BasePlayer : MonoBehaviour, IPlayerStatus
     public virtual void SetWeapon(BaseWeapon.Weapon weapon)
     {
         //サブウェポンの処理
-        GameObject o = BaseWeapon.CreateWeapon(gameObject, weapon);     //武器の作成
-        Transform t = o.transform;  //キャッシュ用
-        t.SetParent(transform);       //作成した武器を子オブジェクトにする
-
-        //位置と角度の初期設定
-        t.localPosition = new Vector3(0, 0, 0);
-        t.localRotation = Quaternion.Euler(0, 0, 0);
-
-        weapons[(int)Weapon.SUB] = o.GetComponent<BaseWeapon>();
+        GameObject o = BaseWeapon.CreateWeapon(gameObject, weapon);
+        BaseWeapon bw = o.GetComponent<BaseWeapon>();   //名前省略
+        bw.SetChild(cacheTransform);
+        weapons[(int)Weapon.SUB] = bw;
     }
 
     //ロックオンしない対象を設定
