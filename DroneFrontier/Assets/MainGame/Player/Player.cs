@@ -276,20 +276,19 @@ public class Player : BasePlayer
             Destroy(weapons[(int)Weapon.SUB].gameObject);
 
             //次の武器に切り替える
-            if (++atackType >= (int)BaseWeapon.Weapon.NONE)
+            if(++atackType == (int)BaseWeapon.Weapon.GATLING)
+            {
+                atackType++;
+            }
+            if (atackType >= (int)BaseWeapon.Weapon.NONE)
             {
                 atackType = 0;
             }
 
             GameObject o = BaseWeapon.CreateWeapon(gameObject, (BaseWeapon.Weapon)atackType);     //武器の作成
-            Transform t = o.transform;  //キャッシュ用
-            t.SetParent(transform);     //作成した武器を子オブジェクトにする
-
-            //位置と角度の初期設定
-            t.localPosition = new Vector3(0, 0, 0);
-            t.localRotation = Quaternion.Euler(0, 0, 0);
-
-            weapons[(int)Weapon.SUB] = o.GetComponent<BaseWeapon>();
+            BaseWeapon bw = o.GetComponent<BaseWeapon>();   //名前省略
+            bw.SetChild(cacheTransform);
+            weapons[(int)Weapon.SUB] = bw;
         }
 
         //デバッグ用

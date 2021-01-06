@@ -9,11 +9,11 @@ public class Explosion : MonoBehaviour
     [SerializeField] float size = 20;    //爆発範囲
     [SerializeField] float power = 20;   //威力
     [SerializeField] float powerDownRate = 0.8f;   //中心地からの距離による威力減衰率
-    [SerializeField] float notPowerDownRange = 0.25f;    //威力が減衰しない範囲
+    [SerializeField] float notPowerDownRange = 0.25f; //威力が減衰しない範囲
     [SerializeField] float lengthReference = 0.1f;    //威力減衰の基準の長さ
 
     List<GameObject> wasHitObjects;    //触れたオブジェクトを全て格納する
-    const float DESTROY_TIME = 3.0f;    //生存時間
+    const float DESTROY_TIME = 3.0f;   //生存時間
 
     void Start()
     {
