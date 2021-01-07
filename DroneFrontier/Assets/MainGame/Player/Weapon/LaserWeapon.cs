@@ -35,6 +35,7 @@ public class LaserWeapon : BaseWeapon
         laserBullet = Instantiate(laserBullet).GetComponent<LaserBullet>();
         laserBullet.transform.SetParent(transform);
         laserBullet.transform.localPosition = shotPos.localPosition;
+        laserBullet.transform.localRotation = shotPos.localRotation;
         laserBullet.ShotInterval = ShotInterval;
 
         laserGaugeImage = GameObject.Find("LaserGauge").GetComponent<Image>();

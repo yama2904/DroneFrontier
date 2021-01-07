@@ -210,15 +210,15 @@ public class CPUSelectButtonsController : MonoBehaviour
     BaseWeapon.Weapon ConverWeaponToBaseWepon(Weapon weapon)
     {
         int w = (int)weapon;
-        if(w == (int)BaseWeapon.Weapon.SHOTGUN)
+        if(w == (int)Weapon.SHOTGUN)
         {
             return BaseWeapon.Weapon.SHOTGUN;
         }
-        else if (w == (int)BaseWeapon.Weapon.MISSILE)
+        else if (w == (int)Weapon.MISSILE)
         {
             return BaseWeapon.Weapon.MISSILE;
         }
-        else if (w == (int)BaseWeapon.Weapon.LASER)
+        else if (w == (int)Weapon.LASER)
         {
             return BaseWeapon.Weapon.LASER;
         }

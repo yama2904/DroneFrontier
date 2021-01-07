@@ -112,8 +112,22 @@ public class MainGameManager : MonoBehaviour
             basePlayers.Add(p);
         }
 
-
         //デバッグ用
+        if(playerDatas.Count == 0)
+        {
+            GameObject[] p = GameObject.FindGameObjectsWithTag(Player.PLAYER_TAG);
+            foreach(GameObject o in p)
+            {
+                basePlayers.Add(o.GetComponent<BasePlayer>());
+            }
+            GameObject[] c  = GameObject.FindGameObjectsWithTag(CPUController.CPU_TAG);
+            foreach (GameObject o in c)
+            {
+                basePlayers.Add(o.GetComponent<BasePlayer>());
+            }
+        }
+
+        //カーソルロック
         Cursor.lockState = CursorLockMode.Locked;
     }
 
@@ -130,6 +144,25 @@ public class MainGameManager : MonoBehaviour
             {
                 MainGameToConfig();
             }
+        }
+
+        //破壊されたドローンがあるか調べる
+        for(int i = basePlayers.Count - 1; i >= 0; i--)
+        {
+            //破壊されていたらランキング用リストに名前を入れてドローンをリストから削除
+            if (basePlayers[i].IsDestroy)
+            {
+                ResultButtonsController.Rank rank = (ResultButtonsController.Rank)basePlayers.Count - 1;
+                ResultButtonsController.SetRank(basePlayers[i].name, rank);
+                basePlayers.RemoveAt(i);
+            }
+        }
+
+        //ドローンが1機に残ったらリザルトに移動
+        if(basePlayers.Count == 1)
+        {
+            ResultButtonsController.SetRank(basePlayers[0].name, ResultButtonsController.Rank.RANK_1ST);
+            StartCoroutine(MoveResult());
         }
 
 
@@ -150,6 +183,18 @@ public class MainGameManager : MonoBehaviour
         }
     }
 
+    //変数の初期化
+    void Init()
+    {
+        IsMainGaming = false;
+        IsMulti = false;
+        IsConfig = false;
+        Mode = GameMode.NONE;
+        playerDatas.Clear();
+        basePlayers.Clear();
+        Cursor.lockState = CursorLockMode.None;
+    }
+
     void MainGameToConfig()
     {
         screenMaskImage.enabled = true;     //設定画面の背景にマスクをつける
@@ -157,6 +202,13 @@ public class MainGameManager : MonoBehaviour
 
         Cursor.lockState = CursorLockMode.None;
         IsConfig = true;
+    }
+
+    IEnumerator MoveResult()
+    {
+        yield return new WaitForSeconds(3.0f);
+        Init();
+        NonGameManager.MainGameToResult();
     }
 
 

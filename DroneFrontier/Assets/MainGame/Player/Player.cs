@@ -285,10 +285,7 @@ public class Player : BasePlayer
                 atackType = 0;
             }
 
-            GameObject o = BaseWeapon.CreateWeapon(gameObject, (BaseWeapon.Weapon)atackType);     //武器の作成
-            BaseWeapon bw = o.GetComponent<BaseWeapon>();   //名前省略
-            bw.SetChild(cacheTransform);
-            weapons[(int)Weapon.SUB] = bw;
+            SetWeapon((BaseWeapon.Weapon)atackType);
         }
 
         //デバッグ用

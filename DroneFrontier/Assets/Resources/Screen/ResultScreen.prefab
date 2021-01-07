@@ -195,7 +195,7 @@ RectTransform:
   - {fileID: 8972208611487365165}
   - {fileID: 8972208611849399468}
   m_Father: {fileID: 8972208612392309955}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -369,7 +369,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 8972208612392309955}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &8972208611619595001
 MonoBehaviour:
@@ -383,6 +383,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e651ca1d2ab5f124db883a13b756e21e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  NameText1st: {fileID: 8972208612380265952}
+  NameText2st: {fileID: 8972208611688674112}
+  NameText3st: {fileID: 8972208611730802030}
+  NameText4st: {fileID: 8972208611608436468}
 --- !u!1 &8972208611688674114
 GameObject:
   m_ObjectHideFlags: 0
@@ -473,7 +477,7 @@ GameObject:
   - component: {fileID: 8972208611709231112}
   - component: {fileID: 8972208611709231113}
   m_Layer: 5
-  m_Name: Text3P
+  m_Name: Text3st
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -538,7 +542,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: 3P
+  m_Text: "\u4E09\u4F4D"
 --- !u!1 &8972208611730802024
 GameObject:
   m_ObjectHideFlags: 0
@@ -629,7 +633,7 @@ GameObject:
   - component: {fileID: 8972208611740688731}
   - component: {fileID: 8972208611740688708}
   m_Layer: 5
-  m_Name: Text2P
+  m_Name: Text2st
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -694,7 +698,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: 2P
+  m_Text: "\u4E8C\u4F4D"
 --- !u!1 &8972208611752489098
 GameObject:
   m_ObjectHideFlags: 0
@@ -869,7 +873,7 @@ GameObject:
   - component: {fileID: 8972208612027176741}
   - component: {fileID: 8972208612027176742}
   m_Layer: 5
-  m_Name: Text4P
+  m_Name: Text4st
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -934,7 +938,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: 4P
+  m_Text: "\u56DB\u4F4D"
 --- !u!1 &8972208612380265954
 GameObject:
   m_ObjectHideFlags: 0
@@ -1040,7 +1044,6 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 8972208612546218775}
   - {fileID: 8972208611619595002}
   - {fileID: 8972208612783308432}
   - {fileID: 8972208611523111555}
@@ -1157,49 +1160,6 @@ Transform:
   m_Father: {fileID: 8972208612783308432}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &8972208612546218768
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 8972208612546218775}
-  - component: {fileID: 8972208612546218774}
-  m_Layer: 0
-  m_Name: ResultManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &8972208612546218775
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8972208612546218768}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 8972208612392309955}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8972208612546218774
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8972208612546218768}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: be684103416fb894eb3539c996b5dce2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &8972208612690588894
 GameObject:
   m_ObjectHideFlags: 0
@@ -1313,7 +1273,7 @@ RectTransform:
   - {fileID: 8972208611752489097}
   - {fileID: 8972208612456345799}
   m_Father: {fileID: 8972208612392309955}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -1392,7 +1352,7 @@ GameObject:
   - component: {fileID: 8972208613105926414}
   - component: {fileID: 8972208613105926415}
   m_Layer: 5
-  m_Name: Text1P
+  m_Name: Text1st
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1457,7 +1417,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: 1P
+  m_Text: "\u4E00\u4F4D"
 --- !u!1 &8972208613340507944
 GameObject:
   m_ObjectHideFlags: 0

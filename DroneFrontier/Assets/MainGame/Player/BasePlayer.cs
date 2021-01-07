@@ -18,9 +18,14 @@ public abstract class BasePlayer : MonoBehaviour, IPlayerStatus
     public float RotateSpeed { get; set; } = 3.0f;
     float LimitCameraTiltX { get; set; } = 40.0f;
 
+    //破壊されたか
+    public bool IsDestroy { get; private set; } = false;
+
+    //バリア
     [SerializeField] Barrier barrierInspector = null;
     protected Barrier _Barrier { get; private set; } = null;
 
+    //ロックオン
     [SerializeField] LockOn lockOnInspector = null;
     protected LockOn _LockOn { get; private set; } = null;
     protected float LockOnTrackingSpeed { get; set; } = 0.1f;
@@ -193,9 +198,21 @@ public abstract class BasePlayer : MonoBehaviour, IPlayerStatus
         }
     }
 
+    protected virtual void Destroy()
+    {
+        IsDestroy = true;
+        _Barrier.enabled = false;
+    }
+
+
     //プレイヤーにダメージを与える
     public virtual void Damage(float power)
     {
+        if (IsDestroy)
+        {
+            return;
+        }
+
         IBarrier barrier = _Barrier;
         float p = Useful.DecimalPointTruncation(power, 1);  //小数点第2以下切り捨て
 
@@ -211,6 +228,7 @@ public abstract class BasePlayer : MonoBehaviour, IPlayerStatus
             if (HP < 0)
             {
                 HP = 0;
+                Destroy();
             }
 
 

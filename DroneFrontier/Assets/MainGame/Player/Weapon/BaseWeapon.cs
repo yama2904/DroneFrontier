@@ -94,6 +94,7 @@ public abstract class BaseWeapon : MonoBehaviour, IWeapon
     {
         transform.SetParent(parent);
         transform.localPosition = weaponLocalPos.localPosition;
+        transform.localRotation = weaponLocalPos.localRotation;
     }
 
     public enum Weapon

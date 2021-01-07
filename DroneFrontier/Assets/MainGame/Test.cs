@@ -14,20 +14,31 @@ public class Test : MonoBehaviour
     bool isMainCamera = true;
 
     [SerializeField] BasePlayer player;
+    [SerializeField] Transform playerPos;
     [SerializeField] BasePlayer cpu;
-    [SerializeField] bool isWeaponDebug = false;
+    [SerializeField] Transform cpuPos;
+    [SerializeField] bool isPlayerDebug = false;
     [SerializeField] BaseWeapon.Weapon playerWeapon = BaseWeapon.Weapon.SHOTGUN;
     [SerializeField] BaseWeapon.Weapon cpuWeapon = BaseWeapon.Weapon.SHOTGUN;
 
-    void Start()
+    void Awake()
     {
         deltaTime = 0;
         count = 0;
 
-        if (isWeaponDebug)
+        if (isPlayerDebug)
         {
-            player.SetWeapon(playerWeapon);
-            cpu.SetWeapon(cpuWeapon);
+            BasePlayer p = Instantiate(player);
+            p.transform.parent = null;
+            p.transform.position = playerPos.position;
+            p.transform.rotation = playerPos.rotation;
+            p.SetWeapon(playerWeapon);
+
+            BasePlayer c = Instantiate(cpu);
+            c.transform.parent = null;
+            c.transform.position = cpuPos.position;
+            c.transform.rotation = cpuPos.rotation;
+            c.SetWeapon(cpuWeapon);
         }
 
         //mainCamera = Camera.main.gameObject;
