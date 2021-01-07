@@ -112,7 +112,7 @@ public class TestDroneScript : MonoBehaviour
     //回転処理
     void Rotate(float valueX, float valueY, float speed)
     {
-        if (MainGameManager.IsCursorLock)
+        if (isCursorLock)
         {
             Vector3 angle = new Vector3(valueX * speed, valueY * speed, 0);
 

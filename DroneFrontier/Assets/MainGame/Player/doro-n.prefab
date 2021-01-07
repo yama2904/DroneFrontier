@@ -330,6 +330,7 @@ GameObject:
   - component: {fileID: 3029783880410522380}
   - component: {fileID: 3029783880410522383}
   - component: {fileID: 3029783880410522382}
+  - component: {fileID: 2984668094238729941}
   m_Layer: 0
   m_Name: doro-n
   m_TagString: Player
@@ -469,6 +470,22 @@ MonoBehaviour:
   barrierInspector: {fileID: 8350260369489129708}
   lockOnInspector: {fileID: 2095892392745028258}
   radar: {fileID: 7404620403777368885}
+--- !u!114 &2984668094238729941
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3029783880410522377}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 0
+  serverOnly: 0
+  m_AssetId: 
+  hasSpawned: 0
 --- !u!1 &4293304714322869758
 GameObject:
   m_ObjectHideFlags: 0
