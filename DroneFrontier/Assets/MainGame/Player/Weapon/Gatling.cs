@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Mirror;
 
 public class Gatling : BaseWeapon
 {
@@ -21,6 +22,8 @@ public class Gatling : BaseWeapon
         BulletsNum = 10;
         BulletsRemain = BulletsNum;
         BulletPower = 3.0f;
+
+        //GetComponent<NetworkIdentity>().AssignClientAuthority(connectionToClient);
     }
 
     protected override void Update()
@@ -56,15 +59,16 @@ public class Gatling : BaseWeapon
             return;
         }
 
-        Bullet b = Instantiate(bullet, shotPos.position, transform.rotation);    //弾丸の複製
+        CmdCreateBullet(shotPos.position, transform.rotation, target);
+        //Bullet b = Instantiate(bullet, shotPos.position, transform.rotation);    //弾丸の複製
 
-        //弾丸のパラメータ設定
-        b.Shooter = Shooter;    //撃ったプレイヤーを登録
-        b.Target = target;      //ロックオン中の敵
-        b.SpeedPerSecond = speedPerSecond;  //スピード
-        b.DestroyTime = destroyTime;        //射程
-        b.TrackingPower = trackingPower;    //誘導力
-        b.Power = BulletPower;              //威力
+        ////弾丸のパラメータ設定
+        //b.Shooter = Shooter;    //撃ったプレイヤーを登録
+        //b.Target = target;      //ロックオン中の敵
+        //b.SpeedPerSecond = speedPerSecond;  //スピード
+        //b.DestroyTime = destroyTime;        //射程
+        //b.TrackingPower = trackingPower;    //誘導力
+        //b.Power = BulletPower;              //威力
 
 
         //残り弾丸がMAXで撃つと一瞬で弾丸が1個回復するので
@@ -75,5 +79,21 @@ public class Gatling : BaseWeapon
         }
         BulletsRemain--;    //残り弾数を減らす
         ShotCountTime = 0;  //発射間隔のカウントをリセット
+    }
+
+    [Command]
+    void CmdCreateBullet(Vector3 pos, Quaternion rotation, GameObject target)
+    {
+        Bullet b = Instantiate(bullet, pos, rotation);    //弾丸の複製
+
+        //弾丸のパラメータ設定
+        b.Shooter = Shooter;    //撃ったプレイヤーを登録
+        b.Target = target;      //ロックオン中の敵
+        b.SpeedPerSecond = speedPerSecond;  //スピード
+        b.DestroyTime = destroyTime;        //射程
+        b.TrackingPower = trackingPower;    //誘導力
+        b.Power = BulletPower;              //威力
+
+        NetworkServer.Spawn(b.gameObject);
     }
 }

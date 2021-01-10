@@ -72,6 +72,8 @@ GameObject:
   - component: {fileID: 3830998461108276728}
   - component: {fileID: 7356341536032207105}
   - component: {fileID: 4437007829032219119}
+  - component: {fileID: 6643441237574856554}
+  - component: {fileID: -4600546810934263810}
   m_Layer: 0
   m_Name: Gatling
   m_TagString: Untagged
@@ -86,7 +88,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4437007829032219025}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.01, y: 0.01, z: 0.01}
   m_Children:
@@ -158,10 +160,47 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99ba8943b9049044fbe59365466b20a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
   weaponLocalPos: {fileID: 940059060412089129}
   shotPos: {fileID: 940059061499603391}
+  parentTransform: {fileID: 0}
   bullet: {fileID: -2401255768182461159, guid: 28d3844a32c206344bb065ba45dff061, type: 3}
   speedPerSecond: 40
   destroyTime: 1
   trackingPower: 1.8
   shotPerSecond: 5
+--- !u!114 &6643441237574856554
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4437007829032219025}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 0
+  serverOnly: 0
+  m_AssetId: 
+  hasSpawned: 0
+--- !u!114 &-4600546810934263810
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4437007829032219025}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f74aedd71d9a4f55b3ce499326d45fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  clientAuthority: 0
+  localPositionSensitivity: 0.01
+  localRotationSensitivity: 0.01
+  localScaleSensitivity: 0.01

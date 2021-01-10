@@ -106,3 +106,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac108096e504c104b8be64881239cda1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  regeneStartTime: 8
+  regeneInterval: 1
+  regeneValue: 5
+  resurrectBarrierTime: 15
+  resurrectBarrierHP: 10

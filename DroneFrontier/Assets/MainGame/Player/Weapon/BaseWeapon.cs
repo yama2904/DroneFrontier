@@ -1,16 +1,20 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Mirror;
 
-public abstract class BaseWeapon : MonoBehaviour, IWeapon
+public abstract class BaseWeapon : NetworkBehaviour, IWeapon
 {
     [SerializeField] protected Transform weaponLocalPos = null;
     [SerializeField] protected Transform shotPos = null;
 
-    protected GameObject Shooter { get; set; } = null;   //武器の所持者
+    public GameObject Shooter { get; set; } = null;   //武器の所持者
     protected float RecastCountTime { get; set; } = 0;   //リキャスト時間をカウントする変数
     protected float ShotCountTime { get; set; } = 0;     //1発ごとの間隔をカウントする変数
     protected float BulletPower { get; set; } = -1;      //弾丸の威力
+
+    [SyncVar, HideInInspector]
+    public Transform parentTransform = null;
 
     //プロパティ用
     float recast = 0;
@@ -71,6 +75,10 @@ public abstract class BaseWeapon : MonoBehaviour, IWeapon
         }
     }
 
+    protected virtual void Awake()
+    {
+        parentTransform = transform;
+    }
     protected abstract void Start();
 
     //リキャスト時間と発射間隔を管理する
@@ -97,6 +105,14 @@ public abstract class BaseWeapon : MonoBehaviour, IWeapon
         transform.localRotation = weaponLocalPos.localRotation;
     }
 
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+        transform.SetParent(parentTransform);
+        transform.localPosition = weaponLocalPos.localPosition;
+        transform.localRotation = weaponLocalPos.localRotation;
+    }
+
     public enum Weapon
     {
         SHOTGUN,
@@ -106,6 +122,7 @@ public abstract class BaseWeapon : MonoBehaviour, IWeapon
 
         NONE
     }
+
     public static GameObject CreateWeapon(GameObject shooter, Weapon weapon)
     {
         const string FOLDER_PATH = "Weapon/";

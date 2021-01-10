@@ -41,7 +41,7 @@ public class StunGrenade : MonoBehaviour
     //スタングレネードを爆破させる
     void CreateImpact()
     {
-        StunImpact s = Instantiate(stunImpact, transform.position, Quaternion.Euler(0, 0, 0)).GetComponent<StunImpact>();
+        StunImpact s = Instantiate(stunImpact, transform.position, Quaternion.identity).GetComponent<StunImpact>();
         s.Thrower = thrower;
         Destroy(gameObject);
     }

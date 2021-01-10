@@ -64,7 +64,7 @@ public class MissileBullet : Bullet
 
     void createExplosion()
     {
-        Explosion e = Instantiate(explosion, cacheTransform.position, Quaternion.Euler(0, 0, 0));
+        Explosion e = Instantiate(explosion, cacheTransform.position, Quaternion.identity);
         e.Shooter = Shooter;
         Destroy(gameObject);
     }

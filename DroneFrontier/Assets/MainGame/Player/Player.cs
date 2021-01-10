@@ -23,9 +23,16 @@ public class Player : BasePlayer
 
     protected override void Start()
     {
+        base.Start();
+
         HP = 30;
         MoveSpeed = 20.0f;
         MaxSpeed = 30.0f;
+
+        //if (!isLocalPlayer)
+        //{
+        //    _Rigidbody.isKinematic = true;
+        //}
 
         //配列初期化
         for (int i = 0; i < (int)Weapon.NONE; i++)
@@ -43,6 +50,12 @@ public class Player : BasePlayer
 
     protected override void Update()
     {
+        if (!isLocalPlayer)
+        {
+            return;
+        }
+
+
         base.Update();
 
         if (MainGameManager.IsCursorLock)
@@ -276,7 +289,7 @@ public class Player : BasePlayer
             Destroy(weapons[(int)Weapon.SUB].gameObject);
 
             //次の武器に切り替える
-            if(++atackType == (int)BaseWeapon.Weapon.GATLING)
+            if (++atackType == (int)BaseWeapon.Weapon.GATLING)
             {
                 atackType++;
             }

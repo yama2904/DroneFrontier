@@ -1,8 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Mirror;
 
-public class Bullet : MonoBehaviour
+public class Bullet : NetworkBehaviour
 {
     public const string BULLET_TAG = "Bullet";
 
@@ -13,7 +14,7 @@ public class Bullet : MonoBehaviour
     public float SpeedPerSecond { protected get; set; } = 0;   //1秒間に進む量
     public float DestroyTime { protected get; set; } = 0;      //発射してから消えるまでの時間(射程)
 
-    protected Transform cacheTransform;
+    protected Transform cacheTransform = null;
 
 
     protected virtual void Start()

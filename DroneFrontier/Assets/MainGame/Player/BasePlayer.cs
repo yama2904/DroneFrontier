@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
+using Mirror;
 
-public abstract class BasePlayer : MonoBehaviour, IPlayerStatus
+public abstract class BasePlayer : NetworkBehaviour, IPlayerStatus
 {
     public float HP { get; protected set; } = 0; //HP
     protected Rigidbody _Rigidbody = null;
@@ -50,7 +51,6 @@ public abstract class BasePlayer : MonoBehaviour, IPlayerStatus
     }
     protected BaseWeapon[] weapons = new BaseWeapon[(int)Weapon.NONE];  //ウェポン群
 
-
     //アイテム
     protected enum ItemNum
     {
@@ -89,19 +89,28 @@ public abstract class BasePlayer : MonoBehaviour, IPlayerStatus
         _LockOn = lockOnInspector;
 
 
-        //メインウェポンの初期化
-        GameObject o = BaseWeapon.CreateWeapon(gameObject, BaseWeapon.Weapon.GATLING);    //Gatlingの生成
-        BaseWeapon bw = o.GetComponent<BaseWeapon>();
-        bw.SetChild(cacheTransform);
-        weapons[(int)Weapon.MAIN] = o.GetComponent<BaseWeapon>();
-
-
         //配列初期化
         for (int i = 0; i < (int)Status.NONE; i++)
         {
             isStatus[i] = false;
         }
     }
+
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+        CmdCreateWeapon();
+    }
+
+    [Command]
+    protected void CmdCreateWeapon()
+    {
+        GameObject weapon = BaseWeapon.CreateWeapon(gameObject, BaseWeapon.Weapon.GATLING);
+        weapon.GetComponent<BaseWeapon>().parentTransform = transform;
+        NetworkServer.Spawn(weapon, connectionToClient);
+        weapons[(int)Weapon.MAIN] = weapon.GetComponent<BaseWeapon>();
+    }
+
     protected virtual void Start() { }
     protected virtual void Update()
     {
@@ -291,7 +300,7 @@ public abstract class BasePlayer : MonoBehaviour, IPlayerStatus
             return false;
         }
         //バリアが破壊されていたら強化しない
-        if(b.HP <= 0)
+        if (b.HP <= 0)
         {
             return false;
         }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
+using Mirror;
 
 public class LaserWeapon : BaseWeapon
 {
