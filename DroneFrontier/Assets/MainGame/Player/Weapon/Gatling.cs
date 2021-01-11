@@ -94,6 +94,6 @@ public class Gatling : BaseWeapon
         b.TrackingPower = trackingPower;    //誘導力
         b.Power = BulletPower;              //威力
 
-        NetworkServer.Spawn(b.gameObject);
+        NetworkServer.Spawn(b.gameObject, connectionToClient);
     }
 }

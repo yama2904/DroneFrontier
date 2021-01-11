@@ -146,6 +146,10 @@ public class NewNetworkManager : NetworkManager
     public override void OnServerAddPlayer(NetworkConnection conn)
     {
         var player = Instantiate(playerPrefab, GetStartPosition().position, Quaternion.identity);
+        //GameObject weapon = BaseWeapon.CreateWeapon(player, BaseWeapon.Weapon.GATLING);
+        //weapon.GetComponent<BaseWeapon>().parentTransform = player.transform;
+        //NetworkServer.Spawn(weapon, conn);
+        //player.GetComponent<BasePlayer>().SetWeapon(weapon.GetComponent<BaseWeapon>());
         NetworkServer.AddPlayerForConnection(conn, player);
     }
 

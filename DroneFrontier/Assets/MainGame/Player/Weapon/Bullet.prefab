@@ -126,7 +126,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   syncMode: 0
-  syncInterval: 0.1
+  syncInterval: 0
+  Shooter: {fileID: 0}
+  Target: {fileID: 0}
+  TrackingPower: 0
+  Power: 0
+  SpeedPerSecond: 0
+  DestroyTime: 0
 --- !u!114 &767224710757440951
 MonoBehaviour:
   m_ObjectHideFlags: 0

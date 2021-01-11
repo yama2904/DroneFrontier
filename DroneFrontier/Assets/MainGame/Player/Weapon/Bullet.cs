@@ -7,18 +7,19 @@ public class Bullet : NetworkBehaviour
 {
     public const string BULLET_TAG = "Bullet";
 
-    public GameObject Shooter { protected get; set; } = null;  //撃ったプレイヤー
-    public GameObject Target { private get; set; } = null;     //誘導する対象
-    public float TrackingPower { protected get; set; } = 0;    //追従力
-    public float Power { protected get; set; } = 0;            //威力
-    public float SpeedPerSecond { protected get; set; } = 0;   //1秒間に進む量
-    public float DestroyTime { protected get; set; } = 0;      //発射してから消えるまでの時間(射程)
+    [SyncVar] public GameObject Shooter = null;  //撃ったプレイヤー
+    [SyncVar] public GameObject Target = null;     //誘導する対象
+    [SyncVar] public float TrackingPower  = 0;    //追従力
+    [SyncVar] public float Power = 0;            //威力
+    [SyncVar] public float SpeedPerSecond  = 0;   //1秒間に進む量
+    [SyncVar] public float DestroyTime  = 0;      //発射してから消えるまでの時間(射程)
 
     protected Transform cacheTransform = null;
 
 
     protected virtual void Start()
     {
+        Debug.Log(DestroyTime);
         cacheTransform = transform;
         Destroy(gameObject, DestroyTime);
     }

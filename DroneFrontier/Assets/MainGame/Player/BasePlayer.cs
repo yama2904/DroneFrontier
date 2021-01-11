@@ -55,6 +55,9 @@ public abstract class BasePlayer : NetworkBehaviour, IPlayerStatus
     }
     protected BaseWeapon[] weapons = new BaseWeapon[(int)Weapon.NONE];  //ウェポン群
 
+    [SyncVar]
+    protected GameObject mainWeapon = null;
+
     //アイテム
     protected enum ItemNum
     {
@@ -87,6 +90,12 @@ public abstract class BasePlayer : NetworkBehaviour, IPlayerStatus
     public override void OnStartClient()
     {
         base.OnStartClient();
+    }
+
+    public override void OnStartLocalPlayer()
+    {
+        base.OnStartLocalPlayer();
+        _Camera.depth++;
         CmdCreateWeapon();
     }
 
@@ -96,13 +105,7 @@ public abstract class BasePlayer : NetworkBehaviour, IPlayerStatus
         GameObject weapon = BaseWeapon.CreateWeapon(gameObject, BaseWeapon.Weapon.GATLING);
         weapon.GetComponent<BaseWeapon>().parentTransform = transform;
         NetworkServer.Spawn(weapon, connectionToClient);
-        weapons[(int)Weapon.MAIN] = weapon.GetComponent<BaseWeapon>();
-    }
-
-    public override void OnStartLocalPlayer()
-    {
-        base.OnStartLocalPlayer();
-        _Camera.depth++;
+        mainWeapon = weapon;
     }
 
     protected virtual void Awake()
@@ -203,7 +206,9 @@ public abstract class BasePlayer : NetworkBehaviour, IPlayerStatus
     protected virtual void UseWeapon(Weapon weapon)
     {
         ILockOn l = _LockOn;
-        IWeapon w = weapons[(int)weapon];
+        //IWeapon w = weapons[(int)weapon];
+        //w.Shot(l.Target);
+        IWeapon w = mainWeapon.GetComponent<BaseWeapon>();
         w.Shot(l.Target);
     }
 
