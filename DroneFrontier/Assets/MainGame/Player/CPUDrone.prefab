@@ -911,7 +911,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1a7ad88ae6a575418c2e02a063abec1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
   MoveSpeed: 0
+  cameraInspector: {fileID: 3961185181324795762}
   barrierInspector: {fileID: 3961185180629351537}
   lockOnInspector: {fileID: 3961185181182409849}
   speed: 0.1

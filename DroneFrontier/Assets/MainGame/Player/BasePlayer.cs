@@ -22,6 +22,10 @@ public abstract class BasePlayer : NetworkBehaviour, IPlayerStatus
     //破壊されたか
     public bool IsDestroy { get; private set; } = false;
 
+    //カメラ
+    [SerializeField] Camera cameraInspector = null;
+    protected Camera _Camera { get; private set; } = null;
+
     //バリア
     [SerializeField] Barrier barrierInspector = null;
     protected Barrier _Barrier { get; private set; } = null;
@@ -80,22 +84,6 @@ public abstract class BasePlayer : NetworkBehaviour, IPlayerStatus
     bool isQ = true;
 
 
-    protected virtual void Awake()
-    {
-        _Rigidbody = GetComponent<Rigidbody>();
-        cacheTransform = transform;
-
-        _Barrier = barrierInspector;
-        _LockOn = lockOnInspector;
-
-
-        //配列初期化
-        for (int i = 0; i < (int)Status.NONE; i++)
-        {
-            isStatus[i] = false;
-        }
-    }
-
     public override void OnStartClient()
     {
         base.OnStartClient();
@@ -110,6 +98,30 @@ public abstract class BasePlayer : NetworkBehaviour, IPlayerStatus
         NetworkServer.Spawn(weapon, connectionToClient);
         weapons[(int)Weapon.MAIN] = weapon.GetComponent<BaseWeapon>();
     }
+
+    public override void OnStartLocalPlayer()
+    {
+        base.OnStartLocalPlayer();
+        _Camera.depth++;
+    }
+
+    protected virtual void Awake()
+    {
+        _Rigidbody = GetComponent<Rigidbody>();
+        cacheTransform = transform;
+
+        _Camera = cameraInspector;
+        _Barrier = barrierInspector;
+        _LockOn = lockOnInspector;
+
+
+        //配列初期化
+        for (int i = 0; i < (int)Status.NONE; i++)
+        {
+            isStatus[i] = false;
+        }
+    }
+
 
     protected virtual void Start() { }
     protected virtual void Update()

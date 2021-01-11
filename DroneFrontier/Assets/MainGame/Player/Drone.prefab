@@ -400,6 +400,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0.1
   MoveSpeed: 20
+  cameraInspector: {fileID: 4293304715628187314}
   barrierInspector: {fileID: 8350260369489129708}
   lockOnInspector: {fileID: 2095892392745028258}
   radar: {fileID: 7404620403777368885}
