@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Mirror;
 
 public class StunImpact : MonoBehaviour
 {
@@ -8,18 +9,24 @@ public class StunImpact : MonoBehaviour
     [SerializeField] float stunTime = 9.0f;
     [SerializeField] float destroyTime = 0.5f;
 
-    IEnumerator Start()
+    void Start()
     {
-        Destroy(gameObject, destroyTime);
+        Invoke(nameof(DestroyMe), destroyTime);
 
         //爆発した直後に当たり判定を消す
-        yield return new WaitForSeconds(0.05f);
+        Invoke(nameof(FalseEnabledCollider), 0.05f);
+    }
+
+    void Update() { }
+
+    void FalseEnabledCollider()
+    {
         GetComponent<SphereCollider>().enabled = false;
     }
 
-    void Update()
+    void DestroyMe()
     {
-
+        NetworkServer.Destroy(gameObject);
     }
 
     private void OnTriggerEnter(Collider other)

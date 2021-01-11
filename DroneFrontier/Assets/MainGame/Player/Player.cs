@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System;
+using Mirror;
 
 public class Player : BasePlayer
 {
@@ -286,7 +287,7 @@ public class Player : BasePlayer
         if (Input.GetKeyDown(KeyCode.Tab))
         {
             //今持っているサブ武器を削除
-            Destroy(weapons[(int)Weapon.SUB].gameObject);
+            NetworkServer.Destroy(weapons[(int)Weapon.SUB].gameObject);
 
             //次の武器に切り替える
             if (++atackType == (int)BaseWeapon.Weapon.GATLING)

@@ -9,7 +9,6 @@ public class LockOn : MonoBehaviour, ILockOn
     //プレイヤー系変数
     [SerializeField] GameObject player = null;
     Transform playerTransform = null;
-    bool isMainPlayer;
 
     //カメラ用変数
     [SerializeField] Camera _camera = null;
@@ -29,11 +28,6 @@ public class LockOn : MonoBehaviour, ILockOn
 
     void Awake()
     {
-        isMainPlayer = false;
-        if (ReferenceEquals(MainGameManager.MainPlayer, player))
-        {
-            isMainPlayer = true;
-        }
         playerTransform = player.transform;
         cameraTransform = _camera.transform;
 

@@ -9,10 +9,10 @@ public class Bullet : NetworkBehaviour
 
     [SyncVar] public GameObject Shooter = null;  //撃ったプレイヤー
     [SyncVar] public GameObject Target = null;     //誘導する対象
-    [SyncVar] public float TrackingPower  = 0;    //追従力
+    [SyncVar] public float TrackingPower = 0;    //追従力
     [SyncVar] public float Power = 0;            //威力
-    [SyncVar] public float SpeedPerSecond  = 0;   //1秒間に進む量
-    [SyncVar] public float DestroyTime  = 0;      //発射してから消えるまでの時間(射程)
+    [SyncVar] public float SpeedPerSecond = 0;   //1秒間に進む量
+    [SyncVar] public float DestroyTime = 0;      //発射してから消えるまでの時間(射程)
 
     protected Transform cacheTransform = null;
 
@@ -21,7 +21,7 @@ public class Bullet : NetworkBehaviour
     {
         Debug.Log(DestroyTime);
         cacheTransform = transform;
-        Destroy(gameObject, DestroyTime);
+        Invoke(nameof(DestroyMe), DestroyTime);
     }
 
     protected virtual void Update()
@@ -59,6 +59,11 @@ public class Bullet : NetworkBehaviour
         cacheTransform.position += cacheTransform.forward * SpeedPerSecond * Time.deltaTime;
     }
 
+    protected void DestroyMe()
+    {
+        NetworkServer.Destroy(gameObject);
+    }
+
     protected virtual void OnTriggerEnter(Collider other)
     {
         //撃ったプレイヤーなら当たり判定を行わない
@@ -69,10 +74,10 @@ public class Bullet : NetworkBehaviour
 
         //プレイヤーかCPUの当たり判定
         if (other.CompareTag(Player.PLAYER_TAG) || other.CompareTag(CPUController.CPU_TAG))
-        {            
+        {
             BasePlayer bp = other.GetComponent<BasePlayer>();
             bp.Damage(Power);
-            Destroy(gameObject);
+            DestroyMe();
         }
         else if (other.CompareTag(JammingBot.JAMMING_BOT_TAG))
         {
@@ -82,7 +87,7 @@ public class Bullet : NetworkBehaviour
                 return;
             }
             jb.Damage(Power);
-            Destroy(gameObject);
+            DestroyMe();
         }
     }
 }

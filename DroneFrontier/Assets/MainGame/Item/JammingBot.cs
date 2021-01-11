@@ -18,11 +18,10 @@ public class JammingBot : MonoBehaviour
     }
 
     void Update()
-    {
-        
+    {        
     }
 
-    public void DestroyBot()
+    private void OnDestroy()
     {
         //デバッグ用
         Debug.Log("ジャミングボット破壊");
@@ -33,9 +32,22 @@ public class JammingBot : MonoBehaviour
         {
             Creater.GetComponent<BasePlayer>().UnSetNotLockOnObject(gameObject);
         }
-
-        Destroy(gameObject);
     }
+
+    //public void DestroyBot()
+    //{
+    //    //デバッグ用
+    //    Debug.Log("ジャミングボット破壊");
+
+
+    //    //SetNotLockOnObjectを解除
+    //    if (Creater.CompareTag(Player.PLAYER_TAG) || Creater.CompareTag(CPUController.CPU_TAG))
+    //    {
+    //        Creater.GetComponent<BasePlayer>().UnSetNotLockOnObject(gameObject);
+    //    }
+
+    //    Destroy(gameObject);
+    //}
 
     public void Damage(float power)
     {
@@ -44,7 +56,7 @@ public class JammingBot : MonoBehaviour
         if (HP < 0)
         {
             HP = 0;
-            DestroyBot();
+            Destroy(gameObject);
         }
     }
 }

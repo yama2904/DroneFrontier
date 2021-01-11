@@ -6,17 +6,17 @@ using UnityEngine.SceneManagement;
 public class NonGameManager : MonoBehaviour
 {
     static List<MainGameManager.PlayerData> playerDatas = new List<MainGameManager.PlayerData>();
-    static bool isStart = false;
+    static bool isStarted = false;
     static bool isResult = false;
 
     void Start()
     {
-        if (!isStart)
+        if (!isStarted)
         {
             ConfigManager.InitConfig();
             MainGameManager.IsMulti = false;
         }
-        isStart = true;
+        isStarted = true;
         playerDatas.Clear();
 
         //全ての画面のロード

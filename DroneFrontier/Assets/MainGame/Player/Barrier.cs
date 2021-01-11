@@ -59,7 +59,7 @@ public class Barrier : MonoBehaviour, IBarrier, IBarrierStatus
         {
             if (regeneCountTime >= regeneInterval)
             {
-                if(HP < MAX_HP)
+                if (HP < MAX_HP)
                 {
                     Regene(regeneValue);
                 }
@@ -88,7 +88,7 @@ public class Barrier : MonoBehaviour, IBarrier, IBarrierStatus
     //バリアを復活させる
     void ResurrectBarrier(float resurrectHP)
     {
-        if(HP > 0)
+        if (HP > 0)
         {
             return;
         }
@@ -128,7 +128,7 @@ public class Barrier : MonoBehaviour, IBarrier, IBarrierStatus
     public void BarrierStrength(float strengthPrercent, float time)
     {
         damagePercent = 1 - strengthPrercent;
-        StartCoroutine(EndStrength(time));
+        Invoke(nameof(EndStrength), time);
 
         IsStrength = true;
 
@@ -137,18 +137,18 @@ public class Barrier : MonoBehaviour, IBarrier, IBarrierStatus
         Debug.Log("バリア強化");
     }
     //time秒後にバリア強化を終了させる
-    IEnumerator EndStrength(float time)
+    void EndStrength()
     {
-        yield return new WaitForSeconds(time);
-        if (!IsWeak)
+        if (IsWeak)
         {
-            damagePercent = 1;
-            IsStrength = false;
-
-
-            //デバッグ用
-            Debug.Log("バリア強化解除");
+            return;
         }
+        damagePercent = 1;
+        IsStrength = false;
+
+
+        //デバッグ用
+        Debug.Log("バリア強化解除");
     }
 
     //バリア弱体化
@@ -185,7 +185,7 @@ public class Barrier : MonoBehaviour, IBarrier, IBarrierStatus
     //バリア弱体化解除
     public void ReleaseBarrierWeak()
     {
-        if(HP <= 0)
+        if (HP <= 0)
         {
             ResurrectBarrier(resurrectBarrierHP);
         }

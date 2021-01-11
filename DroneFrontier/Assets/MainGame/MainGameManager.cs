@@ -20,9 +20,6 @@ using UnityEngine.SceneManagement;
  */
 public class MainGameManager : MonoBehaviour
 {
-    //操作しているプレイヤー
-    public static GameObject MainPlayer { get; set; } = null;
-
     //マルチモードか
     public static bool IsMulti { get; set; } = false;
 
@@ -162,7 +159,7 @@ public class MainGameManager : MonoBehaviour
         if(basePlayers.Count == 1)
         {
             ResultButtonsController.SetRank(basePlayers[0].name, ResultButtonsController.Rank.RANK_1ST);
-            StartCoroutine(MoveResult());
+            Invoke(nameof(MoveResult), 3.0f);
         }
 
 
@@ -204,9 +201,8 @@ public class MainGameManager : MonoBehaviour
         IsConfig = true;
     }
 
-    IEnumerator MoveResult()
+    void MoveResult()
     {
-        yield return new WaitForSeconds(3.0f);
         Init();
         NonGameManager.MainGameToResult();
     }

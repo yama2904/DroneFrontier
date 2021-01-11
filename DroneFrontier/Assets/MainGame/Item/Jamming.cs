@@ -8,12 +8,11 @@ public class Jamming : MonoBehaviour
 
     [SerializeField] GameObject jammingBot = null;
     [SerializeField] Transform jammingBotPosition = null;
-    JammingBot createBot = null; 
+    JammingBot createBot = null;
     List<BasePlayer> jamingPlayers = new List<BasePlayer>();
 
     [SerializeField] float destroyTime = 60.0f;
-    float deltaTime = 0;
-    bool isEndCoroutine = false;
+
 
     void Start()
     {
@@ -21,20 +20,16 @@ public class Jamming : MonoBehaviour
 
     void Update()
     {
-        //コルーチンを抜けたら処理
-        if (isEndCoroutine)
+        if (createBot == null)
         {
-            if (createBot == null)
+            //ジャミングを解除する
+            foreach (BasePlayer bp in jamingPlayers)
             {
-                //ジャミングを解除する
-                foreach (BasePlayer bp in jamingPlayers)
-                {
-                    IPlayerStatus ps = bp;
-                    ps.UnSetJamming();
-                }                
-
-                Destroy(gameObject);
+                IPlayerStatus ps = bp;
+                ps.UnSetJamming();
             }
+
+            Destroy(gameObject);
         }
     }
 
@@ -60,31 +55,8 @@ public class Jamming : MonoBehaviour
         Debug.Log("ジャミングボット生成");
 
 
-        StartCoroutine(JammingCoroutine(createBot, destroyTime));
-    }
-
-    IEnumerator JammingCoroutine(JammingBot bot, float time)
-    {
-        //毎フレーム処理
-        while (true)
-        {
-            //一定時間経過したらbotを破壊してコルーチンを抜ける
-            if (deltaTime >= time)
-            {
-                bot.DestroyBot();
-                isEndCoroutine = true;
-                yield break;
-            }
-            //botが破壊されたらコルーチンを抜ける
-            if (bot == null)
-            {
-                isEndCoroutine = true;
-                yield break;
-            }
-
-            deltaTime += Time.deltaTime;
-            yield return null;
-        }
+        //一定時間後にボットを削除
+        Destroy(createBot, destroyTime);
     }
 
     private void OnTriggerEnter(Collider other)
