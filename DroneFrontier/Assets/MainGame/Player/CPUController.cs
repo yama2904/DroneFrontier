@@ -17,6 +17,8 @@ public class CPUController : BasePlayer
         HP = 30;
         MoveSpeed = speed;
         MaxSpeed = 30.0f;
+
+        SetWeapon(Weapon.MAIN, BaseWeapon.Weapon.GATLING);
     }
 
     protected override void Update()
@@ -34,5 +36,11 @@ public class CPUController : BasePlayer
             transform.position += new Vector3(MoveSpeed * Mathf.Sin(deltaTime), 0, 0);
         }
         deltaTime += Time.deltaTime;
+    }
+
+    //サブウェポンをセットする
+    public void SetSubWeapon(BaseWeapon.Weapon weapon)
+    {
+        SetWeapon(Weapon.SUB, weapon);
     }
 }

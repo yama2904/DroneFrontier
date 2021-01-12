@@ -53,8 +53,6 @@ public abstract class BasePlayer : NetworkBehaviour, IPlayerStatus
 
         NONE
     }
-    protected BaseWeapon[] weapons = new BaseWeapon[(int)Weapon.NONE];  //ウェポン群
-
     [SyncVar] protected GameObject mainWeapon = null;
     [SyncVar] protected GameObject subWeapon = null;
 
@@ -105,7 +103,11 @@ public abstract class BasePlayer : NetworkBehaviour, IPlayerStatus
     }
 
 
-    protected virtual void Start() { }
+    protected virtual void Start()
+    {
+        SetWeapon(Weapon.MAIN, BaseWeapon.Weapon.GATLING);
+    }
+
     protected virtual void Update()
     {
         IBarrierStatus b = _Barrier;
@@ -184,10 +186,30 @@ public abstract class BasePlayer : NetworkBehaviour, IPlayerStatus
     //攻撃処理
     protected virtual void UseWeapon(Weapon weapon)
     {
+        GameObject o;
+        if (weapon == Weapon.MAIN)
+        {
+            if (mainWeapon == null)
+            {
+                return;
+            }
+            o = mainWeapon;
+        }
+        else if (weapon == Weapon.SUB)
+        {
+            if (subWeapon == null)
+            {
+                return;
+            }
+            o = subWeapon;
+        }
+        else
+        {
+            return;
+        }
+
         ILockOn l = _LockOn;
-        //IWeapon w = weapons[(int)weapon];
-        //w.Shot(l.Target);
-        IWeapon w = mainWeapon.GetComponent<BaseWeapon>();
+        IWeapon w = o.GetComponent<BaseWeapon>();
         w.Shot(l.Target);
     }
 
@@ -200,6 +222,26 @@ public abstract class BasePlayer : NetworkBehaviour, IPlayerStatus
         if (items[num] != null)
         {
             items[num].UseItem(this);
+        }
+    }
+
+    protected virtual void SetWeapon(Weapon weapon, BaseWeapon.Weapon weaponType)
+    {
+        GameObject create = BaseWeapon.CreateWeapon(gameObject, weaponType);
+        create.GetComponent<BaseWeapon>().SetChild(cacheTransform);
+
+        if (weapon == Weapon.MAIN)
+        {
+            mainWeapon = create;
+            Debug.Log(mainWeapon);
+        }
+        else if (weapon == Weapon.SUB)
+        {
+            subWeapon = create;
+        }
+        else
+        {
+            return;
         }
     }
 
@@ -240,16 +282,6 @@ public abstract class BasePlayer : NetworkBehaviour, IPlayerStatus
             //デバッグ用
             Debug.Log(name + "に" + p + "のダメージ\n残りHP: " + HP);
         }
-    }
-
-    //サブウェポンをセットする
-    public virtual void SetWeapon(BaseWeapon.Weapon weapon)
-    {
-        //サブウェポンの処理
-        GameObject o = BaseWeapon.CreateWeapon(gameObject, weapon);
-        BaseWeapon bw = o.GetComponent<BaseWeapon>();   //名前省略
-        bw.SetChild(cacheTransform);
-        weapons[(int)Weapon.SUB] = bw;
     }
 
     //ロックオンしない対象を設定

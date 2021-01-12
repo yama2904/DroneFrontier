@@ -6,9 +6,9 @@ using Mirror;
 public class Shotgun : BaseWeapon
 {
     //ショットガンのパラメータ
-    [SerializeField] Bullet bullet = null;          //弾のオブジェクト
-    [SerializeField] float diffusionPower = 10.0f;  //拡散力
-    [SerializeField] float angleDiff = 3.0f;        //角度の変動量
+    [SerializeField] Bullet bullet = null;    //弾のオブジェクト
+    [SerializeField] float angle = 10.0f;     //拡散力
+    [SerializeField] float angleDiff = 3.0f;  //角度の変動量
 
     //弾丸のパラメータ
     [SerializeField] float speedPerSecond = 10.0f;  //1秒間に進む量
@@ -72,23 +72,14 @@ public class Shotgun : BaseWeapon
         {
             for (int j = -1; j <= 1; j++)
             {
-                Bullet b = Instantiate(bullet, shotPos.position, transform.rotation);    //弾丸の複製
-                Transform t = b.transform;  //キャッシュ
-
-                //弾丸のパラメータ設定
-                b.Shooter = Shooter;    //撃ったプレイヤーを登録
-                b.Target = target;     //ロックオン中の敵
-                b.SpeedPerSecond = speedPerSecond;   //スピード
-                b.DestroyTime = destroyTime;         //射程
-                b.TrackingPower = trackingPower;     //誘導力
-                b.Power = BulletPower;               //威力
-
-
-                //弾丸の進む方向を変えて散らす処理
-                float rotateX = (diffusionPower * i) + Random.Range(angleDiff * -1, angleDiff); 　//左右の角度
-                float rotateY = (diffusionPower * j) + Random.Range(angleDiff * -1, angleDiff);   //上下の角度
-                t.RotateAround(t.position, t.right, rotateY);
-                t.RotateAround(t.position, t.up, rotateX);
+                if (MainGameManager.IsMulti)
+                {
+                    CmdCreateBullet(shotPos.position, transform.rotation, angle * i, angle * j, target);
+                }
+                else
+                {
+                    CreateBullet(shotPos.position, transform.rotation, angle * i, angle * j, target);
+                }
             }
         }
         //残り弾丸がMAXで撃つと一瞬で弾丸が1個回復するので
@@ -103,5 +94,34 @@ public class Shotgun : BaseWeapon
 
         //デバッグ用
         Debug.Log("残り弾数: " + BulletsRemain);
+    }
+
+    Bullet CreateBullet(Vector3 pos, Quaternion rotation, float angleX, float angleY, GameObject target)
+    {
+        Bullet b = Instantiate(bullet, pos, rotation);    //弾丸の複製
+
+        //弾丸のパラメータ設定
+        b.Shooter = Shooter;    //撃ったプレイヤーを登録
+        b.Target = target;      //ロックオン中の敵
+        b.SpeedPerSecond = speedPerSecond;  //スピード
+        b.DestroyTime = destroyTime;        //射程
+        b.TrackingPower = trackingPower;    //誘導力
+        b.Power = BulletPower;              //威力
+
+        //弾丸の進む方向を変えて散らす処理
+        Transform t = b.transform;  //キャッシュ
+        float rotateX = angleX + Random.Range(angleDiff * -1, angleDiff);  //左右の角度
+        float rotateY = angleY + Random.Range(angleDiff * -1, angleDiff);   //上下の角度
+        t.RotateAround(t.position, t.right, rotateY);
+        t.RotateAround(t.position, t.up, rotateX);
+
+        return b;
+    }
+
+    [Command]
+    void CmdCreateBullet(Vector3 pos, Quaternion rotation, float angleX, float angleY, GameObject target)
+    {
+        Bullet b = CreateBullet(pos, rotation,angleX, angleY, target);
+        NetworkServer.Spawn(b.gameObject, connectionToClient);
     }
 }

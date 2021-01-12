@@ -4,20 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
-/*
- * 公開変数
- * static bool IsMulti          マルチモードか
- * static bool IsItem           アイテムを出現させるか
- * static bool IsMainGaming     メインゲーム中か
- * static bool IsConfig         設定画面を開いているか
- * static GameMode Mode         どのゲームモードを選んでいるか
- * 
- * 公開型
- * enum GameMode    ゲームモード一覧
- * 
- * 公開メソッド
- * static void ConfigToMainGame()   設定画面からゲーム画面に移動する(ほとんどConfigManager専用)
- */
+
 public class MainGameManager : MonoBehaviour
 {
     //マルチモードか
@@ -52,10 +39,10 @@ public class MainGameManager : MonoBehaviour
     static List<PlayerData> playerDatas = new List<PlayerData>();
 
     //ゲーム上のプレイヤー・CPU情報
-    [SerializeField] BasePlayer playerInspector = null;
-    [SerializeField] BasePlayer cpuInspector = null;
-    static BasePlayer player = null;
-    static BasePlayer cpu = null;
+    [SerializeField] Player playerInspector = null;
+    [SerializeField] CPUController cpuInspector = null;
+    static Player player = null;
+    static CPUController cpu = null;
     static List<BasePlayer> basePlayers = new List<BasePlayer>();
 
 
@@ -72,12 +59,17 @@ public class MainGameManager : MonoBehaviour
 
     //デバッグ用
     public static bool IsCursorLock { get; private set; } = true;
+    [SerializeField] bool offline = false;
 
     void Awake()
     {
         player = playerInspector;
         cpu = cpuInspector;
         screenMaskImage = screenMaskImageInspector;
+
+
+        //デバッグ用
+        IsMulti = !offline;
     }
 
     void Start()
@@ -100,24 +92,25 @@ public class MainGameManager : MonoBehaviour
             }
             else
             {
-                p = Instantiate(cpu);
+                CPUController c = Instantiate(cpu);
+                c.SetSubWeapon(playerDatas[i].weapon);
+                p = c;
             }
             p.transform.Translate(0, 0, i * 2.0f);
             p.name = playerDatas[i].name;
-            p.SetWeapon(playerDatas[i].weapon);
 
             basePlayers.Add(p);
         }
 
         //デバッグ用
-        if(playerDatas.Count == 0)
+        if (playerDatas.Count == 0)
         {
             GameObject[] p = GameObject.FindGameObjectsWithTag(Player.PLAYER_TAG);
-            foreach(GameObject o in p)
+            foreach (GameObject o in p)
             {
                 basePlayers.Add(o.GetComponent<BasePlayer>());
             }
-            GameObject[] c  = GameObject.FindGameObjectsWithTag(CPUController.CPU_TAG);
+            GameObject[] c = GameObject.FindGameObjectsWithTag(CPUController.CPU_TAG);
             foreach (GameObject o in c)
             {
                 basePlayers.Add(o.GetComponent<BasePlayer>());
@@ -144,7 +137,7 @@ public class MainGameManager : MonoBehaviour
         }
 
         //破壊されたドローンがあるか調べる
-        for(int i = basePlayers.Count - 1; i >= 0; i--)
+        for (int i = basePlayers.Count - 1; i >= 0; i--)
         {
             //破壊されていたらランキング用リストに名前を入れてドローンをリストから削除
             if (basePlayers[i].IsDestroy)
@@ -156,7 +149,7 @@ public class MainGameManager : MonoBehaviour
         }
 
         //ドローンが1機に残ったらリザルトに移動
-        if(basePlayers.Count == 1)
+        if (basePlayers.Count == 1)
         {
             ResultButtonsController.SetRank(basePlayers[0].name, ResultButtonsController.Rank.RANK_1ST);
             Invoke(nameof(MoveResult), 3.0f);
@@ -229,7 +222,7 @@ public class MainGameManager : MonoBehaviour
     public static void SetPlayer(string name, BaseWeapon.Weapon weapon, bool isPlayer)
     {
         //不正な値なら弾く
-        if(name == "" || weapon == BaseWeapon.Weapon.NONE)
+        if (name == "" || weapon == BaseWeapon.Weapon.NONE)
         {
             return;
         }

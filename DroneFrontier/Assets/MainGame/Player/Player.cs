@@ -8,6 +8,7 @@ using Mirror;
 public class Player : BasePlayer
 {
     public const string PLAYER_TAG = "Player";  //タグ名
+    public static BaseWeapon.Weapon SetSubWeapon { private get; set; } = BaseWeapon.Weapon.SHOTGUN;
     bool[] isUsingWeapons = new bool[(int)Weapon.NONE];    //使用中の武器
 
     [SerializeField] Radar radar = null;
@@ -31,16 +32,26 @@ public class Player : BasePlayer
     {
         base.OnStartLocalPlayer();
         _Camera.depth++;
-        CmdCreateWeapon();
+        CmdCreateMainWeapon();
+        CmdCreateSubWeapon();
     }
 
     [Command]
-    protected void CmdCreateWeapon()
+    void CmdCreateMainWeapon()
     {
         GameObject weapon = BaseWeapon.CreateWeapon(gameObject, BaseWeapon.Weapon.GATLING);
         weapon.GetComponent<BaseWeapon>().parentTransform = transform;
         NetworkServer.Spawn(weapon, connectionToClient);
         mainWeapon = weapon;
+    }
+
+    [Command]
+    void CmdCreateSubWeapon()
+    {
+        GameObject weapon = BaseWeapon.CreateWeapon(gameObject, SetSubWeapon);
+        weapon.GetComponent<BaseWeapon>().parentTransform = transform;
+        NetworkServer.Spawn(weapon, connectionToClient);
+        subWeapon = weapon;
     }
 
 
@@ -60,18 +71,27 @@ public class Player : BasePlayer
         boostImage.fillAmount = 1;
 
 
+        if (!MainGameManager.IsMulti)
+        {
+            SetWeapon(Weapon.MAIN, BaseWeapon.Weapon.GATLING);
+            SetWeapon(Weapon.SUB, SetSubWeapon);
+        }
+
+
         //デバッグ用
         initPos = cacheTransform.position;
     }
 
     protected override void Update()
     {
-        if (!isLocalPlayer)
+        if (MainGameManager.IsMulti)
         {
-            return;
+            if (!isLocalPlayer)
+            {
+                return;
+            }
+
         }
-
-
         base.Update();
 
         if (MainGameManager.IsCursorLock)
@@ -302,7 +322,7 @@ public class Player : BasePlayer
         if (Input.GetKeyDown(KeyCode.Tab))
         {
             //今持っているサブ武器を削除
-            NetworkServer.Destroy(weapons[(int)Weapon.SUB].gameObject);
+            NetworkServer.Destroy(subWeapon);
 
             //次の武器に切り替える
             if (++atackType == (int)BaseWeapon.Weapon.GATLING)
@@ -314,7 +334,7 @@ public class Player : BasePlayer
                 atackType = 0;
             }
 
-            SetWeapon((BaseWeapon.Weapon)atackType);
+            SetWeapon(Weapon.SUB, (BaseWeapon.Weapon)atackType);
         }
 
         //デバッグ用

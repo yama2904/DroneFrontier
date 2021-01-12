@@ -59,16 +59,15 @@ public class Gatling : BaseWeapon
             return;
         }
 
-        CmdCreateBullet(shotPos.position, transform.rotation, target);
-        //Bullet b = Instantiate(bullet, shotPos.position, transform.rotation);    //弾丸の複製
 
-        ////弾丸のパラメータ設定
-        //b.Shooter = Shooter;    //撃ったプレイヤーを登録
-        //b.Target = target;      //ロックオン中の敵
-        //b.SpeedPerSecond = speedPerSecond;  //スピード
-        //b.DestroyTime = destroyTime;        //射程
-        //b.TrackingPower = trackingPower;    //誘導力
-        //b.Power = BulletPower;              //威力
+        if (MainGameManager.IsMulti)
+        {
+            CmdCreateBullet(shotPos.position, transform.rotation, target);
+        }
+        else
+        {
+            CreateBullet(shotPos.position, transform.rotation, target);
+        }
 
 
         //残り弾丸がMAXで撃つと一瞬で弾丸が1個回復するので
@@ -81,8 +80,7 @@ public class Gatling : BaseWeapon
         ShotCountTime = 0;  //発射間隔のカウントをリセット
     }
 
-    [Command]
-    void CmdCreateBullet(Vector3 pos, Quaternion rotation, GameObject target)
+    Bullet CreateBullet(Vector3 pos, Quaternion rotation, GameObject target)
     {
         Bullet b = Instantiate(bullet, pos, rotation);    //弾丸の複製
 
@@ -94,6 +92,13 @@ public class Gatling : BaseWeapon
         b.TrackingPower = trackingPower;    //誘導力
         b.Power = BulletPower;              //威力
 
+        return b;
+    }
+
+    [Command]
+    void CmdCreateBullet(Vector3 pos, Quaternion rotation, GameObject target)
+    {
+        Bullet b = CreateBullet(pos, rotation, target);
         NetworkServer.Spawn(b.gameObject, connectionToClient);
     }
 }

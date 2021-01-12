@@ -13,32 +13,41 @@ public class Test : MonoBehaviour
     //GameObject mainCamera;
     bool isMainCamera = true;
 
-    [SerializeField] BasePlayer player;
+    [SerializeField] Player player;
     [SerializeField] Transform playerPos;
-    [SerializeField] BasePlayer cpu;
+    [SerializeField] CPUController cpu;
     [SerializeField] Transform cpuPos;
+
     [SerializeField] bool isPlayerDebug = false;
     [SerializeField] BaseWeapon.Weapon playerWeapon = BaseWeapon.Weapon.SHOTGUN;
     [SerializeField] BaseWeapon.Weapon cpuWeapon = BaseWeapon.Weapon.SHOTGUN;
 
-    void Awake()
+    private void Awake()
+    {
+        
+    }
+
+    void Start()
     {
         deltaTime = 0;
         count = 0;
 
-        if (isPlayerDebug)
+        if (!MainGameManager.IsMulti)
         {
-            BasePlayer p = Instantiate(player);
-            p.transform.parent = null;
-            p.transform.position = playerPos.position;
-            p.transform.rotation = playerPos.rotation;
-            p.SetWeapon(playerWeapon);
+            if (isPlayerDebug)
+            {
+                Player p = Instantiate(player);
+                p.transform.parent = null;
+                p.transform.position = playerPos.position;
+                p.transform.rotation = playerPos.rotation;
+                Player.SetSubWeapon = playerWeapon;
 
-            BasePlayer c = Instantiate(cpu);
-            c.transform.parent = null;
-            c.transform.position = cpuPos.position;
-            c.transform.rotation = cpuPos.rotation;
-            c.SetWeapon(cpuWeapon);
+                CPUController c = Instantiate(cpu);
+                c.transform.parent = null;
+                c.transform.position = cpuPos.position;
+                c.transform.rotation = cpuPos.rotation;
+                c.SetSubWeapon(cpuWeapon);
+            }
         }
 
         //mainCamera = Camera.main.gameObject;

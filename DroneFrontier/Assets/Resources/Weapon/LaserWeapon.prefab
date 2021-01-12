@@ -103,6 +103,8 @@ GameObject:
   m_Component:
   - component: {fileID: 873565387085211943}
   - component: {fileID: 873565387085211940}
+  - component: {fileID: 1635838061856858797}
+  - component: {fileID: 6310157173101002661}
   m_Layer: 0
   m_Name: LaserWeapon
   m_TagString: Untagged
@@ -139,12 +141,49 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: adae2bef09a3889479d1477275b61c8d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
   weaponLocalPos: {fileID: 8512925811248693083}
   shotPos: {fileID: 8512925811606060853}
+  parentTransform: {fileID: 0}
   laserBullet: {fileID: 7073714418969793329, guid: 24eccdfad1ec7ec4db66c7497ec702e0,
     type: 3}
   maxShotTime: 5
   hitPerSecond: 5
+--- !u!114 &1635838061856858797
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 873565387085211942}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 0
+  serverOnly: 0
+  m_AssetId: 
+  hasSpawned: 0
+--- !u!114 &6310157173101002661
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 873565387085211942}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f74aedd71d9a4f55b3ce499326d45fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  clientAuthority: 1
+  localPositionSensitivity: 0.01
+  localRotationSensitivity: 0.01
+  localScaleSensitivity: 0.01
 --- !u!1 &886600979686277241
 GameObject:
   m_ObjectHideFlags: 0

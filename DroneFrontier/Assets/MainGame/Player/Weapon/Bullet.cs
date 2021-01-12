@@ -7,19 +7,18 @@ public class Bullet : NetworkBehaviour
 {
     public const string BULLET_TAG = "Bullet";
 
-    [SyncVar] public GameObject Shooter = null;  //撃ったプレイヤー
-    [SyncVar] public GameObject Target = null;     //誘導する対象
-    [SyncVar] public float TrackingPower = 0;    //追従力
-    [SyncVar] public float Power = 0;            //威力
-    [SyncVar] public float SpeedPerSecond = 0;   //1秒間に進む量
-    [SyncVar] public float DestroyTime = 0;      //発射してから消えるまでの時間(射程)
+    [SyncVar, HideInInspector] public GameObject Shooter = null;  //撃ったプレイヤー
+    [SyncVar, HideInInspector] public GameObject Target = null;     //誘導する対象
+    [SyncVar, HideInInspector] public float TrackingPower = 0;    //追従力
+    [SyncVar, HideInInspector] public float Power = 0;            //威力
+    [SyncVar, HideInInspector] public float SpeedPerSecond = 0;   //1秒間に進む量
+    [SyncVar, HideInInspector] public float DestroyTime = 0;      //発射してから消えるまでの時間(射程)
 
     protected Transform cacheTransform = null;
 
 
     protected virtual void Start()
     {
-        Debug.Log(DestroyTime);
         cacheTransform = transform;
         Invoke(nameof(DestroyMe), DestroyTime);
     }
@@ -61,7 +60,14 @@ public class Bullet : NetworkBehaviour
 
     protected void DestroyMe()
     {
-        NetworkServer.Destroy(gameObject);
+        if (MainGameManager.IsMulti)
+        {
+            NetworkServer.Destroy(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
     protected virtual void OnTriggerEnter(Collider other)
