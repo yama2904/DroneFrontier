@@ -22,18 +22,33 @@ public class Player : BasePlayer
     Vector3 initPos;
 
 
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+    }
+
+    public override void OnStartLocalPlayer()
+    {
+        base.OnStartLocalPlayer();
+        _Camera.depth++;
+        CmdCreateWeapon();
+    }
+
+    [Command]
+    protected void CmdCreateWeapon()
+    {
+        GameObject weapon = BaseWeapon.CreateWeapon(gameObject, BaseWeapon.Weapon.GATLING);
+        weapon.GetComponent<BaseWeapon>().parentTransform = transform;
+        NetworkServer.Spawn(weapon, connectionToClient);
+        mainWeapon = weapon;
+    }
+
+
     protected override void Start()
     {
-        base.Start();
-
         HP = 30;
         MoveSpeed = 20.0f;
         MaxSpeed = 30.0f;
-
-        //if (!isLocalPlayer)
-        //{
-        //    _Rigidbody.isKinematic = true;
-        //}
 
         //配列初期化
         for (int i = 0; i < (int)Weapon.NONE; i++)

@@ -55,8 +55,8 @@ public abstract class BasePlayer : NetworkBehaviour, IPlayerStatus
     }
     protected BaseWeapon[] weapons = new BaseWeapon[(int)Weapon.NONE];  //ウェポン群
 
-    [SyncVar]
-    protected GameObject mainWeapon = null;
+    [SyncVar] protected GameObject mainWeapon = null;
+    [SyncVar] protected GameObject subWeapon = null;
 
     //アイテム
     protected enum ItemNum
@@ -86,27 +86,6 @@ public abstract class BasePlayer : NetworkBehaviour, IPlayerStatus
     //デバッグ用
     bool isQ = true;
 
-
-    public override void OnStartClient()
-    {
-        base.OnStartClient();
-    }
-
-    public override void OnStartLocalPlayer()
-    {
-        base.OnStartLocalPlayer();
-        _Camera.depth++;
-        CmdCreateWeapon();
-    }
-
-    [Command]
-    protected void CmdCreateWeapon()
-    {
-        GameObject weapon = BaseWeapon.CreateWeapon(gameObject, BaseWeapon.Weapon.GATLING);
-        weapon.GetComponent<BaseWeapon>().parentTransform = transform;
-        NetworkServer.Spawn(weapon, connectionToClient);
-        mainWeapon = weapon;
-    }
 
     protected virtual void Awake()
     {
