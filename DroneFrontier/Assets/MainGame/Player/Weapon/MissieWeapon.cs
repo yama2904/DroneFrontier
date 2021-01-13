@@ -23,6 +23,12 @@ public class MissieWeapon : BaseWeapon
         base.OnStartClient();
     }
 
+    public override void OnStartServer()
+    {
+        base.OnStartServer();
+        CmdCreateMissile();
+    }
+
     protected override void Start()
     {
         Recast = 10.0f;
@@ -31,8 +37,6 @@ public class MissieWeapon : BaseWeapon
         BulletsNum = 3;
         BulletsRemain = BulletsNum;
         BulletPower = 20.0f;
-
-         CmdCreateMissile();
     }
 
     protected override void Update()
@@ -72,7 +76,6 @@ public class MissieWeapon : BaseWeapon
             {
                 BulletsRemain++;        //弾数を回復
                 RecastCountTime = 0;    //リキャストのカウントをリセット
-
 
 
                 //デバッグ用
@@ -165,8 +168,9 @@ public class MissieWeapon : BaseWeapon
     [Command]
     void CmdShot(GameObject useMissile, GameObject target)
     {
-        useMissile.transform.parent = null;
-        useMissile.GetComponent<MissileBullet>().Shot();
-        useMissile.GetComponent<MissileBullet>().Target = target;
+        MissileBullet m = useMissile.GetComponent<MissileBullet>();
+        m.myTransform.parent = null;
+        m.Shot();
+        m.Target = target;
     }
 }
