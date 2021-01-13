@@ -23,11 +23,6 @@ public class Player : BasePlayer
     Vector3 initPos;
 
 
-    public override void OnStartClient()
-    {
-        base.OnStartClient();
-    }
-
     public override void OnStartLocalPlayer()
     {
         base.OnStartLocalPlayer();

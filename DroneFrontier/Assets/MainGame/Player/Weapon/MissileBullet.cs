@@ -6,11 +6,18 @@ using Mirror;
 public class MissileBullet : Bullet
 {
     [SerializeField] Explosion explosion = null;
+    [SyncVar, HideInInspector] public Transform myTransform = null;
+    [SyncVar] bool isShot = false;
+
+
+    void Awake()
+    {
+        cacheTransform = transform;
+        myTransform = transform;
+    }
 
     protected override void Start()
     {
-        cacheTransform = transform;
-        Invoke(nameof(DestroyMe), DestroyTime);
     }
 
     protected override void Update()
@@ -19,9 +26,7 @@ public class MissileBullet : Bullet
 
     protected override void FixedUpdate()
     {
-        //Quaternion rotation = Quaternion.LookRotation(diff);    //ターゲットへの向き
-        //transform.rotation = Quaternion.Slerp(transform.rotation, rotation, trackingPower); 
-        //Quaternion diffRotation = rotation * Quaternion.Inverse(transform.rotation);
+        if (!isShot) return;
 
         //90度傾けたままだと誘導がバグるので一旦直す
         cacheTransform.Rotate(new Vector3(-90, 0, 0)); 
@@ -31,6 +36,8 @@ public class MissileBullet : Bullet
 
     protected override void OnTriggerEnter(Collider other)
     {
+        if (!isShot) return;
+
         //当たり判定を行わないオブジェクトだったら処理をしない
         if (ReferenceEquals(other.gameObject, Shooter))
         {
@@ -84,8 +91,15 @@ public class MissileBullet : Bullet
         NetworkServer.Spawn(e.gameObject);
     }
 
-    public void InitRotate()
+    public void Init()
     {
-        transform.localRotation = Quaternion.Euler(90, 0, 0);    //オブジェクトを90度傾ける
+        myTransform = transform;
+        myTransform.localRotation = Quaternion.Euler(90, 0, 0);    //オブジェクトを90度傾ける
+    }
+
+    public void Shot()
+    {
+        Invoke(nameof(DestroyMe), DestroyTime);
+        isShot = true;
     }
 }

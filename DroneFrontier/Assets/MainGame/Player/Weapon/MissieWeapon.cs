@@ -7,14 +7,21 @@ public class MissieWeapon : BaseWeapon
 {
     [SerializeField] MissileBullet missile = null;  //複製する弾丸
     //SyncList<GameObject> createMissiles = new SyncList<GameObject>();
-    [SyncVar] GameObject settingMissile = null;
-    const short USE_MISSILE_INDEX = 0;
+    [SyncVar] GameObject settingFirstMissile = null;
+    [SyncVar] GameObject settingSecondMissile = null;
+    [SyncVar] bool useFirstMissile = true;
 
     //弾丸のパラメータ
     [SerializeField] float speedPerSecond = 13.0f;  //1秒間に進む量
     [SerializeField] float destroyTime = 2.0f;      //発射してから消えるまでの時間(射程)
     [SerializeField] float trackingPower = 2.3f;    //追従力
     [SerializeField] float shotPerSecond = 1.0f;    //1秒間に発射する弾数
+
+
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+    }
 
     protected override void Start()
     {
@@ -25,22 +32,23 @@ public class MissieWeapon : BaseWeapon
         BulletsRemain = BulletsNum;
         BulletPower = 20.0f;
 
-        CmdCreateMissile();
-
-        //if (!MainGameManager.IsMulti)
-        //{
-        //    for (int i = 0; i < BulletsNum; i++)
-        //    {
-        //        createMissiles.Add(CreateMissile().gameObject);
-
-        //    }
-        //}
+         CmdCreateMissile();
     }
 
     protected override void Update()
     {
         //発射間隔のカウント
-        if (settingMissile == null)
+        GameObject useMissile = null;
+        if (useFirstMissile)
+        {
+            useMissile = settingFirstMissile;
+        }
+        else
+        {
+            useMissile = settingSecondMissile;
+        }
+
+        if (useMissile == null)
         {
             ShotCountTime += Time.deltaTime;
             if (ShotCountTime > ShotInterval)
@@ -48,12 +56,10 @@ public class MissieWeapon : BaseWeapon
                 ShotCountTime = ShotInterval;
                 if (BulletsRemain > 0)  //弾丸が残っていない場合は処理しない
                 {
-                    //createMissiles[USE_MISSILE_INDEX].gameObject.SetActive(true);
                     if (MainGameManager.IsMulti)
                     {
                         CmdCreateMissile();
                     }
-                    ShotCountTime = 0;
                 }
             }
         }
@@ -64,20 +70,6 @@ public class MissieWeapon : BaseWeapon
             RecastCountTime += Time.deltaTime;
             if (RecastCountTime >= Recast)
             {
-                //if (MainGameManager.IsMulti)
-                //{
-                //    CmdCreateMissile();
-                //}
-                //else
-                //{
-                //    createMissiles.Add(CreateMissile().gameObject);
-                //}
-
-                ////弾丸が空だったら生成してすぐに表示する
-                //if (BulletsRemain <= 0)
-                //{
-                //    createMissiles[USE_MISSILE_INDEX].gameObject.SetActive(true);
-                //}
                 BulletsRemain++;        //弾数を回復
                 RecastCountTime = 0;    //リキャストのカウントをリセット
 
@@ -92,9 +84,9 @@ public class MissieWeapon : BaseWeapon
     MissileBullet CreateMissile()
     {
         MissileBullet m = Instantiate(missile);    //ミサイルの複製
-        m.transform.SetParent(transform);
-        m.transform.localPosition = new Vector3(0, 0, 0);
-        m.InitRotate();
+        m.Init();
+        m.myTransform.SetParent(transform);
+        m.myTransform.localPosition = new Vector3(0, 0, 0);
 
         //弾丸のパラメータ設定
         m.Shooter = Shooter;    //撃ったプレイヤーを登録
@@ -103,29 +95,22 @@ public class MissieWeapon : BaseWeapon
         m.TrackingPower = trackingPower;    //誘導力
         m.Power = BulletPower;              //威力
 
-        //発射するまでスクリプト無効
-        m.enabled = false;
-
-        ////一旦非表示
-        //m.gameObject.SetActive(false);
-
         return m;
     }
 
     [Command]
     void CmdCreateMissile()
     {
-        MissileBullet m  = CreateMissile();
+        MissileBullet m = CreateMissile();
         NetworkServer.Spawn(m.gameObject, connectionToClient);
-        settingMissile = m.gameObject;
-
-        //for (int i = 0; i < BulletsNum; i++)
-        //{
-        //    MissileBullet m = CreateMissile();
-        //    NetworkServer.Spawn(m.gameObject, connectionToClient);
-        //    createMissiles.Add(m.gameObject);
-        //}
-        //createMissiles[USE_MISSILE_INDEX].gameObject.SetActive(true);
+        if (useFirstMissile)
+        {
+            settingFirstMissile = m.gameObject;
+        }
+        else
+        {
+            settingSecondMissile = m.gameObject;
+        }
     }
 
 
@@ -134,37 +119,35 @@ public class MissieWeapon : BaseWeapon
         //前回発射して発射間隔分の時間が経過していなかったら撃たない
         if (ShotCountTime < ShotInterval) return;
 
+        GameObject useMissile = null;
+        if (useFirstMissile)
+        {
+            useMissile = settingFirstMissile;
+        }
+        else
+        {
+            useMissile = settingSecondMissile;
+        }
+
         //バグ防止
-        if(settingMissile == null) return;
-        //if (createMissiles.Count <= 0 || createMissiles[USE_MISSILE_INDEX] == null)
-        //{
-        //    return;
-        //}
+        if (useMissile == null) return;
 
         //残り弾数が0だったら撃たない
         if (BulletsRemain <= 0) return;
 
+
         //ミサイルスクリプトを有効にして親子関係を外す
         if (MainGameManager.IsMulti)
         {
-            CmdShot(target);
+            CmdShot(useMissile, target);
         }
         else
         {
-            settingMissile.transform.parent = null;
-            settingMissile.GetComponent<MissileBullet>().enabled = true;
-            settingMissile.GetComponent<MissileBullet>().Target = target;
+            useMissile.transform.parent = null;
+            useMissile.GetComponent<MissileBullet>().Shot();
+            useMissile.GetComponent<MissileBullet>().Target = target;
         }
-
-        ////ミサイルスクリプトを有効にして親子関係を外す
-        //createMissiles[USE_MISSILE_INDEX].GetComponent<MissileBullet>().enabled = true;
-        //createMissiles[USE_MISSILE_INDEX].transform.parent = null;
-
-        ////ロックオン中の敵
-        //createMissiles[USE_MISSILE_INDEX].GetComponent<MissileBullet>().Target = target;
-
-        ////発射したミサイルをリストから削除
-        //createMissiles.RemoveAt(USE_MISSILE_INDEX);
+        useFirstMissile = !useFirstMissile;
 
 
         if (BulletsRemain == BulletsNum)
@@ -180,10 +163,10 @@ public class MissieWeapon : BaseWeapon
     }
 
     [Command]
-    void CmdShot(GameObject target)
+    void CmdShot(GameObject useMissile, GameObject target)
     {
-        settingMissile.transform.parent = null;
-        settingMissile.GetComponent<MissileBullet>().enabled = true;
-        settingMissile.GetComponent<MissileBullet>().Target = target;
+        useMissile.transform.parent = null;
+        useMissile.GetComponent<MissileBullet>().Shot();
+        useMissile.GetComponent<MissileBullet>().Target = target;
     }
 }
