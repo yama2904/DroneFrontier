@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using Mirror;
 
-public class LaserBullet : MonoBehaviour
+public class LaserBullet : NetworkBehaviour
 {
     //パラメータ
     public float ShotInterval { private get; set; } = 0;

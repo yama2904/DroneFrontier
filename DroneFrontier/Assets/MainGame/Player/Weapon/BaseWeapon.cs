@@ -8,7 +8,7 @@ public abstract class BaseWeapon : NetworkBehaviour, IWeapon
     [SerializeField] protected Transform weaponLocalPos = null;
     [SerializeField] protected Transform shotPos = null;
 
-    public GameObject Shooter { get; set; } = null;   //武器の所持者
+    public GameObject Shooter { get; set; } = null;      //武器の所持者
     protected float RecastCountTime { get; set; } = 0;   //リキャスト時間をカウントする変数
     protected float ShotCountTime { get; set; } = 0;     //1発ごとの間隔をカウントする変数
     protected float BulletPower { get; set; } = -1;      //弾丸の威力

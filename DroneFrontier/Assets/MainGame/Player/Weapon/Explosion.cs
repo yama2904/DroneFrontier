@@ -2,17 +2,18 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using Mirror;
 
-public class Explosion : MonoBehaviour
+public class Explosion : NetworkBehaviour
 {
-    public GameObject Shooter { private get; set; } = null;  //撃ったプレイヤー
+    [SyncVar, HideInInspector] public GameObject Shooter = null;  //撃ったプレイヤー
     [SerializeField] float size = 20;    //爆発範囲
     [SerializeField] float power = 20;   //威力
     [SerializeField] float powerDownRate = 0.8f;   //中心地からの距離による威力減衰率
     [SerializeField] float notPowerDownRange = 0.25f; //威力が減衰しない範囲
     [SerializeField] float lengthReference = 0.1f;    //威力減衰の基準の長さ
 
-    List<GameObject> wasHitObjects;    //触れたオブジェクトを全て格納する
+    SyncList<GameObject> wasHitObjects = new SyncList<GameObject>();    //触れたオブジェクトを全て格納する
     const float DESTROY_TIME = 3.0f;   //生存時間
 
     void Start()
@@ -39,10 +40,9 @@ public class Explosion : MonoBehaviour
         sc.radius *= size;
         sc.center = new Vector3(0, 0, 0);
 
-        wasHitObjects = new List<GameObject>();
 
         //一定時間後に消滅
-        Destroy(gameObject, DESTROY_TIME);
+        Invoke(nameof(DestroyMe), DESTROY_TIME);
     }
 
     void Update()
@@ -120,5 +120,17 @@ public class Explosion : MonoBehaviour
 
         //長さに応じた減衰率を適用する
         return power * Mathf.Pow(powerDownRate, distance / lengthReference);
+    }
+
+    void DestroyMe()
+    {
+        if (MainGameManager.IsMulti)
+        {
+            NetworkServer.Destroy(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 }

@@ -8,7 +8,7 @@ using Mirror;
 public class Player : BasePlayer
 {
     public const string PLAYER_TAG = "Player";  //タグ名
-    public static BaseWeapon.Weapon SetSubWeapon { private get; set; } = BaseWeapon.Weapon.SHOTGUN;
+    public static BaseWeapon.Weapon SetSubWeapon { private get; set; } = BaseWeapon.Weapon.MISSILE;
     bool[] isUsingWeapons = new bool[(int)Weapon.NONE];    //使用中の武器
 
     [SerializeField] Radar radar = null;
@@ -90,7 +90,6 @@ public class Player : BasePlayer
             {
                 return;
             }
-
         }
         base.Update();
 

@@ -157,7 +157,7 @@ MonoBehaviour:
   cpu: {fileID: 8104096176694376185, guid: c5c00b9cae5608b41a147fb2634d2f23, type: 3}
   cpuPos: {fileID: 943308166}
   isPlayerDebug: 1
-  playerWeapon: 0
+  playerWeapon: 2
   cpuWeapon: 0
 --- !u!4 &368702361
 Transform:
@@ -291,7 +291,7 @@ MonoBehaviour:
   cpuInspector: {fileID: 8104096176694376185, guid: c5c00b9cae5608b41a147fb2634d2f23,
     type: 3}
   screenMaskImageInspector: {fileID: 1635689067}
-  isLocal: 0
+  offline: 0
 --- !u!4 &430712977
 Transform:
   m_ObjectHideFlags: 0
@@ -1197,8 +1197,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 7248455893646624115}
-  m_RootOrder: 0
+  m_Father: {fileID: 0}
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &7248455892811500076
 MonoBehaviour:
@@ -1230,8 +1230,13 @@ MonoBehaviour:
   autoCreatePlayer: 1
   playerSpawnMethod: 0
   spawnPrefabs:
-  - {fileID: 7483229619002608348, guid: 28d3844a32c206344bb065ba45dff061, type: 3}
+  - {fileID: 2439782399147486162, guid: 0963903853145f841802ba53dfeb66af, type: 3}
   - {fileID: 4437007829032219025, guid: 53c88131e71805242b5645af4721a3ff, type: 3}
+  - {fileID: 8400011875109955529, guid: f840aa4b7f6cd6c45bf992380dc4eefc, type: 3}
+  - {fileID: 873565387085211942, guid: 31b6fadaa02d58848ae972f38dcd093f, type: 3}
+  - {fileID: 7483229619002608348, guid: 28d3844a32c206344bb065ba45dff061, type: 3}
+  - {fileID: 7764006446683557312, guid: 4e623a5a535f118479e6cd28d219f667, type: 3}
+  - {fileID: 2437432638473288414, guid: 24eccdfad1ec7ec4db66c7497ec702e0, type: 3}
 --- !u!114 &7248455892811500077
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1264,8 +1269,8 @@ Transform:
   m_LocalPosition: {x: 2.69, y: -0.062, z: -13.123}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 7248455893646624115}
-  m_RootOrder: 1
+  m_Father: {fileID: 0}
+  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &7248455893393610329
 MonoBehaviour:
@@ -1296,38 +1301,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!1 &7248455893646624112
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 7248455893646624115}
-  m_Layer: 0
-  m_Name: Network
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &7248455893646624115
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7248455893646624112}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children:
-  - {fileID: 7248455892811500067}
-  - {fileID: 7248455893393610328}
-  m_Father: {fileID: 0}
-  m_RootOrder: 8
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &7820721929111772313
 PrefabInstance:
   m_ObjectHideFlags: 0

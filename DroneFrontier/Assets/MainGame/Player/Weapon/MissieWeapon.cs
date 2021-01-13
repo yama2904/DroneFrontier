@@ -6,7 +6,8 @@ using Mirror;
 public class MissieWeapon : BaseWeapon
 {
     [SerializeField] MissileBullet missile = null;  //複製する弾丸
-    List<MissileBullet> createMissiles = new List<MissileBullet>();
+    //SyncList<GameObject> createMissiles = new SyncList<GameObject>();
+    [SyncVar] GameObject settingMissile = null;
     const short USE_MISSILE_INDEX = 0;
 
     //弾丸のパラメータ
@@ -17,58 +18,69 @@ public class MissieWeapon : BaseWeapon
 
     protected override void Start()
     {
-        Recast = 3.0f;
+        Recast = 10.0f;
         ShotInterval = 1.0f / shotPerSecond;
         ShotCountTime = ShotInterval;
         BulletsNum = 3;
         BulletsRemain = BulletsNum;
         BulletPower = 20.0f;
 
-        for (int i = 0; i < BulletsNum; i++)
-        {
-            CreateMissile();
-        }
-        createMissiles[USE_MISSILE_INDEX].gameObject.SetActive(true);
+        CmdCreateMissile();
+
+        //if (!MainGameManager.IsMulti)
+        //{
+        //    for (int i = 0; i < BulletsNum; i++)
+        //    {
+        //        createMissiles.Add(CreateMissile().gameObject);
+
+        //    }
+        //}
     }
 
     protected override void Update()
     {
-        //リキャストのカウント
-        RecastCountTime += Time.deltaTime;
-        if (RecastCountTime > Recast)
-        {
-            RecastCountTime = Recast;
-        }
-
         //発射間隔のカウント
-        if (ShotCountTime < ShotInterval)
+        if (settingMissile == null)
         {
             ShotCountTime += Time.deltaTime;
             if (ShotCountTime > ShotInterval)
             {
                 ShotCountTime = ShotInterval;
-                if (BulletsRemain > 0)
+                if (BulletsRemain > 0)  //弾丸が残っていない場合は処理しない
                 {
-                    createMissiles[USE_MISSILE_INDEX].gameObject.SetActive(true);
+                    //createMissiles[USE_MISSILE_INDEX].gameObject.SetActive(true);
+                    if (MainGameManager.IsMulti)
+                    {
+                        CmdCreateMissile();
+                    }
+                    ShotCountTime = 0;
                 }
             }
         }
 
-
         //リキャスト時間経過したら弾数を1個補充
-        if (RecastCountTime >= Recast)
+        if (BulletsRemain < BulletsNum)     //最大弾数持っていたら処理しない
         {
-            //残り弾数が最大弾数に達していなかったら補充
-            if (BulletsRemain < BulletsNum)
+            RecastCountTime += Time.deltaTime;
+            if (RecastCountTime >= Recast)
             {
-                CreateMissile();
-                //弾丸が空だったら生成してすぐに表示する
-                if(BulletsRemain <= 0)
-                {
-                    createMissiles[USE_MISSILE_INDEX].gameObject.SetActive(true);
-                }
+                //if (MainGameManager.IsMulti)
+                //{
+                //    CmdCreateMissile();
+                //}
+                //else
+                //{
+                //    createMissiles.Add(CreateMissile().gameObject);
+                //}
+
+                ////弾丸が空だったら生成してすぐに表示する
+                //if (BulletsRemain <= 0)
+                //{
+                //    createMissiles[USE_MISSILE_INDEX].gameObject.SetActive(true);
+                //}
                 BulletsRemain++;        //弾数を回復
                 RecastCountTime = 0;    //リキャストのカウントをリセット
+
 
 
                 //デバッグ用
@@ -77,7 +89,7 @@ public class MissieWeapon : BaseWeapon
         }
     }
 
-    void CreateMissile()
+    MissileBullet CreateMissile()
     {
         MissileBullet m = Instantiate(missile);    //ミサイルの複製
         m.transform.SetParent(transform);
@@ -94,42 +106,65 @@ public class MissieWeapon : BaseWeapon
         //発射するまでスクリプト無効
         m.enabled = false;
 
-        //一旦非表示
-        m.gameObject.SetActive(false);
+        ////一旦非表示
+        //m.gameObject.SetActive(false);
 
-        createMissiles.Add(m);
+        return m;
+    }
+
+    [Command]
+    void CmdCreateMissile()
+    {
+        MissileBullet m  = CreateMissile();
+        NetworkServer.Spawn(m.gameObject, connectionToClient);
+        settingMissile = m.gameObject;
+
+        //for (int i = 0; i < BulletsNum; i++)
+        //{
+        //    MissileBullet m = CreateMissile();
+        //    NetworkServer.Spawn(m.gameObject, connectionToClient);
+        //    createMissiles.Add(m.gameObject);
+        //}
+        //createMissiles[USE_MISSILE_INDEX].gameObject.SetActive(true);
     }
 
 
     public override void Shot(GameObject target = null)
     {
         //前回発射して発射間隔分の時間が経過していなかったら撃たない
-        if (ShotCountTime < ShotInterval)
-        {
-            return;
-        }
+        if (ShotCountTime < ShotInterval) return;
 
         //バグ防止
-        if(createMissiles.Count <= 0 || createMissiles[USE_MISSILE_INDEX] == null)
-        {
-            return;
-        }
+        if(settingMissile == null) return;
+        //if (createMissiles.Count <= 0 || createMissiles[USE_MISSILE_INDEX] == null)
+        //{
+        //    return;
+        //}
 
         //残り弾数が0だったら撃たない
-        if (BulletsRemain <= 0)
-        {
-            return;
-        }
+        if (BulletsRemain <= 0) return;
 
         //ミサイルスクリプトを有効にして親子関係を外す
-        createMissiles[USE_MISSILE_INDEX].enabled = true;
-        createMissiles[USE_MISSILE_INDEX].transform.parent = null;
+        if (MainGameManager.IsMulti)
+        {
+            CmdShot(target);
+        }
+        else
+        {
+            settingMissile.transform.parent = null;
+            settingMissile.GetComponent<MissileBullet>().enabled = true;
+            settingMissile.GetComponent<MissileBullet>().Target = target;
+        }
 
-        //ロックオン中の敵
-        createMissiles[USE_MISSILE_INDEX].Target = target;
+        ////ミサイルスクリプトを有効にして親子関係を外す
+        //createMissiles[USE_MISSILE_INDEX].GetComponent<MissileBullet>().enabled = true;
+        //createMissiles[USE_MISSILE_INDEX].transform.parent = null;
 
-        //発射したミサイルをリストから削除
-        createMissiles.RemoveAt(USE_MISSILE_INDEX);
+        ////ロックオン中の敵
+        //createMissiles[USE_MISSILE_INDEX].GetComponent<MissileBullet>().Target = target;
+
+        ////発射したミサイルをリストから削除
+        //createMissiles.RemoveAt(USE_MISSILE_INDEX);
 
 
         if (BulletsRemain == BulletsNum)
@@ -141,6 +176,14 @@ public class MissieWeapon : BaseWeapon
 
 
         //デバッグ用
-        Debug.Log("残り弾数: " + BulletsRemain);
+        Debug.Log("ミサイル発射 残り弾数: " + BulletsRemain);
+    }
+
+    [Command]
+    void CmdShot(GameObject target)
+    {
+        settingMissile.transform.parent = null;
+        settingMissile.GetComponent<MissileBullet>().enabled = true;
+        settingMissile.GetComponent<MissileBullet>().Target = target;
     }
 }

@@ -1,26 +1,20 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Mirror;
 
 public class MissileBullet : Bullet
 {
     [SerializeField] Explosion explosion = null;
-    float totalTime;    //発射させてから経過した時間
 
     protected override void Start()
     {
         cacheTransform = transform;
-        totalTime = 0;
+        Invoke(nameof(DestroyMe), DestroyTime);
     }
 
     protected override void Update()
     {
-        //発射されて一定時間経過したら爆破
-        totalTime += Time.deltaTime;
-        if (totalTime > DestroyTime)
-        {
-            createExplosion();
-        }
     }
 
     protected override void FixedUpdate()
@@ -48,7 +42,7 @@ public class MissileBullet : Bullet
             BasePlayer bp = other.GetComponent<BasePlayer>();
             
             bp.Damage(Power);
-            createExplosion();
+            DestroyMe();
         }
         else if (other.CompareTag(JammingBot.JAMMING_BOT_TAG))
         {
@@ -58,15 +52,36 @@ public class MissileBullet : Bullet
                 return;
             }
             jb.Damage(Power);
-            createExplosion();
+            DestroyMe();
         }
     }
 
-    void createExplosion()
+   void DestroyMe()
+    {
+        if (MainGameManager.IsMulti)
+        {
+            CmdCreateExplosion();
+            NetworkServer.Destroy(gameObject);
+        }
+        else
+        {
+            CreateExplosion();
+            Destroy(gameObject);
+        }
+    }
+
+    private Explosion CreateExplosion()
     {
         Explosion e = Instantiate(explosion, cacheTransform.position, Quaternion.identity);
         e.Shooter = Shooter;
-        Destroy(gameObject);
+        return e;
+    }
+
+    [Command]
+    void CmdCreateExplosion()
+    {
+        Explosion e = CreateExplosion();
+        NetworkServer.Spawn(e.gameObject);
     }
 
     public void InitRotate()
