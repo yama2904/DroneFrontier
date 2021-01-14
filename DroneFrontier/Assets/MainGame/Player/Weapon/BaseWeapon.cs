@@ -15,6 +15,7 @@ public abstract class BaseWeapon : NetworkBehaviour, IWeapon
 
     [SyncVar, HideInInspector]
     public Transform parentTransform = null;
+    [SyncVar, HideInInspector] public bool IsLocalPlayer = false;
 
     //プロパティ用
     float recast = 0;
@@ -97,6 +98,7 @@ public abstract class BaseWeapon : NetworkBehaviour, IWeapon
         }
     }
 
+    public abstract void Init(bool isLocalPlayer);
     public abstract void Shot(GameObject target = null);
     public virtual void SetChild(Transform parent)
     {

@@ -7,13 +7,19 @@ public class MissileBullet : Bullet
 {
     [SerializeField] Explosion explosion = null;
     [SyncVar, HideInInspector] public Transform myTransform = null;
+    [SyncVar, HideInInspector] public Transform parentTransform = null;
     [SyncVar] bool isShot = false;
 
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+        Init();
+        transform.SetParent(parentTransform);
+        transform.localPosition = new Vector3(0, 0, 0);
+    }
 
     void Awake()
     {
-        cacheTransform = transform;
-        myTransform = transform;
     }
 
     protected override void Start()
@@ -93,6 +99,7 @@ public class MissileBullet : Bullet
 
     public void Init()
     {
+        cacheTransform = transform;
         myTransform = transform;
         myTransform.localRotation = Quaternion.Euler(90, 0, 0);    //オブジェクトを90度傾ける
     }

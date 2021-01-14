@@ -6,10 +6,9 @@ using Mirror;
 public class MissieWeapon : BaseWeapon
 {
     [SerializeField] MissileBullet missile = null;  //複製する弾丸
-    //SyncList<GameObject> createMissiles = new SyncList<GameObject>();
     [SyncVar] GameObject settingFirstMissile = null;
     [SyncVar] GameObject settingSecondMissile = null;
-    [SyncVar] bool useFirstMissile = true;
+    bool useFirstMissile = true;
 
     //弾丸のパラメータ
     [SerializeField] float speedPerSecond = 13.0f;  //1秒間に進む量
@@ -21,11 +20,7 @@ public class MissieWeapon : BaseWeapon
     public override void OnStartClient()
     {
         base.OnStartClient();
-    }
-
-    public override void OnStartServer()
-    {
-        base.OnStartServer();
+        if (!IsLocalPlayer) return;
         CmdCreateMissile();
     }
 
@@ -41,6 +36,8 @@ public class MissieWeapon : BaseWeapon
 
     protected override void Update()
     {
+        if (!IsLocalPlayer) return;
+
         //発射間隔のカウント
         GameObject useMissile = null;
         if (useFirstMissile)
@@ -84,12 +81,15 @@ public class MissieWeapon : BaseWeapon
         }
     }
 
+    public override void Init(bool isLocalPlayer)
+    {
+        IsLocalPlayer = isLocalPlayer;
+    }
+
     MissileBullet CreateMissile()
     {
         MissileBullet m = Instantiate(missile);    //ミサイルの複製
-        m.Init();
-        m.myTransform.SetParent(transform);
-        m.myTransform.localPosition = new Vector3(0, 0, 0);
+        m.parentTransform = transform;
 
         //弾丸のパラメータ設定
         m.Shooter = Shooter;    //撃ったプレイヤーを登録
@@ -101,7 +101,7 @@ public class MissieWeapon : BaseWeapon
         return m;
     }
 
-    [Command]
+    [Command(ignoreAuthority = true)]
     void CmdCreateMissile()
     {
         MissileBullet m = CreateMissile();

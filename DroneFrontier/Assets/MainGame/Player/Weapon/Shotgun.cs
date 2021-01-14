@@ -51,6 +51,10 @@ public class Shotgun : BaseWeapon
         }
     }
 
+    public override void Init(bool isLocalPlayer)
+    {        
+    }
+
     public override void Shot(GameObject target = null)
     {
         //throw new System.NotImplementedException();

@@ -29,6 +29,8 @@ public class Player : BasePlayer
         _Camera.depth++;
         CmdCreateMainWeapon();
         CmdCreateSubWeapon();
+
+        Debug.Log("End: OnStartLocalPlayer");
     }
 
     [Command]
@@ -46,6 +48,7 @@ public class Player : BasePlayer
         GameObject weapon = BaseWeapon.CreateWeapon(gameObject, SetSubWeapon);
         weapon.GetComponent<BaseWeapon>().parentTransform = transform;
         NetworkServer.Spawn(weapon, connectionToClient);
+        weapon.GetComponent<BaseWeapon>().IsLocalPlayer = isLocalPlayer;
         subWeapon = weapon;
     }
 
@@ -66,11 +69,11 @@ public class Player : BasePlayer
         boostImage.fillAmount = 1;
 
 
-        if (!MainGameManager.IsMulti)
-        {
-            SetWeapon(Weapon.MAIN, BaseWeapon.Weapon.GATLING);
-            SetWeapon(Weapon.SUB, SetSubWeapon);
-        }
+        //if (!MainGameManager.IsMulti)
+        //{
+        //    SetWeapon(Weapon.MAIN, BaseWeapon.Weapon.GATLING);
+        //    SetWeapon(Weapon.SUB, SetSubWeapon);
+        //}
 
 
         //デバッグ用
@@ -79,13 +82,11 @@ public class Player : BasePlayer
 
     protected override void Update()
     {
-        if (MainGameManager.IsMulti)
+        if (!isLocalPlayer)
         {
-            if (!isLocalPlayer)
-            {
-                return;
-            }
+            return;
         }
+
         base.Update();
 
         if (MainGameManager.IsCursorLock)

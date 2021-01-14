@@ -157,7 +157,7 @@ MonoBehaviour:
   cpu: {fileID: 8104096176694376185, guid: c5c00b9cae5608b41a147fb2634d2f23, type: 3}
   cpuPos: {fileID: 943308166}
   isPlayerDebug: 1
-  playerWeapon: 2
+  playerWeapon: 0
   cpuWeapon: 0
 --- !u!4 &368702361
 Transform:
@@ -1235,7 +1235,7 @@ MonoBehaviour:
   - {fileID: 8400011875109955529, guid: f840aa4b7f6cd6c45bf992380dc4eefc, type: 3}
   - {fileID: 873565387085211942, guid: 31b6fadaa02d58848ae972f38dcd093f, type: 3}
   - {fileID: 7483229619002608348, guid: 28d3844a32c206344bb065ba45dff061, type: 3}
-  - {fileID: 7764006446683557312, guid: 4e623a5a535f118479e6cd28d219f667, type: 3}
+  - {fileID: 1529079018685213207, guid: 4e623a5a535f118479e6cd28d219f667, type: 3}
   - {fileID: 6288059414027088638, guid: fdc401304f7c08043bc900548af95475, type: 3}
   - {fileID: 2437432638473288414, guid: 24eccdfad1ec7ec4db66c7497ec702e0, type: 3}
 --- !u!114 &7248455892811500077

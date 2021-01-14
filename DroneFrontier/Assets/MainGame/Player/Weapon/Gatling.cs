@@ -43,10 +43,12 @@ public class Gatling : BaseWeapon
         }
     }
 
+    public override void Init(bool isLocalPlayer)
+    {
+    }
+
     public override void Shot(GameObject target = null)
     {
-        //throw new System.NotImplementedException();
-
         //前回発射して発射間隔分の時間が経過していなかったら撃たない
         if (ShotCountTime < ShotInterval)
         {
