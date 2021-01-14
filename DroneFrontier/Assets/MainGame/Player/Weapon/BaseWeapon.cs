@@ -15,7 +15,7 @@ public abstract class BaseWeapon : NetworkBehaviour, IWeapon
 
     [SyncVar, HideInInspector]
     public Transform parentTransform = null;
-    [SyncVar, HideInInspector] public bool IsLocalPlayer = false;
+    [SyncVar, HideInInspector] public uint _netId = 0;
 
     //プロパティ用
     float recast = 0;
@@ -78,7 +78,7 @@ public abstract class BaseWeapon : NetworkBehaviour, IWeapon
 
     protected virtual void Awake()
     {
-        parentTransform = transform;
+        //parentTransform = transform;
     }
     protected abstract void Start();
 
@@ -98,7 +98,8 @@ public abstract class BaseWeapon : NetworkBehaviour, IWeapon
         }
     }
 
-    public abstract void Init(bool isLocalPlayer);
+    public abstract void Init(uint netId);
+    public abstract void MyUpdate();
     public abstract void Shot(GameObject target = null);
     public virtual void SetChild(Transform parent)
     {

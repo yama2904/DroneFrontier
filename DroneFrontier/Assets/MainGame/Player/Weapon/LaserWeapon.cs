@@ -92,10 +92,14 @@ public class LaserWeapon : BaseWeapon
         }
     }
 
-    public override void Init(bool isLocalPlayer)
+
+    public override void Init(uint netId)
     {
     }
 
+    public override void MyUpdate()
+    {
+    }
 
     public override void Shot(GameObject target = null)
     {

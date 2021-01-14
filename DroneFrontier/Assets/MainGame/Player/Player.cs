@@ -40,6 +40,8 @@ public class Player : BasePlayer
         weapon.GetComponent<BaseWeapon>().parentTransform = transform;
         NetworkServer.Spawn(weapon, connectionToClient);
         mainWeapon = weapon;
+
+        Debug.Log("End: CmdCreateMainWeapon");
     }
 
     [Command]
@@ -48,8 +50,10 @@ public class Player : BasePlayer
         GameObject weapon = BaseWeapon.CreateWeapon(gameObject, SetSubWeapon);
         weapon.GetComponent<BaseWeapon>().parentTransform = transform;
         NetworkServer.Spawn(weapon, connectionToClient);
-        weapon.GetComponent<BaseWeapon>().IsLocalPlayer = isLocalPlayer;
+        weapon.GetComponent<BaseWeapon>().Init(netId);
         subWeapon = weapon;
+
+        Debug.Log("End: CmdCreateSubWeapon");
     }
 
 
@@ -69,13 +73,6 @@ public class Player : BasePlayer
         boostImage.fillAmount = 1;
 
 
-        //if (!MainGameManager.IsMulti)
-        //{
-        //    SetWeapon(Weapon.MAIN, BaseWeapon.Weapon.GATLING);
-        //    SetWeapon(Weapon.SUB, SetSubWeapon);
-        //}
-
-
         //デバッグ用
         initPos = cacheTransform.position;
     }
@@ -88,6 +85,10 @@ public class Player : BasePlayer
         }
 
         base.Update();
+        if (subWeapon != null)
+        {
+            subWeapon.GetComponent<BaseWeapon>().MyUpdate();
+        }
 
         if (MainGameManager.IsCursorLock)
         {

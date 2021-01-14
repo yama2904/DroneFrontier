@@ -30,6 +30,36 @@ Transform:
   m_Father: {fileID: 8400011875109955530}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &7696406009233718113
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3853599449480899470}
+  m_Layer: 0
+  m_Name: ShotPos
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3853599449480899470
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7696406009233718113}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 8400011875109955530}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8400011875109955529
 GameObject:
   m_ObjectHideFlags: 0
@@ -61,6 +91,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 2032177690770584973}
+  - {fileID: 3853599449480899470}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -79,14 +110,14 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0.1
   weaponLocalPos: {fileID: 2032177690770584973}
-  shotPos: {fileID: 0}
+  shotPos: {fileID: 3853599449480899470}
   parentTransform: {fileID: 0}
-  IsLocalPlayer: 0
+  netId: 0
   missile: {fileID: 5741596557835123230, guid: 4e623a5a535f118479e6cd28d219f667, type: 3}
   speedPerSecond: 30
   destroyTime: 2
   trackingPower: 2.5
-  shotPerSecond: 0.3
+  shotPerSecond: 0.2
 --- !u!114 &-3027676268421260177
 MonoBehaviour:
   m_ObjectHideFlags: 0

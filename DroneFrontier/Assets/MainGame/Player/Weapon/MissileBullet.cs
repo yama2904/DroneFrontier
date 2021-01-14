@@ -13,7 +13,8 @@ public class MissileBullet : Bullet
     public override void OnStartClient()
     {
         base.OnStartClient();
-        Init();
+        cacheTransform = transform;
+        CmdInit();
         transform.SetParent(parentTransform);
         transform.localPosition = new Vector3(0, 0, 0);
     }
@@ -90,21 +91,22 @@ public class MissileBullet : Bullet
         return e;
     }
 
-    [Command]
+    [Command(ignoreAuthority = true)]
     void CmdCreateExplosion()
     {
         Explosion e = CreateExplosion();
         NetworkServer.Spawn(e.gameObject);
     }
 
-    public void Init()
+    [Command(ignoreAuthority = true)]
+    public void CmdInit()
     {
-        cacheTransform = transform;
         myTransform = transform;
         myTransform.localRotation = Quaternion.Euler(90, 0, 0);    //オブジェクトを90度傾ける
     }
 
-    public void Shot()
+    [Command(ignoreAuthority = true)]
+    public void CmdShot()
     {
         Invoke(nameof(DestroyMe), DestroyTime);
         isShot = true;
