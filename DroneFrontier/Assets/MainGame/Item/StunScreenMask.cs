@@ -29,7 +29,7 @@ public class StunScreenMask : MonoBehaviour
 
     void Update()
     {
-        if (isStartUpdate)
+        if (!isStartUpdate)
         {
             return;
         }

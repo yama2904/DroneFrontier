@@ -52,6 +52,8 @@ public class Player : BasePlayer
         NetworkServer.Spawn(weapon, connectionToClient);
         weapon.GetComponent<BaseWeapon>().Init(netId);
         subWeapon = weapon;
+        //GetComponent<NetworkTransformChild>().target = subWeapon.transform;
+        
 
         Debug.Log("End: CmdCreateSubWeapon");
     }
@@ -77,6 +79,7 @@ public class Player : BasePlayer
         initPos = cacheTransform.position;
     }
 
+
     protected override void Update()
     {
         if (!isLocalPlayer)
@@ -87,7 +90,7 @@ public class Player : BasePlayer
         base.Update();
         if (subWeapon != null)
         {
-            subWeapon.GetComponent<BaseWeapon>().MyUpdate();
+            subWeapon.GetComponent<BaseWeapon>().UpdateMe();
         }
 
         if (MainGameManager.IsCursorLock)

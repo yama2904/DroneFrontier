@@ -55,7 +55,7 @@ public class Shotgun : BaseWeapon
     {
     }
 
-    public override void MyUpdate()
+    public override void UpdateMe()
     {        
     }
 

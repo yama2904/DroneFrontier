@@ -6,17 +6,13 @@ using Mirror;
 public class MissileBullet : Bullet
 {
     [SerializeField] Explosion explosion = null;
-    [SyncVar, HideInInspector] public Transform myTransform = null;
-    [SyncVar, HideInInspector] public Transform parentTransform = null;
+    NetworkTransform nTransform = null;
     [SyncVar] bool isShot = false;
 
     public override void OnStartClient()
     {
         base.OnStartClient();
         cacheTransform = transform;
-        CmdInit();
-        transform.SetParent(parentTransform);
-        transform.localPosition = new Vector3(0, 0, 0);
     }
 
     void Awake()
@@ -98,17 +94,17 @@ public class MissileBullet : Bullet
         NetworkServer.Spawn(e.gameObject);
     }
 
-    [Command(ignoreAuthority = true)]
-    public void CmdInit()
+    public void Init()
     {
-        myTransform = transform;
-        myTransform.localRotation = Quaternion.Euler(90, 0, 0);    //オブジェクトを90度傾ける
+        nTransform = GetComponent<NetworkTransform>();
+        nTransform.transform.localRotation = Quaternion.Euler(90, 0, 0);    //オブジェクトを90度傾ける
     }
 
     [Command(ignoreAuthority = true)]
-    public void CmdShot()
+    public void CmdShot(GameObject target)
     {
         Invoke(nameof(DestroyMe), DestroyTime);
+        Target = target;
         isShot = true;
     }
 }

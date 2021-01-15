@@ -99,7 +99,7 @@ public abstract class BaseWeapon : NetworkBehaviour, IWeapon
     }
 
     public abstract void Init(uint netId);
-    public abstract void MyUpdate();
+    public abstract void UpdateMe();
     public abstract void Shot(GameObject target = null);
     public virtual void SetChild(Transform parent)
     {

@@ -97,7 +97,7 @@ public class LaserWeapon : BaseWeapon
     {
     }
 
-    public override void MyUpdate()
+    public override void UpdateMe()
     {
     }
 

@@ -47,7 +47,7 @@ public class Gatling : BaseWeapon
     {
     }
 
-    public override void MyUpdate()
+    public override void UpdateMe()
     {
     }
 

@@ -72,6 +72,7 @@ GameObject:
   - component: {fileID: 8400011875109955531}
   - component: {fileID: -3027676268421260177}
   - component: {fileID: -4921150945162250458}
+  - component: {fileID: 7699639996122595838}
   m_Layer: 0
   m_Name: MissileWeapon
   m_TagString: Untagged
@@ -112,7 +113,7 @@ MonoBehaviour:
   weaponLocalPos: {fileID: 2032177690770584973}
   shotPos: {fileID: 3853599449480899470}
   parentTransform: {fileID: 0}
-  netId: 0
+  _netId: 0
   missile: {fileID: 5741596557835123230, guid: 4e623a5a535f118479e6cd28d219f667, type: 3}
   speedPerSecond: 30
   destroyTime: 2
@@ -152,3 +153,22 @@ MonoBehaviour:
   localPositionSensitivity: 0.01
   localRotationSensitivity: 0.01
   localScaleSensitivity: 0.01
+--- !u!114 &7699639996122595838
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8400011875109955529}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 734b48bea0b204338958ee3d885e11f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  clientAuthority: 0
+  localPositionSensitivity: 0.01
+  localRotationSensitivity: 0.01
+  localScaleSensitivity: 0.01
+  target: {fileID: 0}
