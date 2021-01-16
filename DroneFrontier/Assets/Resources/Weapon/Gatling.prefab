@@ -123,7 +123,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 276219cd02c7edf40b2621d49f6c981b, type: 2}
+  - {fileID: 0}
   - {fileID: 2100000, guid: 37fd466832170944bb723a2cdd9dd368, type: 2}
   - {fileID: 2100000, guid: 5fbc2d8c8e6fee346bced533d5cd5cb6, type: 2}
   - {fileID: 2100000, guid: 03b30073d8a2db6488eace24d93553ce, type: 2}
@@ -165,6 +165,7 @@ MonoBehaviour:
   weaponLocalPos: {fileID: 940059060412089129}
   shotPos: {fileID: 940059061499603391}
   parentTransform: {fileID: 0}
+  parentNetId: 0
   bullet: {fileID: -2401255768182461159, guid: 28d3844a32c206344bb065ba45dff061, type: 3}
   speedPerSecond: 40
   destroyTime: 1

@@ -6,24 +6,27 @@ using Mirror;
 public class MissileBullet : Bullet
 {
     [SerializeField] Explosion explosion = null;
-    NetworkTransform nTransform = null;
+    [SyncVar, HideInInspector] public uint parentNetId = 0;
     [SyncVar] bool isShot = false;
 
     public override void OnStartClient()
     {
         base.OnStartClient();
         cacheTransform = transform;
+        GameObject parent = NetworkIdentity.spawned[parentNetId].gameObject;
+        transform.SetParent(parent.transform);
+        Init();
     }
 
     void Awake()
     {
     }
 
-    protected override void Start()
+    void Start()
     {
     }
 
-    protected override void Update()
+    void Update()
     {
     }
 
@@ -32,7 +35,7 @@ public class MissileBullet : Bullet
         if (!isShot) return;
 
         //90度傾けたままだと誘導がバグるので一旦直す
-        cacheTransform.Rotate(new Vector3(-90, 0, 0)); 
+        cacheTransform.Rotate(new Vector3(-90, 0, 0));
         base.FixedUpdate();
         cacheTransform.Rotate(new Vector3(90, 0, 0));
     }
@@ -50,14 +53,14 @@ public class MissileBullet : Bullet
         if (other.CompareTag(Player.PLAYER_TAG) || other.CompareTag(CPUController.CPU_TAG))
         {
             BasePlayer bp = other.GetComponent<BasePlayer>();
-            
+
             bp.Damage(Power);
             DestroyMe();
         }
         else if (other.CompareTag(JammingBot.JAMMING_BOT_TAG))
         {
             JammingBot jb = other.GetComponent<JammingBot>();
-            if(jb.Creater == Shooter)
+            if (jb.Creater == Shooter)
             {
                 return;
             }
@@ -66,18 +69,10 @@ public class MissileBullet : Bullet
         }
     }
 
-   void DestroyMe()
+    void DestroyMe()
     {
-        if (MainGameManager.IsMulti)
-        {
-            CmdCreateExplosion();
-            NetworkServer.Destroy(gameObject);
-        }
-        else
-        {
-            CreateExplosion();
-            Destroy(gameObject);
-        }
+        CmdCreateExplosion();
+        NetworkServer.Destroy(gameObject);
     }
 
     private Explosion CreateExplosion()
@@ -94,17 +89,25 @@ public class MissileBullet : Bullet
         NetworkServer.Spawn(e.gameObject);
     }
 
-    public void Init()
+    void Init()
     {
-        nTransform = GetComponent<NetworkTransform>();
-        nTransform.transform.localRotation = Quaternion.Euler(90, 0, 0);    //オブジェクトを90度傾ける
+        transform.localPosition = new Vector3(0, 0, 0);
+        transform.localRotation = Quaternion.Euler(90, 0, 0);
     }
 
     [Command(ignoreAuthority = true)]
     public void CmdShot(GameObject target)
     {
+        RpcParentNull();
+
         Invoke(nameof(DestroyMe), DestroyTime);
         Target = target;
         isShot = true;
+    }
+
+    [ClientRpc]
+    void RpcParentNull()
+    {
+        transform.parent = null;
     }
 }

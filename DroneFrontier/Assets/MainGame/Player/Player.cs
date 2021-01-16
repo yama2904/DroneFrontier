@@ -37,7 +37,7 @@ public class Player : BasePlayer
     void CmdCreateMainWeapon()
     {
         GameObject weapon = BaseWeapon.CreateWeapon(gameObject, BaseWeapon.Weapon.GATLING);
-        weapon.GetComponent<BaseWeapon>().parentTransform = transform;
+        weapon.GetComponent<BaseWeapon>().parentNetId = netId;
         NetworkServer.Spawn(weapon, connectionToClient);
         mainWeapon = weapon;
 
@@ -48,12 +48,11 @@ public class Player : BasePlayer
     void CmdCreateSubWeapon()
     {
         GameObject weapon = BaseWeapon.CreateWeapon(gameObject, SetSubWeapon);
-        weapon.GetComponent<BaseWeapon>().parentTransform = transform;
+        weapon.GetComponent<BaseWeapon>().parentNetId = netId;
         NetworkServer.Spawn(weapon, connectionToClient);
         weapon.GetComponent<BaseWeapon>().Init(netId);
         subWeapon = weapon;
-        //GetComponent<NetworkTransformChild>().target = subWeapon.transform;
-        
+
 
         Debug.Log("End: CmdCreateSubWeapon");
     }

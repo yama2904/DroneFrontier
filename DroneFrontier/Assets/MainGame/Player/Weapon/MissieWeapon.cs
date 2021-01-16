@@ -19,16 +19,17 @@ public class MissieWeapon : BaseWeapon
     public override void OnStartClient()
     {
         base.OnStartClient();
-    }
 
-    protected override void Start()
-    {
         Recast = 10.0f;
         ShotInterval = 1.0f / shotPerSecond;
         ShotCountTime = ShotInterval;
         BulletsNum = 3;
         BulletsRemain = BulletsNum;
         BulletPower = 20.0f;
+    }
+
+    protected override void Start()
+    {
     }
 
     protected override void Update()
@@ -38,7 +39,6 @@ public class MissieWeapon : BaseWeapon
 
     public override void Init(uint netId)
     {
-        _netId = netId;
         CmdCreateMissile();
     }
 
@@ -54,6 +54,8 @@ public class MissieWeapon : BaseWeapon
                 if (BulletsRemain > 0)  //弾丸が残っていない場合は処理しない
                 {
                     CmdCreateMissile();
+
+
                     //デバッグ用
                     Debug.Log("ミサイルの弾丸が1回分補充されました");
                 }
@@ -70,27 +72,12 @@ public class MissieWeapon : BaseWeapon
                 RecastCountTime = 0;    //リキャストのカウントをリセット
             }
         }
-
-        //消えたミサイルを走査
-        for (int i = settingBullets.Count - 1; i >= 0; i--)
-        {
-            if (settingBullets[i] == null)
-            {
-                CmdRemoveMissile(i);
-            }
-        }
     }
 
     MissileBullet CreateMissile()
     {
         MissileBullet m = Instantiate(missile);    //ミサイルの複製
-        NetworkTransform nt = m.GetComponent<NetworkTransform>();
-        Transform t = m.transform;
-        GetComponent<NetworkTransformChild>().target = t;
-        //nt.transform.SetParent(GetComponent<NetworkTransform>().transform);
-        nt.transform.SetParent(transform);
-        nt.transform.localPosition = new Vector3(0, 0, 0);
-        m.Init();
+        m.parentNetId = netId;
 
         //弾丸のパラメータ設定
         m.Shooter = Shooter;    //撃ったプレイヤーを登録
@@ -105,17 +92,15 @@ public class MissieWeapon : BaseWeapon
     [Command(ignoreAuthority = true)]
     void CmdCreateMissile()
     {
+        if(useMissile >= 0)
+        {
+            return;
+        }
         MissileBullet m = CreateMissile();
         NetworkServer.Spawn(m.gameObject, connectionToClient);
+
         settingBullets.Add(m.gameObject);
         useMissile = settingBullets.Count - 1;
-    }
-
-    [Command(ignoreAuthority = true)]
-    void CmdRemoveMissile(int index)
-    {
-        settingBullets.RemoveAt(index);
-        useMissile--;
     }
 
     public override void Shot(GameObject target = null)
@@ -150,10 +135,9 @@ public class MissieWeapon : BaseWeapon
     void CmdShot(GameObject target)
     {
         MissileBullet m = settingBullets[useMissile].GetComponent<MissileBullet>();
-        m.GetComponent<NetworkTransform>().transform.parent = null;
         m.CmdShot(target);
-        
 
+        settingBullets.RemoveAt(useMissile);
         useMissile = -1;
     }
 }

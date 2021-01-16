@@ -4,6 +4,6 @@ using UnityEngine;
 
 public interface IWeapon
 {
-    void SetChild(Transform parent);
+    //void SetChild(Transform parent);
     void Shot(GameObject target = null);
 }

@@ -45,6 +45,11 @@ public class Gatling : BaseWeapon
 
     public override void Init(uint netId)
     {
+        //parentNetId = netId;
+
+        //NetworkTransform nt = GetComponent<NetworkTransform>();
+        //nt.transform.localPosition = weaponLocalPos.localPosition;
+        //nt.transform.localRotation = weaponLocalPos.localRotation;
     }
 
     public override void UpdateMe()
@@ -65,15 +70,7 @@ public class Gatling : BaseWeapon
             return;
         }
 
-
-        if (MainGameManager.IsMulti)
-        {
-            CmdCreateBullet(shotPos.position, transform.rotation, target);
-        }
-        else
-        {
-            CreateBullet(shotPos.position, transform.rotation, target);
-        }
+        CmdCreateBullet(shotPos.position, transform.rotation, target);
 
 
         //残り弾丸がMAXで撃つと一瞬で弾丸が1個回復するので

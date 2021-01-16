@@ -16,6 +16,7 @@ public class Explosion : NetworkBehaviour
     SyncList<GameObject> wasHitObjects = new SyncList<GameObject>();    //触れたオブジェクトを全て格納する
     const float DESTROY_TIME = 3.0f;   //生存時間
 
+
     void Start()
     {
         //サイズに応じて変数の値も変える

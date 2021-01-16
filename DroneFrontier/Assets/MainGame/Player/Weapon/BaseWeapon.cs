@@ -13,9 +13,7 @@ public abstract class BaseWeapon : NetworkBehaviour, IWeapon
     protected float ShotCountTime { get; set; } = 0;     //1発ごとの間隔をカウントする変数
     protected float BulletPower { get; set; } = -1;      //弾丸の威力
 
-    [SyncVar, HideInInspector]
-    public Transform parentTransform = null;
-    [SyncVar, HideInInspector] public uint _netId = 0;
+    [SyncVar, HideInInspector] public uint parentNetId = 0;
 
     //プロパティ用
     float recast = 0;
@@ -101,19 +99,25 @@ public abstract class BaseWeapon : NetworkBehaviour, IWeapon
     public abstract void Init(uint netId);
     public abstract void UpdateMe();
     public abstract void Shot(GameObject target = null);
+
     public virtual void SetChild(Transform parent)
     {
-        transform.SetParent(parent);
-        transform.localPosition = weaponLocalPos.localPosition;
-        transform.localRotation = weaponLocalPos.localRotation;
+        //Transform t = GetComponent<NetworkTransform>().transform;
+        //t.SetParent(parent);
+        //t.localPosition = weaponLocalPos.localPosition;
+        //t.localRotation = weaponLocalPos.localRotation;
     }
 
     public override void OnStartClient()
     {
         base.OnStartClient();
-        transform.SetParent(parentTransform);
+        GameObject parent = NetworkIdentity.spawned[parentNetId].gameObject;
+        transform.SetParent(parent.transform);
         transform.localPosition = weaponLocalPos.localPosition;
         transform.localRotation = weaponLocalPos.localRotation;
+        //NetworkTransform nt = GetComponent<NetworkTransform>();
+        //nt.transform.localPosition = weaponLocalPos.localPosition;
+        //nt.transform.localRotation = weaponLocalPos.localRotation;
     }
 
     public enum Weapon

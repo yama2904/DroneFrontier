@@ -17,13 +17,13 @@ public class Bullet : NetworkBehaviour
     protected Transform cacheTransform = null;
 
 
-    protected virtual void Start()
+    void Start()
     {
         cacheTransform = transform;
         Invoke(nameof(DestroyMe), DestroyTime);
     }
 
-    protected virtual void Update()
+    void Update()
     {
     }
 
@@ -60,14 +60,7 @@ public class Bullet : NetworkBehaviour
 
     void DestroyMe()
     {
-        if (MainGameManager.IsMulti)
-        {
-            NetworkServer.Destroy(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        NetworkServer.Destroy(gameObject);
     }
 
     protected virtual void OnTriggerEnter(Collider other)
