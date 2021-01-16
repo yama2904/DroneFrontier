@@ -33821,6 +33821,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5bcec36f042be145a8dc46e97861fbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  Shooter: {fileID: 0}
   size: 20
   power: 20
   powerDownRate: 0.8

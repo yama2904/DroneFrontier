@@ -78,11 +78,11 @@ public class Radar : MonoBehaviour, IRadar
                 SearchData sd = new SearchData();
                 sd.target = hit.transform;
                 //プレイヤーかCPUなら赤い表示
-                if (hit.CompareTag(Player.PLAYER_TAG) || hit.CompareTag(CPUController.CPU_TAG))
+                if (hit.CompareTag(TagNameManager.PLAYER) || hit.CompareTag(TagNameManager.CPU))
                 {
                     sd.marker = Instantiate(enemyMarker).transform.GetChild(0).GetComponent<RectTransform>();
                 }
-                else if (hit.CompareTag(Item.ITEM_TAG))
+                else if (hit.CompareTag(TagNameManager.ITEM))
                 {
                     sd.marker = Instantiate(itemMarker).transform.GetChild(0).GetComponent<RectTransform>();
                 }
@@ -141,7 +141,7 @@ public class Radar : MonoBehaviour, IRadar
             Vector3 screenPoint = _camera.WorldToViewportPoint(h.transform.position);
             return screenPoint.x > 0 && screenPoint.x < 1 && screenPoint.y > 0 && screenPoint.y < 1 && screenPoint.z > 0;
         }).Where(h => !ReferenceEquals(h, player))   //操作しているプレイヤーは除外
-          .Where(h => h.CompareTag(Player.PLAYER_TAG) || h.CompareTag(CPUController.CPU_TAG) || h.CompareTag(Item.ITEM_TAG))  //プレイヤーとCPUとアイテムが対象          
+          .Where(h => h.CompareTag(TagNameManager.PLAYER) || h.CompareTag(TagNameManager.CPU) || h.CompareTag(TagNameManager.ITEM))  //プレイヤーとCPUとアイテムが対象          
           .ToList();
     }
 }

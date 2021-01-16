@@ -19,7 +19,6 @@ public class MissieWeapon : BaseWeapon
     public override void OnStartClient()
     {
         base.OnStartClient();
-
         Recast = 10.0f;
         ShotInterval = 1.0f / shotPerSecond;
         ShotCountTime = ShotInterval;
@@ -39,6 +38,7 @@ public class MissieWeapon : BaseWeapon
 
     public override void Init(uint netId)
     {
+        BulletPower = 20.0f;
         CmdCreateMissile();
     }
 

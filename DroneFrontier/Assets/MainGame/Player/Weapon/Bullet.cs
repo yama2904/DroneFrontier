@@ -5,8 +5,6 @@ using Mirror;
 
 public class Bullet : NetworkBehaviour
 {
-    public const string BULLET_TAG = "Bullet";
-
     [SyncVar, HideInInspector] public GameObject Shooter = null;  //撃ったプレイヤー
     [SyncVar, HideInInspector] public GameObject Target = null;   //誘導する対象
     [SyncVar, HideInInspector] public float TrackingPower = 0;    //追従力
@@ -27,6 +25,7 @@ public class Bullet : NetworkBehaviour
     {
     }
 
+    [ServerCallback]
     protected virtual void FixedUpdate()
     {
         if (Target != null)
@@ -63,6 +62,7 @@ public class Bullet : NetworkBehaviour
         NetworkServer.Destroy(gameObject);
     }
 
+    [ServerCallback]
     protected virtual void OnTriggerEnter(Collider other)
     {
         //撃ったプレイヤーなら当たり判定を行わない
@@ -72,13 +72,13 @@ public class Bullet : NetworkBehaviour
         }
 
         //プレイヤーかCPUの当たり判定
-        if (other.CompareTag(Player.PLAYER_TAG) || other.CompareTag(CPUController.CPU_TAG))
+        if (other.CompareTag(TagNameManager.PLAYER) || other.CompareTag(TagNameManager.CPU))
         {
-            BasePlayer bp = other.GetComponent<BasePlayer>();
+            Player bp = other.GetComponent<Player>();
             bp.Damage(Power);
             DestroyMe();
         }
-        else if (other.CompareTag(JammingBot.JAMMING_BOT_TAG))
+        else if (other.CompareTag(TagNameManager.JAMMING_BOT))
         {
             JammingBot jb = other.GetComponent<JammingBot>();
             if (ReferenceEquals(jb.Creater, Shooter))

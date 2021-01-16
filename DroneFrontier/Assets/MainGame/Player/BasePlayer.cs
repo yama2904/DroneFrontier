@@ -27,8 +27,8 @@ public abstract class BasePlayer : NetworkBehaviour, IPlayerStatus
     protected Camera _Camera { get; private set; } = null;
 
     //バリア
-    [SerializeField] Barrier barrierInspector = null;
-    protected Barrier _Barrier { get; private set; } = null;
+    [SerializeField] protected Barrier barrierInspector = null;
+    protected Barrier _Barrier = null;
 
     //ロックオン
     [SerializeField] LockOn lockOnInspector = null;
@@ -91,9 +91,8 @@ public abstract class BasePlayer : NetworkBehaviour, IPlayerStatus
         cacheTransform = transform;
 
         _Camera = cameraInspector;
-        _Barrier = barrierInspector;
         _LockOn = lockOnInspector;
-
+        _Barrier = barrierInspector;
 
         //配列初期化
         for (int i = 0; i < (int)Status.NONE; i++)
@@ -221,7 +220,7 @@ public abstract class BasePlayer : NetworkBehaviour, IPlayerStatus
         //アイテム枠1にアイテムを持っていたら使用
         if (items[num] != null)
         {
-            items[num].UseItem(this);
+            //items[num].UseItem(this);
         }
     }
 

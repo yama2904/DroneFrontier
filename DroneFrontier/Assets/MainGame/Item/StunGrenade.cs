@@ -54,7 +54,7 @@ public class StunGrenade : MonoBehaviour
             return;
         }
 
-        if (other.CompareTag(Player.PLAYER_TAG) || other.CompareTag(CPUController.CPU_TAG))
+        if (other.CompareTag(TagNameManager.PLAYER) || other.CompareTag(TagNameManager.CPU))
         {
             CreateImpact();
         }

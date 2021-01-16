@@ -69,8 +69,8 @@ public class LockOn : MonoBehaviour, ILockOn
             //各要素の座標をビューポートに変換(画面左下が0:0、右上が1:1)して条件に合うものだけリストに詰め込む
             Vector3 screenPoint = _camera.WorldToViewportPoint(h.transform.position);
             return screenPoint.x > 0.25f && screenPoint.x < 0.75f && screenPoint.y > 0.15f && screenPoint.y < 0.85f && screenPoint.z > 0;
-        }).Where(h => h.CompareTag(Player.PLAYER_TAG) || h.CompareTag(CPUController.CPU_TAG) ||   //ロックオン対象を選択
-           h.CompareTag(JammingBot.JAMMING_BOT_TAG))
+        }).Where(h => h.CompareTag(TagNameManager.PLAYER) || h.CompareTag(TagNameManager.CPU) ||   //ロックオン対象を選択
+           h.CompareTag(TagNameManager.JAMMING_BOT))
            .Where(h =>   //notLockOnObjects内のオブジェクトがある場合は除外
            {
                if(notLockOnObjects.FindIndex(o => ReferenceEquals(o, h.gameObject)) == -1)

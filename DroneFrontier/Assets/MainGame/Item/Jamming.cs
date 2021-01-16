@@ -9,7 +9,7 @@ public class Jamming : MonoBehaviour
     [SerializeField] GameObject jammingBot = null;
     [SerializeField] Transform jammingBotPosition = null;
     JammingBot createBot = null;
-    List<BasePlayer> jamingPlayers = new List<BasePlayer>();
+    List<Player> jamingPlayers = new List<Player>();
 
     [SerializeField] float destroyTime = 60.0f;
 
@@ -23,7 +23,7 @@ public class Jamming : MonoBehaviour
         if (createBot == null)
         {
             //ジャミングを解除する
-            foreach (BasePlayer bp in jamingPlayers)
+            foreach (Player bp in jamingPlayers)
             {
                 IPlayerStatus ps = bp;
                 ps.UnSetJamming();
@@ -61,9 +61,9 @@ public class Jamming : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag(Player.PLAYER_TAG) || other.CompareTag(CPUController.CPU_TAG))
+        if (other.CompareTag(TagNameManager.PLAYER))
         {
-            BasePlayer bp = other.GetComponent<BasePlayer>();
+            Player bp = other.GetComponent<Player>();
             if (ReferenceEquals(bp.gameObject, creater))   //ジャミングを付与しないプレイヤーならスキップ
             {
                 return;
@@ -79,9 +79,9 @@ public class Jamming : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.CompareTag(Player.PLAYER_TAG) || other.CompareTag(CPUController.CPU_TAG))
+        if (other.CompareTag(TagNameManager.PLAYER))
         {
-            BasePlayer bp = other.GetComponent<BasePlayer>();
+            Player bp = other.GetComponent<Player>();
             if (ReferenceEquals(bp.gameObject, creater))   //ジャミングを付与しないプレイヤーならスキップ
             {
                 return;

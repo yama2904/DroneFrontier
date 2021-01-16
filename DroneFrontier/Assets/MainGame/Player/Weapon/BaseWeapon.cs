@@ -74,6 +74,16 @@ public abstract class BaseWeapon : NetworkBehaviour, IWeapon
         }
     }
 
+
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+        GameObject parent = NetworkIdentity.spawned[parentNetId].gameObject;
+        transform.SetParent(parent.transform);
+        transform.localPosition = weaponLocalPos.localPosition;
+        transform.localRotation = weaponLocalPos.localRotation;
+    }
+
     protected virtual void Awake()
     {
         //parentTransform = transform;
@@ -106,18 +116,6 @@ public abstract class BaseWeapon : NetworkBehaviour, IWeapon
         //t.SetParent(parent);
         //t.localPosition = weaponLocalPos.localPosition;
         //t.localRotation = weaponLocalPos.localRotation;
-    }
-
-    public override void OnStartClient()
-    {
-        base.OnStartClient();
-        GameObject parent = NetworkIdentity.spawned[parentNetId].gameObject;
-        transform.SetParent(parent.transform);
-        transform.localPosition = weaponLocalPos.localPosition;
-        transform.localRotation = weaponLocalPos.localRotation;
-        //NetworkTransform nt = GetComponent<NetworkTransform>();
-        //nt.transform.localPosition = weaponLocalPos.localPosition;
-        //nt.transform.localRotation = weaponLocalPos.localRotation;
     }
 
     public enum Weapon

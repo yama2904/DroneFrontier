@@ -7,10 +7,10 @@ using Mirror;
 
 public class LaserWeapon : BaseWeapon
 {
-    const float SHOT_POSSIBLE_MIN = 0.2f;       //発射可能な最低ゲージ量
+    const float SHOT_POSSIBLE_MIN = 0.2f;        //発射可能な最低ゲージ量
     [SerializeField] LaserBullet laserBullet = null;
-    [SerializeField] float maxShotTime = 5;     //最大何秒発射できるか
-    [SerializeField] float hitPerSecond = 5.0f;     //1秒間にヒットする回数
+    [SerializeField] float maxShotTime = 5;      //最大何秒発射できるか
+    [SerializeField] float hitPerSecond = 5.0f;  //1秒間にヒットする回数
 
     Image laserGaugeImage = null;
     float gaugeAmout = 1.0f;
@@ -68,7 +68,7 @@ public class LaserWeapon : BaseWeapon
 
         //あとで直す
         //プレイヤーならUIのゲージを変動させる
-        if (Shooter.CompareTag(Player.PLAYER_TAG))
+        if (Shooter.CompareTag(TagNameManager.PLAYER))
         {
             laserGaugeImage.fillAmount = gaugeAmout;
         }

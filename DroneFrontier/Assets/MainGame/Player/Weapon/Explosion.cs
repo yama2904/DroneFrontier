@@ -50,6 +50,7 @@ public class Explosion : NetworkBehaviour
     {
     }
 
+    [ServerCallback]
     private void OnTriggerEnter(Collider other)
     {
         //当たり判定を行わないオブジェクトだったら処理をしない
@@ -57,48 +58,7 @@ public class Explosion : NetworkBehaviour
         {
             return;
         }
-
-        if (other.CompareTag(Player.PLAYER_TAG) || other.CompareTag(CPUController.CPU_TAG))
-        {
-            BasePlayer bp = other.GetComponent<BasePlayer>();
-                        
-            //既にヒット済のオブジェクトはスルー
-            foreach (GameObject o in wasHitObjects)
-            {
-                if (ReferenceEquals(other.gameObject, o))
-                {
-                    return;
-                }
-            }
-            bp.Damage(CalcPower(other.transform.position));
-            wasHitObjects.Add(other.gameObject);
-
-
-            //デバッグ用
-            Debug.Log("威力: " + CalcPower(other.transform.position));
-        }
-        else if (other.CompareTag(JammingBot.JAMMING_BOT_TAG))
-        {
-            JammingBot jb = other.GetComponent<JammingBot>();
-            if (ReferenceEquals(jb.Creater, Shooter))
-            {
-                return;
-            }
-            //既にヒット済のオブジェクトはスルー
-            foreach (GameObject o in wasHitObjects)
-            {
-                if (ReferenceEquals(other.gameObject, o))
-                {
-                    return;
-                }
-            }
-            jb.Damage(CalcPower(other.transform.position));
-            wasHitObjects.Add(other.gameObject);
-
-
-            //デバッグ用
-            Debug.Log("威力: " + CalcPower(other.transform.position));
-        }
+        CmdTrigger(other.gameObject);
     }
 
     //相手の座標を入れると距離による最終的な威力を返す
@@ -125,13 +85,52 @@ public class Explosion : NetworkBehaviour
 
     void DestroyMe()
     {
-        if (MainGameManager.IsMulti)
+        NetworkServer.Destroy(gameObject);
+    }
+
+    [Command(ignoreAuthority = true)]
+    void CmdTrigger(GameObject other)
+    {
+        if (other.CompareTag(TagNameManager.PLAYER))
         {
-            NetworkServer.Destroy(gameObject);
+            Player bp = other.GetComponent<Player>();
+
+            //既にヒット済のオブジェクトはスルー
+            foreach (GameObject o in wasHitObjects)
+            {
+                if (ReferenceEquals(other, o))
+                {
+                    return;
+                }
+            }
+            bp.Damage(CalcPower(other.transform.position));
+            wasHitObjects.Add(other);
+
+
+            //デバッグ用
+            Debug.Log("威力: " + CalcPower(other.transform.position));
         }
-        else
+        else if (other.CompareTag(TagNameManager.JAMMING_BOT))
         {
-            Destroy(gameObject);
+            JammingBot jb = other.GetComponent<JammingBot>();
+            if (ReferenceEquals(jb.Creater, Shooter))
+            {
+                return;
+            }
+            //既にヒット済のオブジェクトはスルー
+            foreach (GameObject o in wasHitObjects)
+            {
+                if (ReferenceEquals(other.gameObject, o))
+                {
+                    return;
+                }
+            }
+            jb.Damage(CalcPower(other.transform.position));
+            wasHitObjects.Add(other.gameObject);
+
+
+            //デバッグ用
+            Debug.Log("威力: " + CalcPower(other.transform.position));
         }
     }
 }

@@ -16,27 +16,27 @@ public class MagnetArea : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag(Player.PLAYER_TAG) || other.CompareTag(CPUController.CPU_TAG))
+        if (other.CompareTag(TagNameManager.PLAYER) || other.CompareTag(TagNameManager.CPU))
         {
-            IPlayerStatus ps = other.GetComponent<BasePlayer>();
+            IPlayerStatus ps = other.GetComponent<Player>();
             ps.SetSpeedDown(downPercent);
 
 
             //デバッグ用
-            Debug.Log(other.GetComponent<BasePlayer>().name + ": in磁場エリア");
+            Debug.Log(other.GetComponent<Player>().name + ": in磁場エリア");
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.CompareTag(Player.PLAYER_TAG) || other.CompareTag(CPUController.CPU_TAG))
+        if (other.CompareTag(TagNameManager.PLAYER) || other.CompareTag(TagNameManager.CPU))
         {
-            IPlayerStatus ps = other.GetComponent<BasePlayer>();
+            IPlayerStatus ps = other.GetComponent<Player>();
             ps.UnSetSpeedDown();
 
 
             //デバッグ用
-            Debug.Log(other.GetComponent<BasePlayer>().name + ": out磁場エリア");
+            Debug.Log(other.GetComponent<Player>().name + ": out磁場エリア");
         }
     }
 }

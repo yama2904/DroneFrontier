@@ -1,8 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Mirror;
 
-public class Barrier : MonoBehaviour, IBarrier, IBarrierStatus
+public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
 {
     const float MAX_HP = 100;
     public float HP { get; private set; } = MAX_HP;
@@ -17,9 +18,19 @@ public class Barrier : MonoBehaviour, IBarrier, IBarrierStatus
     [SerializeField] float resurrectBarrierTime = 15.0f;   //バリアが破壊されてから修復される時間
     [SerializeField] float resurrectBarrierHP = 10.0f;     //バリアが復活した際のHP
     float regeneCountTime;    //計測用
-    bool isRegene;      //回復中か
+    bool isRegene;    //回復中か
 
     float damagePercent;    //ダメージ倍率
+    [SyncVar, HideInInspector] public uint parentNetId = 0;
+
+
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+        GameObject parent = NetworkIdentity.spawned[parentNetId].gameObject;
+        transform.SetParent(parent.transform);
+        transform.localPosition = new Vector3(0, 0, 0);
+    }
 
     void Start()
     {

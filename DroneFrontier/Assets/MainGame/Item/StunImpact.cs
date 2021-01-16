@@ -36,9 +36,9 @@ public class StunImpact : MonoBehaviour
             return;
         }
 
-        if (other.CompareTag(Player.PLAYER_TAG))
+        if (other.CompareTag(TagNameManager.PLAYER))
         {
-            IPlayerStatus ps = other.GetComponent<BasePlayer>();
+            IPlayerStatus ps = other.GetComponent<Player>();
             ps.SetStun(stunTime);
 
             //必要なら距離によるスタンの時間を変える処理をいつか加える

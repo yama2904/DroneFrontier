@@ -22,8 +22,6 @@ public class Gatling : BaseWeapon
         BulletsNum = 10;
         BulletsRemain = BulletsNum;
         BulletPower = 3.0f;
-
-        //GetComponent<NetworkIdentity>().AssignClientAuthority(connectionToClient);
     }
 
     protected override void Update()
@@ -45,11 +43,6 @@ public class Gatling : BaseWeapon
 
     public override void Init(uint netId)
     {
-        //parentNetId = netId;
-
-        //NetworkTransform nt = GetComponent<NetworkTransform>();
-        //nt.transform.localPosition = weaponLocalPos.localPosition;
-        //nt.transform.localRotation = weaponLocalPos.localRotation;
     }
 
     public override void UpdateMe()

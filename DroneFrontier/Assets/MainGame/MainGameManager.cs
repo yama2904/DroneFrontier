@@ -82,40 +82,40 @@ public class MainGameManager : MonoBehaviour
         screenMaskImage.enabled = false;
 
 
-        //プレイヤーとCPUを配置
-        for (int i = 0; i < playerDatas.Count; i++)
-        {
-            BasePlayer p;
-            if (playerDatas[i].isPlayer)
-            {
-                p = Instantiate(player);
-            }
-            else
-            {
-                CPUController c = Instantiate(cpu);
-                c.SetSubWeapon(playerDatas[i].weapon);
-                p = c;
-            }
-            p.transform.Translate(0, 0, i * 2.0f);
-            p.name = playerDatas[i].name;
+        ////プレイヤーとCPUを配置
+        //for (int i = 0; i < playerDatas.Count; i++)
+        //{
+        //    BasePlayer p;
+        //    if (playerDatas[i].isPlayer)
+        //    {
+        //        p = Instantiate(player);
+        //    }
+        //    else
+        //    {
+        //        CPUController c = Instantiate(cpu);
+        //        c.SetSubWeapon(playerDatas[i].weapon);
+        //        p = c;
+        //    }
+        //    p.transform.Translate(0, 0, i * 2.0f);
+        //    p.name = playerDatas[i].name;
 
-            basePlayers.Add(p);
-        }
+        //    basePlayers.Add(p);
+        //}
 
-        //デバッグ用
-        if (playerDatas.Count == 0)
-        {
-            GameObject[] p = GameObject.FindGameObjectsWithTag(Player.PLAYER_TAG);
-            foreach (GameObject o in p)
-            {
-                basePlayers.Add(o.GetComponent<BasePlayer>());
-            }
-            GameObject[] c = GameObject.FindGameObjectsWithTag(CPUController.CPU_TAG);
-            foreach (GameObject o in c)
-            {
-                basePlayers.Add(o.GetComponent<BasePlayer>());
-            }
-        }
+        ////デバッグ用
+        //if (playerDatas.Count == 0)
+        //{
+        //    GameObject[] p = GameObject.FindGameObjectsWithTag(TagNameManager.PLAYER);
+        //    foreach (GameObject o in p)
+        //    {
+        //        basePlayers.Add(o.GetComponent<BasePlayer>());
+        //    }
+        //    GameObject[] c = GameObject.FindGameObjectsWithTag(TagNameManager.CPU);
+        //    foreach (GameObject o in c)
+        //    {
+        //        basePlayers.Add(o.GetComponent<BasePlayer>());
+        //    }
+        //}
 
         //カーソルロック
         Cursor.lockState = CursorLockMode.Locked;

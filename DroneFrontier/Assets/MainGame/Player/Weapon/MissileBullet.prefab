@@ -141,6 +141,7 @@ MonoBehaviour:
   DestroyTime: 0
   explosion: {fileID: 8188179291703425062, guid: fdc401304f7c08043bc900548af95475,
     type: 3}
+  parentNetId: 0
 --- !u!114 &1123663406975885586
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -171,7 +172,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0
-  clientAuthority: 1
+  clientAuthority: 0
   localPositionSensitivity: 0.01
   localRotationSensitivity: 0.01
   localScaleSensitivity: 0.01

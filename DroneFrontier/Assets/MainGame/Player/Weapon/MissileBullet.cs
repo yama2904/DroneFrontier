@@ -15,7 +15,8 @@ public class MissileBullet : Bullet
         cacheTransform = transform;
         GameObject parent = NetworkIdentity.spawned[parentNetId].gameObject;
         transform.SetParent(parent.transform);
-        Init();
+        transform.localPosition = new Vector3(0, 0, 0);
+        transform.localRotation = Quaternion.Euler(90, 0, 0);
     }
 
     void Awake()
@@ -30,6 +31,7 @@ public class MissileBullet : Bullet
     {
     }
 
+    [ServerCallback]
     protected override void FixedUpdate()
     {
         if (!isShot) return;
@@ -40,6 +42,7 @@ public class MissileBullet : Bullet
         cacheTransform.Rotate(new Vector3(90, 0, 0));
     }
 
+    [ServerCallback]
     protected override void OnTriggerEnter(Collider other)
     {
         if (!isShot) return;
@@ -50,14 +53,14 @@ public class MissileBullet : Bullet
             return;
         }
 
-        if (other.CompareTag(Player.PLAYER_TAG) || other.CompareTag(CPUController.CPU_TAG))
+        if (other.CompareTag(TagNameManager.PLAYER) || other.CompareTag(TagNameManager.CPU))
         {
-            BasePlayer bp = other.GetComponent<BasePlayer>();
+            Player bp = other.GetComponent<Player>();
 
             bp.Damage(Power);
             DestroyMe();
         }
-        else if (other.CompareTag(JammingBot.JAMMING_BOT_TAG))
+        else if (other.CompareTag(TagNameManager.JAMMING_BOT))
         {
             JammingBot jb = other.GetComponent<JammingBot>();
             if (jb.Creater == Shooter)
@@ -87,12 +90,6 @@ public class MissileBullet : Bullet
     {
         Explosion e = CreateExplosion();
         NetworkServer.Spawn(e.gameObject);
-    }
-
-    void Init()
-    {
-        transform.localPosition = new Vector3(0, 0, 0);
-        transform.localRotation = Quaternion.Euler(90, 0, 0);
     }
 
     [Command(ignoreAuthority = true)]

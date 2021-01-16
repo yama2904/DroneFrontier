@@ -14,7 +14,7 @@ public class BarrierWeakArea : MonoBehaviour
 
     class HitPlayerData
     {
-        public BasePlayer player;
+        public Player player;
         public float deltaTime; //計測用
     }
 
@@ -71,9 +71,9 @@ public class BarrierWeakArea : MonoBehaviour
             SearchNearestObject(out RaycastHit hit, hits);
             GameObject o = hit.transform.gameObject;    //名前省略
 
-            if (o.CompareTag(Player.PLAYER_TAG) || o.CompareTag(CPUController.CPU_TAG))
+            if (o.CompareTag(TagNameManager.PLAYER) || o.CompareTag(TagNameManager.CPU))
             {
-                BasePlayer bp = o.GetComponent<BasePlayer>();
+                Player bp = o.GetComponent<Player>();
                 int index = -1;
 
                 //既にリスト内に存在しているか調べる
@@ -115,8 +115,8 @@ public class BarrierWeakArea : MonoBehaviour
     List<RaycastHit> FilterTargetRaycast(List<RaycastHit> hits)
     {
         //不要な要素を除外する
-        return hits.Where(h => !h.transform.CompareTag(Item.ITEM_TAG))      //アイテム除外
-                   .Where(h => !h.transform.CompareTag(Bullet.BULLET_TAG))  //弾丸除外
+        return hits.Where(h => !h.transform.CompareTag(TagNameManager.ITEM))      //アイテム除外
+                   .Where(h => !h.transform.CompareTag(TagNameManager.BULLET))  //弾丸除外
                    .ToList();
     }
 

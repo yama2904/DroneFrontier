@@ -5,7 +5,6 @@ using UnityEngine;
 public class Item : MonoBehaviour
 {
     const string FOLDER_PATH = "Item/";     //Resourcesフォルダのパス
-    public const string ITEM_TAG = "Item";  //タグ名
 
     //アイテムの種類
     public enum ItemType
@@ -19,7 +18,7 @@ public class Item : MonoBehaviour
     [SerializeField] ItemType itemType = ItemType.NONE;
 
     //アイテムを使用する
-    public void UseItem(BasePlayer player)
+    public void UseItem(Player player)
     {
         //バリア強化
         if(itemType == ItemType.BARRIER_STRENGTH)

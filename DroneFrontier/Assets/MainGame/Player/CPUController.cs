@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class CPUController : BasePlayer
 {
-    public const string CPU_TAG = "CPU";    //タグ名
-
     //デバッグ用
     [SerializeField] float speed = 0.1f;
     [SerializeField] bool isAtack = true;

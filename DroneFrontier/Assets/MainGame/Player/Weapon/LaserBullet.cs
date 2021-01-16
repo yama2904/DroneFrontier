@@ -10,13 +10,13 @@ public class LaserBullet : NetworkBehaviour
     public float ShotInterval { private get; set; } = 0;
     float shotCountTime = 0;
     [SerializeField] float chargeTime = 3.0f;     //チャージする時間
-    [SerializeField] float lineRadius = 0.01f;      //レーザーの半径
-    [SerializeField] float lineRange = 4.0f;        //レーザーの射程
+    [SerializeField] float lineRadius = 0.01f;    //レーザーの半径
+    [SerializeField] float lineRange = 4.0f;      //レーザーの射程
     public bool IsShotBeam { get; private set; } = false;
 
 
     //Charge用変数
-    const int MAX_RATE_OVER_TIME = 128;         //チャージのパーティクルのrateOverTime最大値
+    const int MAX_RATE_OVER_TIME = 128;   //チャージのパーティクルのrateOverTime最大値
     [SerializeField] ParticleSystem charge = null;
     ParticleSystem.EmissionModule chargeEmission;
     ParticleSystem.MinMaxCurve chargeMinmaxcurve;
@@ -125,15 +125,15 @@ public class LaserBullet : NetworkBehaviour
     List<RaycastHit> FilterTargetRaycast(List<RaycastHit> hits, GameObject shooter)
     {
         //不要な要素を除外する
-        return hits.Where(h => !h.transform.CompareTag(Item.ITEM_TAG))      //アイテム除外
-                   .Where(h => !h.transform.CompareTag(Bullet.BULLET_TAG))  //弾丸除外
+        return hits.Where(h => !h.transform.CompareTag(TagNameManager.ITEM))      //アイテム除外
+                   .Where(h => !h.transform.CompareTag(TagNameManager.BULLET))  //弾丸除外
                    .Where(h =>  //撃ったプレイヤーは当たり判定から除外
                    {
                        return !ReferenceEquals(h.transform.gameObject, shooter);
                    })
                    .Where(h =>  //ジャミングボットを生成したプレイヤーと打ったプレイヤーが同じなら除外
                    {
-                       if (h.transform.CompareTag(JammingBot.JAMMING_BOT_TAG))
+                       if (h.transform.CompareTag(TagNameManager.JAMMING_BOT))
                        {
                            return !ReferenceEquals(h.transform.GetComponent<JammingBot>().Creater, shooter);
                        }
@@ -278,11 +278,11 @@ public class LaserBullet : NetworkBehaviour
                 SearchNearestObject(out RaycastHit hit, hits);
                 GameObject o = hit.transform.gameObject;    //名前省略
 
-                if (o.CompareTag(Player.PLAYER_TAG) || o.CompareTag(CPUController.CPU_TAG))
+                if (o.CompareTag(TagNameManager.PLAYER) || o.CompareTag(TagNameManager.CPU))
                 {
-                    o.GetComponent<BasePlayer>().Damage(power);
+                    o.GetComponent<Player>().Damage(power);
                 }
-                else if (o.CompareTag(JammingBot.JAMMING_BOT_TAG))
+                else if (o.CompareTag(TagNameManager.JAMMING_BOT))
                 {
                     o.GetComponent<JammingBot>().Damage(power);
                 }

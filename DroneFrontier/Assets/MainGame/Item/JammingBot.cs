@@ -4,16 +4,15 @@ using UnityEngine;
 
 public class JammingBot : MonoBehaviour
 {
-    public const string JAMMING_BOT_TAG = "JammingBot";
     public GameObject Creater { get; set; } = null;
     [SerializeField] float HP = 30.0f;
 
     void Start()
     {
         //生成した自分のジャミングボットをプレイヤーがロックオンしないように設定
-        if(Creater.CompareTag(Player.PLAYER_TAG) || Creater.CompareTag(CPUController.CPU_TAG))
+        if(Creater.CompareTag(TagNameManager.PLAYER))
         {
-            Creater.GetComponent<BasePlayer>().SetNotLockOnObject(gameObject);
+            Creater.GetComponent<Player>().SetNotLockOnObject(gameObject);
         }
     }
 
@@ -28,9 +27,9 @@ public class JammingBot : MonoBehaviour
 
 
         //SetNotLockOnObjectを解除
-        if (Creater.CompareTag(Player.PLAYER_TAG) || Creater.CompareTag(CPUController.CPU_TAG))
+        if (Creater.CompareTag(TagNameManager.PLAYER))
         {
-            Creater.GetComponent<BasePlayer>().UnSetNotLockOnObject(gameObject);
+            Creater.GetComponent<Player>().UnSetNotLockOnObject(gameObject);
         }
     }
 

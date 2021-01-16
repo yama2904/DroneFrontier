@@ -8,7 +8,7 @@ public class BarrierStrength : MonoBehaviour
     static float strengthTime = 10.0f;   //強化時間
 
     //バリアを強化する
-    public static bool Strength(BasePlayer player)
+    public static bool Strength(Player player)
     {
         IPlayerStatus ps = player;
         return ps.SetBarrierStrength(strengthRate, strengthTime);

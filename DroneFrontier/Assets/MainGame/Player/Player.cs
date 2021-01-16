@@ -5,30 +5,99 @@ using UnityEngine.UI;
 using System;
 using Mirror;
 
-public class Player : BasePlayer
+public class Player : NetworkBehaviour, IPlayerStatus
 {
-    public const string PLAYER_TAG = "Player";  //タグ名
-    public static BaseWeapon.Weapon SetSubWeapon { private get; set; } = BaseWeapon.Weapon.MISSILE;
-    bool[] isUsingWeapons = new bool[(int)Weapon.NONE];    //使用中の武器
+    public float HP { get; private set; } = 0; //HP
+    Rigidbody _Rigidbody = null;
+    Transform cacheTransform = null;  //キャッシュ用
 
+    //移動用
+    public float MoveSpeed { get; set;} = 0;   //移動速度
+    public float MaxSpeed { get; set; } = 0;   //最高速度
+
+    //回転用
+    public float RotateSpeed { get; set; } = 3.0f;
+    float LimitCameraTiltX { get; set; } = 40.0f;
+
+    //破壊されたか
+    public bool IsDestroy { get; private set; } = false;
+
+    //カメラ
+    [SerializeField] Camera cameraInspector = null;
+    Camera _camera = null;
+
+    //バリア
+    [SerializeField] Barrier barrierInspector = null;
+    [SyncVar] GameObject barrier = null;
+
+    //ロックオン
+    [SerializeField] LockOn lockOnInspector = null;
+    LockOn lockOn = null;
+    float lockOnTrackingSpeed = 0.1f;
+
+    //レーダー
     [SerializeField] Radar radar = null;
 
+    //ブースト用
+    const float BOOST_POSSIBLE_MIN = 0.2f;  //ブースト可能な最低ゲージ量
+    Image boostImage = null;       //ブーストのゲージ画像
+    float boostAccele = 2.0f;      //ブーストの加速度
+    float maxBoostTime = 5.0f;     //ブーストできる最大の時間
+    float boostRecastTime = 6.0f;  //ブーストのリキャスト時間
+    bool isBoost = false;
 
-    //ブースト用変数
-    Image boostImage = null;
 
+    //武器
+    protected enum Weapon
+    {
+        MAIN,   //メイン武器
+        SUB,    //サブ武器
+
+        NONE
+    }
+    [SyncVar] GameObject mainWeapon = null;
+    [SyncVar] GameObject subWeapon = null;
+    public static BaseWeapon.Weapon SetSubWeapon { private get; set; } = BaseWeapon.Weapon.LASER;
+    bool[] isUsingWeapons = new bool[(int)Weapon.NONE];    //使用中の武器
+    float atackingDownSpeed = 0.5f;   //攻撃中の移動速度の低下率
+
+
+    //アイテム
+    enum ItemNum
+    {
+        ITEM_1,   //アイテム枠1
+        ITEM_2,   //アイテム枠2
+
+        NONE
+    }
+    Item[] items = new Item[(int)ItemNum.NONE];
+
+
+    //弱体や強化などの状態
+    public enum Status
+    {
+        BARRIER_STRENGTH,   //バリア強化
+        BARRIER_WEAK,       //バリア弱体化
+        STUN,               //スタン
+        JAMMING,            //ジャミング
+        SPEED_DOWN,         //スピードダウン
+
+        NONE
+    }
+    bool[] isStatus = new bool[(int)Status.NONE];   //状態異常が付与されているか
+    float speedPercent = 1;
 
     //デバッグ用
-    int atackType = (int)BaseWeapon.Weapon.SHOTGUN;
-    Vector3 initPos;
+    bool isV = true;
 
 
     public override void OnStartLocalPlayer()
     {
         base.OnStartLocalPlayer();
-        _Camera.depth++;
+        _camera.depth++;
         CmdCreateMainWeapon();
         CmdCreateSubWeapon();
+        CmdCreateBarrier();
 
         Debug.Log("End: OnStartLocalPlayer");
     }
@@ -41,7 +110,8 @@ public class Player : BasePlayer
         NetworkServer.Spawn(weapon, connectionToClient);
         mainWeapon = weapon;
 
-        Debug.Log("End: CmdCreateMainWeapon");
+
+        Debug.Log("CreateMainWeapon");
     }
 
     [Command]
@@ -54,11 +124,39 @@ public class Player : BasePlayer
         subWeapon = weapon;
 
 
-        Debug.Log("End: CmdCreateSubWeapon");
+        Debug.Log("CreateSubWeapon");
+    }
+
+    [Command]
+    void CmdCreateBarrier()
+    {
+        Barrier b = Instantiate(barrierInspector);
+        b.parentNetId = netId;
+        NetworkServer.Spawn(b.gameObject, connectionToClient);
+        barrier = b.gameObject;
+
+
+        Debug.Log("CreateBarrier");
     }
 
 
-    protected override void Start()
+    void Awake()
+    {
+        _Rigidbody = GetComponent<Rigidbody>();
+        cacheTransform = transform;
+
+        _camera = cameraInspector;
+        lockOn = lockOnInspector;
+
+
+        //配列初期化
+        for (int i = 0; i < (int)Status.NONE; i++)
+        {
+            isStatus[i] = false;
+        }
+    }
+
+    void Start()
     {
         HP = 30;
         MoveSpeed = 20.0f;
@@ -72,21 +170,30 @@ public class Player : BasePlayer
 
         boostImage = GameObject.Find("BoostGauge").GetComponent<Image>();
         boostImage.fillAmount = 1;
-
-
-        //デバッグ用
-        initPos = cacheTransform.position;
     }
 
 
-    protected override void Update()
+    void Update()
     {
         if (!isLocalPlayer)
         {
             return;
         }
 
-        base.Update();
+        //状態異常処理
+        if (barrier != null)
+        {
+            IBarrierStatus b = barrier.GetComponent<Barrier>();
+            SetStatus(Status.BARRIER_STRENGTH, b.IsStrength);
+            SetStatus(Status.BARRIER_WEAK, b.IsWeak);
+        }
+
+        if (Input.GetKeyDown(KeyCode.V))
+        {
+            isV = !isV;
+            Debug.Log("移動処理切り替え");
+        }
+
         if (subWeapon != null)
         {
             subWeapon.GetComponent<BaseWeapon>().UpdateMe();
@@ -136,14 +243,14 @@ public class Player : BasePlayer
         {
             if (!isStatus[(int)Status.JAMMING])
             {
-                ILockOn l = _LockOn;
-                l.StartLockOn(LockOnTrackingSpeed);
+                ILockOn l = lockOn;
+                l.StartLockOn(lockOnTrackingSpeed);
             }
         }
         //ロックオン解除
         if (Input.GetKeyUp(KeyCode.LeftShift))
         {
-            ILockOn l = _LockOn;
+            ILockOn l = lockOn;
             l.ReleaseLockOn();
         }
 
@@ -179,7 +286,7 @@ public class Player : BasePlayer
         {
             MoveSpeed *= x;
             RotateSpeed *= x;
-            LockOnTrackingSpeed *= x;
+            lockOnTrackingSpeed *= x;
         };
 
         //メイン武器攻撃
@@ -188,7 +295,7 @@ public class Player : BasePlayer
             //サブ武器を使用していない場合は移動速度と回転速度とロックオンの追従速度を下げる
             if (!isUsingWeapons[(int)Weapon.SUB])
             {
-                ModifySpeeds(AtackingDownSpeed);
+                ModifySpeeds(atackingDownSpeed);
                 isUsingWeapons[(int)Weapon.MAIN] = true;
             }
         }
@@ -201,7 +308,7 @@ public class Player : BasePlayer
             //メインもサブも使用していないなら速度を戻す
             if (!isUsingWeapons[(int)Weapon.SUB])
             {
-                ModifySpeeds(1 / AtackingDownSpeed);
+                ModifySpeeds(1 / atackingDownSpeed);
             }
             isUsingWeapons[(int)Weapon.MAIN] = false;
         }
@@ -212,7 +319,7 @@ public class Player : BasePlayer
             //メイン武器を使用していない場合は移動速度と回転速度とロックオンの追従速度を下げる
             if (!isUsingWeapons[(int)Weapon.MAIN])
             {
-                ModifySpeeds(AtackingDownSpeed);
+                ModifySpeeds(atackingDownSpeed);
                 isUsingWeapons[(int)Weapon.SUB] = true;
             }
         }
@@ -225,7 +332,7 @@ public class Player : BasePlayer
         {
             if (!isUsingWeapons[(int)Weapon.MAIN])
             {
-                ModifySpeeds(1 / AtackingDownSpeed);
+                ModifySpeeds(1 / atackingDownSpeed);
             }
             isUsingWeapons[(int)Weapon.SUB] = false;
         }
@@ -316,42 +423,244 @@ public class Player : BasePlayer
 
 
         //デバッグ用
-        //武器切り替え
-        if (Input.GetKeyDown(KeyCode.Tab))
-        {
-            //今持っているサブ武器を削除
-            NetworkServer.Destroy(subWeapon);
-
-            //次の武器に切り替える
-            if (++atackType == (int)BaseWeapon.Weapon.GATLING)
-            {
-                atackType++;
-            }
-            if (atackType >= (int)BaseWeapon.Weapon.NONE)
-            {
-                atackType = 0;
-            }
-
-            SetWeapon(Weapon.SUB, (BaseWeapon.Weapon)atackType);
-        }
-
-        //デバッグ用
         if (Input.GetKeyDown(KeyCode.LeftControl))
         {
-            LockOnTrackingSpeed *= 0.1f;
+            lockOnTrackingSpeed *= 0.1f;
             RotateSpeed *= 0.1f;
             MoveSpeed *= 0.1f;
         }
         if (Input.GetKeyUp(KeyCode.LeftControl))
         {
-            LockOnTrackingSpeed *= 10;
+            lockOnTrackingSpeed *= 10;
             RotateSpeed *= 10;
             MoveSpeed *= 10;
         }
-        if (Input.GetKeyDown(KeyCode.P))
+    }
+
+    //移動処理
+    void Move(float speed, float _maxSpeed, Vector3 direction)
+    {
+        if (!isV)
         {
-            cacheTransform.position = initPos;
+            //最大速度に達していなかったら移動処理
+            if (_Rigidbody.velocity.sqrMagnitude < Mathf.Pow(_maxSpeed, 2))
+            {
+                _Rigidbody.AddForce(direction * speed, ForceMode.Force);
+
+
+                //デバッグ用
+                //Debug.Log(Mathf.Pow(_maxSpeed, 2));
+            }
         }
+        else
+        {
+            _Rigidbody.AddForce(direction * speed + (direction * speed - _Rigidbody.velocity), ForceMode.Force);
+        }
+
+
+        //デバッグ用
+        //Debug.Log(_rigidbody.velocity.sqrMagnitude);
+    }
+
+    //回転処理
+    void Rotate(float valueX, float valueY, float speed)
+    {
+        if (MainGameManager.IsCursorLock)
+        {
+            Vector3 angle = new Vector3(valueX * speed, valueY * speed, 0);
+
+            //カメラの左右回転
+            cacheTransform.RotateAround(cacheTransform.position, Vector3.up, angle.x);
+
+            //カメラの上下の回転に制限をかける
+            Vector3 localAngle = cacheTransform.localEulerAngles;
+            localAngle.x += angle.y * -1;
+            if (localAngle.x > LimitCameraTiltX && localAngle.x < 180)
+            {
+                localAngle.x = LimitCameraTiltX;
+            }
+            if (localAngle.x < 360 - LimitCameraTiltX && localAngle.x > 180)
+            {
+                localAngle.x = 360 - LimitCameraTiltX;
+            }
+            cacheTransform.localEulerAngles = localAngle;
+        }
+    }
+
+    //攻撃処理
+    void UseWeapon(Weapon weapon)
+    {
+        GameObject o;
+        if (weapon == Weapon.MAIN)
+        {
+            if (mainWeapon == null)
+            {
+                return;
+            }
+            o = mainWeapon;
+        }
+        else if (weapon == Weapon.SUB)
+        {
+            if (subWeapon == null)
+            {
+                return;
+            }
+            o = subWeapon;
+        }
+        else
+        {
+            return;
+        }
+
+        ILockOn l = lockOn;
+        IWeapon w = o.GetComponent<BaseWeapon>();
+        w.Shot(l.Target);
+    }
+
+    //アイテム使用
+    void UseItem(ItemNum item)
+    {
+        int num = (int)item;  //名前省略
+
+        //アイテム枠1にアイテムを持っていたら使用
+        if (items[num] != null)
+        {
+            items[num].UseItem(this);
+        }
+    }
+
+    void SetWeapon(Weapon weapon, BaseWeapon.Weapon weaponType)
+    {
+        GameObject create = BaseWeapon.CreateWeapon(gameObject, weaponType);
+        create.GetComponent<BaseWeapon>().SetChild(cacheTransform);
+
+        if (weapon == Weapon.MAIN)
+        {
+            mainWeapon = create;
+            Debug.Log(mainWeapon);
+        }
+        else if (weapon == Weapon.SUB)
+        {
+            subWeapon = create;
+        }
+        else
+        {
+            return;
+        }
+    }
+
+    void DestroyMe()
+    {
+        IsDestroy = true;
+        barrier.GetComponent<Barrier>().enabled = false;
+    }
+
+
+    //プレイヤーにダメージを与える
+    public void Damage(float power)
+    {
+        if (IsDestroy)
+        {
+            return;
+        }
+
+        IBarrier b = barrier.GetComponent<Barrier>();
+        float p = Useful.DecimalPointTruncation(power, 1);  //小数点第2以下切り捨て
+
+        //バリアが破壊されていなかったらバリアにダメージを肩代わりさせる
+        if (b.HP > 0)
+        {
+            b.Damage(p);
+        }
+        //バリアが破壊されていたらドローンが直接ダメージを受ける
+        else
+        {
+            HP -= p;
+            if (HP < 0)
+            {
+                HP = 0;
+                DestroyMe();
+            }
+
+
+            //デバッグ用
+            Debug.Log(name + "に" + p + "のダメージ\n残りHP: " + HP);
+        }
+    }
+
+    //ロックオンしない対象を設定
+    public void SetNotLockOnObject(GameObject o)
+    {
+        ILockOn l = lockOn;
+        l.SetNotLockOnObject(o);
+    }
+
+    //SetNotLockOnObjectで設定したオブジェクトを解除
+    public void UnSetNotLockOnObject(GameObject o)
+    {
+        ILockOn l = lockOn;
+        l.UnSetNotLockOnObject(o);
+    }
+
+
+    //指定したプレイヤーの状態を返す
+    public bool GetStatus(Status status)
+    {
+        return isStatus[(int)status];
+    }
+
+    //状態を更新
+    void SetStatus(Status status, bool flag)
+    {
+        isStatus[(int)status] = flag;
+    }
+
+    //バリア強化
+    public bool SetBarrierStrength(float strengthPercent, float time)
+    {
+        IBarrier b = barrier.GetComponent<Barrier>();
+        IBarrierStatus s = barrier.GetComponent<Barrier>();
+
+        //既に強化中なら強化しない
+        if (s.IsStrength)
+        {
+            return false;
+        }
+        //バリア弱体化中なら強化しない
+        if (s.IsWeak)
+        {
+            return false;
+        }
+        //バリアが破壊されていたら強化しない
+        if (b.HP <= 0)
+        {
+            return false;
+        }
+
+        s.BarrierStrength(strengthPercent, time);
+        SetStatus(Status.BARRIER_STRENGTH, true);
+
+        return true;
+    }
+
+    //バリア弱体化
+    public void SetBarrierWeak()
+    {
+        IBarrierStatus b = barrier.GetComponent<Barrier>();
+        if (b.IsWeak)
+        {
+            return;
+        }
+        b.BarrierWeak();
+        SetStatus(Status.BARRIER_WEAK, true);
+    }
+
+    //バリア弱体化解除
+    public void UnSetBarrierWeak()
+    {
+        IBarrierStatus b = barrier.GetComponent<Barrier>();
+        b.ReleaseBarrierWeak();
+        SetStatus(Status.BARRIER_WEAK, false);
     }
 
     //スピードを変更する
@@ -361,40 +670,49 @@ public class Player : BasePlayer
         MaxSpeed *= speedMgnf;
     }
 
-    //ブースト使用
-    protected override IEnumerator UseBoost(float speedMgnf, float time)
+    //ジャミング
+    public void SetJamming()
     {
-        ModifySpeed(speedMgnf);
-        isBoost = true;
+        ILockOn l = lockOn;
+        l.ReleaseLockOn();
 
-
-        //デバッグ用
-        Debug.Log("ブースト使用");
-
-        if (time >= 0)
-        {
-            //time秒後に速度を戻す
-            yield return new WaitForSeconds(time);
-            ModifySpeed(1 / speedMgnf);
-            isBoost = false;
-
-
-            //デバッグ用
-            Debug.Log("ブースト終了");
-        }
-    }
-
-    public override void SetJamming()
-    {
-        base.SetJamming();
         IRadar r = radar;
         r.ReleaseRadar();
+
+        SetStatus(Status.JAMMING, true);
     }
 
-    public override void SetStun(float time)
+    //ジャミング解除
+    public void UnSetJamming()
     {
-        base.SetStun(time);
+        SetStatus(Status.JAMMING, false);
+    }
+
+    //スタン
+    public void SetStun(float time)
+    {
+        SetStatus(Status.STUN, true);
         StunScreenMask.CreateStunMask(time);
+    }
+
+    //スピードダウン
+    public void SetSpeedDown(float downPercent)
+    {
+        speedPercent *= 1 - downPercent;
+        MoveSpeed *= speedPercent;
+        MaxSpeed *= speedPercent;
+
+        SetStatus(Status.SPEED_DOWN, true);
+    }
+
+    //スピードダウン解除
+    public void UnSetSpeedDown()
+    {
+        MoveSpeed /= speedPercent;
+        MaxSpeed /= speedPercent;
+
+        speedPercent = 1;
+        SetStatus(Status.SPEED_DOWN, false);
     }
 
     private void OnTriggerStay(Collider other)
@@ -402,7 +720,7 @@ public class Player : BasePlayer
         //Eキーでアイテム取得
         if (Input.GetKey(KeyCode.E))
         {
-            if (other.CompareTag(Item.ITEM_TAG))
+            if (other.CompareTag(TagNameManager.ITEM))
             {
                 //アイテム所持枠に空きがあるか調べる
                 for (int num = 0; num < (int)ItemNum.NONE; num++)
