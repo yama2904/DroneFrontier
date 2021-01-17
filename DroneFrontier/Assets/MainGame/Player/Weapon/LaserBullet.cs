@@ -13,6 +13,7 @@ public class LaserBullet : NetworkBehaviour
     [SerializeField] float lineRadius = 0.01f;    //レーザーの半径
     [SerializeField] float lineRange = 4.0f;      //レーザーの射程
     public bool IsShotBeam { get; private set; } = false;
+    bool isStartCharge = false;
 
     //親子付け用
     [SyncVar, HideInInspector] public uint parentNetId = 0;
@@ -43,18 +44,7 @@ public class LaserBullet : NetworkBehaviour
 
     //End用変数
     [SerializeField] Transform endObjectTransform = null;
-    ParticleSystem[] endChilds;
-
-
-    //攻撃中のフラグ
-    enum ShotFlag
-    {
-        SHOT_START,     //攻撃を始めたらtrue
-        SHOT_SHOTING,   //攻撃中は常に更新させる
-
-        NONE
-    }
-    bool[] isShots = new bool[(int)ShotFlag.NONE];
+    List<ParticleSystem> endChilds = new List<ParticleSystem>();
 
 
     public override void OnStartClient()
@@ -64,10 +54,7 @@ public class LaserBullet : NetworkBehaviour
         transform.SetParent(parent.transform);
         transform.localPosition = localPos;
         transform.localRotation = localRot;
-    }
 
-    void Start()
-    {
         Transform cacheTransform = transform;   //処理の軽量化用キャッシュ
 
         //Charge用処理//
@@ -94,17 +81,17 @@ public class LaserBullet : NetworkBehaviour
 
 
         //End用処理//
-        endChilds = new ParticleSystem[endObjectTransform.childCount];
         for (int i = 0; i < endObjectTransform.childCount; i++)
         {
-            endChilds[i] = endObjectTransform.GetChild(i).GetComponent<ParticleSystem>();
+            ParticleSystem ps = endObjectTransform.GetChild(i).GetComponent<ParticleSystem>();
+            endChilds.Add(ps);
         }
         //初期座標の保存
         endObjectTransform.localRotation = midwayObjectTransform.localRotation;   //Midwayと同じ向き
 
 
-        ModifyLaserLength(lineRange);   //Laserの長さを設定した長さに変更
-        StopShot(); //開始時は発射させない
+        ModifyLaserLength(lineRadius);
+        StopShot();
     }
 
     void Update()
@@ -114,24 +101,6 @@ public class LaserBullet : NetworkBehaviour
         if (shotCountTime > ShotInterval)
         {
             shotCountTime = ShotInterval;
-        }
-    }
-
-    private void LateUpdate()
-    {
-        //攻撃中かどうか
-        if (isShots[(int)ShotFlag.SHOT_START])
-        {
-            //攻撃中は常にSHOT_SHOTINGの更新をかける
-            if (isShots[(int)ShotFlag.SHOT_SHOTING])
-            {
-                isShots[(int)ShotFlag.SHOT_SHOTING] = false;
-            }
-            //フラグの更新が止まっていたら攻撃をストップ
-            else
-            {
-                StopShot();
-            }
         }
     }
 
@@ -172,6 +141,7 @@ public class LaserBullet : NetworkBehaviour
         }
     }
 
+
     //レーザーの長さを変える
     void ModifyLaserLength(float length)
     {
@@ -186,8 +156,38 @@ public class LaserBullet : NetworkBehaviour
         thunderTransform.localPosition = new Vector3(thunderPos.x, thunderPos.y, initThunderPosZ * length);
     }
 
+
+    [Command(ignoreAuthority = true)]
+    void CmdCallRpcModifyLaserLength(float length)
+    {
+        RpcModifyLaserLength(length);
+    }
+
+    [ClientRpc]
+    void RpcModifyLaserLength(float length)
+    {
+        ModifyLaserLength(length);
+    }
+
     //チャージとレーザーを止める
-    void StopShot()
+    public void StopShot()
+    {
+        CmdCallRpcStopAllParticle();
+
+        //フラグの初期化
+        isCharged = false;
+        IsShotBeam = false;
+        isStartCharge = false;
+    }
+
+    [Command(ignoreAuthority = true)]
+    void CmdCallRpcStopAllParticle()
+    {
+        RpcStopAllParticle();
+    }
+
+    [ClientRpc]
+    void RpcStopAllParticle()
     {
         charge.Stop();  //Chargeを止める
 
@@ -211,56 +211,32 @@ public class LaserBullet : NetworkBehaviour
         {
             p.Stop();
         }
-
-        //フラグの初期化
-        isCharged = false;
-        IsShotBeam = false;
-        for (int i = 0; i < (int)ShotFlag.NONE; i++)
-        {
-            isShots[i] = false;
-        }
     }
 
 
     public void Shot(GameObject shooter, float power)
     {
-        isShots[(int)ShotFlag.SHOT_SHOTING] = true;
-
         //チャージ処理
         if (!isCharged)
         {
             //攻撃開始時
-            if (!isShots[(int)ShotFlag.SHOT_START])
+            if (!isStartCharge)
             {
-                isShots[(int)ShotFlag.SHOT_START] = true;
-                charge.Play();
+                CmdCallRpcChargePlay(true);
+                isStartCharge = true;
             }
 
             //徐々にチャージのエフェクトを増す
-            chargeMinmaxcurve.constant += rateovertimeAddAmout * Time.deltaTime;
-            chargeEmission.rateOverTime = chargeMinmaxcurve;
+            CmdCallRpcAddChargeParticle(rateovertimeAddAmout * Time.deltaTime);
 
             //MAX_RATE_OVER_TIME経ったら発射
             if (chargeEmission.rateOverTime.constant > MAX_RATE_OVER_TIME)
             {
-                //チャージを止めてレーザーを発射
-                charge.Stop();
+                //チャージを止める
+                CmdCallRpcChargePlay(false);
 
-                //Startの再生
-                foreach (ParticleSystem p in startChilds)
-                {
-                    p.Play();
-                }
-
-                //Midwayの再生
-                lineParticle.Play();
-                thunderParticle.Play();
-
-                //Endの再生
-                foreach (ParticleSystem p in endChilds)
-                {
-                    p.Play();
-                }
+                //レーザーの発射
+                CmdCallRpcLaserPlay();
 
                 isCharged = true;
             }
@@ -270,10 +246,7 @@ public class LaserBullet : NetworkBehaviour
             IsShotBeam = true;
 
             //前回ヒットして発射間隔分の時間が経過していなかったら当たり判定を行わない
-            if (shotCountTime < ShotInterval)
-            {
-                return;
-            }
+            if (shotCountTime < ShotInterval) return;
 
             //レーザーの射線上にヒットした全てのオブジェクトを調べる
             var hits = Physics.SphereCastAll(
@@ -292,7 +265,7 @@ public class LaserBullet : NetworkBehaviour
                 SearchNearestObject(out RaycastHit hit, hits);
                 GameObject o = hit.transform.gameObject;    //名前省略
 
-                if (o.CompareTag(TagNameManager.PLAYER) || o.CompareTag(TagNameManager.CPU))
+                if (o.CompareTag(TagNameManager.PLAYER))
                 {
                     o.GetComponent<Player>().Damage(power);
                 }
@@ -305,7 +278,7 @@ public class LaserBullet : NetworkBehaviour
                 lineLength = hit.distance;
 
                 //ヒットした場所にEndオブジェクトを移動させる
-                endObjectTransform.position = hit.point;
+                CmdCallRpcSetEndObjectTransform(hit.point);
 
 
                 shotCountTime = 0;  //発射間隔のカウントをリセット
@@ -313,10 +286,84 @@ public class LaserBullet : NetworkBehaviour
             else
             {
                 //レーザーの末端にEndオブジェクトを移動
-                endObjectTransform.position = lineTransform.position + (lineTransform.forward * lineRange);
+                CmdCallRpcSetEndObjectTransform(lineTransform.position + (lineTransform.forward * lineRange));
             }
             //レーザーの長さに応じてオブジェクトの座標やサイズを変える
-            ModifyLaserLength(lineLength);
+            CmdCallRpcModifyLaserLength(lineLength);
         }
+    }
+
+
+    [Command(ignoreAuthority = true)]
+    void CmdCallRpcChargePlay(bool flag)
+    {
+        RpcChargePlay(flag);
+    }
+
+    [ClientRpc]
+    void RpcChargePlay(bool flag)
+    {
+        if (flag)
+        {
+            charge.Play();
+        }
+        else
+        {
+            charge.Stop();
+        }
+    }
+
+
+    [Command(ignoreAuthority = true)]
+    void CmdCallRpcAddChargeParticle(float add)
+    {
+        RpcAddChargeParticle(add);
+    }
+
+    [ClientRpc]
+    void RpcAddChargeParticle(float add)
+    {
+        chargeMinmaxcurve.constant += add;
+        chargeEmission.rateOverTime = chargeMinmaxcurve;
+    }
+
+
+    [Command(ignoreAuthority = true)]
+    void CmdCallRpcLaserPlay()
+    {
+        RpcLaserPlay();
+    }
+
+    [ClientRpc]
+    void RpcLaserPlay()
+    {
+        //Startの再生
+        foreach (ParticleSystem p in startChilds)
+        {
+            p.Play();
+        }
+
+        //Midwayの再生
+        lineParticle.Play();
+        thunderParticle.Play();
+
+        //Endの再生
+        foreach (ParticleSystem p in endChilds)
+        {
+            p.Play();
+        }
+    }
+
+
+    [Command(ignoreAuthority = true)]
+    void CmdCallRpcSetEndObjectTransform(Vector3 pos)
+    {
+        RpcSetEndObjectTransform(pos);
+    }
+
+    [ClientRpc]
+    void RpcSetEndObjectTransform(Vector3 pos)
+    {
+        endObjectTransform.position = pos;
     }
 }
