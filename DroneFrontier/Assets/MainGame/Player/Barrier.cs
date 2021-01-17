@@ -6,10 +6,13 @@ using Mirror;
 public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
 {
     const float MAX_HP = 100;
-    public float HP { get; private set; } = MAX_HP;
+    [SyncVar] float syncHP = MAX_HP;
+    public float HP { get { return syncHP; } }
 
-    public bool IsStrength { get; private set; } = false;
-    public bool IsWeak { get; private set; } = false;
+    [SyncVar] bool syncIsStrength = false;
+    [SyncVar] bool syncIsWeak = false;
+    public bool IsStrength { get { return syncIsStrength; } }
+    public bool IsWeak { get { return syncIsWeak; } }
 
     //バリアの回復用変数
     [SerializeField] float regeneStartTime = 8.0f;   //バリアが回復しだす時間
@@ -20,7 +23,7 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
     float regeneCountTime;    //計測用
     bool isRegene;    //回復中か
 
-    float damagePercent;    //ダメージ倍率
+    [SyncVar] float damagePercent;    //ダメージ倍率
     [SyncVar, HideInInspector] public uint parentNetId = 0;
 
 
@@ -34,7 +37,6 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
 
     void Start()
     {
-        HP = MAX_HP;
         damagePercent = 1;
         regeneCountTime = 0;
         isRegene = true;    //ゲーム開始時はHPMAXで回復の必要がないのでtrue
@@ -43,13 +45,13 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
     void Update()
     {
         //バリア弱体化中は回復処理を行わない
-        if (IsWeak)
+        if (syncIsWeak)
         {
             return;
         }
 
         //バリアが破壊されていたら修復処理
-        if (HP <= 0)
+        if (syncHP <= 0)
         {
             if (regeneCountTime >= resurrectBarrierTime)
             {
@@ -70,7 +72,7 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
         {
             if (regeneCountTime >= regeneInterval)
             {
-                if (HP < MAX_HP)
+                if (syncHP < MAX_HP)
                 {
                     Regene(regeneValue);
                 }
@@ -83,27 +85,27 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
     //HPを回復する
     void Regene(float value)
     {
-        HP += regeneValue;
-        if (HP >= MAX_HP)
+        syncHP += regeneValue;
+        if (syncHP >= MAX_HP)
         {
-            HP = MAX_HP;
-            Debug.Log("バリアHPMAX: " + HP);
+            syncHP = MAX_HP;
+            Debug.Log("バリアHPMAX: " + syncHP);
         }
         //デバッグ用
         else
         {
-            Debug.Log("リジェネ後バリアHP: " + HP);
+            Debug.Log("リジェネ後バリアHP: " + syncHP);
         }
     }
 
     //バリアを復活させる
     void ResurrectBarrier(float resurrectHP)
     {
-        if (HP > 0)
+        if (syncHP > 0)
         {
             return;
         }
-        HP = resurrectHP;
+        syncHP = resurrectHP;
 
         //修復したら回復処理に移る
         isRegene = true;
@@ -116,19 +118,20 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
 
 
     //バリアに引数分のダメージを与える
-    public void Damage(float power)
+    [Command(ignoreAuthority = true)]
+    public void CmdDamage(float power)
     {
         float p = Useful.DecimalPointTruncation(power * damagePercent, 1);  //小数点第2以下切り捨て
-        HP -= p;
-        if (HP < 0)
+        syncHP -= p;
+        if (syncHP < 0)
         {
-            HP = 0;
+            syncHP = 0;
         }
         regeneCountTime = 0;
         isRegene = false;
 
 
-        Debug.Log("バリアに" + p + "のダメージ\n残りHP: " + HP);
+        Debug.Log("バリアに" + p + "のダメージ\n残りHP: " + syncHP);
     }
 
     /*
@@ -136,12 +139,13 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
      * 引数1: 軽減する割合(0～1)
      * 引数2: 軽減する時間(秒数)
      */
-    public void BarrierStrength(float strengthPrercent, float time)
+     [Command(ignoreAuthority = true)]
+    public void CmdBarrierStrength(float strengthPrercent, float time)
     {
         damagePercent = 1 - strengthPrercent;
         Invoke(nameof(EndStrength), time);
 
-        IsStrength = true;
+        syncIsStrength = true;
 
 
         //デバッグ用
@@ -150,12 +154,12 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
     //time秒後にバリア強化を終了させる
     void EndStrength()
     {
-        if (IsWeak)
+        if (syncIsWeak)
         {
             return;
         }
         damagePercent = 1;
-        IsStrength = false;
+        syncIsStrength = false;
 
 
         //デバッグ用
@@ -163,16 +167,17 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
     }
 
     //バリア弱体化
-    public void BarrierWeak()
+    [Command(ignoreAuthority = true)]
+    public void CmdBarrierWeak()
     {
         //デバッグ用
         Debug.Log("バリア弱体化");
 
 
-        if (IsStrength)
+        if (syncIsStrength)
         {
             damagePercent = 1;
-            IsStrength = false;
+            syncIsStrength = false;
 
 
             //デバッグ用
@@ -180,28 +185,29 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
         }
         else
         {
-            HP *= 0.5f;
+            syncHP *= 0.5f;
 
 
             //デバッグ用
-            Debug.Log("バリアHP: " + HP);
+            Debug.Log("バリアHP: " + syncHP);
         }
 
         isRegene = false;
         regeneCountTime = 0;
 
-        IsWeak = true;
+        syncIsWeak = true;
     }
 
     //バリア弱体化解除
-    public void ReleaseBarrierWeak()
+    [Command(ignoreAuthority = true)]
+    public void CmdReleaseBarrierWeak()
     {
-        if (HP <= 0)
+        if (syncHP <= 0)
         {
             ResurrectBarrier(resurrectBarrierHP);
         }
 
-        IsWeak = false;
+        syncIsWeak = false;
 
 
         //デバッグ用

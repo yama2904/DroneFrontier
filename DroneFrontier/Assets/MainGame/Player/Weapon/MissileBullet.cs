@@ -57,7 +57,7 @@ public class MissileBullet : Bullet
         {
             Player bp = other.GetComponent<Player>();
 
-            bp.Damage(Power);
+            bp.CmdDamage(Power);
             DestroyMe();
         }
         else if (other.CompareTag(TagNameManager.JAMMING_BOT))

@@ -7,7 +7,8 @@ using Mirror;
 
 public class Player : NetworkBehaviour, IPlayerStatus
 {
-    public float HP { get; private set; } = 0; //HP
+    [SyncVar] float syncHP = 0;
+    public float HP { get { return syncHP; } } //HP
     Rigidbody _Rigidbody = null;
     Transform cacheTransform = null;  //キャッシュ用
 
@@ -85,7 +86,7 @@ public class Player : NetworkBehaviour, IPlayerStatus
 
         NONE
     }
-    bool[] isStatus = new bool[(int)Status.NONE];   //状態異常が付与されているか
+    SyncList<bool> isStatus = new SyncList<bool>();   //状態異常が付与されているか
     float speedPercent = 1;
 
     //デバッグ用
@@ -152,7 +153,7 @@ public class Player : NetworkBehaviour, IPlayerStatus
         //配列初期化
         for (int i = 0; i < (int)Status.NONE; i++)
         {
-            isStatus[i] = false;
+            isStatus.Add(false);
         }
         for (int i = 0; i < (int)ItemNum.NONE; i++)
         {
@@ -162,7 +163,7 @@ public class Player : NetworkBehaviour, IPlayerStatus
 
     void Start()
     {
-        HP = 30;
+        syncHP = 30;
         MoveSpeed = 20.0f;
         MaxSpeed = 30.0f;
 
@@ -188,8 +189,8 @@ public class Player : NetworkBehaviour, IPlayerStatus
         if (barrier != null)
         {
             IBarrierStatus b = barrier.GetComponent<Barrier>();
-            SetStatus(Status.BARRIER_STRENGTH, b.IsStrength);
-            SetStatus(Status.BARRIER_WEAK, b.IsWeak);
+            isStatus[(int)Status.BARRIER_STRENGTH] = b.IsStrength;
+            isStatus[(int)Status.BARRIER_WEAK] = b.IsWeak;
         }
 
         if (Input.GetKeyDown(KeyCode.V))
@@ -567,7 +568,8 @@ public class Player : NetworkBehaviour, IPlayerStatus
 
 
     //プレイヤーにダメージを与える
-    public void Damage(float power)
+    [Command(ignoreAuthority = true)]
+    public void CmdDamage(float power)
     {
         if (IsDestroy)
         {
@@ -580,21 +582,21 @@ public class Player : NetworkBehaviour, IPlayerStatus
         //バリアが破壊されていなかったらバリアにダメージを肩代わりさせる
         if (b.HP > 0)
         {
-            b.Damage(p);
+            b.CmdDamage(p);
         }
         //バリアが破壊されていたらドローンが直接ダメージを受ける
         else
         {
-            HP -= p;
-            if (HP < 0)
+            syncHP -= p;
+            if (syncHP < 0)
             {
-                HP = 0;
+                syncHP = 0;
                 DestroyMe();
             }
 
 
             //デバッグ用
-            Debug.Log(name + "に" + p + "のダメージ\n残りHP: " + HP);
+            Debug.Log(name + "に" + p + "のダメージ\n残りHP: " + syncHP);
         }
     }
 
@@ -619,12 +621,6 @@ public class Player : NetworkBehaviour, IPlayerStatus
         return isStatus[(int)status];
     }
 
-    //状態を更新
-    void SetStatus(Status status, bool flag)
-    {
-        isStatus[(int)status] = flag;
-    }
-
     //バリア強化
     public bool SetBarrierStrength(float strengthPercent, float time)
     {
@@ -647,10 +643,16 @@ public class Player : NetworkBehaviour, IPlayerStatus
             return false;
         }
 
-        s.BarrierStrength(strengthPercent, time);
-        SetStatus(Status.BARRIER_STRENGTH, true);
-
+        CmdSetBarrierStrength(strengthPercent, time);
         return true;
+    }
+
+    [Command]
+    void CmdSetBarrierStrength(float strengthPercent, float time)
+    {
+        IBarrierStatus s = barrier.GetComponent<Barrier>();
+        s.CmdBarrierStrength(strengthPercent, time);
+        isStatus[(int)Status.BARRIER_STRENGTH] = true;
     }
 
     //バリア弱体化
@@ -661,16 +663,16 @@ public class Player : NetworkBehaviour, IPlayerStatus
         {
             return;
         }
-        b.BarrierWeak();
-        SetStatus(Status.BARRIER_WEAK, true);
+        b.CmdBarrierWeak();
+        isStatus[(int)Status.BARRIER_WEAK] = true;
     }
 
     //バリア弱体化解除
     public void UnSetBarrierWeak()
     {
         IBarrierStatus b = barrier.GetComponent<Barrier>();
-        b.ReleaseBarrierWeak();
-        SetStatus(Status.BARRIER_WEAK, false);
+        b.CmdReleaseBarrierWeak();
+        isStatus[(int)Status.BARRIER_WEAK] = false;
     }
 
     //スピードを変更する
@@ -689,19 +691,19 @@ public class Player : NetworkBehaviour, IPlayerStatus
         IRadar r = radar;
         r.ReleaseRadar();
 
-        SetStatus(Status.JAMMING, true);
+        isStatus[(int)Status.JAMMING] = true;
     }
 
     //ジャミング解除
     public void UnSetJamming()
     {
-        SetStatus(Status.JAMMING, false);
+        isStatus[(int)Status.JAMMING] = false;
     }
 
     //スタン
     public void SetStun(float time)
     {
-        SetStatus(Status.STUN, true);
+        isStatus[(int)Status.STUN] = true;
         StunScreenMask.CreateStunMask(time);
     }
 
@@ -712,7 +714,7 @@ public class Player : NetworkBehaviour, IPlayerStatus
         MoveSpeed *= speedPercent;
         MaxSpeed *= speedPercent;
 
-        SetStatus(Status.SPEED_DOWN, true);
+        isStatus[(int)Status.SPEED_DOWN] = true;
     }
 
     //スピードダウン解除
@@ -722,7 +724,7 @@ public class Player : NetworkBehaviour, IPlayerStatus
         MaxSpeed /= speedPercent;
 
         speedPercent = 1;
-        SetStatus(Status.SPEED_DOWN, false);
+        isStatus[(int)Status.SPEED_DOWN] = false;
     }
 
     private void OnTriggerStay(Collider other)

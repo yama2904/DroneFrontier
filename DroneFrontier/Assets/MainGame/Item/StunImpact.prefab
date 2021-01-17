@@ -38599,6 +38599,8 @@ GameObject:
   - component: {fileID: 1130954130503758937}
   - component: {fileID: 1134113185920709072}
   - component: {fileID: 6044247564831494911}
+  - component: {fileID: 3422052658085530785}
+  - component: {fileID: -8302013618530608726}
   m_Layer: 0
   m_Name: StunImpact
   m_TagString: Untagged
@@ -38638,8 +38640,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10976431a38b8c9488e121b5b610ac00, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stunScreenMask: {fileID: 3969662621950321302, guid: 8c2ea1de19e199245af77ca42744e83f,
-    type: 3}
+  stunTime: 9
+  destroyTime: 0.5
 --- !u!135 &6044247564831494911
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -38653,6 +38655,40 @@ SphereCollider:
   serializedVersion: 2
   m_Radius: 5
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &3422052658085530785
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1134113185920709073}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 0
+  serverOnly: 0
+  m_AssetId: 
+  hasSpawned: 0
+--- !u!114 &-8302013618530608726
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1134113185920709073}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f74aedd71d9a4f55b3ce499326d45fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  clientAuthority: 0
+  localPositionSensitivity: 0.01
+  localRotationSensitivity: 0.01
+  localScaleSensitivity: 0.01
 --- !u!1 &1134184320621672805
 GameObject:
   m_ObjectHideFlags: 0

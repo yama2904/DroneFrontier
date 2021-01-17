@@ -103,7 +103,7 @@ public class Explosion : NetworkBehaviour
                     return;
                 }
             }
-            bp.Damage(CalcPower(other.transform.position));
+            bp.CmdDamage(CalcPower(other.transform.position));
             wasHitObjects.Add(other);
 
 

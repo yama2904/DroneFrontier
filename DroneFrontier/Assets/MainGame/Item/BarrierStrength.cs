@@ -1,8 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Mirror;
 
-public class BarrierStrength : MonoBehaviour
+public class BarrierStrength : NetworkBehaviour
 {
     static float strengthRate = 0.5f;    //バリアのダメージ軽減率
     static float strengthTime = 10.0f;   //強化時間

@@ -12,8 +12,8 @@ public interface IBarrierStatus
      * 引数1: バリアのダメージ軽減率(0～1)
      * 引数2: 強化する時間
      */
-    void BarrierStrength(float strengthPercent, float time);
+    void CmdBarrierStrength(float strengthPercent, float time);
         
-    void BarrierWeak();         //バリア弱体化
-    void ReleaseBarrierWeak();  //バリア弱体化解除
+    void CmdBarrierWeak();         //バリア弱体化
+    void CmdReleaseBarrierWeak();  //バリア弱体化解除
 }

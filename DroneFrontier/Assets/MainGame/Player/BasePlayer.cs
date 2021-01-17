@@ -265,7 +265,7 @@ public abstract class BasePlayer : NetworkBehaviour, IPlayerStatus
         //バリアが破壊されていなかったらバリアにダメージを肩代わりさせる
         if (barrier.HP > 0)
         {
-            barrier.Damage(p);
+            barrier.CmdDamage(p);
         }
         //バリアが破壊されていたらドローンが直接ダメージを受ける
         else
@@ -332,7 +332,7 @@ public abstract class BasePlayer : NetworkBehaviour, IPlayerStatus
             return false;
         }
 
-        s.BarrierStrength(strengthPercent, time);
+        s.CmdBarrierStrength(strengthPercent, time);
         SetStatus(Status.BARRIER_STRENGTH, true);
 
         return true;
@@ -346,7 +346,7 @@ public abstract class BasePlayer : NetworkBehaviour, IPlayerStatus
         {
             return;
         }
-        barrier.BarrierWeak();
+        barrier.CmdBarrierWeak();
         SetStatus(Status.BARRIER_WEAK, true);
     }
 
@@ -354,7 +354,7 @@ public abstract class BasePlayer : NetworkBehaviour, IPlayerStatus
     public virtual void UnSetBarrierWeak()
     {
         IBarrierStatus barrier = _Barrier;
-        barrier.ReleaseBarrierWeak();
+        barrier.CmdReleaseBarrierWeak();
         SetStatus(Status.BARRIER_WEAK, false);
     }
 

@@ -14,6 +14,8 @@ GameObject:
   - component: {fileID: 7942529980942362641}
   - component: {fileID: 5386117213220868559}
   - component: {fileID: 3348723483966348986}
+  - component: {fileID: 15590335615065024}
+  - component: {fileID: 4619729152600156410}
   m_Layer: 0
   m_Name: StunGrenade
   m_TagString: Untagged
@@ -130,6 +132,40 @@ MonoBehaviour:
   throwRotate: {fileID: 364162735733947447}
   throwPower: 15
   impactTime: 1
+--- !u!114 &15590335615065024
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 401223180371432453}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 0
+  serverOnly: 0
+  m_AssetId: 
+  hasSpawned: 0
+--- !u!114 &4619729152600156410
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 401223180371432453}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f74aedd71d9a4f55b3ce499326d45fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  clientAuthority: 0
+  localPositionSensitivity: 0.01
+  localRotationSensitivity: 0.01
+  localScaleSensitivity: 0.01
 --- !u!1 &6233666973287149830
 GameObject:
   m_ObjectHideFlags: 0
