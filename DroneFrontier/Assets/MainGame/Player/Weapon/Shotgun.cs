@@ -56,13 +56,11 @@ public class Shotgun : BaseWeapon
     }
 
     public override void UpdateMe()
-    {        
+    {
     }
 
     public override void Shot(GameObject target = null)
     {
-        //throw new System.NotImplementedException();
-
         //前回発射して発射間隔分の時間が経過していなかったら撃たない
         if (ShotCountTime < ShotInterval)
         {
@@ -80,19 +78,12 @@ public class Shotgun : BaseWeapon
         {
             for (int j = -1; j <= 1; j++)
             {
-                if (MainGameManager.IsMulti)
-                {
-                    CmdCreateBullet(shotPos.position, transform.rotation, angle * i, angle * j, target);
-                }
-                else
-                {
-                    CreateBullet(shotPos.position, transform.rotation, angle * i, angle * j, target);
-                }
+                CmdCreateBullet(shotPos.position, transform.rotation, angle * i, angle * j, target);
             }
         }
         //残り弾丸がMAXで撃つと一瞬で弾丸が1個回復するので
         //残り弾丸がMAXで撃った場合のみリキャストを0にする
-        if(BulletsRemain == BulletsNum)
+        if (BulletsRemain == BulletsNum)
         {
             RecastCountTime = 0;
         }
@@ -129,7 +120,7 @@ public class Shotgun : BaseWeapon
     [Command]
     void CmdCreateBullet(Vector3 pos, Quaternion rotation, float angleX, float angleY, GameObject target)
     {
-        Bullet b = CreateBullet(pos, rotation,angleX, angleY, target);
+        Bullet b = CreateBullet(pos, rotation, angleX, angleY, target);
         NetworkServer.Spawn(b.gameObject, connectionToClient);
     }
 }
