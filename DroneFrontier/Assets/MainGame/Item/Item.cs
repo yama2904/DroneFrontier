@@ -16,12 +16,17 @@ public class Item : NetworkBehaviour
 
         NONE
     }
-    [SerializeField] ItemType itemType = ItemType.NONE;
-    public ItemType type { get; private set; } = ItemType.NONE;
+    public ItemType type = ItemType.NONE;
+
+    [SerializeField] Jamming jammingInspector = null;
+    [SerializeField] StunGrenade stunGrenadeInspector = null;
+    static Jamming jamming = null;
+    static StunGrenade stunGrenade = null;
 
     void Awake()
     {
-        type = itemType;
+        jamming = jammingInspector;
+        stunGrenade = stunGrenadeInspector;
     }
 
     //アイテムを使用する
@@ -40,15 +45,17 @@ public class Item : NetworkBehaviour
         //ジャミング
         else if(type == ItemType.JAMMING)
         {
-            GameObject o = Instantiate(Resources.Load(FOLDER_PATH + "Jamming")) as GameObject;
-            o.GetComponent<Jamming>().CreateBot(player.gameObject);
+            Jamming j = Instantiate(jamming);
+            NetworkServer.Spawn(j.gameObject);
+            j.CmdCreateBot(player.gameObject);
         }
 
         //スタングレネード
         else if(type == ItemType.STUN_GRENADE)
         {
-            GameObject o = Instantiate(Resources.Load(FOLDER_PATH + "StunGrenade")) as GameObject;
-            o.GetComponent<StunGrenade>().ThrowGrenade(player.gameObject);
+            StunGrenade s = Instantiate(stunGrenade);
+            s.ThrowGrenade(player.gameObject);
+            NetworkServer.Spawn(s.gameObject);
         }
 
         //デバッグ用

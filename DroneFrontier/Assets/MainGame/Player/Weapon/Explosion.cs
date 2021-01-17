@@ -125,7 +125,7 @@ public class Explosion : NetworkBehaviour
                     return;
                 }
             }
-            jb.Damage(CalcPower(other.transform.position));
+            jb.CmdDamage(CalcPower(other.transform.position));
             wasHitObjects.Add(other.gameObject);
 
 

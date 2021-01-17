@@ -1,94 +1,101 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Mirror;
 
-public class Jamming : MonoBehaviour
+public class Jamming : NetworkBehaviour
 {
-    GameObject creater;
+    [SyncVar] GameObject creater;
+    [SerializeField] float destroyTime = 60.0f;
 
     [SerializeField] GameObject jammingBot = null;
     [SerializeField] Transform jammingBotPosition = null;
-    JammingBot createBot = null;
-    List<Player> jamingPlayers = new List<Player>();
-
-    [SerializeField] float destroyTime = 60.0f;
+    [SyncVar] GameObject createBot = null;
+    SyncList<GameObject> jamingPlayers = new SyncList<GameObject>();
 
 
     void Start()
     {
     }
 
+    [ServerCallback]
     void Update()
     {
         if (createBot == null)
         {
             //ジャミングを解除する
-            foreach (Player bp in jamingPlayers)
+            foreach (GameObject bp in jamingPlayers)
             {
-                IPlayerStatus ps = bp;
+                IPlayerStatus ps = bp.GetComponent<Player>();
                 ps.UnSetJamming();
             }
 
-            Destroy(gameObject);
+            NetworkServer.Destroy(gameObject);
         }
     }
 
     //ジャミングボットを生成する
-    public void CreateBot(GameObject creater)
+    [Command(ignoreAuthority = true)]
+    public void CmdCreateBot(GameObject creater)
     {
         this.creater = creater;
         transform.position = creater.transform.position;
 
         //ボット生成
-        createBot = Instantiate(jammingBot, jammingBotPosition).GetComponent<JammingBot>();
+        JammingBot jb = Instantiate(jammingBot, jammingBotPosition).GetComponent<JammingBot>();
+        jb.Init(creater);
+        jb.parentNetId = netId;
+        jb.createrTransform = creater;
+        jb.Creater = creater;
 
-        //ボットの向きを変える
-        Vector3 angle = createBot.transform.localEulerAngles;
-        angle.y += creater.transform.localEulerAngles.y;
-        createBot.transform.localEulerAngles = angle;
+        NetworkServer.Spawn(jb.gameObject);
+        createBot = jb.gameObject;
 
-        createBot.Creater = creater;
-        createBot.transform.SetParent(transform);   //ボットを子に設定
+        //一定時間後にボットを削除
+       Invoke(nameof(DestroyBot), destroyTime);
 
 
         //デバッグ用
         Debug.Log("ジャミングボット生成");
-
-
-        //一定時間後にボットを削除
-        Destroy(createBot, destroyTime);
     }
 
+    void DestroyBot()
+    {
+        NetworkServer.Destroy(createBot);
+    }
+
+    [ServerCallback]
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag(TagNameManager.PLAYER))
         {
-            Player bp = other.GetComponent<Player>();
-            if (ReferenceEquals(bp.gameObject, creater))   //ジャミングを付与しないプレイヤーならスキップ
+            GameObject o = other.gameObject;
+            if (ReferenceEquals(o, creater))   //ジャミングを付与しないプレイヤーならスキップ
             {
                 return;
             }
 
             //ジャミング付与
-            IPlayerStatus ps = bp;
+            IPlayerStatus ps = o.GetComponent<Player>();
             ps.SetJamming();
 
-            jamingPlayers.Add(bp);    //リストに追加
+            jamingPlayers.Add(o);    //リストに追加
         }
     }
 
+    [ServerCallback]
     private void OnTriggerExit(Collider other)
     {
         if (other.CompareTag(TagNameManager.PLAYER))
         {
-            Player bp = other.GetComponent<Player>();
-            if (ReferenceEquals(bp.gameObject, creater))   //ジャミングを付与しないプレイヤーならスキップ
+            GameObject bp = other.gameObject;
+            if (ReferenceEquals(bp, creater))   //ジャミングを付与しないプレイヤーならスキップ
             {
                 return;
             }
 
             //ジャミング解除
-            IPlayerStatus ps = bp;
+            IPlayerStatus ps = bp.GetComponent<Player>();
             ps.UnSetJamming();
 
             //解除したプレイヤーをリストから削除

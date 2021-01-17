@@ -84,9 +84,8 @@ public abstract class BaseWeapon : NetworkBehaviour, IWeapon
         transform.localRotation = weaponLocalPos.localRotation;
     }
 
-    protected virtual void Awake()
+    void Awake()
     {
-        //parentTransform = transform;
     }
     protected abstract void Start();
 

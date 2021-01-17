@@ -271,7 +271,7 @@ public class LaserBullet : NetworkBehaviour
                 }
                 else if (o.CompareTag(TagNameManager.JAMMING_BOT))
                 {
-                    o.GetComponent<JammingBot>().Damage(power);
+                    o.GetComponent<JammingBot>().CmdDamage(power);
                 }
 
                 //ヒットしたオブジェクトの距離とレーザーの長さを合わせる

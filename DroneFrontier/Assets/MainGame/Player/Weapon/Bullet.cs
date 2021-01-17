@@ -85,7 +85,7 @@ public class Bullet : NetworkBehaviour
             {
                 return;
             }
-            jb.Damage(Power);
+            jb.CmdDamage(Power);
             DestroyMe();
         }
     }

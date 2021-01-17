@@ -1,8 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Mirror;
 
-public class StunGrenade : MonoBehaviour
+public class StunGrenade : NetworkBehaviour
 {
     GameObject thrower = null;
     [SerializeField] StunImpact stunImpact = null;

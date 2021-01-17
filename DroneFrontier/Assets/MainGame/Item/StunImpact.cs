@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 
-public class StunImpact : MonoBehaviour
+public class StunImpact : NetworkBehaviour
 {
     public GameObject Thrower { private get; set; } = null;
     [SerializeField] float stunTime = 9.0f;

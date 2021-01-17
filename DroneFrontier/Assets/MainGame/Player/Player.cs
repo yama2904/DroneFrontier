@@ -32,8 +32,8 @@ public class Player : NetworkBehaviour, IPlayerStatus
     [SyncVar] GameObject barrier = null;
 
     //ロックオン
-    [SerializeField] LockOn lockOnInspector = null;
-    LockOn lockOn = null;
+    [SerializeField] LockOn lockOn = null;
+    //[SyncVar] public GameObject lockOn = null;
     float lockOnTrackingSpeed = 0.1f;
 
     //レーダー
@@ -93,17 +93,6 @@ public class Player : NetworkBehaviour, IPlayerStatus
     bool isV = true;
 
 
-    public override void OnStartLocalPlayer()
-    {
-        base.OnStartLocalPlayer();
-        _camera.depth++;
-        CmdCreateMainWeapon();
-        CmdCreateSubWeapon();
-        CmdCreateBarrier();
-
-        Debug.Log("End: OnStartLocalPlayer");
-    }
-
     [Command]
     void CmdCreateMainWeapon()
     {
@@ -140,14 +129,36 @@ public class Player : NetworkBehaviour, IPlayerStatus
         Debug.Log("CreateBarrier");
     }
 
+    //[Command]
+    //void CmdCreateLockOn()
+    //{
+    //    LockOn l = Instantiate(lockOnInspector);
+    //    l.parentNetId = netId;
+    //    l._camera = _camera.gameObject;
+    //    NetworkServer.Spawn(l.gameObject, connectionToClient);
+    //    lockOn = l.gameObject;
+    //}
+
+
+    public override void OnStartLocalPlayer()
+    {
+        base.OnStartLocalPlayer();
+        _camera.depth++;
+        //lockOn = lockOnInspector.gameObject;
+
+        CmdCreateMainWeapon();
+        CmdCreateSubWeapon();
+        CmdCreateBarrier();
+        //CmdCreateLockOn();
+
+        Debug.Log("End: OnStartLocalPlayer");
+    }
 
     void Awake()
     {
         _Rigidbody = GetComponent<Rigidbody>();
         cacheTransform = transform;
-
         _camera = cameraInspector;
-        lockOn = lockOnInspector;
 
 
         //配列初期化
@@ -262,7 +273,6 @@ public class Player : NetworkBehaviour, IPlayerStatus
         if (Input.GetKeyUp(KeyCode.LeftShift))
         {
             ILockOn l = lockOn;
-            l.ReleaseLockOn();
         }
 
         //レーダー使用
@@ -531,12 +541,13 @@ public class Player : NetworkBehaviour, IPlayerStatus
     //アイテム使用
     void UseItem(ItemNum item)
     {
-        Item.ItemType i = items[(int)item];   //名前省略
+        Item.ItemType t = items[(int)item];   //名前省略
 
         //アイテム枠1にアイテムを持っていたら使用
-        if (i != Item.ItemType.NONE)
+        if (t != Item.ItemType.NONE)
         {
-            Item.UseItem(this, i);
+            Item.UseItem(this, t);
+            items[(int)item] = Item.ItemType.NONE;
         }
     }
 
@@ -601,14 +612,28 @@ public class Player : NetworkBehaviour, IPlayerStatus
     }
 
     //ロックオンしない対象を設定
-    public void SetNotLockOnObject(GameObject o)
+    [Command(ignoreAuthority = true)]
+    public void CmdSetNotLockOnObject(GameObject o)
+    {
+        RpcSetNotLockOnObject(o);
+    }
+
+    [ClientRpc]
+    void RpcSetNotLockOnObject(GameObject o)
     {
         ILockOn l = lockOn;
         l.SetNotLockOnObject(o);
     }
 
     //SetNotLockOnObjectで設定したオブジェクトを解除
-    public void UnSetNotLockOnObject(GameObject o)
+    [Command(ignoreAuthority = true)]
+    public void CmdUnSetNotLockOnObject(GameObject o)
+    {
+        RpcUnSetNotLockOnObject(o);
+    }
+
+    [ClientRpc]
+    void RpcUnSetNotLockOnObject(GameObject o)
     {
         ILockOn l = lockOn;
         l.UnSetNotLockOnObject(o);
@@ -685,13 +710,18 @@ public class Player : NetworkBehaviour, IPlayerStatus
     //ジャミング
     public void SetJamming()
     {
+        RpcSetJamming();
+        isStatus[(int)Status.JAMMING] = true;
+    }
+
+    [ClientRpc]
+    void RpcSetJamming()
+    {
         ILockOn l = lockOn;
         l.ReleaseLockOn();
 
         IRadar r = radar;
         r.ReleaseRadar();
-
-        isStatus[(int)Status.JAMMING] = true;
     }
 
     //ジャミング解除
@@ -740,15 +770,20 @@ public class Player : NetworkBehaviour, IPlayerStatus
                     //空きがある
                     if (items[num] == Item.ItemType.NONE)
                     {
-                        items[num] = other.GetComponent<Item>().type;
+                        Item item = other.GetComponent<Item>();
+                        if (item.type == Item.ItemType.NONE) continue;
+
+                        items[num] = item.type;
+                        item.type = Item.ItemType.NONE;  //通信のラグのせいで1つのアイテムを2回とるバグの防止
                         NetworkServer.Destroy(other.gameObject);  //アイテムを取得したら削除
+
+
+                        //デバッグ用
+                        Debug.Log("アイテム取得");
+
                         break;
                     }
                 }
-
-
-                //デバッグ用
-                Debug.Log("アイテム取得");
             }
         }
     }

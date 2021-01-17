@@ -108,6 +108,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d54123bb6813a814d8bf434f0508573d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  itemType: 3
+  jammingInspector: {fileID: 3575662588822282970, guid: 9073f90d8c9013d42ba11bc1c45f5513,
+    type: 3}
+  stunGrenadeInspector: {fileID: 3348723483966348986, guid: d3a6d9c787cffe744aabe2f3c025b34e,
+    type: 3}
 --- !u!114 &-4683187098943661969
 MonoBehaviour:
   m_ObjectHideFlags: 0

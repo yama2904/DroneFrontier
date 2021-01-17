@@ -67,7 +67,7 @@ public class MissileBullet : Bullet
             {
                 return;
             }
-            jb.Damage(Power);
+            jb.CmdDamage(Power);
             DestroyMe();
         }
     }

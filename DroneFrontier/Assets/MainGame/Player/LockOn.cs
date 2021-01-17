@@ -7,10 +7,12 @@ using System.Linq;
 public class LockOn : MonoBehaviour, ILockOn
 {
     //プレイヤー系変数
-    [SerializeField] GameObject player = null;
+    //[SyncVar, HideInInspector] public uint parentNetId = 0;
+    [SerializeField] Player player = null;
     Transform playerTransform = null;
 
     //カメラ用変数
+    //[SyncVar, HideInInspector] public GameObject _camera = null;
     [SerializeField] Camera _camera = null;
     Transform cameraTransform = null;
 
@@ -26,16 +28,25 @@ public class LockOn : MonoBehaviour, ILockOn
     public float TrackingSpeed { get; set; } = 0;     //ロックオンした際に敵にカメラを向ける速度
 
 
+    //public override void OnStartClient()
+    //{
+    //    base.OnStartClient();
+    //    GameObject parent = NetworkIdentity.spawned[parentNetId].gameObject;
+    //    transform.SetParent(parent.transform);
+    //    playerTransform = parent.transform;
+    //    cameraTransform = _camera.transform;
+
+    //    //自分をロックオンしない対象に入れる
+    //    notLockOnObjects.Add(parent);
+    //}
+
     void Awake()
     {
         playerTransform = player.transform;
         cameraTransform = _camera.transform;
 
-        //ロックオン処理用変数
-        lockOnImage.enabled = false;    //ロックオンしていない際は非表示
-
         //自分をロックオンしない対象に入れる
-        notLockOnObjects.Add(player);
+        notLockOnObjects.Add(player.gameObject);
     }
 
     void Update()
@@ -73,7 +84,7 @@ public class LockOn : MonoBehaviour, ILockOn
            h.CompareTag(TagNameManager.JAMMING_BOT))
            .Where(h =>   //notLockOnObjects内のオブジェクトがある場合は除外
            {
-               if(notLockOnObjects.FindIndex(o => ReferenceEquals(o, h.gameObject)) == -1)
+               if (notLockOnObjects.FindIndex(o => ReferenceEquals(o, h.gameObject)) == -1)
                {
                    return true;
                }
@@ -144,7 +155,7 @@ public class LockOn : MonoBehaviour, ILockOn
         //既にオブジェクトが含まれている場合はスルー
         if (notLockOnObjects.FindIndex(listObject => ReferenceEquals(listObject, o)) == -1)
         {
-        notLockOnObjects.Add(o);
+            notLockOnObjects.Add(o);
         }
     }
 
@@ -152,7 +163,7 @@ public class LockOn : MonoBehaviour, ILockOn
     public void UnSetNotLockOnObject(GameObject o)
     {
         int index = notLockOnObjects.FindIndex(listObject => ReferenceEquals(listObject, o));
-        if(index >= 0)
+        if (index >= 0)
         {
             notLockOnObjects.RemoveAt(index);
         }
