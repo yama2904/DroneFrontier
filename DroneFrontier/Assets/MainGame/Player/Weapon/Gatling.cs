@@ -41,7 +41,7 @@ public class Gatling : BaseWeapon
         }
     }
 
-    public override void Init(uint netId)
+    public override void Init()
     {
     }
 

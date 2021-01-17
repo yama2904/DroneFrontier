@@ -12,7 +12,7 @@ public class LaserWeapon : BaseWeapon
     [SerializeField] float maxShotTime = 5;      //最大何秒発射できるか
     [SerializeField] float hitPerSecond = 5.0f;  //1秒間にヒットする回数
 
-    Image laserGaugeImage = null;
+    [SerializeField] Image laserGaugeImage = null;
     float gaugeAmout = 1.0f;
 
     //攻撃中のフラグ
@@ -23,7 +23,7 @@ public class LaserWeapon : BaseWeapon
 
         NONE
     }
-    bool[] isShots = new bool[(int)ShotFlag.NONE];
+    SyncList<bool> isShots = new SyncList<bool>();
 
     protected override void Start()
     {
@@ -32,20 +32,43 @@ public class LaserWeapon : BaseWeapon
         ShotInterval = 1.0f / hitPerSecond;
         ShotCountTime = ShotInterval;
         BulletPower = 5.0f;
-
-        laserBullet = Instantiate(laserBullet).GetComponent<LaserBullet>();
-        laserBullet.transform.SetParent(transform);
-        laserBullet.transform.localPosition = shotPos.localPosition;
-        laserBullet.transform.localRotation = shotPos.localRotation;
-        laserBullet.ShotInterval = ShotInterval;
-
-        laserGaugeImage = GameObject.Find("LaserGauge").GetComponent<Image>();
-        laserGaugeImage.fillAmount = 1.0f;
         gaugeAmout = 1.0f;
     }
 
-    protected override void Update()
+    protected override void Update() { }
+    
+    public override void Init()
     {
+        CmdInit();
+        laserGaugeImage.enabled = true;
+        laserGaugeImage.fillAmount = 1.0f;
+    }
+
+    [Command(ignoreAuthority = true)]
+    void CmdInit()
+    {
+        for(int i = 0; i < (int)ShotFlag.NONE; i++)
+        {
+            isShots.Add(false);
+        }
+
+        LaserBullet lb = Instantiate(laserBullet).GetComponent<LaserBullet>();
+        lb.parentNetId = netId;
+        lb.localPos = shotPos.localPosition;
+        lb.localRot = shotPos.localRotation;
+        lb.ShotInterval = ShotInterval;
+
+        NetworkServer.Spawn(lb.gameObject, connectionToClient);
+        laserBullet = lb;
+    }
+
+    public override void UpdateMe()
+    {
+        if (isShots.Count <= 0)
+        {
+            return;
+        }
+
         //撃っていない間はリキャストの管理
         if (!isShots[(int)ShotFlag.SHOT_START])
         {
@@ -65,40 +88,31 @@ public class LaserWeapon : BaseWeapon
             }
         }
 
-
-        //あとで直す
-        //プレイヤーならUIのゲージを変動させる
-        if (Shooter.CompareTag(TagNameManager.PLAYER))
-        {
-            laserGaugeImage.fillAmount = gaugeAmout;
-        }
+        laserGaugeImage.fillAmount = gaugeAmout;
     }
 
+    [ServerCallback]
     void LateUpdate()
     {
+        if (isShots.Count <= 0)
+        {
+            return;
+        }
+
         //攻撃中かどうか
         if (isShots[(int)ShotFlag.SHOT_START])
         {
             //攻撃中は常にSHOT_SHOTINGの更新をかける
             if (isShots[(int)ShotFlag.SHOT_SHOTING])
             {
-                isShots[(int)ShotFlag.SHOT_SHOTING] = false;
+                CmdSetFlag((int)ShotFlag.SHOT_SHOTING, false);
             }
             else
             {
-                isShots[(int)ShotFlag.SHOT_START] = false;
-                isShots[(int)ShotFlag.SHOT_SHOTING] = false;
+                CmdSetFlag((int)ShotFlag.SHOT_START, false);
+                CmdSetFlag((int)ShotFlag.SHOT_SHOTING, false);
             }
         }
-    }
-
-
-    public override void Init(uint netId)
-    {
-    }
-
-    public override void UpdateMe()
-    {
     }
 
     public override void Shot(GameObject target = null)
@@ -110,11 +124,11 @@ public class LaserWeapon : BaseWeapon
             {
                 return;
             }
-            isShots[(int)ShotFlag.SHOT_START] = true;
+            CmdSetFlag((int)ShotFlag.SHOT_START, true);
         }
 
         laserBullet.Shot(Shooter, BulletPower);
-        isShots[(int)ShotFlag.SHOT_SHOTING] = true;
+        CmdSetFlag((int)ShotFlag.SHOT_SHOTING, true);
 
         //撃っている間はゲージを減らす
         if (laserBullet.IsShotBeam)
@@ -124,8 +138,14 @@ public class LaserWeapon : BaseWeapon
             if (gaugeAmout <= 0)    //ゲージがなくなったらレーザーを止める
             {
                 gaugeAmout = 0;
-                isShots[(int)ShotFlag.SHOT_SHOTING] = false;
+                CmdSetFlag((int)ShotFlag.SHOT_SHOTING, false);
             }
         }
+    }
+
+    [Command(ignoreAuthority = true)]
+    void CmdSetFlag(int index, bool flag)
+    {
+        isShots[index] = flag;
     }
 }

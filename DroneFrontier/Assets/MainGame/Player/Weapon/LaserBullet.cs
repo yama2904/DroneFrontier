@@ -14,6 +14,11 @@ public class LaserBullet : NetworkBehaviour
     [SerializeField] float lineRange = 4.0f;      //レーザーの射程
     public bool IsShotBeam { get; private set; } = false;
 
+    //親子付け用
+    [SyncVar, HideInInspector] public uint parentNetId = 0;
+    [SyncVar, HideInInspector] public Vector3 localPos = new Vector3();
+    [SyncVar, HideInInspector] public Quaternion localRot = Quaternion.identity;
+
 
     //Charge用変数
     const int MAX_RATE_OVER_TIME = 128;   //チャージのパーティクルのrateOverTime最大値
@@ -51,6 +56,15 @@ public class LaserBullet : NetworkBehaviour
     }
     bool[] isShots = new bool[(int)ShotFlag.NONE];
 
+
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+        GameObject parent = NetworkIdentity.spawned[parentNetId].gameObject;
+        transform.SetParent(parent.transform);
+        transform.localPosition = localPos;
+        transform.localRotation = localRot;
+    }
 
     void Start()
     {

@@ -51,7 +51,7 @@ public class Shotgun : BaseWeapon
         }
     }
 
-    public override void Init(uint netId)
+    public override void Init()
     {
     }
 

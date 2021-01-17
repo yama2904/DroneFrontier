@@ -36,7 +36,7 @@ public class MissieWeapon : BaseWeapon
     }
 
 
-    public override void Init(uint netId)
+    public override void Init()
     {
         BulletPower = 20.0f;
         CmdCreateMissile();

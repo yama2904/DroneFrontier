@@ -106,7 +106,7 @@ public abstract class BaseWeapon : NetworkBehaviour, IWeapon
         }
     }
 
-    public abstract void Init(uint netId);
+    public abstract void Init();
     public abstract void UpdateMe();
     public abstract void Shot(GameObject target = null);
 

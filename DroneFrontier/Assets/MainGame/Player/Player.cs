@@ -60,6 +60,7 @@ public class Player : NetworkBehaviour, IPlayerStatus
     public static BaseWeapon.Weapon SetSubWeapon { private get; set; } = BaseWeapon.Weapon.LASER;
     bool[] isUsingWeapons = new bool[(int)Weapon.NONE];    //使用中の武器
     float atackingDownSpeed = 0.5f;   //攻撃中の移動速度の低下率
+    bool initSubWeapon = false;
 
 
     //アイテム
@@ -120,7 +121,6 @@ public class Player : NetworkBehaviour, IPlayerStatus
         GameObject weapon = BaseWeapon.CreateWeapon(gameObject, SetSubWeapon);
         weapon.GetComponent<BaseWeapon>().parentNetId = netId;
         NetworkServer.Spawn(weapon, connectionToClient);
-        weapon.GetComponent<BaseWeapon>().Init(netId);
         subWeapon = weapon;
 
 
@@ -194,8 +194,14 @@ public class Player : NetworkBehaviour, IPlayerStatus
             Debug.Log("移動処理切り替え");
         }
 
+        //サブウェポンのUpdate
         if (subWeapon != null)
         {
+            if (!initSubWeapon)
+            {
+                subWeapon.GetComponent<BaseWeapon>().Init();
+                initSubWeapon = true;
+            }
             subWeapon.GetComponent<BaseWeapon>().UpdateMe();
         }
 

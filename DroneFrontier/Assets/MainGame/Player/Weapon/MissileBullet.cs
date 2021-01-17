@@ -14,9 +14,9 @@ public class MissileBullet : Bullet
         base.OnStartClient();
         cacheTransform = transform;
         GameObject parent = NetworkIdentity.spawned[parentNetId].gameObject;
-        transform.SetParent(parent.transform);
-        transform.localPosition = new Vector3(0, 0, 0);
-        transform.localRotation = Quaternion.Euler(90, 0, 0);
+        cacheTransform.SetParent(parent.transform);
+        cacheTransform.localPosition = new Vector3(0, 0, 0);
+        cacheTransform.localRotation = Quaternion.Euler(90, 0, 0);
     }
 
     void Awake()
