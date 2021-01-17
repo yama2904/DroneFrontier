@@ -1,8 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Mirror;
 
-public class Item : MonoBehaviour
+public class Item : NetworkBehaviour
 {
     const string FOLDER_PATH = "Item/";     //Resourcesフォルダのパス
 
@@ -16,12 +17,18 @@ public class Item : MonoBehaviour
         NONE
     }
     [SerializeField] ItemType itemType = ItemType.NONE;
+    public ItemType type { get; private set; } = ItemType.NONE;
+
+    void Awake()
+    {
+        type = itemType;
+    }
 
     //アイテムを使用する
-    public void UseItem(Player player)
+    public static void UseItem(Player player, ItemType type)
     {
         //バリア強化
-        if(itemType == ItemType.BARRIER_STRENGTH)
+        if(type == ItemType.BARRIER_STRENGTH)
         {
             //強化できなかったらアイテムを消去しない
             if (!BarrierStrength.Strength(player))
@@ -31,14 +38,14 @@ public class Item : MonoBehaviour
         }
 
         //ジャミング
-        else if(itemType == ItemType.JAMMING)
+        else if(type == ItemType.JAMMING)
         {
             GameObject o = Instantiate(Resources.Load(FOLDER_PATH + "Jamming")) as GameObject;
             o.GetComponent<Jamming>().CreateBot(player.gameObject);
         }
 
         //スタングレネード
-        else if(itemType == ItemType.STUN_GRENADE)
+        else if(type == ItemType.STUN_GRENADE)
         {
             GameObject o = Instantiate(Resources.Load(FOLDER_PATH + "StunGrenade")) as GameObject;
             o.GetComponent<StunGrenade>().ThrowGrenade(player.gameObject);
@@ -46,9 +53,5 @@ public class Item : MonoBehaviour
 
         //デバッグ用
         Debug.Log("アイテム使用");
-
-
-        //アイテムを使用したら消去
-        Destroy(gameObject);
     }
 }

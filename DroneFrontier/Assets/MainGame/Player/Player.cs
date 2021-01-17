@@ -12,7 +12,7 @@ public class Player : NetworkBehaviour, IPlayerStatus
     Transform cacheTransform = null;  //キャッシュ用
 
     //移動用
-    public float MoveSpeed { get; set;} = 0;   //移動速度
+    public float MoveSpeed { get; set; } = 0;   //移動速度
     public float MaxSpeed { get; set; } = 0;   //最高速度
 
     //回転用
@@ -71,7 +71,7 @@ public class Player : NetworkBehaviour, IPlayerStatus
 
         NONE
     }
-    Item[] items = new Item[(int)ItemNum.NONE];
+    Item.ItemType[] items = new Item.ItemType[(int)ItemNum.NONE];
 
 
     //弱体や強化などの状態
@@ -153,6 +153,10 @@ public class Player : NetworkBehaviour, IPlayerStatus
         for (int i = 0; i < (int)Status.NONE; i++)
         {
             isStatus[i] = false;
+        }
+        for (int i = 0; i < (int)ItemNum.NONE; i++)
+        {
+            items[i] = Item.ItemType.NONE;
         }
     }
 
@@ -526,12 +530,12 @@ public class Player : NetworkBehaviour, IPlayerStatus
     //アイテム使用
     void UseItem(ItemNum item)
     {
-        int num = (int)item;  //名前省略
+        Item.ItemType i = items[(int)item];   //名前省略
 
         //アイテム枠1にアイテムを持っていたら使用
-        if (items[num] != null)
+        if (i != Item.ItemType.NONE)
         {
-            items[num].UseItem(this);
+            Item.UseItem(this, i);
         }
     }
 
@@ -732,10 +736,10 @@ public class Player : NetworkBehaviour, IPlayerStatus
                 for (int num = 0; num < (int)ItemNum.NONE; num++)
                 {
                     //空きがある
-                    if (items[num] == null)
+                    if (items[num] == Item.ItemType.NONE)
                     {
-                        items[num] = other.GetComponent<Item>();
-                        other.gameObject.SetActive(false);  //アイテムを取得したらオブジェクトを非表示
+                        items[num] = other.GetComponent<Item>().type;
+                        NetworkServer.Destroy(other.gameObject);  //アイテムを取得したら削除
                         break;
                     }
                 }
