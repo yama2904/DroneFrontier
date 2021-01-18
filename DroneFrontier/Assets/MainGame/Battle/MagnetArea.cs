@@ -1,9 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Mirror;
 
-public class MagnetArea : NetworkBehaviour
+public class MagnetArea : MonoBehaviour
 {
     [SerializeField] float downPercent = 0.7f;  //下がる倍率
     public float DownPercent { get { return downPercent; } }

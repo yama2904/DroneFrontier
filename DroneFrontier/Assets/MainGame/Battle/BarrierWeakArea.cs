@@ -25,10 +25,6 @@ public class BarrierWeakArea : MonoBehaviour
     {
         //キャッシュ用
         cacheTransform = transform;
-
-        //リスト初期化
-        hitPlayerDatas.Clear();
-
         ModifyLaserLength(lineRange);
     }
 
@@ -70,28 +66,30 @@ public class BarrierWeakArea : MonoBehaviour
             SearchNearestObject(out RaycastHit hit, hits);
             GameObject o = hit.transform.gameObject;    //名前省略
 
-            if (o.CompareTag(TagNameManager.PLAYER) || o.CompareTag(TagNameManager.CPU))
+            if (o.CompareTag(TagNameManager.PLAYER))
             {
                 Player player = o.GetComponent<Player>();
-                int index = -1;
-
-                //既にリスト内に存在しているか調べる
-                index = hitPlayerDatas.FindIndex(p => ReferenceEquals(p.player, p));
-                if (index == -1)
+                if (player.IsLocalPlayer)
                 {
-                    //存在していなかったらバリアを弱体化させてリストに追加
-                    player.SetBarrierWeak();
 
+                    //既にリスト内に存在しているか調べる
+                    int index = hitPlayerDatas.FindIndex(p => ReferenceEquals(p.player, p));
+                    if (index == -1)
+                    {
+                        //存在していなかったらバリアを弱体化
+                        player.SetBarrierWeak();
 
-                    HitPlayerData h = new HitPlayerData();
-                    h.player = player;
-                    h.deltaTime = 0;
-                    hitPlayerDatas.Add(h);
-                }
-                else
-                {
-                    //存在していたらカウントをリセット
-                    hitPlayerDatas[index].deltaTime = 0;
+                        //リストに追加
+                        HitPlayerData h = new HitPlayerData();
+                        h.player = player;
+                        h.deltaTime = 0;
+                        hitPlayerDatas.Add(h);
+                    }
+                    else
+                    {
+                        //存在していたらカウントをリセット
+                        hitPlayerDatas[index].deltaTime = 0;
+                    }
                 }
             }
             //ヒットしたオブジェクトの距離とレーザーの長さを合わせる
@@ -113,8 +111,9 @@ public class BarrierWeakArea : MonoBehaviour
     List<RaycastHit> FilterTargetRaycast(List<RaycastHit> hits)
     {
         //不要な要素を除外する
-        return hits.Where(h => !h.transform.CompareTag(TagNameManager.ITEM))      //アイテム除外
+        return hits.Where(h => !h.transform.CompareTag(TagNameManager.ITEM))    //アイテム除外
                    .Where(h => !h.transform.CompareTag(TagNameManager.BULLET))  //弾丸除外
+                   .Where(h => !h.transform.CompareTag(TagNameManager.GIMMICK)) //ギミックエリア除外
                    .ToList();
     }
 
