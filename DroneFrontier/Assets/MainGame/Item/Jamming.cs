@@ -43,10 +43,8 @@ public class Jamming : NetworkBehaviour
 
         //ボット生成
         JammingBot jb = Instantiate(jammingBot, jammingBotPosition).GetComponent<JammingBot>();
-        jb.Init(creater);
         jb.parentNetId = netId;
-        jb.createrTransform = creater;
-        jb.Creater = creater;
+        jb.creater = creater;
 
         NetworkServer.Spawn(jb.gameObject);
         createBot = jb.gameObject;

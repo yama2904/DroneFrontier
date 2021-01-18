@@ -5,10 +5,9 @@ using Mirror;
 
 public class JammingBot : NetworkBehaviour
 {
-    public GameObject Creater { get; set; } = null;
     [SyncVar] float HP = 30.0f;
     [SyncVar, HideInInspector] public uint parentNetId = 0;
-    [SyncVar, HideInInspector] public GameObject createrTransform = null;
+    [SyncVar, HideInInspector] public GameObject creater = null;
 
 
     public override void OnStartClient()
@@ -19,25 +18,24 @@ public class JammingBot : NetworkBehaviour
 
         //ボットの向きを変える
         Vector3 angle = transform.localEulerAngles;
-        angle.y += createrTransform.transform.localEulerAngles.y;
+        angle.y += creater.transform.localEulerAngles.y;
         transform.localEulerAngles = angle;
-    }
 
-    public void Init(GameObject creater)
-    {
-        //生成した自分のジャミングボットをプレイヤーがロックオンしないように設定
+        //生成した自分のジャミングボットをプレイヤーがロックオン・照射しないように設定
         if (creater.CompareTag(TagNameManager.PLAYER))
         {
-            creater.GetComponent<Player>().CmdSetNotLockOnObject(gameObject);
+            creater.GetComponent<Player>().SetNotLockOnObject(gameObject);
+            creater.GetComponent<Player>().SetNotRadarObject(gameObject);
         }
     }
 
     private void OnDestroy()
     {
-        //SetNotLockOnObjectを解除
-        if (Creater.CompareTag(TagNameManager.PLAYER))
+        //SetNotLockOnObject、SetNotRadarObjectを解除
+        if (creater.CompareTag(TagNameManager.PLAYER))
         {
-            Creater.GetComponent<Player>().CmdUnSetNotLockOnObject(gameObject);
+            creater.GetComponent<Player>().UnSetNotLockOnObject(gameObject);
+            creater.GetComponent<Player>().UnSetNotRadarObject(gameObject);
         }
 
 

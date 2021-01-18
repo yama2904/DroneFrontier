@@ -9,8 +9,11 @@ public class Player : NetworkBehaviour, IPlayerStatus
 {
     [SyncVar] float syncHP = 0;
     public float HP { get { return syncHP; } } //HP
+
+    //コンポーネント用
     Rigidbody _Rigidbody = null;
     Transform cacheTransform = null;  //キャッシュ用
+    PlayerItemAction itemAction = null;
 
     //移動用
     public float MoveSpeed { get; set; } = 0;   //移動速度
@@ -129,16 +132,6 @@ public class Player : NetworkBehaviour, IPlayerStatus
         Debug.Log("CreateBarrier");
     }
 
-    //[Command]
-    //void CmdCreateLockOn()
-    //{
-    //    LockOn l = Instantiate(lockOnInspector);
-    //    l.parentNetId = netId;
-    //    l._camera = _camera.gameObject;
-    //    NetworkServer.Spawn(l.gameObject, connectionToClient);
-    //    lockOn = l.gameObject;
-    //}
-
 
     public override void OnStartLocalPlayer()
     {
@@ -158,6 +151,7 @@ public class Player : NetworkBehaviour, IPlayerStatus
     {
         _Rigidbody = GetComponent<Rigidbody>();
         cacheTransform = transform;
+        itemAction = GetComponent<PlayerItemAction>();
         _camera = cameraInspector;
 
 
@@ -273,6 +267,7 @@ public class Player : NetworkBehaviour, IPlayerStatus
         if (Input.GetKeyUp(KeyCode.LeftShift))
         {
             ILockOn l = lockOn;
+            l.ReleaseLockOn();
         }
 
         //レーダー使用
@@ -546,7 +541,7 @@ public class Player : NetworkBehaviour, IPlayerStatus
         //アイテム枠1にアイテムを持っていたら使用
         if (t != Item.ItemType.NONE)
         {
-            Item.UseItem(this, t);
+            itemAction.UseItem(t);
             items[(int)item] = Item.ItemType.NONE;
         }
     }
@@ -612,31 +607,47 @@ public class Player : NetworkBehaviour, IPlayerStatus
     }
 
     //ロックオンしない対象を設定
-    [Command(ignoreAuthority = true)]
-    public void CmdSetNotLockOnObject(GameObject o)
-    {
-        RpcSetNotLockOnObject(o);
-    }
-
-    [ClientRpc]
-    void RpcSetNotLockOnObject(GameObject o)
+    //[Command(ignoreAuthority = true)]
+    public void SetNotLockOnObject(GameObject o)
     {
         ILockOn l = lockOn;
         l.SetNotLockOnObject(o);
-    }
+    //RpcSetNotLockOnObject(o);
+}
+
+    //[ClientRpc]
+    //void RpcSetNotLockOnObject(GameObject o)
+    //{
+    //    ILockOn l = lockOn;
+    //    l.SetNotLockOnObject(o);
+    //}
 
     //SetNotLockOnObjectで設定したオブジェクトを解除
-    [Command(ignoreAuthority = true)]
-    public void CmdUnSetNotLockOnObject(GameObject o)
-    {
-        RpcUnSetNotLockOnObject(o);
-    }
-
-    [ClientRpc]
-    void RpcUnSetNotLockOnObject(GameObject o)
+    //[Command(ignoreAuthority = true)]
+    public void UnSetNotLockOnObject(GameObject o)
     {
         ILockOn l = lockOn;
         l.UnSetNotLockOnObject(o);
+        //RpcUnSetNotLockOnObject(o);
+    }
+
+    //[ClientRpc]
+    //void RpcUnSetNotLockOnObject(GameObject o)
+    //{
+    //    ILockOn l = lockOn;
+    //    l.UnSetNotLockOnObject(o);
+    //}
+
+    public void SetNotRadarObject(GameObject o)
+    {
+        IRadar r = radar;
+        r.SetNotRadarObject(o);
+    }
+
+    public void UnSetNotRadarObject(GameObject o)
+    {
+        IRadar r = radar;
+        r.UnSetNotRadarObject(o);
     }
 
 
@@ -775,7 +786,7 @@ public class Player : NetworkBehaviour, IPlayerStatus
 
                         items[num] = item.type;
                         item.type = Item.ItemType.NONE;  //通信のラグのせいで1つのアイテムを2回とるバグの防止
-                        NetworkServer.Destroy(other.gameObject);  //アイテムを取得したら削除
+                        CmdDestroy(other.gameObject);
 
 
                         //デバッグ用
@@ -786,5 +797,18 @@ public class Player : NetworkBehaviour, IPlayerStatus
                 }
             }
         }
+    }
+
+    //スポーンせずに元からシーン上に配置しているオブジェクトを削除する用
+    [Command]
+    void CmdDestroy(GameObject o)
+    {
+        RpcDestroy(o);
+    }
+
+    [ClientRpc]
+    void RpcDestroy(GameObject o)
+    {
+        Destroy(o);
     }
 }

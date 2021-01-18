@@ -17,7 +17,7 @@ public class Bullet : NetworkBehaviour
 
     void Start()
     {
-        cacheTransform = transform;
+        cacheTransform = GetComponent<Rigidbody>().transform;
         Invoke(nameof(DestroyMe), DestroyTime);
     }
 
@@ -81,7 +81,7 @@ public class Bullet : NetworkBehaviour
         else if (other.CompareTag(TagNameManager.JAMMING_BOT))
         {
             JammingBot jb = other.GetComponent<JammingBot>();
-            if (ReferenceEquals(jb.Creater, Shooter))
+            if (ReferenceEquals(jb.creater, Shooter))
             {
                 return;
             }

@@ -118,7 +118,7 @@ public class LaserBullet : NetworkBehaviour
                    {
                        if (h.transform.CompareTag(TagNameManager.JAMMING_BOT))
                        {
-                           return !ReferenceEquals(h.transform.GetComponent<JammingBot>().Creater, shooter);
+                           return !ReferenceEquals(h.transform.GetComponent<JammingBot>().creater, shooter);
                        }
                        return true;
                    })

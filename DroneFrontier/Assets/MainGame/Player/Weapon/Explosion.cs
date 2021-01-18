@@ -113,7 +113,7 @@ public class Explosion : NetworkBehaviour
         else if (other.CompareTag(TagNameManager.JAMMING_BOT))
         {
             JammingBot jb = other.GetComponent<JammingBot>();
-            if (ReferenceEquals(jb.Creater, Shooter))
+            if (ReferenceEquals(jb.creater, Shooter))
             {
                 return;
             }

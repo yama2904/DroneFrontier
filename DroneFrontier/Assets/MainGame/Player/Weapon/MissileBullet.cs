@@ -12,7 +12,7 @@ public class MissileBullet : Bullet
     public override void OnStartClient()
     {
         base.OnStartClient();
-        cacheTransform = transform;
+        cacheTransform = GetComponent<Rigidbody>().transform;
         GameObject parent = NetworkIdentity.spawned[parentNetId].gameObject;
         cacheTransform.SetParent(parent.transform);
         cacheTransform.localPosition = new Vector3(0, 0, 0);
@@ -63,7 +63,7 @@ public class MissileBullet : Bullet
         else if (other.CompareTag(TagNameManager.JAMMING_BOT))
         {
             JammingBot jb = other.GetComponent<JammingBot>();
-            if (jb.Creater == Shooter)
+            if (jb.creater == Shooter)
             {
                 return;
             }

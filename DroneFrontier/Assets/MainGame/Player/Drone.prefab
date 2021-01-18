@@ -328,6 +328,7 @@ GameObject:
   - component: {fileID: 3029783880410522380}
   - component: {fileID: 3029783880410522383}
   - component: {fileID: 3029783880410522382}
+  - component: {fileID: 8994845543069626279}
   - component: {fileID: -6163873847128685553}
   - component: {fileID: 2302681852008542686}
   m_Layer: 0
@@ -403,6 +404,23 @@ MonoBehaviour:
     type: 3}
   lockOn: {fileID: 2862642335511507680}
   radar: {fileID: 7404620403777368885}
+--- !u!114 &8994845543069626279
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3029783880410522377}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c216078fcac66854a8d2c66cd0094aa6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  jamming: {fileID: 3575662588822282970, guid: 9073f90d8c9013d42ba11bc1c45f5513, type: 3}
+  stunGrenade: {fileID: 3348723483966348986, guid: d3a6d9c787cffe744aabe2f3c025b34e,
+    type: 3}
 --- !u!114 &-6163873847128685553
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -864,7 +882,7 @@ PrefabInstance:
         type: 3}
       propertyPath: player
       value: 
-      objectReference: {fileID: 3029783880410522377}
+      objectReference: {fileID: 3029783880410522382}
     - target: {fileID: 6725737789729847729, guid: 118ebc704feaab543a07314c49144954,
         type: 3}
       propertyPath: _camera

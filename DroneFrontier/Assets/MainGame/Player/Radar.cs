@@ -6,7 +6,7 @@ using System.Linq;
 
 public class Radar : MonoBehaviour, IRadar
 {
-    [SerializeField] GameObject player = null;
+    [SerializeField] Player player = null;
     [SerializeField] Camera _camera = null;
     Transform cameraTransform = null;
 
@@ -20,8 +20,10 @@ public class Radar : MonoBehaviour, IRadar
         public RectTransform marker;
     }
     List<SearchData> searchDatas = new List<SearchData>();
-
     float searchRadius = 100.0f; //照射する範囲
+
+    //レーダーに照射しないオブジェクト
+    List<GameObject> notRadarObjects = new List<GameObject>();
 
 
     void Awake()
@@ -34,6 +36,9 @@ public class Radar : MonoBehaviour, IRadar
 
         enemyMarker = Resources.Load("EnemyMarker") as GameObject;
         itemMarker = Resources.Load("ItemMarker") as GameObject;
+
+        //自分を照射しない対象に入れる
+        notRadarObjects.Add(player.gameObject);
     }
 
     void Update()
@@ -44,6 +49,27 @@ public class Radar : MonoBehaviour, IRadar
             s.marker.position = new Vector3(Screen.width * screenPoint.x, Screen.height * screenPoint.y, 0);
         }
     }
+
+    //リストから必要な要素だけ抜き取る
+    List<GameObject> FilterTargetObject(List<GameObject> hits)
+    {
+        return hits.Where(h =>
+        {
+            //各要素の座標をビューポートに変換(画面左下が0:0、右上が1:1)して条件に合うものだけリストに詰め込む
+            Vector3 screenPoint = _camera.WorldToViewportPoint(h.transform.position);
+            return screenPoint.x > 0 && screenPoint.x < 1 && screenPoint.y > 0 && screenPoint.y < 1 && screenPoint.z > 0;
+        }).Where(h => h.CompareTag(TagNameManager.PLAYER) || h.CompareTag(TagNameManager.CPU) || h.CompareTag(TagNameManager.ITEM) || h.CompareTag(TagNameManager.JAMMING_BOT))  //照射対象を選択       
+          .Where(h =>   //notRadarObjects内のオブジェクトがある場合は除外
+          {
+              if (notRadarObjects.FindIndex(o => ReferenceEquals(o, h.gameObject)) == -1)
+              {
+                  return true;
+              }
+              return false;
+          })
+        .ToList();
+    }
+
 
     public void StartRadar()
     {
@@ -78,7 +104,7 @@ public class Radar : MonoBehaviour, IRadar
                 SearchData sd = new SearchData();
                 sd.target = hit.transform;
                 //プレイヤーかCPUなら赤い表示
-                if (hit.CompareTag(TagNameManager.PLAYER) || hit.CompareTag(TagNameManager.CPU))
+                if (hit.CompareTag(TagNameManager.PLAYER) || hit.CompareTag(TagNameManager.CPU) || hit.CompareTag(TagNameManager.JAMMING_BOT))
                 {
                     sd.marker = Instantiate(enemyMarker).transform.GetChild(0).GetComponent<RectTransform>();
                 }
@@ -109,7 +135,7 @@ public class Radar : MonoBehaviour, IRadar
             //何もレーダーに照射されていない場合はリストとマーカーを削除
             if (searchDatas.Count > 0)
             {
-                foreach(SearchData sd in searchDatas)
+                foreach (SearchData sd in searchDatas)
                 {
                     Destroy(sd.marker.parent.gameObject);
                 }
@@ -132,16 +158,23 @@ public class Radar : MonoBehaviour, IRadar
         searchDatas.Clear();
     }
 
-    //リストから必要な要素だけ抜き取る
-    List<GameObject> FilterTargetObject(List<GameObject> hits)
+    //ロックオンしないオブジェクトを設定
+    public void SetNotRadarObject(GameObject o)
     {
-        return hits.Where(h =>
+        //既にオブジェクトが含まれている場合はスルー
+        if (notRadarObjects.FindIndex(listObject => ReferenceEquals(listObject, o)) == -1)
         {
-            //各要素の座標をビューポートに変換(画面左下が0:0、右上が1:1)して条件に合うものだけリストに詰め込む
-            Vector3 screenPoint = _camera.WorldToViewportPoint(h.transform.position);
-            return screenPoint.x > 0 && screenPoint.x < 1 && screenPoint.y > 0 && screenPoint.y < 1 && screenPoint.z > 0;
-        }).Where(h => !ReferenceEquals(h, player))   //操作しているプレイヤーは除外
-          .Where(h => h.CompareTag(TagNameManager.PLAYER) || h.CompareTag(TagNameManager.CPU) || h.CompareTag(TagNameManager.ITEM))  //プレイヤーとCPUとアイテムが対象          
-          .ToList();
+            notRadarObjects.Add(o);
+        }
+    }
+
+    //SetNotLockOnObjectで設定したオブジェクトをロックオンするように設定
+    public void UnSetNotRadarObject(GameObject o)
+    {
+        int index = notRadarObjects.FindIndex(listObject => ReferenceEquals(listObject, o));
+        if (index >= 0)
+        {
+            notRadarObjects.RemoveAt(index);
+        }
     }
 }

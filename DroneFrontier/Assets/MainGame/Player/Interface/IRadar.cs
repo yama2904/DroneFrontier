@@ -6,4 +6,6 @@ public interface IRadar
 {
     void StartRadar();
     void ReleaseRadar();
+    void SetNotRadarObject(GameObject o);
+    void UnSetNotRadarObject(GameObject o);
 }
