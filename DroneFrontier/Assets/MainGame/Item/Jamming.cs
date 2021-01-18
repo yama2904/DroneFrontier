@@ -24,10 +24,9 @@ public class Jamming : NetworkBehaviour
         if (createBot == null)
         {
             //ジャミングを解除する
-            foreach (GameObject bp in jamingPlayers)
+            foreach (GameObject p in jamingPlayers)
             {
-                IPlayerStatus ps = bp.GetComponent<Player>();
-                ps.UnSetJamming();
+                p.GetComponent<Player>().TargetUnSetJamming(p.GetComponent<NetworkIdentity>().connectionToClient);
             }
 
             NetworkServer.Destroy(gameObject);
@@ -74,8 +73,7 @@ public class Jamming : NetworkBehaviour
             }
 
             //ジャミング付与
-            IPlayerStatus ps = o.GetComponent<Player>();
-            ps.SetJamming();
+            o.GetComponent<Player>().TargetSetJamming(o.GetComponent<NetworkIdentity>().connectionToClient);
 
             jamingPlayers.Add(o);    //リストに追加
         }
@@ -86,18 +84,17 @@ public class Jamming : NetworkBehaviour
     {
         if (other.CompareTag(TagNameManager.PLAYER))
         {
-            GameObject bp = other.gameObject;
-            if (ReferenceEquals(bp, creater))   //ジャミングを付与しないプレイヤーならスキップ
+            GameObject p = other.gameObject;
+            if (ReferenceEquals(p, creater))   //ジャミングを付与しないプレイヤーならスキップ
             {
                 return;
             }
 
             //ジャミング解除
-            IPlayerStatus ps = bp.GetComponent<Player>();
-            ps.UnSetJamming();
+            p.GetComponent<Player>().TargetUnSetJamming(other.GetComponent<NetworkIdentity>().connectionToClient);
 
             //解除したプレイヤーをリストから削除
-            int index = jamingPlayers.FindIndex(o => ReferenceEquals(bp, o));
+            int index = jamingPlayers.FindIndex(o => ReferenceEquals(p, o));
             if (index >= 0)
             {
                 jamingPlayers.RemoveAt(index);

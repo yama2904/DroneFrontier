@@ -93,8 +93,6 @@ public class Explosion : NetworkBehaviour
     {
         if (other.CompareTag(TagNameManager.PLAYER))
         {
-            Player bp = other.GetComponent<Player>();
-
             //既にヒット済のオブジェクトはスルー
             foreach (GameObject o in wasHitObjects)
             {
@@ -103,7 +101,7 @@ public class Explosion : NetworkBehaviour
                     return;
                 }
             }
-            bp.CmdDamage(CalcPower(other.transform.position));
+            other.GetComponent<Player>().CmdDamage(CalcPower(other.transform.position));
             wasHitObjects.Add(other);
 
 

@@ -1,9 +1,11 @@
 fileFormatVersion: 2
-guid: 5f0517354bfd2234998c7caea0ce9964
+guid: 71451add7c5c5944ab133204201659d4
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - stunScreenMask: {fileID: 3969662621950321302, guid: 8c2ea1de19e199245af77ca42744e83f,
+      type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

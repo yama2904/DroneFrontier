@@ -11,7 +11,6 @@ public class BarrierStrength : NetworkBehaviour
     //バリアを強化する
     public static bool Strength(Player player)
     {
-        IPlayerStatus ps = player;
-        return ps.SetBarrierStrength(strengthRate, strengthTime);
+        return player.SetBarrierStrength(strengthRate, strengthTime);
     }
 }

@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using System;
 using Mirror;
 
-public class Player : NetworkBehaviour, IPlayerStatus
+public class Player : NetworkBehaviour
 {
     [SyncVar] float syncHP = 0;
     public float HP { get { return syncHP; } } //HP
@@ -14,6 +14,8 @@ public class Player : NetworkBehaviour, IPlayerStatus
     Rigidbody _Rigidbody = null;
     Transform cacheTransform = null;  //キャッシュ用
     PlayerItemAction itemAction = null;
+    PlayerStatusAction statusAction = null;
+    bool isPlayerStatusInit = false;
 
     //移動用
     public float MoveSpeed { get; set; } = 0;   //移動速度
@@ -77,19 +79,6 @@ public class Player : NetworkBehaviour, IPlayerStatus
     }
     Item.ItemType[] items = new Item.ItemType[(int)ItemNum.NONE];
 
-
-    //弱体や強化などの状態
-    public enum Status
-    {
-        BARRIER_STRENGTH,   //バリア強化
-        BARRIER_WEAK,       //バリア弱体化
-        STUN,               //スタン
-        JAMMING,            //ジャミング
-        SPEED_DOWN,         //スピードダウン
-
-        NONE
-    }
-    SyncList<bool> isStatus = new SyncList<bool>();   //状態異常が付与されているか
     float speedPercent = 1;
 
     //デバッグ用
@@ -137,12 +126,10 @@ public class Player : NetworkBehaviour, IPlayerStatus
     {
         base.OnStartLocalPlayer();
         _camera.depth++;
-        //lockOn = lockOnInspector.gameObject;
 
         CmdCreateMainWeapon();
         CmdCreateSubWeapon();
         CmdCreateBarrier();
-        //CmdCreateLockOn();
 
         Debug.Log("End: OnStartLocalPlayer");
     }
@@ -152,14 +139,9 @@ public class Player : NetworkBehaviour, IPlayerStatus
         _Rigidbody = GetComponent<Rigidbody>();
         cacheTransform = transform;
         itemAction = GetComponent<PlayerItemAction>();
+        statusAction = GetComponent<PlayerStatusAction>();
         _camera = cameraInspector;
 
-
-        //配列初期化
-        for (int i = 0; i < (int)Status.NONE; i++)
-        {
-            isStatus.Add(false);
-        }
         for (int i = 0; i < (int)ItemNum.NONE; i++)
         {
             items[i] = Item.ItemType.NONE;
@@ -170,7 +152,7 @@ public class Player : NetworkBehaviour, IPlayerStatus
     {
         syncHP = 30;
         MoveSpeed = 20.0f;
-        MaxSpeed = 30.0f;
+        MaxSpeed = MoveSpeed * 2;
 
         //配列初期化
         for (int i = 0; i < (int)Weapon.NONE; i++)
@@ -190,12 +172,14 @@ public class Player : NetworkBehaviour, IPlayerStatus
             return;
         }
 
-        //状態異常処理
-        if (barrier != null)
+        //PlayerStatusActionの初期化
+        if (!isPlayerStatusInit)
         {
-            IBarrierStatus b = barrier.GetComponent<Barrier>();
-            isStatus[(int)Status.BARRIER_STRENGTH] = b.IsStrength;
-            isStatus[(int)Status.BARRIER_WEAK] = b.IsWeak;
+            if (barrier != null && lockOn != null && radar != null)  //エラー防止
+            {
+                statusAction.Init(barrier.GetComponent<Barrier>(), lockOn, radar);
+                isPlayerStatusInit = true;
+            }
         }
 
         if (Input.GetKeyDown(KeyCode.V))
@@ -257,7 +241,7 @@ public class Player : NetworkBehaviour, IPlayerStatus
         //ロックオン
         if (Input.GetKey(KeyCode.LeftShift))
         {
-            if (!isStatus[(int)Status.JAMMING])
+            if (!statusAction.GetIsStatus(PlayerStatusAction.Status.JAMMING))
             {
                 ILockOn l = lockOn;
                 l.StartLockOn(lockOnTrackingSpeed);
@@ -273,7 +257,7 @@ public class Player : NetworkBehaviour, IPlayerStatus
         //レーダー使用
         if (Input.GetKey(KeyCode.Space))
         {
-            if (!isStatus[(int)Status.JAMMING])
+            if (!statusAction.GetIsStatus(PlayerStatusAction.Status.JAMMING))
             {
                 IRadar r = radar;
                 r.StartRadar();
@@ -300,7 +284,7 @@ public class Player : NetworkBehaviour, IPlayerStatus
         //攻撃処理しか使わない簡易メソッド
         Action<float> ModifySpeeds = (x) =>
         {
-            MoveSpeed *= x;
+            ModifySpeed(x);
             RotateSpeed *= x;
             lockOnTrackingSpeed *= x;
         };
@@ -443,13 +427,13 @@ public class Player : NetworkBehaviour, IPlayerStatus
         {
             lockOnTrackingSpeed *= 0.1f;
             RotateSpeed *= 0.1f;
-            MoveSpeed *= 0.1f;
+            ModifySpeed(0.1f);
         }
         if (Input.GetKeyUp(KeyCode.LeftControl))
         {
             lockOnTrackingSpeed *= 10;
             RotateSpeed *= 10;
-            MoveSpeed *= 10;
+            ModifySpeed(10f);
         }
     }
 
@@ -541,8 +525,10 @@ public class Player : NetworkBehaviour, IPlayerStatus
         //アイテム枠1にアイテムを持っていたら使用
         if (t != Item.ItemType.NONE)
         {
-            itemAction.UseItem(t);
-            items[(int)item] = Item.ItemType.NONE;
+            if (itemAction.UseItem(t))
+            {
+                items[(int)item] = Item.ItemType.NONE;
+            }
         }
     }
 
@@ -607,43 +593,27 @@ public class Player : NetworkBehaviour, IPlayerStatus
     }
 
     //ロックオンしない対象を設定
-    //[Command(ignoreAuthority = true)]
     public void SetNotLockOnObject(GameObject o)
     {
         ILockOn l = lockOn;
         l.SetNotLockOnObject(o);
-    //RpcSetNotLockOnObject(o);
-}
-
-    //[ClientRpc]
-    //void RpcSetNotLockOnObject(GameObject o)
-    //{
-    //    ILockOn l = lockOn;
-    //    l.SetNotLockOnObject(o);
-    //}
+    }
 
     //SetNotLockOnObjectで設定したオブジェクトを解除
-    //[Command(ignoreAuthority = true)]
     public void UnSetNotLockOnObject(GameObject o)
     {
         ILockOn l = lockOn;
         l.UnSetNotLockOnObject(o);
-        //RpcUnSetNotLockOnObject(o);
     }
 
-    //[ClientRpc]
-    //void RpcUnSetNotLockOnObject(GameObject o)
-    //{
-    //    ILockOn l = lockOn;
-    //    l.UnSetNotLockOnObject(o);
-    //}
-
+    //レーダーに照射しない対象を設定
     public void SetNotRadarObject(GameObject o)
     {
         IRadar r = radar;
         r.SetNotRadarObject(o);
     }
 
+    //SetNotRadarObjectで設定したオブジェクトを解除
     public void UnSetNotRadarObject(GameObject o)
     {
         IRadar r = radar;
@@ -651,101 +621,57 @@ public class Player : NetworkBehaviour, IPlayerStatus
     }
 
 
-    //指定したプレイヤーの状態を返す
-    public bool GetStatus(Status status)
-    {
-        return isStatus[(int)status];
-    }
+    //////////////////////////////////////////////////////// 
+    //状態異常系メソッド
+    //////////////////////////////////////////////////////// 
 
     //バリア強化
     public bool SetBarrierStrength(float strengthPercent, float time)
     {
-        IBarrier b = barrier.GetComponent<Barrier>();
-        IBarrierStatus s = barrier.GetComponent<Barrier>();
-
-        //既に強化中なら強化しない
-        if (s.IsStrength)
-        {
-            return false;
-        }
-        //バリア弱体化中なら強化しない
-        if (s.IsWeak)
-        {
-            return false;
-        }
-        //バリアが破壊されていたら強化しない
-        if (b.HP <= 0)
-        {
-            return false;
-        }
-
-        CmdSetBarrierStrength(strengthPercent, time);
-        return true;
-    }
-
-    [Command]
-    void CmdSetBarrierStrength(float strengthPercent, float time)
-    {
-        IBarrierStatus s = barrier.GetComponent<Barrier>();
-        s.CmdBarrierStrength(strengthPercent, time);
-        isStatus[(int)Status.BARRIER_STRENGTH] = true;
+        return statusAction.SetBarrierStrength(strengthPercent, time);
     }
 
     //バリア弱体化
     public void SetBarrierWeak()
     {
-        IBarrierStatus b = barrier.GetComponent<Barrier>();
-        if (b.IsWeak)
-        {
-            return;
-        }
-        b.CmdBarrierWeak();
-        isStatus[(int)Status.BARRIER_WEAK] = true;
+        statusAction.SetBarrierWeak();
     }
 
     //バリア弱体化解除
     public void UnSetBarrierWeak()
     {
-        IBarrierStatus b = barrier.GetComponent<Barrier>();
-        b.CmdReleaseBarrierWeak();
-        isStatus[(int)Status.BARRIER_WEAK] = false;
+        statusAction.UnSetBarrierWeak();
     }
 
     //スピードを変更する
     void ModifySpeed(float speedMgnf)
     {
         MoveSpeed *= speedMgnf;
-        MaxSpeed *= speedMgnf;
+        if (MoveSpeed > MaxSpeed)
+        {
+            MoveSpeed = MaxSpeed;
+        }
     }
 
     //ジャミング
-    public void SetJamming()
+    [TargetRpc]
+    public void TargetSetJamming(NetworkConnection target)
     {
-        RpcSetJamming();
-        isStatus[(int)Status.JAMMING] = true;
-    }
-
-    [ClientRpc]
-    void RpcSetJamming()
-    {
-        ILockOn l = lockOn;
-        l.ReleaseLockOn();
-
-        IRadar r = radar;
-        r.ReleaseRadar();
+        statusAction.SetJamming();
     }
 
     //ジャミング解除
-    public void UnSetJamming()
+    [TargetRpc]
+    public void TargetUnSetJamming(NetworkConnection target)
     {
-        isStatus[(int)Status.JAMMING] = false;
+        statusAction.UnSetJamming();
     }
 
     //スタン
-    public void SetStun(float time)
+    [TargetRpc]
+    public void TargetSetStun(NetworkConnection target, float time)
     {
-        isStatus[(int)Status.STUN] = true;
-        StunScreenMask.CreateStunMask(time);
+        statusAction.SetStun(time);
     }
 
     //スピードダウン
@@ -753,19 +679,21 @@ public class Player : NetworkBehaviour, IPlayerStatus
     {
         speedPercent *= 1 - downPercent;
         MoveSpeed *= speedPercent;
-        MaxSpeed *= speedPercent;
-
-        isStatus[(int)Status.SPEED_DOWN] = true;
+        if (MoveSpeed > MaxSpeed)
+        {
+            MoveSpeed = MaxSpeed;
+        }
     }
 
     //スピードダウン解除
     public void UnSetSpeedDown()
     {
         MoveSpeed /= speedPercent;
-        MaxSpeed /= speedPercent;
-
+        if (MoveSpeed > MaxSpeed)
+        {
+            MoveSpeed = MaxSpeed;
+        }
         speedPercent = 1;
-        isStatus[(int)Status.SPEED_DOWN] = false;
     }
 
     private void OnTriggerStay(Collider other)
@@ -800,7 +728,7 @@ public class Player : NetworkBehaviour, IPlayerStatus
     }
 
     //スポーンせずに元からシーン上に配置しているオブジェクトを削除する用
-    [Command]
+    [Command(ignoreAuthority = true)]
     void CmdDestroy(GameObject o)
     {
         RpcDestroy(o);

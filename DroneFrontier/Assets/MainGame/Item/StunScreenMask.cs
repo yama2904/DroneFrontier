@@ -18,13 +18,12 @@ public class StunScreenMask : MonoBehaviour
     const float GREEN = 1;   //緑
     const float BLUE = 1;    //青
 
+    public bool IsStun { get; private set; } = false;
+
     void Start()
     {
-        screenMaskImage.enabled = true;
         screenMaskImage.color = new Color(RED, GREEN, BLUE, alfa);
-        subtractAlfa = 1 / removeMaskTime;
-
-        Invoke(nameof(StartUpdate), maxMaskTime);
+        screenMaskImage.enabled = false;
     }
 
     void Update()
@@ -38,7 +37,11 @@ public class StunScreenMask : MonoBehaviour
         if (alfa <= 0)
         {
             alfa = 0;
-            Destroy(gameObject);
+            screenMaskImage.color = new Color(RED, GREEN, BLUE, alfa);
+
+            IsStun = false;
+            isStartUpdate = false;
+            screenMaskImage.enabled = false;
         }
         screenMaskImage.color = new Color(RED, GREEN, BLUE, alfa);
     }
@@ -48,12 +51,25 @@ public class StunScreenMask : MonoBehaviour
         isStartUpdate = true;
     }
 
-    public static void CreateStunMask(float time)
+    //public static void CreateStunMask(float time)
+    //{
+    //    GameObject o = Instantiate(Resources.Load("Item/StunScreenMask")) as GameObject;
+    //    float divideTime = time / 3;
+    //    StunScreenMask s = o.GetComponent<StunScreenMask>();
+    //    s.maxMaskTime = divideTime;
+    //    s.removeMaskTime = divideTime * 2;
+    //}
+
+    public void SetStun(float time)
     {
-        GameObject o = Instantiate(Resources.Load("Item/StunScreenMask")) as GameObject;
+        alfa = 1.0f;
+        IsStun = true;
+        isStartUpdate = false;
+        screenMaskImage.enabled = true;
+
         float divideTime = time / 3;
-        StunScreenMask s = o.GetComponent<StunScreenMask>();
-        s.maxMaskTime = divideTime;
-        s.removeMaskTime = divideTime * 2;
+        maxMaskTime = divideTime;
+        subtractAlfa = 1 / (divideTime * 2);
+        Invoke(nameof(StartUpdate), maxMaskTime);
     }
 }

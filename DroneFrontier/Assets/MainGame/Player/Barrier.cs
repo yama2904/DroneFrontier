@@ -20,8 +20,8 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
     [SerializeField] float regeneValue = 5.0f;       //バリアが回復する量
     [SerializeField] float resurrectBarrierTime = 15.0f;   //バリアが破壊されてから修復される時間
     [SerializeField] float resurrectBarrierHP = 10.0f;     //バリアが復活した際のHP
-    float regeneCountTime;    //計測用
-    bool isRegene;    //回復中か
+    [SyncVar] float regeneCountTime;    //計測用
+    [SyncVar] bool isRegene;    //回復中か
 
     [SyncVar] float damagePercent;    //ダメージ倍率
     [SyncVar, HideInInspector] public uint parentNetId = 0;
@@ -144,7 +144,6 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
     {
         damagePercent = 1 - strengthPrercent;
         Invoke(nameof(EndStrength), time);
-
         syncIsStrength = true;
 
 

@@ -119,6 +119,7 @@ public class MainGameManager : MonoBehaviour
 
         //カーソルロック
         Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
     void Update()
@@ -163,11 +164,13 @@ public class MainGameManager : MonoBehaviour
             if (IsCursorLock)
             {
                 Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
                 Debug.Log("カメラロック");
             }
             else
             {
                 Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
                 Debug.Log("カメラロック解除");
             }
         }

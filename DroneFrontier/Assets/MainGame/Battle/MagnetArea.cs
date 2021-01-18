@@ -18,8 +18,7 @@ public class MagnetArea : MonoBehaviour
     {
         if (other.CompareTag(TagNameManager.PLAYER) || other.CompareTag(TagNameManager.CPU))
         {
-            IPlayerStatus ps = other.GetComponent<Player>();
-            ps.SetSpeedDown(downPercent);
+            other.GetComponent<Player>().SetSpeedDown(downPercent);
 
 
             //デバッグ用
@@ -31,8 +30,7 @@ public class MagnetArea : MonoBehaviour
     {
         if (other.CompareTag(TagNameManager.PLAYER) || other.CompareTag(TagNameManager.CPU))
         {
-            IPlayerStatus ps = other.GetComponent<Player>();
-            ps.UnSetSpeedDown();
+            other.GetComponent<Player>().UnSetSpeedDown();
 
 
             //デバッグ用

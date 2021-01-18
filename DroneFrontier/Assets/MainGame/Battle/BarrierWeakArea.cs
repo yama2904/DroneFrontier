@@ -40,8 +40,7 @@ public class BarrierWeakArea : MonoBehaviour
             if (h.deltaTime >= barrierWeakTime)
             {
                 //バリアの弱体化をやめる
-                IPlayerStatus ps = h.player;
-                ps.UnSetBarrierWeak();
+                h.player.UnSetBarrierWeak();
 
                 //リストから削除
                 hitPlayerDatas.RemoveAt(i);
@@ -73,20 +72,19 @@ public class BarrierWeakArea : MonoBehaviour
 
             if (o.CompareTag(TagNameManager.PLAYER) || o.CompareTag(TagNameManager.CPU))
             {
-                Player bp = o.GetComponent<Player>();
+                Player player = o.GetComponent<Player>();
                 int index = -1;
 
                 //既にリスト内に存在しているか調べる
-                index = hitPlayerDatas.FindIndex(p => ReferenceEquals(p.player, bp));
+                index = hitPlayerDatas.FindIndex(p => ReferenceEquals(p.player, p));
                 if (index == -1)
                 {
                     //存在していなかったらバリアを弱体化させてリストに追加
-                    IPlayerStatus ps = bp;
-                    ps.SetBarrierWeak();
+                    player.SetBarrierWeak();
 
 
                     HitPlayerData h = new HitPlayerData();
-                    h.player = bp;
+                    h.player = player;
                     h.deltaTime = 0;
                     hitPlayerDatas.Add(h);
                 }

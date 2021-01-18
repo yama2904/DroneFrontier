@@ -127,6 +127,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6db85cb118713b48bf2f8e8dbd115ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0
   stunImpact: {fileID: 1134113185920709072, guid: 5a310c6edafad474daf4389a5d51b837,
     type: 3}
   throwRotate: {fileID: 364162735733947447}
@@ -161,7 +163,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   syncMode: 0
-  syncInterval: 0.1
+  syncInterval: 0
   clientAuthority: 0
   localPositionSensitivity: 0.01
   localRotationSensitivity: 0.01

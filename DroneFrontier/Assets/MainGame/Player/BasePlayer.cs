@@ -359,7 +359,7 @@ public abstract class BasePlayer : NetworkBehaviour, IPlayerStatus
     }
 
     //ジャミング
-    public virtual void SetJamming()
+    public virtual void TargetSetJamming()
     {
         ILockOn l = _LockOn;
         l.ReleaseLockOn();
@@ -373,7 +373,7 @@ public abstract class BasePlayer : NetworkBehaviour, IPlayerStatus
     }
 
     //スタン
-    public virtual void SetStun(float time)
+    public virtual void TargetSetStun(NetworkConnection target, float time)
     {
         SetStatus(Status.STUN, true);
     }

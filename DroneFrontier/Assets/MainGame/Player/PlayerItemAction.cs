@@ -9,7 +9,8 @@ public class PlayerItemAction : NetworkBehaviour
     [SerializeField] StunGrenade stunGrenade = null;
 
     //アイテムを使用する
-    public void UseItem(Item.ItemType type)
+    //成功したらtrue
+    public bool UseItem(Item.ItemType type)
     {
         //バリア強化
         if (type == Item.ItemType.BARRIER_STRENGTH)
@@ -17,7 +18,8 @@ public class PlayerItemAction : NetworkBehaviour
             //強化できなかったらアイテムを消去しない
             if (!BarrierStrength.Strength(GetComponent<Player>()))
             {
-                return;
+                Debug.Log("バリア強化中なので使用できません");
+                return false;
             }
         }
 
@@ -30,11 +32,14 @@ public class PlayerItemAction : NetworkBehaviour
         //スタングレネード
         else if (type == Item.ItemType.STUN_GRENADE)
         {
-            CmdCreateStunGrenade(gameObject);
+            CmdCreateStunGrenade(netId);
         }
 
         //デバッグ用
         Debug.Log("アイテム使用");
+
+
+        return true;
     }
 
     [Command(ignoreAuthority = true)]
@@ -46,10 +51,10 @@ public class PlayerItemAction : NetworkBehaviour
     }
 
     [Command(ignoreAuthority = true)]
-    void CmdCreateStunGrenade(GameObject player)
+    void CmdCreateStunGrenade(uint netId)
     {
         StunGrenade s = Instantiate(stunGrenade);
-        s.ThrowGrenade(player);
+        s.ThrowGrenade(gameObject);
         NetworkServer.Spawn(s.gameObject);
     }
 }

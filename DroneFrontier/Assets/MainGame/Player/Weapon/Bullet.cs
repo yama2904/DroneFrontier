@@ -72,10 +72,9 @@ public class Bullet : NetworkBehaviour
         }
 
         //プレイヤーかCPUの当たり判定
-        if (other.CompareTag(TagNameManager.PLAYER) || other.CompareTag(TagNameManager.CPU))
+        if (other.CompareTag(TagNameManager.PLAYER))
         {
-            Player bp = other.GetComponent<Player>();
-            bp.CmdDamage(Power);
+            other.GetComponent<Player>().CmdDamage(Power);
             DestroyMe();
         }
         else if (other.CompareTag(TagNameManager.JAMMING_BOT))
