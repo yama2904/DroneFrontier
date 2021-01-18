@@ -8,6 +8,7 @@ TagManager:
   - CPU
   - Bullet
   - JammingBot
+  - Gimmick
   layers:
   - Default
   - TransparentFX

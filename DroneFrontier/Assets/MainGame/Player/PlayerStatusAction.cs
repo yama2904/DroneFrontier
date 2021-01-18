@@ -30,10 +30,15 @@ public class PlayerStatusAction : NetworkBehaviour
     LockOn lockOn = null;
     Radar radar = null;
 
+    //スピードダウン用
+    const int NOT_USE_VALUE = 0;
+    List<float> speedDownList = new List<float>();
+    float maxSpeed = 0;
+    float minSpeed = 0;
+
 
     void Start()
     {
-
     }
 
     void Update()
@@ -48,9 +53,24 @@ public class PlayerStatusAction : NetworkBehaviour
         {
             isStatus[(int)Status.STUN] = createdStunScreenMask.IsStun;
         }
+
+        //リストを使っていなかったらクリア
+        bool useList = false;
+        foreach (float value in speedDownList)
+        {
+            if (value != NOT_USE_VALUE)
+            {
+                useList = true;
+                break;
+            }
+        }
+        if (!useList)
+        {
+            speedDownList.Clear();
+        }
     }
 
-    public void Init(Barrier barrier, LockOn lockOn, Radar radar)
+    public void Init(Barrier barrier, LockOn lockOn, Radar radar, float minSpeed, float maxSpeed)
     {
         //配列初期化
         for (int i = 0; i < (int)Status.NONE; i++)
@@ -61,6 +81,8 @@ public class PlayerStatusAction : NetworkBehaviour
         this.barrier = barrier;
         this.lockOn = lockOn;
         this.radar = radar;
+        this.minSpeed = minSpeed;
+        this.maxSpeed = maxSpeed;
         createdStunScreenMask = Instantiate(stunScreenMask);
     }
 
@@ -82,12 +104,6 @@ public class PlayerStatusAction : NetworkBehaviour
         barrier.CmdBarrierStrength(strengthPercent, time);
         isStatus[(int)Status.BARRIER_STRENGTH] = true;
         return true;
-    }
-
-    [Command]
-    void CmdSetBarrierStrength(float strengthPercent, float time)
-    {
-        
     }
 
 
@@ -134,5 +150,35 @@ public class PlayerStatusAction : NetworkBehaviour
     public void UnSetJamming()
     {
         isStatus[(int)Status.JAMMING] = false;
+    }
+
+
+    //スピードダウン
+    public int SetSpeedDown(ref float speed, float downPercent)
+    {
+        float speedPercent = 1 - downPercent;
+        float tempSpeed = speed;
+        speed *= speedPercent;
+
+        if (speed > maxSpeed)
+        {
+            speed = maxSpeed;
+            speedPercent = maxSpeed / tempSpeed;
+        }
+        if (speed < minSpeed)
+        {
+            speed = minSpeed;
+            speedPercent = minSpeed / tempSpeed;
+        }
+
+        speedDownList.Add(speedPercent);
+        return speedDownList.Count - 1;
+    }
+
+    //スピードダウン解除
+    public void UnSetSpeedDown(ref float speed, int id)
+    {
+        speed /= speedDownList[id];
+        speedDownList[id] = NOT_USE_VALUE;
     }
 }

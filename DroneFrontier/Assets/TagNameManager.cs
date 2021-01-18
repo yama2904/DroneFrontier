@@ -9,4 +9,5 @@ public class TagNameManager : MonoBehaviour
     public const string ITEM = "Item";
     public const string JAMMING_BOT = "JammingBot";
     public const string BULLET = "Bullet";
+    public const string GIMMICK = "Gimmick";
 }

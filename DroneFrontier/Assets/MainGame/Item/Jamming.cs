@@ -11,25 +11,23 @@ public class Jamming : NetworkBehaviour
     [SerializeField] GameObject jammingBot = null;
     [SerializeField] Transform jammingBotPosition = null;
     [SyncVar] GameObject createBot = null;
-    SyncList<GameObject> jamingPlayers = new SyncList<GameObject>();
+    List<Player> jamingPlayers = new List<Player>();
 
 
     void Start()
     {
     }
 
-    [ServerCallback]
     void Update()
     {
         if (createBot == null)
         {
             //ジャミングを解除する
-            foreach (GameObject p in jamingPlayers)
+            foreach (Player p in jamingPlayers)
             {
-                p.GetComponent<Player>().TargetUnSetJamming(p.GetComponent<NetworkIdentity>().connectionToClient);
+                p.UnSetJamming();
             }
-
-            NetworkServer.Destroy(gameObject);
+            Destroy(gameObject);
         }
     }
 
@@ -49,7 +47,7 @@ public class Jamming : NetworkBehaviour
         createBot = jb.gameObject;
 
         //一定時間後にボットを削除
-       Invoke(nameof(DestroyBot), destroyTime);
+        Invoke(nameof(DestroyBot), destroyTime);
 
 
         //デバッグ用
@@ -61,44 +59,31 @@ public class Jamming : NetworkBehaviour
         NetworkServer.Destroy(createBot);
     }
 
-    [ServerCallback]
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag(TagNameManager.PLAYER))
-        {
-            GameObject o = other.gameObject;
-            if (ReferenceEquals(o, creater))   //ジャミングを付与しないプレイヤーならスキップ
-            {
-                return;
-            }
+        if (!other.CompareTag(TagNameManager.PLAYER)) return;   //プレイヤーのみ対象
 
-            //ジャミング付与
-            o.GetComponent<Player>().TargetSetJamming(o.GetComponent<NetworkIdentity>().connectionToClient);
+        Player p = other.GetComponent<Player>();
+        if (!p.IsLocalPlayer) return;   //ローカルプレイヤーのみ処理
+        if (ReferenceEquals(p.gameObject, creater)) return; //ジャミングを付与しないプレイヤーならスキップ
 
-            jamingPlayers.Add(o);    //リストに追加
-        }
+        p.SetJamming(); //ジャミング付与
+        jamingPlayers.Add(p);    //リストに追加
     }
 
-    [ServerCallback]
     private void OnTriggerExit(Collider other)
     {
-        if (other.CompareTag(TagNameManager.PLAYER))
-        {
-            GameObject p = other.gameObject;
-            if (ReferenceEquals(p, creater))   //ジャミングを付与しないプレイヤーならスキップ
-            {
-                return;
-            }
+        if (!other.CompareTag(TagNameManager.PLAYER)) return;   //プレイヤーのみ対象
 
-            //ジャミング解除
-            p.GetComponent<Player>().TargetUnSetJamming(other.GetComponent<NetworkIdentity>().connectionToClient);
-
-            //解除したプレイヤーをリストから削除
-            int index = jamingPlayers.FindIndex(o => ReferenceEquals(p, o));
-            if (index >= 0)
-            {
-                jamingPlayers.RemoveAt(index);
-            }
-        }
+        Player p = other.GetComponent<Player>();
+        if (!p.IsLocalPlayer) return;   //ローカルプレイヤーのみ処理
+        if (ReferenceEquals(p.gameObject, creater)) return; //ジャミングを付与しないプレイヤーならスキップ
+        
+        //リストにない場合は処理しない
+        int index = jamingPlayers.FindIndex(o => ReferenceEquals(p, o));
+        if (index == -1) return;
+                
+        p.UnSetJamming();   //ジャミング解除
+        jamingPlayers.RemoveAt(index);  //解除したプレイヤーをリストから削除
     }
 }

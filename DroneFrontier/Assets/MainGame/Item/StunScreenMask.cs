@@ -9,7 +9,6 @@ public class StunScreenMask : MonoBehaviour
 
     //画面のマスクが徐々に消える用
     float maxMaskTime = 0;      //画面が真っ白の時間
-    float removeMaskTime = 0;   //画面のマスクが消える時間
     float subtractAlfa = 0;     //割り算は重いので先に計算させる用
     bool isStartUpdate = false;
 
@@ -51,18 +50,12 @@ public class StunScreenMask : MonoBehaviour
         isStartUpdate = true;
     }
 
-    //public static void CreateStunMask(float time)
-    //{
-    //    GameObject o = Instantiate(Resources.Load("Item/StunScreenMask")) as GameObject;
-    //    float divideTime = time / 3;
-    //    StunScreenMask s = o.GetComponent<StunScreenMask>();
-    //    s.maxMaskTime = divideTime;
-    //    s.removeMaskTime = divideTime * 2;
-    //}
-
     public void SetStun(float time)
     {
+        //アルファ値をMAXにして画面を真っ白にする
         alfa = 1.0f;
+        screenMaskImage.color = new Color(RED, GREEN, BLUE, alfa);
+
         IsStun = true;
         isStartUpdate = false;
         screenMaskImage.enabled = true;

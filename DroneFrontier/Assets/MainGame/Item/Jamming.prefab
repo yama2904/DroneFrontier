@@ -60,10 +60,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cf7ab9261fa32984c8150c5a23f8738f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  destroyTime: 60
   jammingBot: {fileID: 4682843890191404543, guid: ebdc99f08c939844497af790155f08da,
     type: 3}
   jammingBotPosition: {fileID: 6319352941471360500}
-  destroyTime: 60
 --- !u!114 &-6304882260566110974
 MonoBehaviour:
   m_ObjectHideFlags: 0

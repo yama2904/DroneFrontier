@@ -9,6 +9,7 @@ public class Player : NetworkBehaviour
 {
     [SyncVar] float syncHP = 0;
     public float HP { get { return syncHP; } } //HP
+    public bool IsLocalPlayer { get { return isLocalPlayer; } }
 
     //コンポーネント用
     Rigidbody _Rigidbody = null;
@@ -18,8 +19,10 @@ public class Player : NetworkBehaviour
     bool isPlayerStatusInit = false;
 
     //移動用
-    public float MoveSpeed { get; set; } = 0;   //移動速度
-    public float MaxSpeed { get; set; } = 0;   //最高速度
+    float moveSpeed = 0;      //移動速度
+    float initMoveSpeed = 0;  //移動速度の初期値
+    float maxSpeed = 0;       //最高速度
+    float minSpeed = 0;       //最低速度
 
     //回転用
     public float RotateSpeed { get; set; } = 3.0f;
@@ -38,7 +41,6 @@ public class Player : NetworkBehaviour
 
     //ロックオン
     [SerializeField] LockOn lockOn = null;
-    //[SyncVar] public GameObject lockOn = null;
     float lockOnTrackingSpeed = 0.1f;
 
     //レーダー
@@ -79,7 +81,6 @@ public class Player : NetworkBehaviour
     }
     Item.ItemType[] items = new Item.ItemType[(int)ItemNum.NONE];
 
-    float speedPercent = 1;
 
     //デバッグ用
     bool isV = true;
@@ -151,8 +152,10 @@ public class Player : NetworkBehaviour
     void Start()
     {
         syncHP = 30;
-        MoveSpeed = 20.0f;
-        MaxSpeed = MoveSpeed * 2;
+        moveSpeed = 20.0f;
+        initMoveSpeed = moveSpeed;
+        maxSpeed = moveSpeed * 2;
+        minSpeed = moveSpeed * 0.3f;
 
         //配列初期化
         for (int i = 0; i < (int)Weapon.NONE; i++)
@@ -177,7 +180,7 @@ public class Player : NetworkBehaviour
         {
             if (barrier != null && lockOn != null && radar != null)  //エラー防止
             {
-                statusAction.Init(barrier.GetComponent<Barrier>(), lockOn, radar);
+                statusAction.Init(barrier.GetComponent<Barrier>(), lockOn, radar, minSpeed, maxSpeed);
                 isPlayerStatusInit = true;
             }
         }
@@ -210,31 +213,31 @@ public class Player : NetworkBehaviour
         //移動処理
         if (Input.GetKey(KeyCode.W))
         {
-            Move(MoveSpeed, MaxSpeed, cacheTransform.forward);
+            Move(moveSpeed, maxSpeed, cacheTransform.forward);
         }
         if (Input.GetKey(KeyCode.A))
         {
             Quaternion leftAngle = Quaternion.Euler(0, -90, 0);
             Vector3 left = leftAngle.normalized * cacheTransform.forward;
-            Move(MoveSpeed, MaxSpeed, left);
+            Move(moveSpeed, maxSpeed, left);
         }
         if (Input.GetKey(KeyCode.S))
         {
             Quaternion backwardAngle = Quaternion.Euler(0, 180, 0);
             Vector3 backward = backwardAngle.normalized * cacheTransform.forward;
-            Move(MoveSpeed, MaxSpeed, backward);
+            Move(moveSpeed, maxSpeed, backward);
         }
         if (Input.GetKey(KeyCode.D))
         {
             Quaternion rightAngle = Quaternion.Euler(0, 90, 0);
             Vector3 right = rightAngle.normalized * cacheTransform.forward;
-            Move(MoveSpeed, MaxSpeed, right);
+            Move(moveSpeed, maxSpeed, right);
         }
         if (Input.mouseScrollDelta.y != 0)
         {
             Quaternion upAngle = Quaternion.Euler(-90, 0, 0);
             Vector3 upward = upAngle.normalized * Vector3.forward;
-            Move(MoveSpeed * 4 * Input.mouseScrollDelta.y, MaxSpeed * 4, upward);
+            Move(moveSpeed * 4 * Input.mouseScrollDelta.y, maxSpeed * 4, upward);
         }
 
 
@@ -335,6 +338,24 @@ public class Player : NetworkBehaviour
                 ModifySpeeds(1 / atackingDownSpeed);
             }
             isUsingWeapons[(int)Weapon.SUB] = false;
+        }
+
+        //速度のバグ防止用
+        bool isUsingWeapon = false;
+        for (int i = 0; i < (int)Weapon.NONE; i++)
+        {
+            if (isUsingWeapons[i])
+            {
+                isUsingWeapon = true;
+                break;
+            }
+        }
+        if (isUsingWeapon)
+        {
+            if (!statusAction.GetIsStatus(PlayerStatusAction.Status.SPEED_DOWN))
+            {
+                moveSpeed = initMoveSpeed;
+            }
         }
 
 
@@ -646,54 +667,46 @@ public class Player : NetworkBehaviour
     //スピードを変更する
     void ModifySpeed(float speedMgnf)
     {
-        MoveSpeed *= speedMgnf;
-        if (MoveSpeed > MaxSpeed)
+        moveSpeed *= speedMgnf;
+        if (moveSpeed > maxSpeed)
         {
-            MoveSpeed = MaxSpeed;
+            moveSpeed = maxSpeed;
+        }
+        if(moveSpeed < minSpeed)
+        {
+            moveSpeed = minSpeed;
         }
     }
 
     //ジャミング
-    [TargetRpc]
-    public void TargetSetJamming(NetworkConnection target)
+    public void SetJamming()
     {
         statusAction.SetJamming();
     }
 
     //ジャミング解除
-    [TargetRpc]
-    public void TargetUnSetJamming(NetworkConnection target)
+    public void UnSetJamming()
     {
         statusAction.UnSetJamming();
     }
 
     //スタン
-    [TargetRpc]
-    public void TargetSetStun(NetworkConnection target, float time)
+    public void SetStun(float time)
     {
         statusAction.SetStun(time);
     }
 
     //スピードダウン
-    public void SetSpeedDown(float downPercent)
+    public int SetSpeedDown(float downPercent)
     {
-        speedPercent *= 1 - downPercent;
-        MoveSpeed *= speedPercent;
-        if (MoveSpeed > MaxSpeed)
-        {
-            MoveSpeed = MaxSpeed;
-        }
+        return statusAction.SetSpeedDown(ref moveSpeed, downPercent);
     }
 
+
     //スピードダウン解除
-    public void UnSetSpeedDown()
+    public void UnSetSpeedDown(int id)
     {
-        MoveSpeed /= speedPercent;
-        if (MoveSpeed > MaxSpeed)
-        {
-            MoveSpeed = MaxSpeed;
-        }
-        speedPercent = 1;
+        statusAction.UnSetSpeedDown(ref moveSpeed, id);
     }
 
     private void OnTriggerStay(Collider other)

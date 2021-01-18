@@ -71,7 +71,7 @@ public class Bullet : NetworkBehaviour
             return;
         }
 
-        //プレイヤーかCPUの当たり判定
+        //プレイヤーの当たり判定
         if (other.CompareTag(TagNameManager.PLAYER))
         {
             other.GetComponent<Player>().CmdDamage(Power);

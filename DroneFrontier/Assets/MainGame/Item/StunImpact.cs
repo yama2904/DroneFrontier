@@ -19,7 +19,7 @@ public class StunImpact : NetworkBehaviour
     [ServerCallback]
     void Start()
     {
-        Invoke(nameof(DestroyMe), destroyTime);        
+        Invoke(nameof(DestroyMe), destroyTime);
     }
 
     void FalseEnabledCollider()
@@ -32,21 +32,19 @@ public class StunImpact : NetworkBehaviour
         NetworkServer.Destroy(gameObject);
     }
 
-    [ServerCallback]
     private void OnTriggerEnter(Collider other)
     {
-        if (ReferenceEquals(other.gameObject, thrower))    //投げたプレイヤーなら当たり判定から除外
-        {
-            return;
-        }
+        //投げたプレイヤーなら当たり判定から除外
+        if (ReferenceEquals(other.gameObject, thrower)) return;
+        if (!other.CompareTag(TagNameManager.PLAYER)) return;   //プレイヤーのみ対象
 
-        if (other.CompareTag(TagNameManager.PLAYER))
-        {
-            other.GetComponent<Player>().TargetSetStun(other.GetComponent<NetworkIdentity>().connectionToClient, stunTime);
+        Player p = other.GetComponent<Player>();
+        if (!p.IsLocalPlayer) return;   //ローカルプレイヤーのみ処理
+        p.SetStun(stunTime);
 
-            //必要なら距離によるスタンの時間を変える処理をいつか加える
-            //
-            //
-        }
+        //必要なら距離によるスタンの時間を変える処理をいつか加える
+        //
+        //
+
     }
 }
