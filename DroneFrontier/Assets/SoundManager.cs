@@ -408,11 +408,13 @@ public class SoundManager : MonoBehaviour
     {
         audioSourceDatas[(int)Audio.BGM].audioSource.Pause();
     }
+
     //一時停止しているBGMを再開
     public static void UnPauseBGM()
     {
         audioSourceDatas[(int)Audio.BGM].audioSource.UnPause();
     }
+
     //BGMを停止
     public static void StopBGM()
     {
