@@ -9,6 +9,7 @@ public class Shotgun : BaseWeapon
     [SerializeField] Bullet bullet = null;    //弾のオブジェクト
     [SerializeField] float angle = 10.0f;     //拡散力
     [SerializeField] float angleDiff = 3.0f;  //角度の変動量
+    AudioSource audioSource = null;
 
     //弾丸のパラメータ
     [SerializeField] float speedPerSecond = 10.0f;  //1秒間に進む量
@@ -16,6 +17,14 @@ public class Shotgun : BaseWeapon
     [SerializeField] float trackingPower = 0;       //追従力
     [SerializeField] float shotPerSecond = 2.0f;    //1秒間に発射する弾数
 
+
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+        audioSource = GetComponent<AudioSource>();
+        audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.SHOTGUN);
+        audioSource.volume = SoundManager.BaseSEVolume;
+    }
 
     protected override void Start()
     {
@@ -25,7 +34,7 @@ public class Shotgun : BaseWeapon
         BulletsNum = 5;
         BulletsRemain = BulletsNum;
         BulletPower = 8.0f;
-
+        
         //乱数のシード値の設定
         Random.InitState(System.DateTime.Now.Millisecond);
     }
@@ -122,5 +131,12 @@ public class Shotgun : BaseWeapon
     {
         Bullet b = CreateBullet(pos, rotation, angleX, angleY, target);
         NetworkServer.Spawn(b.gameObject, connectionToClient);
+        RpcPlaySE();
+    }
+
+    [ClientRpc]
+    void RpcPlaySE()
+    {
+        audioSource.Play();
     }
 }

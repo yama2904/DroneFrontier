@@ -487,6 +487,7 @@ GameObject:
   - component: {fileID: -1999432267132834455}
   - component: {fileID: -6163873847128685553}
   - component: {fileID: 2302681852008542686}
+  - component: {fileID: 230779432036714136}
   m_Layer: 0
   m_Name: Drone
   m_TagString: Player
@@ -629,6 +630,14 @@ MonoBehaviour:
   localPositionSensitivity: 0.01
   localRotationSensitivity: 0.01
   localScaleSensitivity: 0.01
+--- !u!81 &230779432036714136
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3029783880410522377}
+  m_Enabled: 1
 --- !u!1 &4293304715628187325
 GameObject:
   m_ObjectHideFlags: 0

@@ -6,15 +6,14 @@ using Mirror;
 public class Gatling : BaseWeapon
 {
     [SerializeField] Bullet bullet = null; //弾のオブジェクト
+    AudioSource audioSource = null;
 
     //弾丸のパラメータ
     [SerializeField] float speedPerSecond = 10.0f;  //1秒間に進む量
     [SerializeField] float destroyTime = 1.0f;      //発射してから消えるまでの時間(射程)
     [SerializeField] float trackingPower = 1.2f;    //追従力
     [SerializeField] float shotPerSecond = 5.0f;    //1秒間に発射する弾数
-
-    AudioSource audioSource = null;
-
+    
 
     public override void OnStartClient()
     {
@@ -111,6 +110,7 @@ public class Gatling : BaseWeapon
     [ClientRpc]
     void RpcPlaySE()
     {
+        audioSource.volume = SoundManager.BaseSEVolume;
         audioSource.Play();
     }
 }

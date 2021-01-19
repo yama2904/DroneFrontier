@@ -9,13 +9,24 @@ public class Explosion : NetworkBehaviour
     [SyncVar, HideInInspector] public GameObject Shooter = null;  //撃ったプレイヤー
     [SerializeField] float size = 20;    //爆発範囲
     [SerializeField] float power = 20;   //威力
-    [SerializeField] float powerDownRate = 0.8f;   //中心地からの距離による威力減衰率
+    [SerializeField] float powerDownRate = 0.8f;      //中心地からの距離による威力減衰率
     [SerializeField] float notPowerDownRange = 0.25f; //威力が減衰しない範囲
     [SerializeField] float lengthReference = 0.1f;    //威力減衰の基準の長さ
+    AudioSource audioSource = null;
 
     SyncList<GameObject> wasHitObjects = new SyncList<GameObject>();    //触れたオブジェクトを全て格納する
     const float DESTROY_TIME = 3.0f;   //生存時間
 
+
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+        audioSource = GetComponent<AudioSource>();
+        audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.EXPLOSION_MISSILE);
+        audioSource.volume = SoundManager.BaseSEVolume;
+        audioSource.time = 0.2f;
+        audioSource.Play();
+    }
 
     void Start()
     {
@@ -44,10 +55,6 @@ public class Explosion : NetworkBehaviour
 
         //一定時間後に消滅
         Invoke(nameof(DestroyMe), DESTROY_TIME);
-    }
-
-    void Update()
-    {
     }
 
     [ServerCallback]

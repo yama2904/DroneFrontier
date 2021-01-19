@@ -8,6 +8,8 @@ public class MissileBullet : Bullet
     [SerializeField] Explosion explosion = null;
     [SyncVar, HideInInspector] public uint parentNetId = 0;
     [SyncVar] bool isShot = false;
+    AudioSource audioSource = null;
+
 
     public override void OnStartClient()
     {
@@ -17,19 +19,12 @@ public class MissileBullet : Bullet
         cacheTransform.SetParent(parent.transform);
         cacheTransform.localPosition = new Vector3(0, 0, 0);
         cacheTransform.localRotation = Quaternion.Euler(90, 0, 0);
+
+        audioSource = GetComponent<AudioSource>();
+        audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.MISSILE);
     }
 
-    void Awake()
-    {
-    }
-
-    void Start()
-    {
-    }
-
-    void Update()
-    {
-    }
+    void Start() { }
 
     [ServerCallback]
     protected override void FixedUpdate()
@@ -94,10 +89,18 @@ public class MissileBullet : Bullet
     public void CmdShot(GameObject target)
     {
         RpcParentNull();
+        RpcPlaySE();
 
         Invoke(nameof(DestroyMe), DestroyTime);
         Target = target;
         isShot = true;
+    }
+
+    [ClientRpc]
+    void RpcPlaySE()
+    {
+        audioSource.volume = SoundManager.BaseSEVolume;
+        audioSource.Play();
     }
 
     [ClientRpc]

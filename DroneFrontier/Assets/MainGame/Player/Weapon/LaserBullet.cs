@@ -14,6 +14,7 @@ public class LaserBullet : NetworkBehaviour
     [SerializeField] float lineRange = 4.0f;      //レーザーの射程
     public bool IsShotBeam { get; private set; } = false;
     bool isStartCharge = false;
+    AudioSource audioSource = null;
 
     //親子付け用
     [SyncVar, HideInInspector] public uint parentNetId = 0;
@@ -89,7 +90,7 @@ public class LaserBullet : NetworkBehaviour
         //初期座標の保存
         endObjectTransform.localRotation = midwayObjectTransform.localRotation;   //Midwayと同じ向き
 
-
+        audioSource = GetComponent<AudioSource>();
         ModifyLaserLength(lineRadius);
         StopShot();
     }
@@ -211,6 +212,15 @@ public class LaserBullet : NetworkBehaviour
         {
             p.Stop();
         }
+
+        //サウンドを止める
+        audioSource.Stop();
+        //if (isCharged)
+        //{
+        //    audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.BEAM_2);
+        //    audioSource.time = 0.6f;
+        //    audioSource.Play();
+        //}
     }
 
 
@@ -306,10 +316,15 @@ public class LaserBullet : NetworkBehaviour
         if (flag)
         {
             charge.Play();
+            audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.BEAM_CAHRGE);
+            audioSource.time = 0.2f;
+            audioSource.volume = SoundManager.BaseSEVolume;
+            audioSource.Play();
         }
         else
         {
             charge.Stop();
+            audioSource.Stop();
         }
     }
 
@@ -352,6 +367,11 @@ public class LaserBullet : NetworkBehaviour
         {
             p.Play();
         }
+
+        //レーザー音の再生
+        audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.BEAM_1);
+        audioSource.volume = SoundManager.BaseSEVolume;
+        audioSource.Play();
     }
 
 

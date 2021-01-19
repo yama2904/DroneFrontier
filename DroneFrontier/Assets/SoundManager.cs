@@ -281,7 +281,7 @@ public class SoundManager : MonoBehaviour
             for (int i = (int)Audio.SE_1; i < (int)Audio.NONE; i++)
             {
                 AudioSourceData asd = audioSourceDatas[i]; //名前省略
-                if (asd.audioSource.clip == null) continue;
+                if (asd.isFree) continue;
                 asd.audioSource.volume = AddVolumeSE(asd.gameVolume);
             }
         }

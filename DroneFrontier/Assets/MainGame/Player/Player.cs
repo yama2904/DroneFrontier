@@ -120,6 +120,15 @@ public class Player : NetworkBehaviour
     }
 
 
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+        if (!IsLocalPlayer)
+        {
+            GetComponent<AudioListener>().enabled = false;
+        }
+    }
+
     public override void OnStartLocalPlayer()
     {
         base.OnStartLocalPlayer();
