@@ -13,6 +13,15 @@ public class Gatling : BaseWeapon
     [SerializeField] float trackingPower = 1.2f;    //追従力
     [SerializeField] float shotPerSecond = 5.0f;    //1秒間に発射する弾数
 
+    AudioSource audioSource = null;
+
+
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+        audioSource = GetComponent<AudioSource>();
+        audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.GATLING);
+    }
 
     protected override void Start()
     {
@@ -96,5 +105,12 @@ public class Gatling : BaseWeapon
     {
         Bullet b = CreateBullet(pos, rotation, target);
         NetworkServer.Spawn(b.gameObject, connectionToClient);
+        RpcPlaySE();
+    }
+
+    [ClientRpc]
+    void RpcPlaySE()
+    {
+        audioSource.Play();
     }
 }
