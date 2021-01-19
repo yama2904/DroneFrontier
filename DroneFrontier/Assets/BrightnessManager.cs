@@ -33,7 +33,7 @@ public class BrightnessManager : MonoBehaviour
     void Awake()
     {
         screenMaskImage = transform.Find("Canvas/Panel").GetComponent<Image>();
-        screenMaskImage.color = new Color(RED, GREEN, BLUE, AddAlfa());
+        screenMaskImage.color = new Color(RED, GREEN, BLUE, AddAlfa(gameAlfa));
     }
 
     void Update()
@@ -42,8 +42,8 @@ public class BrightnessManager : MonoBehaviour
         if (isFadeIn)
         {
             gameAlfa -= fadeAlfa;
-            screenMaskImage.color = new Color(RED, GREEN, BLUE, AddAlfa());
-            if (AddAlfa() <= baseAlfa * MAX_ALFA)
+            screenMaskImage.color = new Color(RED, GREEN, BLUE, AddAlfa(gameAlfa));
+            if (AddAlfa(gameAlfa) <= baseAlfa * MAX_ALFA)
             {
                 gameAlfa = 0;
                 isFadeIn = false;
@@ -55,7 +55,7 @@ public class BrightnessManager : MonoBehaviour
         if (isFadeOut)
         {
             gameAlfa += fadeAlfa;
-            screenMaskImage.color = new Color(RED, GREEN, BLUE, AddAlfa());
+            screenMaskImage.color = new Color(RED, GREEN, BLUE, AddAlfa(gameAlfa));
             if (gameAlfa >= 1.0f)
             {
                 gameAlfa = 1.0f;
@@ -66,26 +66,24 @@ public class BrightnessManager : MonoBehaviour
         deltaTime = Time.deltaTime;
     }
 
-    //ゲーム全体の画面の明るさを0～1で設定
-    //設定画面での画面の明るさの調整など
-    public static void SetBaseAlfa(float x)
+    //ゲーム全体の画面の明るさ
+    public static float BaseAlfa
     {
-        if (x < 0)
+        get { return baseAlfa; }
+        set
         {
-            x = 0;
+            float a = value;
+            if(a < 0)
+            {
+                a = 0;
+            }
+            if(a > 1.0f)
+            {
+                a = 1.0f;
+            }
+            baseAlfa = a;
+            screenMaskImage.color = new Color(RED, GREEN, BLUE, AddAlfa(gameAlfa));
         }
-        if (x > 1)
-        {
-            x = 1;
-        }
-        baseAlfa = x;
-        screenMaskImage.color = new Color(RED, GREEN, BLUE, AddAlfa());
-    }
-
-    //SetBaseAlfaで設定した明るさを取得
-    public static float GetBaseAlfa()
-    {
-        return baseAlfa;
     }
 
     //画面の明るさを0～1で設定
@@ -101,7 +99,7 @@ public class BrightnessManager : MonoBehaviour
             x = 1;
         }
         gameAlfa = x;
-        screenMaskImage.color = new Color(RED, GREEN, BLUE, AddAlfa());
+        screenMaskImage.color = new Color(RED, GREEN, BLUE, AddAlfa(gameAlfa));
     }
 
     //SetGameAlfaで設定した明るさを取得
@@ -151,17 +149,17 @@ public class BrightnessManager : MonoBehaviour
     }
 
     //baseAlfaとgameAlgaを合わせた最終的な画面の明るさを取得
-    private static float AddAlfa()
+    private static float AddAlfa(float alfa)
     {
-        float alfa = 1.0f - (1.0f - (baseAlfa * MAX_ALFA)) * (1.0f - gameAlfa);
-        if (alfa < 0)
+        float a = 1.0f - (1.0f - (baseAlfa * MAX_ALFA)) * (1.0f - alfa);
+        if (a < 0)
         {
-            alfa = 0;
+            a = 0;
         }
-        if (alfa > 1.0f)
+        if (a > 1.0f)
         {
-            alfa = 1.0f;
+            a = 1.0f;
         }
-        return alfa;
+        return a;
     }
 }

@@ -16,9 +16,9 @@ public class ConfigManager : MonoBehaviour
     //設定を初期化する
     public static void InitConfig()
     {
-        SoundManager.SettingVolumeBGM = 1.0f;
-        SoundManager.SettingVolumeSE = 1.0f;
-        BrightnessManager.SetBaseAlfa(0);
+        SoundManager.BaseBGMVolume = 1.0f;
+        SoundManager.BaseSEVolume = 1.0f;
+        BrightnessManager.BaseAlfa = 0;
         CameraManager.BaseSpeed = 1.0f;
     }
 }

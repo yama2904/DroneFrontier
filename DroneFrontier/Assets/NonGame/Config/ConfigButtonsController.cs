@@ -20,9 +20,9 @@ public class ConfigButtonsController : MonoBehaviour
     void Start()
     {
         //Sliderの値の設定
-        BGMSlider.value = SoundManager.SettingVolumeBGM;
-        SESlider.value = SoundManager.SettingVolumeSE;
-        BrightnessSlider.value = 1.0f - BrightnessManager.GetBaseAlfa();
+        BGMSlider.value = SoundManager.BaseBGMVolume;
+        SESlider.value = SoundManager.BaseSEVolume;
+        BrightnessSlider.value = 1.0f - BrightnessManager.BaseAlfa;
         CameraSlider.value = CameraManager.BaseSpeed;
 
         //Textの設定
@@ -35,21 +35,21 @@ public class ConfigButtonsController : MonoBehaviour
     //BGM調整
     public void MoveSliderBGM()
     {
-        SoundManager.SettingVolumeBGM = BGMSlider.value;
+        SoundManager.BaseBGMVolume = BGMSlider.value;
         BGMValueText.text = valueToText(BGMSlider.value);
     }
 
     //SE調整
     public void MoveSliderSE()
     {
-        SoundManager.SettingVolumeSE = SESlider.value;
+        SoundManager.BaseSEVolume = SESlider.value;
         SEValueText.text = valueToText(SESlider.value);
     }
 
     //明るさ調整
     public void MoveSliderBrightness()
     {
-        BrightnessManager.SetBaseAlfa(1.0f - BrightnessSlider.value);
+        BrightnessManager.BaseAlfa = 1.0f - BrightnessSlider.value;
         BrightnessValueText.text = valueToText(BrightnessSlider.value);
     }
 
@@ -65,9 +65,9 @@ public class ConfigButtonsController : MonoBehaviour
     {
         ConfigManager.InitConfig();
         //Sliderの値の設定
-        BGMSlider.value = SoundManager.SettingVolumeBGM;
-        SESlider.value = SoundManager.SettingVolumeSE;
-        BrightnessSlider.value = 1.0f - BrightnessManager.GetBaseAlfa();
+        BGMSlider.value = SoundManager.BaseBGMVolume;
+        SESlider.value = SoundManager.BaseSEVolume;
+        BrightnessSlider.value = 1.0f - BrightnessManager.BaseAlfa;
         CameraSlider.value = CameraManager.BaseSpeed;
 
         //Textの設定

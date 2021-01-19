@@ -25,7 +25,7 @@ public class Player : NetworkBehaviour
     float minSpeed = 0;       //最低速度
 
     //回転用
-    float rotateSpeed = 4.0f;
+    float rotateSpeed = 5.0f;
     float LimitCameraTiltX { get; set; } = 40.0f;
 
     //カメラ
