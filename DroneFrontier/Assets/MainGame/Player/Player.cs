@@ -10,6 +10,7 @@ public class Player : NetworkBehaviour
     [SyncVar] float syncHP = 0;
     public float HP { get { return syncHP; } } //HP
     public bool IsLocalPlayer { get { return isLocalPlayer; } }
+    public bool IsDestroy { get; private set; } = false;    //破壊されたか
 
     //コンポーネント用
     Rigidbody _Rigidbody = null;
@@ -20,16 +21,12 @@ public class Player : NetworkBehaviour
 
     //移動用
     float moveSpeed = 0;      //移動速度
-    float initMoveSpeed = 0;  //移動速度の初期値
     float maxSpeed = 0;       //最高速度
     float minSpeed = 0;       //最低速度
 
     //回転用
-    public float RotateSpeed { get; set; } = 3.0f;
+    float rotateSpeed = 3.0f;
     float LimitCameraTiltX { get; set; } = 40.0f;
-
-    //破壊されたか
-    public bool IsDestroy { get; private set; } = false;
 
     //カメラ
     [SerializeField] Camera cameraInspector = null;
@@ -66,7 +63,7 @@ public class Player : NetworkBehaviour
     [SyncVar] GameObject mainWeapon = null;
     [SyncVar] GameObject subWeapon = null;
     public static BaseWeapon.Weapon SetSubWeapon { private get; set; } = BaseWeapon.Weapon.SHOTGUN;
-    bool[] isUsingWeapons = new bool[(int)Weapon.NONE];    //使用中の武器
+    bool[] usingWeapons = new bool[(int)Weapon.NONE];    //使用中の武器
     float atackingDownSpeed = 0.5f;   //攻撃中の移動速度の低下率
     bool initSubWeapon = false;
 
@@ -139,8 +136,10 @@ public class Player : NetworkBehaviour
 
     void Awake()
     {
+        cacheTransform = transform; //キャッシュ用
+
+        //コンポーネントの初期化
         _Rigidbody = GetComponent<Rigidbody>();
-        cacheTransform = transform;
         itemAction = GetComponent<PlayerItemAction>();
         statusAction = GetComponent<PlayerStatusAction>();
         _camera = cameraInspector;
@@ -153,16 +152,16 @@ public class Player : NetworkBehaviour
 
     void Start()
     {
+        //パラメータ初期化
         syncHP = 30;
         moveSpeed = 20.0f;
-        initMoveSpeed = moveSpeed;
         maxSpeed = moveSpeed * 2;
         minSpeed = moveSpeed * 0.3f;
 
         //配列初期化
         for (int i = 0; i < (int)Weapon.NONE; i++)
         {
-            isUsingWeapons[i] = false;
+            usingWeapons[i] = false;
         }
     }
 
@@ -206,7 +205,7 @@ public class Player : NetworkBehaviour
             //回転処理
             float x = Input.GetAxis("Mouse X");
             float y = Input.GetAxis("Mouse Y");
-            Rotate(x, y, RotateSpeed);
+            Rotate(x, y, rotateSpeed);
         }
 
         //移動処理
@@ -287,73 +286,65 @@ public class Player : NetworkBehaviour
         Action<float> ModifySpeeds = (x) =>
         {
             ModifySpeed(x);
-            RotateSpeed *= x;
+            rotateSpeed *= x;
             lockOnTrackingSpeed *= x;
         };
 
         //メイン武器攻撃
         if (Input.GetMouseButtonDown(0))
         {
-            //サブ武器を使用していない場合は移動速度と回転速度とロックオンの追従速度を下げる
-            if (!isUsingWeapons[(int)Weapon.SUB])
+            //サブ武器を使用していたら撃てない
+            //バグ防止用にメイン武器フラグも調べる
+            if (!usingWeapons[(int)Weapon.SUB] && !usingWeapons[(int)Weapon.MAIN])
             {
+                //攻撃中は速度低下
                 ModifySpeeds(atackingDownSpeed);
-                isUsingWeapons[(int)Weapon.MAIN] = true;
+                usingWeapons[(int)Weapon.MAIN] = true;
             }
         }
         if (Input.GetMouseButton(0))
         {
-            UseWeapon(Weapon.MAIN);     //メインウェポン攻撃
+            if (usingWeapons[(int)Weapon.MAIN])
+            {
+                UseWeapon(Weapon.MAIN);     //メインウェポン攻撃
+            }
         }
         if (Input.GetMouseButtonUp(0))
         {
-            //メインもサブも使用していないなら速度を戻す
-            if (!isUsingWeapons[(int)Weapon.SUB])
+            //攻撃を止めたら速度を戻す
+            if (usingWeapons[(int)Weapon.MAIN])
             {
                 ModifySpeeds(1 / atackingDownSpeed);
+                usingWeapons[(int)Weapon.MAIN] = false;
             }
-            isUsingWeapons[(int)Weapon.MAIN] = false;
         }
 
         //サブ武器攻撃
         if (Input.GetMouseButtonDown(1))
         {
-            //メイン武器を使用していない場合は移動速度と回転速度とロックオンの追従速度を下げる
-            if (!isUsingWeapons[(int)Weapon.MAIN])
+            //サブ武器を使用していたら撃てない
+            //バグ防止用にサブ武器フラグも調べる
+            if (!usingWeapons[(int)Weapon.MAIN] && !usingWeapons[(int)Weapon.SUB])
             {
+                //攻撃中は速度低下
                 ModifySpeeds(atackingDownSpeed);
-                isUsingWeapons[(int)Weapon.SUB] = true;
+                usingWeapons[(int)Weapon.SUB] = true;
             }
         }
         if (Input.GetMouseButton(1))
         {
-            UseWeapon(Weapon.SUB);      //サブウェポン攻撃
+            if (usingWeapons[(int)Weapon.SUB])
+            {
+                UseWeapon(Weapon.SUB);      //サブウェポン攻撃
+            }
         }
-        //メインもサブも使用していないなら速度を戻す
         if (Input.GetMouseButtonUp(1))
         {
-            if (!isUsingWeapons[(int)Weapon.MAIN])
+            //攻撃を止めたら速度を戻す
+            if (usingWeapons[(int)Weapon.SUB])
             {
                 ModifySpeeds(1 / atackingDownSpeed);
-            }
-            isUsingWeapons[(int)Weapon.SUB] = false;
-        }
-
-        //速度のバグ防止用
-        bool isUsingWeapon = false;
-        for (int i = 0; i < (int)Weapon.NONE; i++)
-        {
-            if (isUsingWeapons[i])
-            {
-                isUsingWeapon = true;
-                break;
-            }
-        }
-        if (isUsingWeapon)
-        {
-            if (!statusAction.GetIsStatus(PlayerStatusAction.Status.SPEED_DOWN))
-            {
-                moveSpeed = initMoveSpeed;
+                usingWeapons[(int)Weapon.SUB] = false;
             }
         }
 
@@ -446,13 +437,13 @@ public class Player : NetworkBehaviour
         if (Input.GetKeyDown(KeyCode.LeftControl))
         {
             lockOnTrackingSpeed *= 0.1f;
-            RotateSpeed *= 0.1f;
+            rotateSpeed *= 0.1f;
             ModifySpeed(0.1f);
         }
         if (Input.GetKeyUp(KeyCode.LeftControl))
         {
             lockOnTrackingSpeed *= 10;
-            RotateSpeed *= 10;
+            rotateSpeed *= 10;
             ModifySpeed(10f);
         }
     }
@@ -671,7 +662,7 @@ public class Player : NetworkBehaviour
         {
             moveSpeed = maxSpeed;
         }
-        if(moveSpeed < minSpeed)
+        if (moveSpeed < minSpeed)
         {
             moveSpeed = minSpeed;
         }
