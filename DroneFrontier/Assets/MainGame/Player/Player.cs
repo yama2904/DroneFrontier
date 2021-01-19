@@ -25,7 +25,7 @@ public class Player : NetworkBehaviour
     float minSpeed = 0;       //最低速度
 
     //回転用
-    float rotateSpeed = 3.0f;
+    float rotateSpeed = 4.0f;
     float LimitCameraTiltX { get; set; } = 40.0f;
 
     //カメラ
@@ -205,7 +205,7 @@ public class Player : NetworkBehaviour
             //回転処理
             float x = Input.GetAxis("Mouse X");
             float y = Input.GetAxis("Mouse Y");
-            Rotate(x, y, rotateSpeed);
+            Rotate(x, y, rotateSpeed * CameraManager.CameraSpeed);
         }
 
         //移動処理
@@ -478,7 +478,7 @@ public class Player : NetworkBehaviour
     {
         if (MainGameManager.IsCursorLock)
         {
-            Vector3 angle = new Vector3(valueX * speed, valueY * speed, 0);
+            Vector3 angle = new Vector3(valueX * speed * CameraManager.ReverseX, valueY * speed * CameraManager.ReverseY, 0);
 
             //カメラの左右回転
             cacheTransform.RotateAround(cacheTransform.position, Vector3.up, angle.x);

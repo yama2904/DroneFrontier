@@ -19,6 +19,6 @@ public class ConfigManager : MonoBehaviour
         SoundManager.SettingVolumeBGM = 1.0f;
         SoundManager.SettingVolumeSE = 1.0f;
         BrightnessManager.SetBaseAlfa(0);
-        CameraManager.SetBaseSpeed(1);
+        CameraManager.BaseSpeed = 1.0f;
     }
 }

@@ -102,6 +102,21 @@ public class Test : MonoBehaviour
                 subCamera.transform.Translate(0, -0.01f, 0);
             }
         }
+
+        if (playBGM)
+        {
+            if(SoundManager.IsPlayingBGM == SoundManager.BGM.NONE)
+            {
+                SoundManager.Play(SoundManager.BGM.DRONE_UP, 1.0f);
+            }
+        }
+        else
+        {
+            if (SoundManager.IsPlayingBGM != SoundManager.BGM.NONE)
+            {
+                SoundManager.StopBGM();
+            }
+        }
     }
 
     private void FixedUpdate()

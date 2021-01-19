@@ -159,7 +159,7 @@ MonoBehaviour:
   isPlayerDebug: 1
   playerWeapon: 0
   cpuWeapon: 0
-  playBGM: 1
+  playBGM: 0
 --- !u!4 &368702361
 Transform:
   m_ObjectHideFlags: 0

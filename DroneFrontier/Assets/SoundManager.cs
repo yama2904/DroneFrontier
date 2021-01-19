@@ -365,6 +365,8 @@ public class SoundManager : MonoBehaviour
     public static void StopBGM()
     {
         audioSources[(int)Audio.BGM].Stop();
+        InitAudio(ref audioSources[(int)Audio.BGM]);
+        playingBGM = BGM.NONE;
         isFadeIn = false;
         isFadeOut = false;
         fadeVolume = 0;
@@ -444,7 +446,7 @@ public class SoundManager : MonoBehaviour
     }
 
     //SEが再生されているか
-    public static bool IsPlaying(int num)
+    public static bool IsPlayingSE(int num)
     {
         //AudioSourceの配列内かチェック
         if (!AudioSourceArrayCheck(num)) return false;
@@ -457,9 +459,9 @@ public class SoundManager : MonoBehaviour
     }
 
     //再生されているBGMを返す
-    public static BGM IsPlayingBGM()
+    public static BGM IsPlayingBGM
     {
-        return playingBGM;
+        get { return playingBGM; }
     }
 
     //SEの長さを返す
