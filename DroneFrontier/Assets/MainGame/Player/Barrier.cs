@@ -26,6 +26,16 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
     [SyncVar] float damagePercent;    //ダメージ倍率
     [SyncVar, HideInInspector] public uint parentNetId = 0;
 
+    //サウンド
+    enum SE
+    {
+        DAMAGE,    //ダメージ受けたとき
+        DESTROY,   //バリア破壊
+
+        NONE
+    }
+    AudioSource[] audios;
+
 
     public override void OnStartClient()
     {
@@ -33,6 +43,11 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
         GameObject parent = NetworkIdentity.spawned[parentNetId].gameObject;
         transform.SetParent(parent.transform);
         transform.localPosition = new Vector3(0, 0, 0);
+
+        //AudioSource初期化
+        audios = GetComponents<AudioSource>();
+        audios[(int)SE.DAMAGE].clip = SoundManager.GetAudioClip(SoundManager.SE.BARRIER_DAMAGE);
+        audios[(int)SE.DESTROY].clip = SoundManager.GetAudioClip(SoundManager.SE.DESTROY_BARRIER);
     }
 
     void Start()
@@ -56,6 +71,7 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
             if (regeneCountTime >= resurrectBarrierTime)
             {
                 ResurrectBarrier(resurrectBarrierHP);
+                regeneCountTime = 0;
             }
         }
         //バリアが回復を始めるまで待つ
@@ -101,21 +117,18 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
     //バリアを復活させる
     void ResurrectBarrier(float resurrectHP)
     {
-        if (syncHP > 0)
-        {
-            return;
-        }
-        syncHP = resurrectHP;
+        if (syncHP > 0) return;
 
         //修復したら回復処理に移る
+        syncHP = resurrectHP;
         isRegene = true;
-        regeneCountTime = 0;
 
 
         //デバッグ用
         Debug.Log("バリア修復");
     }
 
+    #region Damage
 
     //バリアに引数分のダメージを与える
     [Command(ignoreAuthority = true)]
@@ -126,20 +139,35 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
         if (syncHP < 0)
         {
             syncHP = 0;
+            RpcPlaySE((int)SE.DESTROY);
         }
         regeneCountTime = 0;
         isRegene = false;
+        RpcPlaySE((int)SE.DAMAGE);
 
 
         Debug.Log("バリアに" + p + "のダメージ\n残りHP: " + syncHP);
     }
+
+    [ClientRpc]
+    void RpcPlaySE(int index)
+    {
+        if (index >= (int)SE.NONE) return;
+
+        audios[index].volume = SoundManager.BaseSEVolume;
+        audios[index].Play();
+    }
+
+    #endregion
+
+    #region BarrierStrength
 
     /*
      * バリアの受けるダメージを軽減する
      * 引数1: 軽減する割合(0～1)
      * 引数2: 軽減する時間(秒数)
      */
-     [Command(ignoreAuthority = true)]
+    [Command(ignoreAuthority = true)]
     public void CmdBarrierStrength(float strengthPrercent, float time)
     {
         damagePercent = 1 - strengthPrercent;
@@ -164,6 +192,10 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
         //デバッグ用
         Debug.Log("バリア強化解除");
     }
+
+    #endregion
+
+    #region BarrierWeak
 
     //バリア弱体化
     [Command(ignoreAuthority = true)]
@@ -212,4 +244,6 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
         //デバッグ用
         Debug.Log("バリア弱体化解除");
     }
+
+    #endregion
 }

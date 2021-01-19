@@ -71,6 +71,8 @@ public class MissileBullet : Bullet
         NetworkServer.Destroy(gameObject);
     }
 
+    #region CreateExplosion
+
     private Explosion CreateExplosion()
     {
         Explosion e = Instantiate(explosion, cacheTransform.position, Quaternion.identity);
@@ -84,6 +86,8 @@ public class MissileBullet : Bullet
         Explosion e = CreateExplosion();
         NetworkServer.Spawn(e.gameObject);
     }
+
+    #endregion
 
     [Command(ignoreAuthority = true)]
     public void CmdShot(GameObject target)

@@ -114,6 +114,7 @@ public class BarrierWeakArea : MonoBehaviour
         return hits.Where(h => !h.transform.CompareTag(TagNameManager.ITEM))    //アイテム除外
                    .Where(h => !h.transform.CompareTag(TagNameManager.BULLET))  //弾丸除外
                    .Where(h => !h.transform.CompareTag(TagNameManager.GIMMICK)) //ギミックエリア除外
+                   .Where(h => !h.transform.CompareTag(TagNameManager.JAMMING)) //ジャミングエリア除外
                    .ToList();
     }
 

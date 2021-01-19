@@ -59,8 +59,10 @@ public class StunGrenade : NetworkBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (ReferenceEquals(other.gameObject, thrower)) return;  //投げたプレイヤーなら当たり判定から除外
-        if (other.CompareTag(TagNameManager.ITEM)) return;  //特定のオブジェクトはすり抜け
+        //特定のオブジェクトはすり抜け
+        if (other.CompareTag(TagNameManager.ITEM)) return;
         if (other.CompareTag(TagNameManager.GIMMICK)) return;
+        if (other.CompareTag(TagNameManager.JAMMING)) return;
         CreateImpact();
     }
 }

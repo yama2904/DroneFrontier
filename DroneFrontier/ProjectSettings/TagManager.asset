@@ -9,6 +9,7 @@ TagManager:
   - Bullet
   - JammingBot
   - Gimmick
+  - Jamming
   layers:
   - Default
   - TransparentFX

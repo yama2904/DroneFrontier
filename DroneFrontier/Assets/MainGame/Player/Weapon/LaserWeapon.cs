@@ -26,6 +26,8 @@ public class LaserWeapon : BaseWeapon
     }
     List<bool> isShots = new List<bool>();
 
+    
+    #region Init
 
     protected override void Start()
     {
@@ -36,9 +38,7 @@ public class LaserWeapon : BaseWeapon
         BulletPower = 5.0f;
         gaugeAmout = 1.0f;
     }
-
-    protected override void Update() { }
-
+    
     public override void Init()
     {
         for (int i = 0; i < (int)ShotFlag.NONE; i++)
@@ -63,6 +63,11 @@ public class LaserWeapon : BaseWeapon
         createBullet = lb.gameObject;
     }
 
+    #endregion
+
+    #region Update
+
+    protected override void Update() { }
     public override void UpdateMe()
     {
         if (isShots.Count <= 0)
@@ -116,6 +121,9 @@ public class LaserWeapon : BaseWeapon
             }
         }
     }
+
+    #endregion
+
 
     public override void Shot(GameObject target = null)
     {

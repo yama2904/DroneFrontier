@@ -10,23 +10,16 @@ public class Jamming : NetworkBehaviour
 
     [SerializeField] GameObject jammingBot = null;
     [SerializeField] Transform jammingBotPosition = null;
-    [SyncVar] GameObject createBot = null;
+    JammingBot createBot = null;
     List<Player> jamingPlayers = new List<Player>();
 
 
-    void Start()
-    {
-    }
-
+    void Start() { }
     void Update()
     {
-        if (createBot == null)
+        if (createBot == null) return;
+        if (createBot.IsDestroy)
         {
-            //ジャミングを解除する
-            foreach (Player p in jamingPlayers)
-            {
-                p.UnSetJamming();
-            }
             Destroy(gameObject);
         }
     }
@@ -44,19 +37,35 @@ public class Jamming : NetworkBehaviour
         jb.creater = creater;
 
         NetworkServer.Spawn(jb.gameObject);
-        createBot = jb.gameObject;
+        RpcSetCreateBot(jb.gameObject);
 
         //一定時間後にボットを削除
-        Invoke(nameof(DestroyBot), destroyTime);
+        Invoke(nameof(DestroyMe), destroyTime);
 
 
         //デバッグ用
         Debug.Log("ジャミングボット生成");
     }
 
-    void DestroyBot()
+    [ClientRpc]
+    void RpcSetCreateBot(GameObject o)
     {
-        NetworkServer.Destroy(createBot);
+        createBot = o.GetComponent<JammingBot>();
+    }
+
+    void DestroyMe()
+    {
+        NetworkServer.Destroy(gameObject);
+    }
+
+    void OnDestroy()
+    {
+        //ジャミングを解除する
+        foreach (Player p in jamingPlayers)
+        {
+            p.UnSetJamming();
+        }
+        Destroy(gameObject);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -78,11 +87,11 @@ public class Jamming : NetworkBehaviour
         Player p = other.GetComponent<Player>();
         if (!p.IsLocalPlayer) return;   //ローカルプレイヤーのみ処理
         if (ReferenceEquals(p.gameObject, creater)) return; //ジャミングを付与しないプレイヤーならスキップ
-        
+
         //リストにない場合は処理しない
         int index = jamingPlayers.FindIndex(o => ReferenceEquals(p, o));
         if (index == -1) return;
-                
+
         p.UnSetJamming();   //ジャミング解除
         jamingPlayers.RemoveAt(index);  //解除したプレイヤーをリストから削除
     }

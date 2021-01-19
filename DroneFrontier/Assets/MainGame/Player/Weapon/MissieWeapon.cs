@@ -27,14 +27,8 @@ public class MissieWeapon : BaseWeapon
         BulletPower = 20.0f;
     }
 
-    protected override void Start()
-    {
-    }
-
-    protected override void Update()
-    {
-    }
-
+    protected override void Start() { }
+    protected override void Update() { }
 
     public override void Init()
     {
@@ -74,6 +68,8 @@ public class MissieWeapon : BaseWeapon
         }
     }
 
+    #region CreateMissile
+
     MissileBullet CreateMissile()
     {
         MissileBullet m = Instantiate(missile);    //ミサイルの複製
@@ -92,7 +88,7 @@ public class MissieWeapon : BaseWeapon
     [Command(ignoreAuthority = true)]
     void CmdCreateMissile()
     {
-        if(useMissile >= 0)
+        if (useMissile >= 0)
         {
             return;
         }
@@ -102,6 +98,8 @@ public class MissieWeapon : BaseWeapon
         settingBullets.Add(m.gameObject);
         useMissile = settingBullets.Count - 1;
     }
+
+    #endregion
 
     public override void Shot(GameObject target = null)
     {

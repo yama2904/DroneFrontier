@@ -10,7 +10,10 @@ public class Player : NetworkBehaviour
     [SyncVar] float syncHP = 0;
     public float HP { get { return syncHP; } } //HP
     public bool IsLocalPlayer { get { return isLocalPlayer; } }
-    public bool IsDestroy { get; private set; } = false;    //破壊されたか
+
+    //破壊されたか
+    [SyncVar] bool syncIsDestroy = false;   
+    public bool IsDestroy { get { return syncIsDestroy; } }
 
     //コンポーネント用
     Rigidbody _Rigidbody = null;
@@ -79,9 +82,29 @@ public class Player : NetworkBehaviour
     Item.ItemType[] items = new Item.ItemType[(int)ItemNum.NONE];
 
 
+    //サウンド
+    enum SE
+    {
+        ACCELERATION,   //加速
+        DEATH,          //死亡
+        PROPELLER,      //プロペラ
+        RADAR,          //レーダー
+        RESPAWN,        //リスポーン
+        USE_ITEM,       //アイテム使用
+        WALL_STUN,      //見えない壁に触れる
+        JAMMING,        //ジャミング
+        MAGNETIC_AREA,  //磁場エリア内
+
+        NONE
+    }
+    AudioSource[] audios;
+
+
     //デバッグ用
     bool isV = true;
 
+
+    #region Init
 
     [Command]
     void CmdCreateMainWeapon()
@@ -127,6 +150,21 @@ public class Player : NetworkBehaviour
         {
             GetComponent<AudioListener>().enabled = false;
         }
+
+        //AudioSourceの初期化
+        audios = GetComponents<AudioSource>();
+        audios[(int)SE.ACCELERATION].clip = SoundManager.GetAudioClip(SoundManager.SE.ACCELERAION);
+        audios[(int)SE.DEATH].clip = SoundManager.GetAudioClip(SoundManager.SE.DEATH);
+        audios[(int)SE.PROPELLER].clip = SoundManager.GetAudioClip(SoundManager.SE.PROPELLER);
+        audios[(int)SE.RADAR].clip = SoundManager.GetAudioClip(SoundManager.SE.RADAR);
+        audios[(int)SE.RESPAWN].clip = SoundManager.GetAudioClip(SoundManager.SE.RESPAWN);
+        audios[(int)SE.USE_ITEM].clip = SoundManager.GetAudioClip(SoundManager.SE.USE_ITEM);
+        audios[(int)SE.WALL_STUN].clip = SoundManager.GetAudioClip(SoundManager.SE.WALL_STUN);
+        audios[(int)SE.JAMMING].clip = SoundManager.GetAudioClip(SoundManager.SE.JAMMING_NOISE);
+        audios[(int)SE.MAGNETIC_AREA].clip = SoundManager.GetAudioClip(SoundManager.SE.MAGNETIC_AREA);
+
+        //プロペラは延々流す
+        PlaySE((int)SE.PROPELLER, SoundManager.BaseSEVolume, true);
     }
 
     public override void OnStartLocalPlayer()
@@ -139,6 +177,7 @@ public class Player : NetworkBehaviour
         CmdCreateMainWeapon();
         CmdCreateSubWeapon();
         CmdCreateBarrier();
+
 
         Debug.Log("End: OnStartLocalPlayer");
     }
@@ -174,6 +213,8 @@ public class Player : NetworkBehaviour
         }
     }
 
+    #endregion
+
 
     void Update()
     {
@@ -198,17 +239,6 @@ public class Player : NetworkBehaviour
             Debug.Log("移動処理切り替え");
         }
 
-        //サブウェポンのUpdate
-        if (subWeapon != null)
-        {
-            if (!initSubWeapon)
-            {
-                subWeapon.GetComponent<BaseWeapon>().Init();
-                initSubWeapon = true;
-            }
-            subWeapon.GetComponent<BaseWeapon>().UpdateMe();
-        }
-
         if (MainGameManager.IsCursorLock)
         {
             //回転処理
@@ -216,6 +246,9 @@ public class Player : NetworkBehaviour
             float y = Input.GetAxis("Mouse Y");
             Rotate(x, y, rotateSpeed * CameraManager.CameraSpeed);
         }
+
+
+        #region Move
 
         //移動処理
         if (Input.GetKey(KeyCode.W))
@@ -247,8 +280,11 @@ public class Player : NetworkBehaviour
             Move(moveSpeed * 4 * Input.mouseScrollDelta.y, maxSpeed * 4, upward);
         }
 
+        #endregion
+        
+        #region LockOn
 
-        //ロックオン
+        //ロックオン使用
         if (Input.GetKey(KeyCode.LeftShift))
         {
             if (!statusAction.GetIsStatus(PlayerStatusAction.Status.JAMMING))
@@ -264,21 +300,36 @@ public class Player : NetworkBehaviour
             l.ReleaseLockOn();
         }
 
-        //レーダー使用
-        if (Input.GetKey(KeyCode.Space))
+        #endregion
+
+        #region Radar
+
+        //ジャミング中は処理しない
+        if (!statusAction.GetIsStatus(PlayerStatusAction.Status.JAMMING))
         {
-            if (!statusAction.GetIsStatus(PlayerStatusAction.Status.JAMMING))
+            //レーダー音の再生
+            if (Input.GetKeyDown(KeyCode.Space))
             {
-                IRadar r = radar;
-                r.StartRadar();
+                PlaySE((int)SE.RADAR, SoundManager.BaseSEVolume);
+            }
+            //レーダー使用
+            if (Input.GetKey(KeyCode.Space))
+            {
+                if (!statusAction.GetIsStatus(PlayerStatusAction.Status.JAMMING))
+                {
+                    IRadar r = radar;
+                    r.StartRadar();
+                }
             }
         }
-        //レーダー使用
+        //レーダー終了
         if (Input.GetKeyUp(KeyCode.Space))
         {
             IRadar r = radar;
             r.ReleaseRadar();
         }
+
+        #endregion
 
 
         //
@@ -289,6 +340,22 @@ public class Player : NetworkBehaviour
         }
         //
         //
+
+
+        #region Weapon
+
+        //サブウェポンのUpdate
+        if (subWeapon != null)
+        {
+            //Start系で初期化するとネットワークのラグでウェポンが生成されていないので
+            //Update内で初期化
+            if (!initSubWeapon)
+            {
+                subWeapon.GetComponent<BaseWeapon>().Init();
+                initSubWeapon = true;
+            }
+            subWeapon.GetComponent<BaseWeapon>().UpdateMe();
+        }
 
 
         //攻撃処理しか使わない簡易メソッド
@@ -357,6 +424,9 @@ public class Player : NetworkBehaviour
             }
         }
 
+        #endregion
+        
+        #region Boost
 
         //ブースト使用
         if (Input.GetKeyDown(KeyCode.Q))
@@ -377,7 +447,8 @@ public class Player : NetworkBehaviour
                 }
 
                 ModifySpeed(boostAccele);
-                isBoost = true;
+                isBoost = true;                
+                PlaySE((int)SE.ACCELERATION, SoundManager.BaseSEVolume, true);    //加速音の再生
 
 
                 //デバッグ用
@@ -399,10 +470,11 @@ public class Player : NetworkBehaviour
 
                     ModifySpeed(1 / boostAccele);
                     isBoost = false;
+                    StopSE((int)SE.ACCELERATION);
 
 
                     //デバッグ用
-                    Debug.Log("ブースト終了");
+                   Debug.Log("ブースト終了");
                 }
             }
             //キーを離したらブースト停止
@@ -410,6 +482,7 @@ public class Player : NetworkBehaviour
             {
                 ModifySpeed(1 / boostAccele);
                 isBoost = false;
+                StopSE((int)SE.ACCELERATION);
 
 
                 //デバッグ用
@@ -429,6 +502,8 @@ public class Player : NetworkBehaviour
                 }
             }
         }
+
+        #endregion
 
 
         //アイテム使用
@@ -546,12 +621,14 @@ public class Player : NetworkBehaviour
         if (t != Item.ItemType.NONE)
         {
             if (itemAction.UseItem(t))
-            {
+            {                
+                PlaySE((int)SE.USE_ITEM, SoundManager.BaseSEVolume);    //アイテム使用音の再生
                 items[(int)item] = Item.ItemType.NONE;
             }
         }
     }
 
+    //武器作成
     void SetWeapon(Weapon weapon, BaseWeapon.Weapon weaponType)
     {
         GameObject create = BaseWeapon.CreateWeapon(gameObject, weaponType);
@@ -572,11 +649,24 @@ public class Player : NetworkBehaviour
         }
     }
 
-    void DestroyMe()
+
+    #region Death
+
+    [Command(ignoreAuthority = true)]
+    void CmdDestroyMe()
     {
-        IsDestroy = true;
+        syncIsDestroy = true;
         barrier.GetComponent<Barrier>().enabled = false;
+        RpcPlaySEDeath();
     }
+
+    [ClientRpc]
+    void RpcPlaySEDeath()
+    {
+        PlaySE((int)SE.DEATH, SoundManager.BaseSEVolume);
+    }
+
+    #endregion
 
 
     //プレイヤーにダメージを与える
@@ -603,7 +693,7 @@ public class Player : NetworkBehaviour
             if (syncHP < 0)
             {
                 syncHP = 0;
-                DestroyMe();
+                CmdDestroyMe();
             }
 
 
@@ -611,6 +701,7 @@ public class Player : NetworkBehaviour
             Debug.Log(name + "に" + p + "のダメージ\n残りHP: " + syncHP);
         }
     }
+
 
     //ロックオンしない対象を設定
     public void SetNotLockOnObject(GameObject o)
@@ -625,6 +716,7 @@ public class Player : NetworkBehaviour
         ILockOn l = lockOn;
         l.UnSetNotLockOnObject(o);
     }
+
 
     //レーダーに照射しない対象を設定
     public void SetNotRadarObject(GameObject o)
@@ -641,9 +733,33 @@ public class Player : NetworkBehaviour
     }
 
 
-    //////////////////////////////////////////////////////// 
-    //状態異常系メソッド
-    //////////////////////////////////////////////////////// 
+    #region Sound
+
+    //SE再生
+    void PlaySE(int index, float volume, bool loop = false)
+    {
+        if (index >= (int)SE.NONE) return;
+        if (volume > 1.0f)
+        {
+            volume = 1.0f;
+        }
+
+        audios[index].volume = volume;
+        audios[index].loop = loop;
+        audios[index].Play();
+    }
+
+    //SE停止
+    void StopSE(int index)
+    {
+        if (index >= (int)SE.NONE) return;
+        audios[index].Stop();
+    }
+
+    #endregion
+
+
+    #region 状態系処理
 
     //バリア強化
     public bool SetBarrierStrength(float strengthPercent, float time)
@@ -681,12 +797,14 @@ public class Player : NetworkBehaviour
     public void SetJamming()
     {
         statusAction.SetJamming();
+        PlaySE((int)SE.JAMMING, SoundManager.BaseSEVolume, true);
     }
 
     //ジャミング解除
     public void UnSetJamming()
     {
         statusAction.UnSetJamming();
+        StopSE((int)SE.JAMMING);
     }
 
     //スタン
@@ -698,15 +816,19 @@ public class Player : NetworkBehaviour
     //スピードダウン
     public int SetSpeedDown(float downPercent)
     {
+        PlaySE((int)SE.MAGNETIC_AREA, SoundManager.BaseSEVolume, true);
         return statusAction.SetSpeedDown(ref moveSpeed, downPercent);
     }
-
-
+    
     //スピードダウン解除
     public void UnSetSpeedDown(int id)
     {
         statusAction.UnSetSpeedDown(ref moveSpeed, id);
+        StopSE((int)SE.MAGNETIC_AREA);
     }
+
+    #endregion
+
 
     private void OnTriggerStay(Collider other)
     {
@@ -725,7 +847,7 @@ public class Player : NetworkBehaviour
                         if (item.type == Item.ItemType.NONE) continue;
 
                         items[num] = item.type;
-                        item.type = Item.ItemType.NONE;  //通信のラグのせいで1つのアイテムを2回とるバグの防止
+                        item.type = Item.ItemType.NONE;  //通信のラグのせいで1つのアイテムを2回取るバグの防止
                         CmdDestroy(other.gameObject);
 
 
@@ -739,7 +861,8 @@ public class Player : NetworkBehaviour
         }
     }
 
-    //スポーンせずに元からシーン上に配置しているオブジェクトを削除する用
+    #region スポーンせずに元からシーン上に配置しているオブジェクトを削除する用
+
     [Command(ignoreAuthority = true)]
     void CmdDestroy(GameObject o)
     {
@@ -751,4 +874,6 @@ public class Player : NetworkBehaviour
     {
         Destroy(o);
     }
+
+    #endregion
 }

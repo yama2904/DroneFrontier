@@ -143,7 +143,8 @@ public class LaserBullet : NetworkBehaviour
     }
 
 
-    //レーザーの長さを変える
+    #region ModifyLaserLength
+
     void ModifyLaserLength(float length)
     {
         //Lineオブジェクト
@@ -156,8 +157,7 @@ public class LaserBullet : NetworkBehaviour
         Vector3 thunderPos = thunderTransform.localPosition;
         thunderTransform.localPosition = new Vector3(thunderPos.x, thunderPos.y, initThunderPosZ * length);
     }
-
-
+    
     [Command(ignoreAuthority = true)]
     void CmdCallRpcModifyLaserLength(float length)
     {
@@ -169,6 +169,10 @@ public class LaserBullet : NetworkBehaviour
     {
         ModifyLaserLength(length);
     }
+
+    #endregion
+
+    #region StopShot
 
     //チャージとレーザーを止める
     public void StopShot()
@@ -215,17 +219,15 @@ public class LaserBullet : NetworkBehaviour
 
         //サウンドを止める
         audioSource.Stop();
-        //if (isCharged)
-        //{
-        //    audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.BEAM_2);
-        //    audioSource.time = 0.6f;
-        //    audioSource.Play();
-        //}
     }
+
+    #endregion
 
 
     public void Shot(GameObject shooter, float power)
     {
+        #region Charge
+
         //チャージ処理
         if (!isCharged)
         {
@@ -251,6 +253,11 @@ public class LaserBullet : NetworkBehaviour
                 isCharged = true;
             }
         }
+
+        #endregion
+
+        #region Laser
+
         else
         {
             IsShotBeam = true;
@@ -301,8 +308,11 @@ public class LaserBullet : NetworkBehaviour
             //レーザーの長さに応じてオブジェクトの座標やサイズを変える
             CmdCallRpcModifyLaserLength(lineLength);
         }
+
+        #endregion
     }
 
+    #region ChargePlay
 
     [Command(ignoreAuthority = true)]
     void CmdCallRpcChargePlay(bool flag)
@@ -328,6 +338,9 @@ public class LaserBullet : NetworkBehaviour
         }
     }
 
+    #endregion
+
+    #region AddChargeParticle
 
     [Command(ignoreAuthority = true)]
     void CmdCallRpcAddChargeParticle(float add)
@@ -342,6 +355,9 @@ public class LaserBullet : NetworkBehaviour
         chargeEmission.rateOverTime = chargeMinmaxcurve;
     }
 
+    #endregion
+
+    #region LaserPlay
 
     [Command(ignoreAuthority = true)]
     void CmdCallRpcLaserPlay()
@@ -374,6 +390,9 @@ public class LaserBullet : NetworkBehaviour
         audioSource.Play();
     }
 
+    #endregion
+
+    #region SetEndObjectTransform
 
     [Command(ignoreAuthority = true)]
     void CmdCallRpcSetEndObjectTransform(Vector3 pos)
@@ -386,4 +405,6 @@ public class LaserBullet : NetworkBehaviour
     {
         endObjectTransform.position = pos;
     }
+
+    #endregion
 }

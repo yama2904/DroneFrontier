@@ -37,8 +37,22 @@ public class PlayerStatusAction : NetworkBehaviour
     float minSpeed = 0;
 
 
-    void Start()
+    void Start() { }
+
+    public void Init(Barrier barrier, LockOn lockOn, Radar radar, float minSpeed, float maxSpeed)
     {
+        //配列初期化
+        for (int i = 0; i < (int)Status.NONE; i++)
+        {
+            isStatus.Add(false);
+        }
+
+        this.barrier = barrier;
+        this.lockOn = lockOn;
+        this.radar = radar;
+        this.minSpeed = minSpeed;
+        this.maxSpeed = maxSpeed;
+        createdStunScreenMask = Instantiate(stunScreenMask);
     }
 
     void Update()
@@ -68,22 +82,6 @@ public class PlayerStatusAction : NetworkBehaviour
         {
             speedDownList.Clear();
         }
-    }
-
-    public void Init(Barrier barrier, LockOn lockOn, Radar radar, float minSpeed, float maxSpeed)
-    {
-        //配列初期化
-        for (int i = 0; i < (int)Status.NONE; i++)
-        {
-            isStatus.Add(false);
-        }
-
-        this.barrier = barrier;
-        this.lockOn = lockOn;
-        this.radar = radar;
-        this.minSpeed = minSpeed;
-        this.maxSpeed = maxSpeed;
-        createdStunScreenMask = Instantiate(stunScreenMask);
     }
 
     public bool GetIsStatus(Status status)

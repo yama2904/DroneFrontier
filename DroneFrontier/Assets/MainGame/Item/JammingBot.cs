@@ -8,6 +8,8 @@ public class JammingBot : NetworkBehaviour
     [SyncVar] float HP = 30.0f;
     [SyncVar, HideInInspector] public uint parentNetId = 0;
     [SyncVar, HideInInspector] public GameObject creater = null;
+    [SyncVar] bool syncIsDestroy = false;
+    public bool IsDestroy { get { return syncIsDestroy; } }
 
 
     public override void OnStartClient()
@@ -51,7 +53,7 @@ public class JammingBot : NetworkBehaviour
         if (HP < 0)
         {
             HP = 0;
-            NetworkServer.Destroy(gameObject);
+            syncIsDestroy = true;
         }
     }
 }
