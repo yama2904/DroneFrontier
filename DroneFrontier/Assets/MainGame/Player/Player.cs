@@ -48,7 +48,7 @@ public class Player : NetworkBehaviour
 
     //ブースト用
     const float BOOST_POSSIBLE_MIN = 0.2f;  //ブースト可能な最低ゲージ量
-    Image boostImage = null;       //ブーストのゲージ画像
+    [SerializeField] Image boostImage = null;       //ブーストのゲージ画像
     float boostAccele = 2.0f;      //ブーストの加速度
     float maxBoostTime = 5.0f;     //ブーストできる最大の時間
     float boostRecastTime = 6.0f;  //ブーストのリキャスト時間
@@ -127,6 +127,8 @@ public class Player : NetworkBehaviour
     {
         base.OnStartLocalPlayer();
         _camera.depth++;
+        boostImage.enabled = true;
+        boostImage.fillAmount = 1;
 
         CmdCreateMainWeapon();
         CmdCreateSubWeapon();
@@ -162,9 +164,6 @@ public class Player : NetworkBehaviour
         {
             isUsingWeapons[i] = false;
         }
-
-        boostImage = GameObject.Find("BoostGauge").GetComponent<Image>();
-        boostImage.fillAmount = 1;
     }
 
 

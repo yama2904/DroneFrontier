@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using System.Linq;
 using Mirror;
 
-public abstract class BasePlayer : NetworkBehaviour, IPlayerStatus
+public abstract class BasePlayer : NetworkBehaviour
 {
     public float HP { get; protected set; } = 0; //HP
     protected Rigidbody _Rigidbody = null;
