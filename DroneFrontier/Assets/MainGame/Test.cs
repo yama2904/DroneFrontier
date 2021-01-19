@@ -22,6 +22,8 @@ public class Test : MonoBehaviour
     [SerializeField] BaseWeapon.Weapon playerWeapon = BaseWeapon.Weapon.SHOTGUN;
     [SerializeField] BaseWeapon.Weapon cpuWeapon = BaseWeapon.Weapon.SHOTGUN;
 
+    [SerializeField] bool playBGM = true;
+
     private void Awake()
     {
         
@@ -50,7 +52,10 @@ public class Test : MonoBehaviour
             }
         }
 
-        //mainCamera = Camera.main.gameObject;
+        if (playBGM)
+        {
+            SoundManager.Play(SoundManager.BGM.DRONE_UP, 1.0f);
+        }
     }
 
     void Update()
