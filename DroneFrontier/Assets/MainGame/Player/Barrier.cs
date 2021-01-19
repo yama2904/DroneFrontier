@@ -184,7 +184,7 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
         }
         else
         {
-            syncHP *= 0.5f;
+            syncHP = Useful.DecimalPointTruncation((syncHP *= 0.5f), 1);
 
 
             //デバッグ用

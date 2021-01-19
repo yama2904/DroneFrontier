@@ -73,7 +73,7 @@ public class BarrierWeakArea : MonoBehaviour
                 {
 
                     //既にリスト内に存在しているか調べる
-                    int index = hitPlayerDatas.FindIndex(p => ReferenceEquals(p.player, p));
+                    int index = hitPlayerDatas.FindIndex(p => ReferenceEquals(p.player, player));
                     if (index == -1)
                     {
                         //存在していなかったらバリアを弱体化
@@ -104,7 +104,7 @@ public class BarrierWeakArea : MonoBehaviour
     {
         //Lineオブジェクト
         Vector3 lineScale = cacheTransform.localScale;
-        cacheTransform.localScale = new Vector3(length, length, lineScale.z);
+        cacheTransform.localScale = new Vector3(lineScale.x, lineScale.y, length);
     }
 
     //リストから必要な要素だけ抜き取る
