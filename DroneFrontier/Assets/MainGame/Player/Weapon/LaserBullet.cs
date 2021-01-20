@@ -219,6 +219,7 @@ public class LaserBullet : NetworkBehaviour
 
         //サウンドを止める
         audioSource.Stop();
+        audioSource.loop = false;
     }
 
     #endregion
@@ -385,8 +386,9 @@ public class LaserBullet : NetworkBehaviour
         }
 
         //レーザー音の再生
-        audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.BEAM_1);
+        audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.BEAM);
         audioSource.volume = SoundManager.BaseSEVolume;
+        audioSource.loop = true;
         audioSource.Play();
     }
 

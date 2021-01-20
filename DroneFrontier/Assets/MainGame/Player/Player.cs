@@ -85,7 +85,7 @@ public class Player : NetworkBehaviour
     //サウンド
     enum SE
     {
-        ACCELERATION,   //加速
+        Boost,          //ブースト
         DEATH,          //死亡
         PROPELLER,      //プロペラ
         RADAR,          //レーダー
@@ -153,7 +153,7 @@ public class Player : NetworkBehaviour
 
         //AudioSourceの初期化
         audios = GetComponents<AudioSource>();
-        audios[(int)SE.ACCELERATION].clip = SoundManager.GetAudioClip(SoundManager.SE.ACCELERAION);
+        audios[(int)SE.Boost].clip = SoundManager.GetAudioClip(SoundManager.SE.BOOST);
         audios[(int)SE.DEATH].clip = SoundManager.GetAudioClip(SoundManager.SE.DEATH);
         audios[(int)SE.PROPELLER].clip = SoundManager.GetAudioClip(SoundManager.SE.PROPELLER);
         audios[(int)SE.RADAR].clip = SoundManager.GetAudioClip(SoundManager.SE.RADAR);
@@ -448,7 +448,7 @@ public class Player : NetworkBehaviour
 
                 ModifySpeed(boostAccele);
                 isBoost = true;                
-                PlaySE((int)SE.ACCELERATION, SoundManager.BaseSEVolume, true);    //加速音の再生
+                PlaySE((int)SE.Boost, SoundManager.BaseSEVolume, true);    //加速音の再生
 
 
                 //デバッグ用
@@ -470,7 +470,7 @@ public class Player : NetworkBehaviour
 
                     ModifySpeed(1 / boostAccele);
                     isBoost = false;
-                    StopSE((int)SE.ACCELERATION);
+                    StopSE((int)SE.Boost);
 
 
                     //デバッグ用
@@ -482,7 +482,7 @@ public class Player : NetworkBehaviour
             {
                 ModifySpeed(1 / boostAccele);
                 isBoost = false;
-                StopSE((int)SE.ACCELERATION);
+                StopSE((int)SE.Boost);
 
 
                 //デバッグ用
