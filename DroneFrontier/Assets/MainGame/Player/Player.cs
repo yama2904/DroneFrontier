@@ -12,7 +12,7 @@ public class Player : NetworkBehaviour
     public bool IsLocalPlayer { get { return isLocalPlayer; } }
 
     //破壊されたか
-    [SyncVar] bool syncIsDestroy = false;   
+    [SyncVar] bool syncIsDestroy = false;
     public bool IsDestroy { get { return syncIsDestroy; } }
 
     //コンポーネント用
@@ -60,7 +60,7 @@ public class Player : NetworkBehaviour
     [SerializeField] Image boostImage = null;   //ブーストのゲージ画像
     [SerializeField, Tooltip("ブーストの加速度")] float boostAccele = 3.0f;  //ブーストの加速度
     [SerializeField, Tooltip("ブースト時間")] float maxBoostTime = 5.0f;   //ブーストできる最大の時間
-    [SerializeField, Tooltip("ブーストのリキャスト時間")]float boostRecastTime = 6.0f;  //ブーストのリキャスト時間
+    [SerializeField, Tooltip("ブーストのリキャスト時間")] float boostRecastTime = 6.0f;  //ブーストのリキャスト時間
     bool isBoost = false;
 
 
@@ -242,15 +242,16 @@ public class Player : NetworkBehaviour
             }
         }
 
+        //デバッグ用
         if (Input.GetKeyDown(KeyCode.V))
         {
             isV = !isV;
             Debug.Log("移動処理切り替え");
         }
 
+        //回転処理
         if (MainGameManager.IsCursorLock)
         {
-            //回転処理
             float x = Input.GetAxis("Mouse X");
             float y = Input.GetAxis("Mouse Y");
             Rotate(x, y, rotateSpeed * CameraManager.CameraSpeed);
@@ -319,7 +320,7 @@ public class Player : NetworkBehaviour
         }
 
         #endregion
-        
+
         #region LockOn
 
         //ロックオン使用
@@ -463,7 +464,7 @@ public class Player : NetworkBehaviour
         }
 
         #endregion
-        
+
         #region Boost
 
         //ブースト使用
@@ -485,7 +486,7 @@ public class Player : NetworkBehaviour
                 }
 
                 ModifySpeed(boostAccele);
-                isBoost = true;                
+                isBoost = true;
                 PlaySE((int)SE.Boost, SoundManager.BaseSEVolume, true);    //加速音の再生
 
 
@@ -512,7 +513,7 @@ public class Player : NetworkBehaviour
 
 
                     //デバッグ用
-                   Debug.Log("ブースト終了");
+                    Debug.Log("ブースト終了");
                 }
             }
             //キーを離したらブースト停止
@@ -668,7 +669,7 @@ public class Player : NetworkBehaviour
         if (t != Item.ItemType.NONE)
         {
             if (itemAction.UseItem(t))
-            {                
+            {
                 PlaySE((int)SE.USE_ITEM, SoundManager.BaseSEVolume);    //アイテム使用音の再生
                 items[(int)item] = Item.ItemType.NONE;
             }
@@ -866,7 +867,7 @@ public class Player : NetworkBehaviour
         PlaySE((int)SE.MAGNETIC_AREA, SoundManager.BaseSEVolume, true);
         return statusAction.SetSpeedDown(ref moveSpeed, downPercent);
     }
-    
+
     //スピードダウン解除
     public void UnSetSpeedDown(int id)
     {
