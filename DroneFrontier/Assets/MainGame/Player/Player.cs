@@ -22,6 +22,15 @@ public class Player : NetworkBehaviour
     PlayerStatusAction statusAction = null;
     bool isPlayerStatusInit = false;
 
+    //ドローンが移動した際にオブジェクトが傾く処理用
+    [SerializeField] Transform droneObject = null;
+    float moveRotateSpeed = 0.02f;
+    Quaternion frontMoveRotate = Quaternion.Euler(50, 0, 0);
+    Quaternion leftMoveRotate = Quaternion.Euler(0, 0, 60);
+    Quaternion rightMoveRotate = Quaternion.Euler(0, 0, -60);
+    Quaternion backMoveRotate = Quaternion.Euler(-70, 0, 0);
+
+
     //移動用
     float moveSpeed = 0;      //移動速度
     float maxSpeed = 0;       //最高速度
@@ -251,28 +260,57 @@ public class Player : NetworkBehaviour
         #region Move
 
         //移動処理
+        //前進
         if (Input.GetKey(KeyCode.W))
         {
             Move(moveSpeed, maxSpeed, cacheTransform.forward);
+            droneObject.localRotation = Quaternion.Slerp(droneObject.localRotation, frontMoveRotate, moveRotateSpeed);
         }
+        else
+        {
+            droneObject.localRotation = Quaternion.Slerp(droneObject.localRotation, Quaternion.identity, moveRotateSpeed);
+        }
+
+        //左移動
         if (Input.GetKey(KeyCode.A))
         {
             Quaternion leftAngle = Quaternion.Euler(0, -90, 0);
             Vector3 left = leftAngle.normalized * cacheTransform.forward;
             Move(moveSpeed, maxSpeed, left);
+            droneObject.localRotation = Quaternion.Slerp(droneObject.localRotation, leftMoveRotate, moveRotateSpeed);
         }
+        else
+        {
+            droneObject.localRotation = Quaternion.Slerp(droneObject.localRotation, Quaternion.identity, moveRotateSpeed);
+        }
+
+        //後退
         if (Input.GetKey(KeyCode.S))
         {
             Quaternion backwardAngle = Quaternion.Euler(0, 180, 0);
             Vector3 backward = backwardAngle.normalized * cacheTransform.forward;
             Move(moveSpeed, maxSpeed, backward);
+            droneObject.localRotation = Quaternion.Slerp(droneObject.localRotation, backMoveRotate, moveRotateSpeed);
         }
+        else
+        {
+            droneObject.localRotation = Quaternion.Slerp(droneObject.localRotation, Quaternion.identity, moveRotateSpeed);
+        }
+
+        //右移動
         if (Input.GetKey(KeyCode.D))
         {
             Quaternion rightAngle = Quaternion.Euler(0, 90, 0);
             Vector3 right = rightAngle.normalized * cacheTransform.forward;
             Move(moveSpeed, maxSpeed, right);
+            droneObject.localRotation = Quaternion.Slerp(droneObject.localRotation, rightMoveRotate, moveRotateSpeed);
         }
+        else
+        {
+            droneObject.localRotation = Quaternion.Slerp(droneObject.localRotation, Quaternion.identity, moveRotateSpeed);
+        }
+
+        //上下移動
         if (Input.mouseScrollDelta.y != 0)
         {
             Quaternion upAngle = Quaternion.Euler(-90, 0, 0);
@@ -308,12 +346,12 @@ public class Player : NetworkBehaviour
         if (!statusAction.GetIsStatus(PlayerStatusAction.Status.JAMMING))
         {
             //レーダー音の再生
-            if (Input.GetKeyDown(KeyCode.Space))
+            if (Input.GetKeyDown(KeyCode.Q))
             {
                 PlaySE((int)SE.RADAR, SoundManager.BaseSEVolume);
             }
             //レーダー使用
-            if (Input.GetKey(KeyCode.Space))
+            if (Input.GetKey(KeyCode.Q))
             {
                 if (!statusAction.GetIsStatus(PlayerStatusAction.Status.JAMMING))
                 {
@@ -323,7 +361,7 @@ public class Player : NetworkBehaviour
             }
         }
         //レーダー終了
-        if (Input.GetKeyUp(KeyCode.Space))
+        if (Input.GetKeyUp(KeyCode.Q))
         {
             IRadar r = radar;
             r.ReleaseRadar();
@@ -429,7 +467,7 @@ public class Player : NetworkBehaviour
         #region Boost
 
         //ブースト使用
-        if (Input.GetKeyDown(KeyCode.Q))
+        if (Input.GetKeyDown(KeyCode.Space))
         {
             //ブーストが使用可能なゲージ量ならブースト使用
             if (boostImage.fillAmount >= BOOST_POSSIBLE_MIN)
@@ -459,7 +497,7 @@ public class Player : NetworkBehaviour
         if (isBoost)
         {
             //キーを押し続けている間はゲージ消費
-            if (Input.GetKey(KeyCode.Q))
+            if (Input.GetKey(KeyCode.Space))
             {
                 boostImage.fillAmount -= 1.0f / maxBoostTime * Time.deltaTime;
 
@@ -478,7 +516,7 @@ public class Player : NetworkBehaviour
                 }
             }
             //キーを離したらブースト停止
-            if (Input.GetKeyUp(KeyCode.Q))
+            if (Input.GetKeyUp(KeyCode.Space))
             {
                 ModifySpeed(1 / boostAccele);
                 isBoost = false;
@@ -555,6 +593,13 @@ public class Player : NetworkBehaviour
 
         //デバッグ用
         //Debug.Log(_rigidbody.velocity.sqrMagnitude);
+    }
+
+    //移動処理
+    [Command]
+    void CmdRotateDrone()
+    {
+
     }
 
     //回転処理

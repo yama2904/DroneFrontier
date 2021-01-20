@@ -566,6 +566,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
+  droneObject: {fileID: 6211274377878697510}
   cameraInspector: {fileID: 4293304715628187314}
   barrierInspector: {fileID: 5221629600747843050, guid: 5114f92025dee6f4a80a77cf9d98d7d8,
     type: 3}
