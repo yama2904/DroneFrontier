@@ -9,11 +9,13 @@ public class Gatling : BaseWeapon
     AudioSource audioSource = null;
 
     //弾丸のパラメータ
-    [SerializeField] float speedPerSecond = 10.0f;  //1秒間に進む量
-    [SerializeField] float destroyTime = 1.0f;      //発射してから消えるまでの時間(射程)
-    [SerializeField] float trackingPower = 1.2f;    //追従力
-    [SerializeField] float shotPerSecond = 5.0f;    //1秒間に発射する弾数
-    
+    [SerializeField, Tooltip("1秒間に進む距離")] float speedPerSecond = 10.0f;  //1秒間に進む量
+    [SerializeField, Tooltip("射程")] float destroyTime = 1.0f;      //発射してから消えるまでの時間(射程)
+    [SerializeField, Tooltip("誘導力")] float trackingPower = 1.2f;    //追従力
+    [SerializeField, Tooltip("1秒間に発射する弾数")] float shotPerSecond = 5.0f;    //1秒間に発射する弾数
+
+    [SerializeField, Tooltip("威力")] float _power = 3f;
+
 
     public override void OnStartClient()
     {
@@ -29,7 +31,7 @@ public class Gatling : BaseWeapon
         ShotCountTime = ShotInterval;
         BulletsNum = 10;
         BulletsRemain = BulletsNum;
-        BulletPower = 3.0f;
+        BulletPower = _power;
     }
 
     protected override void Update()

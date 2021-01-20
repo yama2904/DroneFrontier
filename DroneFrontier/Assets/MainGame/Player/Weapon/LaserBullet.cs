@@ -9,9 +9,9 @@ public class LaserBullet : NetworkBehaviour
     //パラメータ
     public float ShotInterval { private get; set; } = 0;
     float shotCountTime = 0;
-    [SerializeField] float chargeTime = 3.0f;     //チャージする時間
-    [SerializeField] float lineRadius = 0.01f;    //レーザーの半径
-    [SerializeField] float lineRange = 4.0f;      //レーザーの射程
+    [SerializeField, Tooltip("チャージ時間")] float chargeTime = 3.0f;     //チャージする時間
+    [SerializeField, Tooltip("レーザーの当たり判定の半径")] float lineRadius = 0.01f;    //レーザーの半径
+    [SerializeField, Tooltip("レーザーの射程")] float lineRange = 4.0f;      //レーザーの射程
     public bool IsShotBeam { get; private set; } = false;
     bool isStartCharge = false;
     AudioSource audioSource = null;
@@ -91,7 +91,7 @@ public class LaserBullet : NetworkBehaviour
         endObjectTransform.localRotation = midwayObjectTransform.localRotation;   //Midwayと同じ向き
 
         audioSource = GetComponent<AudioSource>();
-        ModifyLaserLength(lineRadius);
+        ModifyLaserLength(lineRange);
         StopShot();
     }
 

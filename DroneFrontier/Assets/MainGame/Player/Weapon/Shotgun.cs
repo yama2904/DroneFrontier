@@ -7,16 +7,19 @@ public class Shotgun : BaseWeapon
 {
     //ショットガンのパラメータ
     [SerializeField] Bullet bullet = null;    //弾のオブジェクト
-    [SerializeField] float angle = 10.0f;     //拡散力
-    [SerializeField] float angleDiff = 3.0f;  //角度の変動量
+    [SerializeField, Tooltip("拡散力")] float angle = 10.0f;     //拡散力
+    [SerializeField, Tooltip("拡散力のランダム値")] float angleDiff = 3.0f;  //角度の変動量
     AudioSource audioSource = null;
 
     //弾丸のパラメータ
-    [SerializeField] float speedPerSecond = 10.0f;  //1秒間に進む量
-    [SerializeField] float destroyTime = 0.3f;      //発射してから消えるまでの時間(射程)
-    [SerializeField] float trackingPower = 0;       //追従力
-    [SerializeField] float shotPerSecond = 2.0f;    //1秒間に発射する弾数
+    [SerializeField, Tooltip("1秒間に進む距離")] float speedPerSecond = 10.0f;  //1秒間に進む量
+    [SerializeField, Tooltip("射程")] float destroyTime = 0.3f;      //発射してから消えるまでの時間(射程)
+    float trackingPower = 0;       //追従力
+    [SerializeField, Tooltip("1秒間に発射する弾数")] float shotPerSecond = 2.0f;    //1秒間に発射する弾数
 
+    [SerializeField, Tooltip("リキャスト時間")] float _recast = 2f;
+    [SerializeField, Tooltip("ストック可能な弾数")] int _bulletsNum = 5;
+    [SerializeField, Tooltip("威力")] float _power = 8f;
 
     public override void OnStartClient()
     {
@@ -28,12 +31,12 @@ public class Shotgun : BaseWeapon
 
     protected override void Start()
     {
-        Recast = 2.0f;
+        Recast = _recast;
         ShotInterval = 1.0f / shotPerSecond;
         ShotCountTime = ShotInterval;
-        BulletsNum = 5;
+        BulletsNum = _bulletsNum;
         BulletsRemain = BulletsNum;
-        BulletPower = 8.0f;
+        BulletPower = _power;
         
         //乱数のシード値の設定
         Random.InitState(System.DateTime.Now.Millisecond);

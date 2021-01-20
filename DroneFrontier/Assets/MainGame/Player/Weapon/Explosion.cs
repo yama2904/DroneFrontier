@@ -7,11 +7,11 @@ using Mirror;
 public class Explosion : NetworkBehaviour
 {
     [SyncVar, HideInInspector] public GameObject Shooter = null;  //撃ったプレイヤー
-    [SerializeField] float size = 20;    //爆発範囲
-    [SerializeField] float power = 20;   //威力
-    [SerializeField] float powerDownRate = 0.8f;      //中心地からの距離による威力減衰率
-    [SerializeField] float notPowerDownRange = 0.25f; //威力が減衰しない範囲
-    [SerializeField] float lengthReference = 0.1f;    //威力減衰の基準の長さ
+    [SerializeField, Tooltip("爆発範囲")] float size = 20;    //爆発範囲
+    [SerializeField, Tooltip("威力")] float power = 20;   //威力
+    [SerializeField, Tooltip("爆発の中心地からの距離の威力減衰率(0～1)")] float powerDownRate = 0.2f; //中心地からの距離による威力減衰率
+    [SerializeField, Tooltip("威力が減衰しない範囲")] float notPowerDownRange = 0.25f; //威力が減衰しない範囲
+    [SerializeField, Tooltip("lengthReference長さごとにpowerDownRate%ダメージが減少する")] float lengthReference = 0.1f;    //威力減衰の基準の長さ
     AudioSource audioSource = null;
 
     SyncList<GameObject> wasHitObjects = new SyncList<GameObject>();    //触れたオブジェクトを全て格納する
@@ -87,7 +87,7 @@ public class Explosion : NetworkBehaviour
         }
 
         //長さに応じた減衰率を適用する
-        return power * Mathf.Pow(powerDownRate, distance / lengthReference);
+        return power * Mathf.Pow(1 - powerDownRate, distance / lengthReference);
     }
 
     void DestroyMe()

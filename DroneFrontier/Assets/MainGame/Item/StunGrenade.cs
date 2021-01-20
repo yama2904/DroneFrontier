@@ -7,10 +7,10 @@ public class StunGrenade : NetworkBehaviour
 {
     [SyncVar] GameObject thrower = null;
     [SerializeField] StunImpact stunImpact = null;
-    [SerializeField] Transform throwRotate = null;
+    [SerializeField ,Tooltip("投げる角度")] Transform throwRotate = null;
 
-    [SerializeField] float throwPower = 10.0f;  //投げる速度
-    [SerializeField] float impactTime = 1.0f;   //着弾時間
+    [SerializeField, Tooltip("投げる速度")] float throwPower = 10.0f;  //投げる速度
+    [SerializeField, Tooltip("着弾時間")] float impactTime = 1.0f;   //着弾時間
 
     public override void OnStartClient()
     {

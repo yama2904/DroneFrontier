@@ -8,20 +8,6 @@ public class Test : MonoBehaviour
     float deltaTime;
     int count;
 
-    //カメラ用変数
-    [SerializeField] GameObject subCamera = null;
-    //GameObject mainCamera;
-    bool isMainCamera = true;
-
-    [SerializeField] Player player;
-    [SerializeField] Transform playerPos;
-    [SerializeField] CPUController cpu;
-    [SerializeField] Transform cpuPos;
-
-    [SerializeField] bool isPlayerDebug = false;
-    [SerializeField] BaseWeapon.Weapon playerWeapon = BaseWeapon.Weapon.SHOTGUN;
-    [SerializeField] BaseWeapon.Weapon cpuWeapon = BaseWeapon.Weapon.SHOTGUN;
-
     [SerializeField] bool playBGM = true;
 
     private void Awake()
@@ -34,24 +20,6 @@ public class Test : MonoBehaviour
         deltaTime = 0;
         count = 0;
 
-        if (!MainGameManager.IsMulti)
-        {
-            if (isPlayerDebug)
-            {
-                Player p = Instantiate(player);
-                p.transform.parent = null;
-                p.transform.position = playerPos.position;
-                p.transform.rotation = playerPos.rotation;
-                Player.SetSubWeapon = playerWeapon;
-
-                CPUController c = Instantiate(cpu);
-                c.transform.parent = null;
-                c.transform.position = cpuPos.position;
-                c.transform.rotation = cpuPos.rotation;
-                c.SetSubWeapon(cpuWeapon);
-            }
-        }
-
         if (playBGM)
         {
             SoundManager.Play(SoundManager.BGM.DRONE_UP, 1.0f);
@@ -60,49 +28,6 @@ public class Test : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.K))
-        {
-            isMainCamera = !isMainCamera;
-            if (isMainCamera)
-            {
-                Camera.main.depth = 1;
-                subCamera.GetComponent<Camera>().depth = 0;
-            }
-            else
-            {
-                Camera.main.depth = 0;
-                subCamera.GetComponent<Camera>().depth = 1;
-            }
-        }
-
-        if (!isMainCamera)
-        {
-            if (Input.GetKey(KeyCode.UpArrow))
-            {
-                subCamera.transform.Translate(0, 0, 0.01f);
-            }
-            if (Input.GetKey(KeyCode.LeftArrow))
-            {
-                subCamera.transform.Translate(-0.01f, 0, 0);
-            }
-            if (Input.GetKey(KeyCode.DownArrow))
-            {
-                subCamera.transform.Translate(0, 0, -0.01f);
-            }
-            if (Input.GetKey(KeyCode.RightArrow))
-            {
-                subCamera.transform.Translate(0.01f, 0, 0);
-            }
-            if (Input.GetKey(KeyCode.RightShift))
-            {
-                subCamera.transform.Translate(0, 0.01f, 0);
-            }
-            if (Input.GetKey(KeyCode.RightControl))
-            {
-                subCamera.transform.Translate(0, -0.01f, 0);
-            }
-        }
-
         if (playBGM)
         {
             if(SoundManager.IsPlayingBGM == SoundManager.BGM.NONE)

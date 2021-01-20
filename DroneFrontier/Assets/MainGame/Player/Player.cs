@@ -32,13 +32,13 @@ public class Player : NetworkBehaviour
 
 
     //移動用
-    float moveSpeed = 0;      //移動速度
+    [SerializeField, Tooltip("移動速度")] float moveSpeed = 0;      //移動速度
     float maxSpeed = 0;       //最高速度
     float minSpeed = 0;       //最低速度
 
     //回転用
-    float rotateSpeed = 5.0f;
-    float LimitCameraTiltX { get; set; } = 40.0f;
+    [SerializeField, Tooltip("回転速度")] float rotateSpeed = 5.0f;
+    [SerializeField, Tooltip("上下の回転制限角度")] float limitCameraTiltX = 40.0f;
 
     //カメラ
     [SerializeField] Camera cameraInspector = null;
@@ -50,17 +50,17 @@ public class Player : NetworkBehaviour
 
     //ロックオン
     [SerializeField] LockOn lockOn = null;
-    float lockOnTrackingSpeed = 0.1f;
+    [SerializeField, Tooltip("ロックオンした際に敵に向く速度")] float lockOnTrackingSpeed = 0.1f;
 
     //レーダー
     [SerializeField] Radar radar = null;
 
     //ブースト用
     const float BOOST_POSSIBLE_MIN = 0.2f;  //ブースト可能な最低ゲージ量
-    [SerializeField] Image boostImage = null;       //ブーストのゲージ画像
-    float boostAccele = 2.0f;      //ブーストの加速度
-    float maxBoostTime = 5.0f;     //ブーストできる最大の時間
-    float boostRecastTime = 6.0f;  //ブーストのリキャスト時間
+    [SerializeField] Image boostImage = null;   //ブーストのゲージ画像
+    [SerializeField, Tooltip("ブーストの加速度")] float boostAccele = 3.0f;  //ブーストの加速度
+    [SerializeField, Tooltip("ブースト時間")] float maxBoostTime = 5.0f;   //ブーストできる最大の時間
+    [SerializeField, Tooltip("ブーストのリキャスト時間")]float boostRecastTime = 6.0f;  //ブーストのリキャスト時間
     bool isBoost = false;
 
 
@@ -76,7 +76,7 @@ public class Player : NetworkBehaviour
     [SyncVar] GameObject subWeapon = null;
     public static BaseWeapon.Weapon SetSubWeapon { private get; set; } = BaseWeapon.Weapon.SHOTGUN;
     bool[] usingWeapons = new bool[(int)Weapon.NONE];    //使用中の武器
-    float atackingDownSpeed = 0.5f;   //攻撃中の移動速度の低下率
+    [SerializeField, Tooltip("攻撃中の移動速度の低下率")] float atackingDownSpeed = 0.5f;   //攻撃中の移動速度の低下率
     bool initSubWeapon = false;
 
 
@@ -212,7 +212,7 @@ public class Player : NetworkBehaviour
         //パラメータ初期化
         syncHP = 30;
         moveSpeed = 20.0f;
-        maxSpeed = moveSpeed * 2;
+        maxSpeed = moveSpeed * boostAccele;
         minSpeed = moveSpeed * 0.3f;
 
         //配列初期化
@@ -264,11 +264,11 @@ public class Player : NetworkBehaviour
         if (Input.GetKey(KeyCode.W))
         {
             Move(moveSpeed, maxSpeed, cacheTransform.forward);
-            droneObject.localRotation = Quaternion.Slerp(droneObject.localRotation, frontMoveRotate, moveRotateSpeed);
+            CmdCallRotateDroneObject(frontMoveRotate, moveRotateSpeed);
         }
         else
         {
-            droneObject.localRotation = Quaternion.Slerp(droneObject.localRotation, Quaternion.identity, moveRotateSpeed);
+            CmdCallRotateDroneObject(Quaternion.identity, moveRotateSpeed);
         }
 
         //左移動
@@ -277,11 +277,11 @@ public class Player : NetworkBehaviour
             Quaternion leftAngle = Quaternion.Euler(0, -90, 0);
             Vector3 left = leftAngle.normalized * cacheTransform.forward;
             Move(moveSpeed, maxSpeed, left);
-            droneObject.localRotation = Quaternion.Slerp(droneObject.localRotation, leftMoveRotate, moveRotateSpeed);
+            CmdCallRotateDroneObject(leftMoveRotate, moveRotateSpeed);
         }
         else
         {
-            droneObject.localRotation = Quaternion.Slerp(droneObject.localRotation, Quaternion.identity, moveRotateSpeed);
+            CmdCallRotateDroneObject(Quaternion.identity, moveRotateSpeed);
         }
 
         //後退
@@ -290,11 +290,11 @@ public class Player : NetworkBehaviour
             Quaternion backwardAngle = Quaternion.Euler(0, 180, 0);
             Vector3 backward = backwardAngle.normalized * cacheTransform.forward;
             Move(moveSpeed, maxSpeed, backward);
-            droneObject.localRotation = Quaternion.Slerp(droneObject.localRotation, backMoveRotate, moveRotateSpeed);
+            CmdCallRotateDroneObject(backMoveRotate, moveRotateSpeed);
         }
         else
         {
-            droneObject.localRotation = Quaternion.Slerp(droneObject.localRotation, Quaternion.identity, moveRotateSpeed);
+            CmdCallRotateDroneObject(Quaternion.identity, moveRotateSpeed);
         }
 
         //右移動
@@ -303,11 +303,11 @@ public class Player : NetworkBehaviour
             Quaternion rightAngle = Quaternion.Euler(0, 90, 0);
             Vector3 right = rightAngle.normalized * cacheTransform.forward;
             Move(moveSpeed, maxSpeed, right);
-            droneObject.localRotation = Quaternion.Slerp(droneObject.localRotation, rightMoveRotate, moveRotateSpeed);
+            CmdCallRotateDroneObject(rightMoveRotate, moveRotateSpeed);
         }
         else
         {
-            droneObject.localRotation = Quaternion.Slerp(droneObject.localRotation, Quaternion.identity, moveRotateSpeed);
+            CmdCallRotateDroneObject(Quaternion.identity, moveRotateSpeed);
         }
 
         //上下移動
@@ -579,28 +579,30 @@ public class Player : NetworkBehaviour
             if (_Rigidbody.velocity.sqrMagnitude < Mathf.Pow(_maxSpeed, 2))
             {
                 _Rigidbody.AddForce(direction * speed, ForceMode.Force);
-
-
-                //デバッグ用
-                //Debug.Log(Mathf.Pow(_maxSpeed, 2));
             }
         }
         else
         {
             _Rigidbody.AddForce(direction * speed + (direction * speed - _Rigidbody.velocity), ForceMode.Force);
         }
-
-
-        //デバッグ用
-        //Debug.Log(_rigidbody.velocity.sqrMagnitude);
     }
+
+    #region RotaetDroneObject
 
     //移動処理
     [Command]
-    void CmdRotateDrone()
+    void CmdCallRotateDroneObject(Quaternion rotate, float speed)
     {
-
+        RpcRotateDroneObject(rotate, speed);
     }
+
+    [ClientRpc]
+    void RpcRotateDroneObject(Quaternion rotate, float speed)
+    {
+        droneObject.localRotation = Quaternion.Slerp(droneObject.localRotation, rotate, speed);
+    }
+
+    #endregion
 
     //回転処理
     void Rotate(float valueX, float valueY, float speed)
@@ -615,13 +617,13 @@ public class Player : NetworkBehaviour
             //カメラの上下の回転に制限をかける
             Vector3 localAngle = cacheTransform.localEulerAngles;
             localAngle.x += angle.y * -1;
-            if (localAngle.x > LimitCameraTiltX && localAngle.x < 180)
+            if (localAngle.x > limitCameraTiltX && localAngle.x < 180)
             {
-                localAngle.x = LimitCameraTiltX;
+                localAngle.x = limitCameraTiltX;
             }
-            if (localAngle.x < 360 - LimitCameraTiltX && localAngle.x > 180)
+            if (localAngle.x < 360 - limitCameraTiltX && localAngle.x > 180)
             {
-                localAngle.x = 360 - LimitCameraTiltX;
+                localAngle.x = 360 - limitCameraTiltX;
             }
             cacheTransform.localEulerAngles = localAngle;
         }
@@ -691,6 +693,20 @@ public class Player : NetworkBehaviour
         else
         {
             return;
+        }
+    }
+
+    //スピードを変更する
+    void ModifySpeed(float speedMgnf)
+    {
+        moveSpeed *= speedMgnf;
+        if (moveSpeed > maxSpeed)
+        {
+            moveSpeed = maxSpeed;
+        }
+        if (moveSpeed < minSpeed)
+        {
+            moveSpeed = minSpeed;
         }
     }
 
@@ -822,20 +838,6 @@ public class Player : NetworkBehaviour
     public void UnSetBarrierWeak()
     {
         statusAction.UnSetBarrierWeak();
-    }
-
-    //スピードを変更する
-    void ModifySpeed(float speedMgnf)
-    {
-        moveSpeed *= speedMgnf;
-        if (moveSpeed > maxSpeed)
-        {
-            moveSpeed = maxSpeed;
-        }
-        if (moveSpeed < minSpeed)
-        {
-            moveSpeed = minSpeed;
-        }
     }
 
     //ジャミング

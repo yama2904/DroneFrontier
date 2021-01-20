@@ -10,8 +10,8 @@ public class LaserWeapon : BaseWeapon
     const float SHOT_POSSIBLE_MIN = 0.2f;        //発射可能な最低ゲージ量
     [SerializeField] LaserBullet laserBullet = null;
     [SyncVar] GameObject createBullet = null;
-    [SerializeField] float maxShotTime = 5;      //最大何秒発射できるか
-    [SerializeField] float hitPerSecond = 5.0f;  //1秒間にヒットする回数
+    [SerializeField, Tooltip("何秒発射できるか")] float maxShotTime = 5;      //最大何秒発射できるか
+    [SerializeField, Tooltip("1秒間にヒットする回数")] float hitPerSecond = 5.0f;  //1秒間にヒットする回数
 
     [SerializeField] Image laserGaugeImage = null;
     float gaugeAmout = 1.0f;
@@ -26,16 +26,19 @@ public class LaserWeapon : BaseWeapon
     }
     List<bool> isShots = new List<bool>();
 
-    
+    [SerializeField, Tooltip("リキャスト時間")] float _recast = 8f;
+    [SerializeField, Tooltip("威力")] float _power = 5f;
+
+
     #region Init
 
     protected override void Start()
     {
         //スーパークラスの変数
-        Recast = 8.0f;
+        Recast = _recast;
         ShotInterval = 1.0f / hitPerSecond;
         ShotCountTime = ShotInterval;
-        BulletPower = 5.0f;
+        BulletPower = _power;
         gaugeAmout = 1.0f;
     }
     
