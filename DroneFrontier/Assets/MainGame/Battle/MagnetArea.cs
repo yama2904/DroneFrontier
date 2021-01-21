@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class MagnetArea : MonoBehaviour
 {
-    [SerializeField] float downPercent = 0.7f;  //下がる倍率
+    [SerializeField, Tooltip("速度低下率")] float downPercent = 0.7f;  //下がる倍率
     public float DownPercent { get { return downPercent; } }
 
     //バグ防止用

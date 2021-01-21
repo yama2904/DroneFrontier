@@ -33827,7 +33827,7 @@ MonoBehaviour:
   Shooter: {fileID: 0}
   size: 20
   power: 20
-  powerDownRate: 0.8
+  powerDownRate: 0.2
   notPowerDownRange: 0.25
   lengthReference: 0.1
 --- !u!135 &93049261

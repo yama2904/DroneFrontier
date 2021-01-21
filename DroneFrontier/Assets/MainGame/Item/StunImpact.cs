@@ -6,8 +6,8 @@ using Mirror;
 public class StunImpact : NetworkBehaviour
 {
     [SyncVar, HideInInspector] public GameObject thrower = null;
-    [SerializeField] float stunTime = 9.0f;
-    [SerializeField] float destroyTime = 0.5f;
+    [SerializeField, Tooltip("スタン状態の時間")] float stunTime = 9.0f;
+    float destroyTime = 0.5f;
 
     public override void OnStartClient()
     {

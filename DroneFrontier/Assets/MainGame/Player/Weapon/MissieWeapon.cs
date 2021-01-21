@@ -10,21 +10,25 @@ public class MissieWeapon : BaseWeapon
     [SyncVar] int useMissile = -1;
 
     //弾丸のパラメータ
-    [SerializeField] float speedPerSecond = 13.0f;  //1秒間に進む量
-    [SerializeField] float destroyTime = 2.0f;      //発射してから消えるまでの時間(射程)
-    [SerializeField] float trackingPower = 2.3f;    //追従力
-    [SerializeField] float shotPerSecond = 1.0f;    //1秒間に発射する弾数
+    [SerializeField, Tooltip("1秒間に進む距離")] float speedPerSecond = 13.0f;  //1秒間に進む量
+    [SerializeField, Tooltip("射程")] float destroyTime = 2.0f;      //発射してから消えるまでの時間(射程)
+    [SerializeField, Tooltip("誘導力")] float trackingPower = 2.3f;    //追従力
+    [SerializeField, Tooltip("1秒間に発射する弾数")] float shotPerSecond = 1.0f;    //1秒間に発射する弾数
+
+    [SerializeField, Tooltip("リキャスト時間")] float _recast = 10f;
+    [SerializeField, Tooltip("ストック可能な弾数")] int _bulletsNum = 3;
+    [SerializeField, Tooltip("威力")] float _power = 20f;
 
 
     public override void OnStartClient()
     {
         base.OnStartClient();
-        Recast = 10.0f;
+        Recast = _recast;
         ShotInterval = 1.0f / shotPerSecond;
         ShotCountTime = ShotInterval;
-        BulletsNum = 3;
+        BulletsNum = _bulletsNum;
         BulletsRemain = BulletsNum;
-        BulletPower = 20.0f;
+        BulletPower = _power;
     }
 
     protected override void Start() { }

@@ -12,7 +12,7 @@ public class Player : NetworkBehaviour
     public bool IsLocalPlayer { get { return isLocalPlayer; } }
 
     //破壊されたか
-    [SyncVar] bool syncIsDestroy = false;   
+    [SyncVar] bool syncIsDestroy = false;
     public bool IsDestroy { get { return syncIsDestroy; } }
 
     //コンポーネント用
@@ -22,14 +22,23 @@ public class Player : NetworkBehaviour
     PlayerStatusAction statusAction = null;
     bool isPlayerStatusInit = false;
 
+    //ドローンが移動した際にオブジェクトが傾く処理用
+    [SerializeField] Transform droneObject = null;
+    float moveRotateSpeed = 0.02f;
+    Quaternion frontMoveRotate = Quaternion.Euler(50, 0, 0);
+    Quaternion leftMoveRotate = Quaternion.Euler(0, 0, 60);
+    Quaternion rightMoveRotate = Quaternion.Euler(0, 0, -60);
+    Quaternion backMoveRotate = Quaternion.Euler(-70, 0, 0);
+
+
     //移動用
-    float moveSpeed = 0;      //移動速度
+    [SerializeField, Tooltip("移動速度")] float moveSpeed = 20;      //移動速度
     float maxSpeed = 0;       //最高速度
     float minSpeed = 0;       //最低速度
 
     //回転用
-    float rotateSpeed = 5.0f;
-    float LimitCameraTiltX { get; set; } = 40.0f;
+    [SerializeField, Tooltip("回転速度")] float rotateSpeed = 5.0f;
+    [SerializeField, Tooltip("上下の回転制限角度")] float limitCameraTiltX = 40.0f;
 
     //カメラ
     [SerializeField] Camera cameraInspector = null;
@@ -41,17 +50,17 @@ public class Player : NetworkBehaviour
 
     //ロックオン
     [SerializeField] LockOn lockOn = null;
-    float lockOnTrackingSpeed = 0.1f;
+    [SerializeField, Tooltip("ロックオンした際に敵に向く速度")] float lockOnTrackingSpeed = 0.1f;
 
     //レーダー
     [SerializeField] Radar radar = null;
 
     //ブースト用
     const float BOOST_POSSIBLE_MIN = 0.2f;  //ブースト可能な最低ゲージ量
-    [SerializeField] Image boostImage = null;       //ブーストのゲージ画像
-    float boostAccele = 2.0f;      //ブーストの加速度
-    float maxBoostTime = 5.0f;     //ブーストできる最大の時間
-    float boostRecastTime = 6.0f;  //ブーストのリキャスト時間
+    [SerializeField] Image boostImage = null;   //ブーストのゲージ画像
+    [SerializeField, Tooltip("ブーストの加速度")] float boostAccele = 3.0f;  //ブーストの加速度
+    [SerializeField, Tooltip("ブースト時間")] float maxBoostTime = 5.0f;   //ブーストできる最大の時間
+    [SerializeField, Tooltip("ブーストのリキャスト時間")] float boostRecastTime = 6.0f;  //ブーストのリキャスト時間
     bool isBoost = false;
 
 
@@ -67,7 +76,7 @@ public class Player : NetworkBehaviour
     [SyncVar] GameObject subWeapon = null;
     public static BaseWeapon.Weapon SetSubWeapon { private get; set; } = BaseWeapon.Weapon.SHOTGUN;
     bool[] usingWeapons = new bool[(int)Weapon.NONE];    //使用中の武器
-    float atackingDownSpeed = 0.5f;   //攻撃中の移動速度の低下率
+    [SerializeField, Tooltip("攻撃中の移動速度の低下率")] float atackingDownSpeed = 0.5f;   //攻撃中の移動速度の低下率
     bool initSubWeapon = false;
 
 
@@ -85,7 +94,7 @@ public class Player : NetworkBehaviour
     //サウンド
     enum SE
     {
-        ACCELERATION,   //加速
+        Boost,          //ブースト
         DEATH,          //死亡
         PROPELLER,      //プロペラ
         RADAR,          //レーダー
@@ -153,7 +162,7 @@ public class Player : NetworkBehaviour
 
         //AudioSourceの初期化
         audios = GetComponents<AudioSource>();
-        audios[(int)SE.ACCELERATION].clip = SoundManager.GetAudioClip(SoundManager.SE.ACCELERAION);
+        audios[(int)SE.Boost].clip = SoundManager.GetAudioClip(SoundManager.SE.BOOST);
         audios[(int)SE.DEATH].clip = SoundManager.GetAudioClip(SoundManager.SE.DEATH);
         audios[(int)SE.PROPELLER].clip = SoundManager.GetAudioClip(SoundManager.SE.PROPELLER);
         audios[(int)SE.RADAR].clip = SoundManager.GetAudioClip(SoundManager.SE.RADAR);
@@ -202,8 +211,8 @@ public class Player : NetworkBehaviour
     {
         //パラメータ初期化
         syncHP = 30;
-        moveSpeed = 20.0f;
-        maxSpeed = moveSpeed * 2;
+        //moveSpeed = 20.0f;
+        maxSpeed = moveSpeed * boostAccele;
         minSpeed = moveSpeed * 0.3f;
 
         //配列初期化
@@ -233,15 +242,16 @@ public class Player : NetworkBehaviour
             }
         }
 
+        //デバッグ用
         if (Input.GetKeyDown(KeyCode.V))
         {
             isV = !isV;
             Debug.Log("移動処理切り替え");
         }
 
+        //回転処理
         if (MainGameManager.IsCursorLock)
         {
-            //回転処理
             float x = Input.GetAxis("Mouse X");
             float y = Input.GetAxis("Mouse Y");
             Rotate(x, y, rotateSpeed * CameraManager.CameraSpeed);
@@ -251,28 +261,57 @@ public class Player : NetworkBehaviour
         #region Move
 
         //移動処理
+        //前進
         if (Input.GetKey(KeyCode.W))
         {
             Move(moveSpeed, maxSpeed, cacheTransform.forward);
+            CmdCallRotateDroneObject(frontMoveRotate, moveRotateSpeed);
         }
+        else
+        {
+            CmdCallRotateDroneObject(Quaternion.identity, moveRotateSpeed);
+        }
+
+        //左移動
         if (Input.GetKey(KeyCode.A))
         {
             Quaternion leftAngle = Quaternion.Euler(0, -90, 0);
             Vector3 left = leftAngle.normalized * cacheTransform.forward;
             Move(moveSpeed, maxSpeed, left);
+            CmdCallRotateDroneObject(leftMoveRotate, moveRotateSpeed);
         }
+        else
+        {
+            CmdCallRotateDroneObject(Quaternion.identity, moveRotateSpeed);
+        }
+
+        //後退
         if (Input.GetKey(KeyCode.S))
         {
             Quaternion backwardAngle = Quaternion.Euler(0, 180, 0);
             Vector3 backward = backwardAngle.normalized * cacheTransform.forward;
             Move(moveSpeed, maxSpeed, backward);
+            CmdCallRotateDroneObject(backMoveRotate, moveRotateSpeed);
         }
+        else
+        {
+            CmdCallRotateDroneObject(Quaternion.identity, moveRotateSpeed);
+        }
+
+        //右移動
         if (Input.GetKey(KeyCode.D))
         {
             Quaternion rightAngle = Quaternion.Euler(0, 90, 0);
             Vector3 right = rightAngle.normalized * cacheTransform.forward;
             Move(moveSpeed, maxSpeed, right);
+            CmdCallRotateDroneObject(rightMoveRotate, moveRotateSpeed);
         }
+        else
+        {
+            CmdCallRotateDroneObject(Quaternion.identity, moveRotateSpeed);
+        }
+
+        //上下移動
         if (Input.mouseScrollDelta.y != 0)
         {
             Quaternion upAngle = Quaternion.Euler(-90, 0, 0);
@@ -281,7 +320,7 @@ public class Player : NetworkBehaviour
         }
 
         #endregion
-        
+
         #region LockOn
 
         //ロックオン使用
@@ -308,12 +347,12 @@ public class Player : NetworkBehaviour
         if (!statusAction.GetIsStatus(PlayerStatusAction.Status.JAMMING))
         {
             //レーダー音の再生
-            if (Input.GetKeyDown(KeyCode.Space))
+            if (Input.GetKeyDown(KeyCode.Q))
             {
                 PlaySE((int)SE.RADAR, SoundManager.BaseSEVolume);
             }
             //レーダー使用
-            if (Input.GetKey(KeyCode.Space))
+            if (Input.GetKey(KeyCode.Q))
             {
                 if (!statusAction.GetIsStatus(PlayerStatusAction.Status.JAMMING))
                 {
@@ -323,7 +362,7 @@ public class Player : NetworkBehaviour
             }
         }
         //レーダー終了
-        if (Input.GetKeyUp(KeyCode.Space))
+        if (Input.GetKeyUp(KeyCode.Q))
         {
             IRadar r = radar;
             r.ReleaseRadar();
@@ -425,11 +464,11 @@ public class Player : NetworkBehaviour
         }
 
         #endregion
-        
+
         #region Boost
 
         //ブースト使用
-        if (Input.GetKeyDown(KeyCode.Q))
+        if (Input.GetKeyDown(KeyCode.Space))
         {
             //ブーストが使用可能なゲージ量ならブースト使用
             if (boostImage.fillAmount >= BOOST_POSSIBLE_MIN)
@@ -447,8 +486,8 @@ public class Player : NetworkBehaviour
                 }
 
                 ModifySpeed(boostAccele);
-                isBoost = true;                
-                PlaySE((int)SE.ACCELERATION, SoundManager.BaseSEVolume, true);    //加速音の再生
+                isBoost = true;
+                PlaySE((int)SE.Boost, SoundManager.BaseSEVolume, true);    //加速音の再生
 
 
                 //デバッグ用
@@ -459,7 +498,7 @@ public class Player : NetworkBehaviour
         if (isBoost)
         {
             //キーを押し続けている間はゲージ消費
-            if (Input.GetKey(KeyCode.Q))
+            if (Input.GetKey(KeyCode.Space))
             {
                 boostImage.fillAmount -= 1.0f / maxBoostTime * Time.deltaTime;
 
@@ -470,19 +509,19 @@ public class Player : NetworkBehaviour
 
                     ModifySpeed(1 / boostAccele);
                     isBoost = false;
-                    StopSE((int)SE.ACCELERATION);
+                    StopSE((int)SE.Boost);
 
 
                     //デバッグ用
-                   Debug.Log("ブースト終了");
+                    Debug.Log("ブースト終了");
                 }
             }
             //キーを離したらブースト停止
-            if (Input.GetKeyUp(KeyCode.Q))
+            if (Input.GetKeyUp(KeyCode.Space))
             {
                 ModifySpeed(1 / boostAccele);
                 isBoost = false;
-                StopSE((int)SE.ACCELERATION);
+                StopSE((int)SE.Boost);
 
 
                 //デバッグ用
@@ -541,21 +580,30 @@ public class Player : NetworkBehaviour
             if (_Rigidbody.velocity.sqrMagnitude < Mathf.Pow(_maxSpeed, 2))
             {
                 _Rigidbody.AddForce(direction * speed, ForceMode.Force);
-
-
-                //デバッグ用
-                //Debug.Log(Mathf.Pow(_maxSpeed, 2));
             }
         }
         else
         {
             _Rigidbody.AddForce(direction * speed + (direction * speed - _Rigidbody.velocity), ForceMode.Force);
         }
-
-
-        //デバッグ用
-        //Debug.Log(_rigidbody.velocity.sqrMagnitude);
     }
+
+    #region RotaetDroneObject
+
+    //移動処理
+    [Command]
+    void CmdCallRotateDroneObject(Quaternion rotate, float speed)
+    {
+        RpcRotateDroneObject(rotate, speed);
+    }
+
+    [ClientRpc]
+    void RpcRotateDroneObject(Quaternion rotate, float speed)
+    {
+        droneObject.localRotation = Quaternion.Slerp(droneObject.localRotation, rotate, speed);
+    }
+
+    #endregion
 
     //回転処理
     void Rotate(float valueX, float valueY, float speed)
@@ -570,13 +618,13 @@ public class Player : NetworkBehaviour
             //カメラの上下の回転に制限をかける
             Vector3 localAngle = cacheTransform.localEulerAngles;
             localAngle.x += angle.y * -1;
-            if (localAngle.x > LimitCameraTiltX && localAngle.x < 180)
+            if (localAngle.x > limitCameraTiltX && localAngle.x < 180)
             {
-                localAngle.x = LimitCameraTiltX;
+                localAngle.x = limitCameraTiltX;
             }
-            if (localAngle.x < 360 - LimitCameraTiltX && localAngle.x > 180)
+            if (localAngle.x < 360 - limitCameraTiltX && localAngle.x > 180)
             {
-                localAngle.x = 360 - LimitCameraTiltX;
+                localAngle.x = 360 - limitCameraTiltX;
             }
             cacheTransform.localEulerAngles = localAngle;
         }
@@ -621,7 +669,7 @@ public class Player : NetworkBehaviour
         if (t != Item.ItemType.NONE)
         {
             if (itemAction.UseItem(t))
-            {                
+            {
                 PlaySE((int)SE.USE_ITEM, SoundManager.BaseSEVolume);    //アイテム使用音の再生
                 items[(int)item] = Item.ItemType.NONE;
             }
@@ -646,6 +694,20 @@ public class Player : NetworkBehaviour
         else
         {
             return;
+        }
+    }
+
+    //スピードを変更する
+    void ModifySpeed(float speedMgnf)
+    {
+        moveSpeed *= speedMgnf;
+        if (moveSpeed > maxSpeed)
+        {
+            moveSpeed = maxSpeed;
+        }
+        if (moveSpeed < minSpeed)
+        {
+            moveSpeed = minSpeed;
         }
     }
 
@@ -779,20 +841,6 @@ public class Player : NetworkBehaviour
         statusAction.UnSetBarrierWeak();
     }
 
-    //スピードを変更する
-    void ModifySpeed(float speedMgnf)
-    {
-        moveSpeed *= speedMgnf;
-        if (moveSpeed > maxSpeed)
-        {
-            moveSpeed = maxSpeed;
-        }
-        if (moveSpeed < minSpeed)
-        {
-            moveSpeed = minSpeed;
-        }
-    }
-
     //ジャミング
     public void SetJamming()
     {
@@ -819,7 +867,7 @@ public class Player : NetworkBehaviour
         PlaySE((int)SE.MAGNETIC_AREA, SoundManager.BaseSEVolume, true);
         return statusAction.SetSpeedDown(ref moveSpeed, downPercent);
     }
-    
+
     //スピードダウン解除
     public void UnSetSpeedDown(int id)
     {

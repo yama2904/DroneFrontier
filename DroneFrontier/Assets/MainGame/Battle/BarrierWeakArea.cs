@@ -5,9 +5,9 @@ using System.Linq;
 
 public class BarrierWeakArea : MonoBehaviour
 {
-    [SerializeField] float lineRadius = 0.01f;  //レーザーの半径
-    [SerializeField] float lineRange = 100;    //射程
-    [SerializeField] float barrierWeakTime = 15.0f;  //バリアの弱体化時間
+    [SerializeField, Tooltip("レーザーの当たり判定の半径")] float lineRadius = 0.01f;  //レーザーの半径
+    float lineRange = 100;     //射程
+    [SerializeField, Tooltip("バリアの弱体化時間")] float barrierWeakTime = 15.0f;  //バリアの弱体化時間
 
     //キャッシュ用のtransform
     Transform cacheTransform = null;

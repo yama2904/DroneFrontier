@@ -6,7 +6,7 @@ using Mirror;
 public class Jamming : NetworkBehaviour
 {
     [SyncVar] GameObject creater;
-    [SerializeField] float destroyTime = 60.0f;
+    [SerializeField, Tooltip("ジャミングボットの生存時間")] float destroyTime = 60.0f;
 
     [SerializeField] GameObject jammingBot = null;
     [SerializeField] Transform jammingBotPosition = null;

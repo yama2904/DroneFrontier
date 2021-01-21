@@ -20,12 +20,13 @@ public class SoundManager : MonoBehaviour
 
     public enum SE
     {
-        ACCELERAION,        //加速
         BARRIER_DAMAGE,     //バリアダメージ
+        BEAM,               //ビーム
         BEAM_1,             //ビーム1
         BEAM_2,             //ビーム2
         BEAM_CAHRGE,        //チャージ
         BEAM_START,         //ビーム開始
+        BOOST,              //ブースト
         CANCEL,             //キャンセル
         DEATH,              //死亡
         DESTROY_BARRIER,    //バリア破壊
@@ -102,12 +103,13 @@ public class SoundManager : MonoBehaviour
         BGMPath[(int)BGM.DRONE_UP] = "Drone_up";
 
         string[] SEPath = new string[(int)SE.NONE];
-        SEPath[(int)SE.ACCELERAION] = "Acceleration";
         SEPath[(int)SE.BARRIER_DAMAGE] = "BarrierDamage";
+        SEPath[(int)SE.BEAM] = "Beam";
         SEPath[(int)SE.BEAM_1] = "Beam_1";
         SEPath[(int)SE.BEAM_2] = "Beam_2";
         SEPath[(int)SE.BEAM_CAHRGE] = "BeamCharge";
         SEPath[(int)SE.BEAM_START] = "BeamStart";
+        SEPath[(int)SE.BOOST] = "Boost";
         SEPath[(int)SE.CANCEL] = "Cancel";
         SEPath[(int)SE.DEATH] = "Death";
         SEPath[(int)SE.DESTROY_BARRIER] = "DestroyBarrier";
