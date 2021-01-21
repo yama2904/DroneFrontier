@@ -320,7 +320,7 @@ public class Player : NetworkBehaviour
         {
             Quaternion upAngle = Quaternion.Euler(-90, 0, 0);
             Vector3 upward = upAngle.normalized * Vector3.forward;
-            Move(moveSpeed * 4 * Input.mouseScrollDelta.y, maxSpeed * 4, upward);
+            Move(moveSpeed * 2 * Input.mouseScrollDelta.y, maxSpeed * 2, upward);
         }
 
         #endregion

@@ -1,8 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Mirror;
 
-public class DroneGuard : MonoBehaviour
+public class DroneGuard : NetworkBehaviour
 {
     enum Pattern
     {
@@ -14,6 +15,7 @@ public class DroneGuard : MonoBehaviour
     }
 
     [SerializeField] Pattern pattern = Pattern.NONE;
+    [SerializeField] float power = 200;
 
     float nowPosi;
 
@@ -35,6 +37,16 @@ public class DroneGuard : MonoBehaviour
         if(pattern == Pattern.THREE)
         {
             transform.position = new Vector3(transform.position.x, nowPosi + Mathf.PingPong(Time.time * 5, 5.5f), transform.position.z);
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag(TagNameManager.PLAYER))
+        {
+            Player p = collision.gameObject.GetComponent<Player>();
+            if (!p.IsLocalPlayer) return;
+            p.GetComponent<Rigidbody>().AddForce(p.transform.forward * power * -1, ForceMode.Impulse);
         }
     }
 }

@@ -12,7 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c300977abe4f274fa3b74e66b146197, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
   pattern: 3
+  power: 200
 --- !u!1001 &3445720409331069240
 PrefabInstance:
   m_ObjectHideFlags: 0
