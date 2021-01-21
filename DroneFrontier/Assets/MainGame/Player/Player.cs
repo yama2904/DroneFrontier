@@ -57,7 +57,8 @@ public class Player : NetworkBehaviour
 
     //ブースト用
     const float BOOST_POSSIBLE_MIN = 0.2f;  //ブースト可能な最低ゲージ量
-    [SerializeField] Image boostImage = null;   //ブーストのゲージ画像
+    [SerializeField] Image boostGaugeImage = null;   //ブーストのゲージ画像
+    [SerializeField] Image boostGaugeFrameImage = null; //ゲージ枠
     [SerializeField, Tooltip("ブーストの加速度")] float boostAccele = 3.0f;  //ブーストの加速度
     [SerializeField, Tooltip("ブースト時間")] float maxBoostTime = 5.0f;   //ブーストできる最大の時間
     [SerializeField, Tooltip("ブーストのリキャスト時間")] float boostRecastTime = 6.0f;  //ブーストのリキャスト時間
@@ -89,6 +90,7 @@ public class Player : NetworkBehaviour
         NONE
     }
     Item.ItemType[] items = new Item.ItemType[(int)ItemNum.NONE];
+    [SerializeField] Image itemFrameImage = null;
 
 
     //サウンド
@@ -180,8 +182,10 @@ public class Player : NetworkBehaviour
     {
         base.OnStartLocalPlayer();
         _camera.depth++;
-        boostImage.enabled = true;
-        boostImage.fillAmount = 1;
+        boostGaugeImage.enabled = true;
+        boostGaugeImage.fillAmount = 1;
+        boostGaugeFrameImage.enabled = true;
+        itemFrameImage.enabled = true;
 
         CmdCreateMainWeapon();
         CmdCreateSubWeapon();
@@ -471,7 +475,7 @@ public class Player : NetworkBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
         {
             //ブーストが使用可能なゲージ量ならブースト使用
-            if (boostImage.fillAmount >= BOOST_POSSIBLE_MIN)
+            if (boostGaugeImage.fillAmount >= BOOST_POSSIBLE_MIN)
             {
                 //バトルモードの場合
                 if (MainGameManager.Mode == MainGameManager.GameMode.BATTLE)
@@ -500,12 +504,12 @@ public class Player : NetworkBehaviour
             //キーを押し続けている間はゲージ消費
             if (Input.GetKey(KeyCode.Space))
             {
-                boostImage.fillAmount -= 1.0f / maxBoostTime * Time.deltaTime;
+                boostGaugeImage.fillAmount -= 1.0f / maxBoostTime * Time.deltaTime;
 
                 //ゲージが空になったらブースト停止
-                if (boostImage.fillAmount <= 0)
+                if (boostGaugeImage.fillAmount <= 0)
                 {
-                    boostImage.fillAmount = 0;
+                    boostGaugeImage.fillAmount = 0;
 
                     ModifySpeed(1 / boostAccele);
                     isBoost = false;
@@ -532,12 +536,12 @@ public class Player : NetworkBehaviour
         //ブースト未使用時にゲージ回復
         if (!isBoost)
         {
-            if (boostImage.fillAmount < 1.0f)
+            if (boostGaugeImage.fillAmount < 1.0f)
             {
-                boostImage.fillAmount += 1.0f / boostRecastTime * Time.deltaTime;
-                if (boostImage.fillAmount >= 1.0f)
+                boostGaugeImage.fillAmount += 1.0f / boostRecastTime * Time.deltaTime;
+                if (boostGaugeImage.fillAmount >= 1.0f)
                 {
-                    boostImage.fillAmount = 1;
+                    boostGaugeImage.fillAmount = 1;
                 }
             }
         }
