@@ -66,7 +66,7 @@ public class BattlePlayer : NetworkBehaviour
     }
     [SyncVar] GameObject mainWeapon = null;
     [SyncVar] GameObject subWeapon = null;
-    public static BaseWeapon.Weapon SetSubWeapon { private get; set; } = BaseWeapon.Weapon.SHOTGUN;
+    public static BaseWeapon.Weapon SetSubWeapon { private get; set; } = BaseWeapon.Weapon.LASER;
     bool[] usingWeapons = new bool[(int)Weapon.NONE];    //使用中の武器
     [SerializeField, Tooltip("攻撃中の移動速度の低下率")] float atackingDownSpeed = 0.5f;   //攻撃中の移動速度の低下率
     bool initSubWeapon = false;
@@ -295,7 +295,7 @@ public class BattlePlayer : NetworkBehaviour
         {
             Quaternion upAngle = Quaternion.Euler(-90, 0, 0);
             Vector3 upward = upAngle.normalized * Vector3.forward;
-            baseAction.Move(moveSpeed * 2 * Input.mouseScrollDelta.y, upward);
+            baseAction.Move(moveSpeed * 4 * Input.mouseScrollDelta.y, upward);
         }
 
         #endregion
@@ -450,7 +450,7 @@ public class BattlePlayer : NetworkBehaviour
             {
                 moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, boostAccele);
                 isBoost = true;
-                PlaySE((int)SE.Boost, SoundManager.BaseSEVolume, true);    //加速音の再生
+                PlaySE((int)SE.Boost, SoundManager.BaseSEVolume * 0.15f, true);    //加速音の再生
 
 
                 //デバッグ用

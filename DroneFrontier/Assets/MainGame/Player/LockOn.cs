@@ -22,8 +22,9 @@ public class LockOn : MonoBehaviour, ILockOn
     //ロックオン処理用変数
     [SerializeField] Image lockOnImage = null;    //ロックオンした際に表示する画像
     List<GameObject> notLockOnObjects = new List<GameObject>();
-    [SerializeField, Tooltip("ロックオン距離")] float searchRadius = 100.0f; //ロックオンする範囲
+    float searchRadius = 100.0f; //ロックオンする範囲
     public float TrackingSpeed { get; set; } = 0;     //ロックオンした際に敵にカメラを向ける速度
+    [SerializeField, Tooltip("ロックオン距離")] float maxDistance = 0.01f;
 
 
     void Awake()
@@ -93,7 +94,7 @@ public class LockOn : MonoBehaviour, ILockOn
                 cameraTransform.position,
                 searchRadius,
                 cameraTransform.forward,
-                0.01f).Select(h => h.transform.gameObject).ToList();
+                maxDistance).Select(h => h.transform.gameObject).ToList();
 
             hits = FilterTargetObject(hits);
             if (hits.Count > 0)

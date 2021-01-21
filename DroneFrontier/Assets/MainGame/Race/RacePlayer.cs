@@ -186,7 +186,7 @@ public class RacePlayer : NetworkBehaviour
             {
                 moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, boostAccele);
                 isBoost = true;
-                PlaySE((int)SE.Boost, SoundManager.BaseSEVolume, true);    //加速音の再生
+                PlaySE((int)SE.Boost, SoundManager.BaseSEVolume * 0.15f, true);    //加速音の再生
 
 
                 //デバッグ用

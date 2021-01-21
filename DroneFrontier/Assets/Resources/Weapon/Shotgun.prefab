@@ -55,12 +55,14 @@ MonoBehaviour:
   shotPos: {fileID: 4687854202441696173}
   parentNetId: 0
   bullet: {fileID: -2401255768182461159, guid: 28d3844a32c206344bb065ba45dff061, type: 3}
-  angle: 10
+  angle: 5
   angleDiff: 3
   speedPerSecond: 50
   destroyTime: 0.6
-  trackingPower: 0
   shotPerSecond: 2
+  _recast: 2
+  _bulletsNum: 5
+  _power: 8
 --- !u!114 &-8047435595204583905
 MonoBehaviour:
   m_ObjectHideFlags: 0

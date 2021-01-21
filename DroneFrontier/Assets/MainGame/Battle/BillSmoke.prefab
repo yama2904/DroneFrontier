@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9182950462204472804}
   m_Layer: 0
-  m_Name: "\u571F\u7159"
+  m_Name: BillSmoke
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

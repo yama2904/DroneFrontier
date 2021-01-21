@@ -167,10 +167,11 @@ MonoBehaviour:
   shotPos: {fileID: 940059061499603391}
   parentNetId: 0
   bullet: {fileID: -2401255768182461159, guid: 28d3844a32c206344bb065ba45dff061, type: 3}
-  speedPerSecond: 40
+  speedPerSecond: 150
   destroyTime: 1
-  trackingPower: 1.8
+  trackingPower: 3
   shotPerSecond: 5
+  _power: 3
 --- !u!114 &6643441237574856554
 MonoBehaviour:
   m_ObjectHideFlags: 0

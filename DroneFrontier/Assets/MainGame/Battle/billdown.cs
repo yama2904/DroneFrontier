@@ -4,55 +4,39 @@ using UnityEngine;
 
 public class billdown : MonoBehaviour
 {
-    //Vector3 target = new Vector3(0,100,0);
-
     //ビルが沈むスピード
-    public float speeeeed = 10.0f;
+    [SerializeField] float speeeeed = 10.0f;
+    [SerializeField] float downTime = 30f;
+    [SerializeField] float destroyPosY = 0;
+    [SerializeField] GameObject billObject = null;
+    [SerializeField] GameObject particles = null;
+
+    Transform cacheTransform = null;
+    bool isStart = false;
     
-     // Start is called before the first frame update
     void Start()
     {
-
+        particles.SetActive(false);
+        cacheTransform = billObject.transform;
+        Invoke(nameof(StartDown), downTime);
     }
-
-    // Update is called once per frame
+    
     void Update()
     {
-        Debug.Log("経過時間(秒)" + Time.time);
-
-        //ビルが動き始めるタイミング（秒）
-        if(Time.time > 10)
+        if (isStart)
         {
-
-            GameObject[] bills = GameObject.FindGameObjectsWithTag("bill");
-
-            foreach (GameObject bill in bills)
+            cacheTransform.Translate(0, speeeeed * Time.deltaTime * -1, 0);
+            if(cacheTransform.transform.position.y < destroyPosY)
             {
-                //ビルが沈む動き
-                bill.transform.position -= transform.up * speeeeed * Time.deltaTime;
-
-                //ビルの動きが止まるタイミング（秒）
-                if (Time.time > 20)
-                {
-                    break;
-                }
+                Destroy(gameObject);
             }
         }
-        if (Time.time > 30)
-        {
+    }
 
-            GameObject[] bills = GameObject.FindGameObjectsWithTag("bill");
-
-            foreach (GameObject bill in bills)
-            {
-                bill.transform.position -= transform.up * speeeeed * Time.deltaTime;
-                if (Time.time > 40)
-                {
-                    break;
-                }
-            }
-        }
-
+    void StartDown()
+    {
+        particles.SetActive(true);
+        isStart = true;
     }
 }
 

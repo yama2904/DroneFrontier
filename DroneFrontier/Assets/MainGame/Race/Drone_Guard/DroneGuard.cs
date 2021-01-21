@@ -17,26 +17,28 @@ public class DroneGuard : NetworkBehaviour
     [SerializeField] Pattern pattern = Pattern.NONE;
     [SerializeField] float power = 200;
 
-    float nowPosi;
+    Transform cacheTransform = null;
+    float initPos;    
 
     void Start()
     {
-        nowPosi = this.transform.position.y;
+        cacheTransform = transform;
+        initPos = cacheTransform.position.y;
     }
 
     void Update()
     {
         if (pattern == Pattern.ONE)
         {
-            transform.position = new Vector3(transform.position.x, nowPosi + Mathf.PingPong(Time.time * 10, 7.5f), transform.position.z);
+            cacheTransform.position = new Vector3(cacheTransform.position.x, initPos + Mathf.PingPong(Time.time * 10, 7.5f), cacheTransform.position.z);
         }
         if(pattern == Pattern.TWO)
         {
-            transform.position = new Vector3(transform.position.x, nowPosi + Mathf.PingPong(Time.time * 15, 9.5f), transform.position.z);
+            cacheTransform.position = new Vector3(cacheTransform.position.x, initPos + Mathf.PingPong(Time.time * 15, 9.5f), cacheTransform.position.z);
         }
         if(pattern == Pattern.THREE)
         {
-            transform.position = new Vector3(transform.position.x, nowPosi + Mathf.PingPong(Time.time * 5, 5.5f), transform.position.z);
+            cacheTransform.position = new Vector3(cacheTransform.position.x, initPos + Mathf.PingPong(Time.time * 5, 5.5f), cacheTransform.position.z);
         }
     }
 

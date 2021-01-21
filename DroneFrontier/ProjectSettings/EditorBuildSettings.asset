@@ -6,11 +6,11 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/MainGame/Race/RaceModeScene.unity
-    guid: b1fecd26806d2b141948bf844cc2c5d4
-  - enabled: 1
     path: Assets/MainGame/Battle/BattleModeScene.unity
     guid: 4ff1d248b9dd78f429ce8a8c750805c6
+  - enabled: 1
+    path: Assets/MainGame/Race/RaceModeScene.unity
+    guid: b1fecd26806d2b141948bf844cc2c5d4
   - enabled: 1
     path: Assets/NonGame/NonGameScene.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab

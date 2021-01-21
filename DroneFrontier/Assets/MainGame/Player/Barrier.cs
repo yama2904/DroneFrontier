@@ -9,7 +9,7 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
     [SyncVar] float syncHP = MAX_HP;
     public float HP { get { return syncHP; } }
     Material material = null;
-    Color barrierColor = null;
+    Color barrierColor;
 
     [SyncVar] bool syncIsStrength = false;
     [SyncVar] bool syncIsWeak = false;
@@ -51,7 +51,17 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
         audios[(int)SE.DAMAGE].clip = SoundManager.GetAudioClip(SoundManager.SE.BARRIER_DAMAGE);
         audios[(int)SE.DESTROY].clip = SoundManager.GetAudioClip(SoundManager.SE.DESTROY_BARRIER);
 
+        //バリアの色変え
         material = GetComponent<Renderer>().material;
+        float value = syncHP / MAX_HP;
+        if (!IsStrength)
+        {
+            material.color = new Color(1 - value, value, 0, value * 0.5f);
+        }
+        else
+        {
+            material.color = new Color(1 - value, 0, value, value * 0.5f);
+        }
     }
 
     void Start()
@@ -148,9 +158,18 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
         }
         regeneCountTime = 0;
         isRegene = false;
-
         RpcPlaySE((int)SE.DAMAGE);
 
+        //バリアの色変え
+        float value = syncHP / MAX_HP;
+        if (!IsStrength)
+        {
+            RpcSetBarrierColor(1 - value, value, 0, value * 0.5f);
+        }
+        else
+        {
+            RpcSetBarrierColor(1 - value, 0, value, value * 0.5f);
+        }
 
         Debug.Log("バリアに" + p + "のダメージ\n残りHP: " + syncHP);
     }
@@ -162,12 +181,6 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
 
         audios[index].volume = SoundManager.BaseSEVolume;
         audios[index].Play();
-    }
-
-    [ClientRpc]
-    void RpcSetBarrierColor(float r, float g, float b, float a)
-    {
-        material.color = new Color(r, g, b, a);
     }
 
     #endregion
@@ -186,6 +199,10 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
         Invoke(nameof(EndStrength), time);
         syncIsStrength = true;
 
+        //バリアの色変え
+        float value = syncHP / MAX_HP;
+        RpcSetBarrierColor(1 - value, 0, value, value * 0.5f);
+
 
         //デバッグ用
         Debug.Log("バリア強化");
@@ -199,6 +216,10 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
         }
         damagePercent = 1;
         syncIsStrength = false;
+
+        //バリアの色変え
+        float value = syncHP / MAX_HP;
+        RpcSetBarrierColor(value, value, 0, 1 - value);
 
 
         //デバッグ用
@@ -258,4 +279,10 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
     }
 
     #endregion
+
+    [ClientRpc]
+    void RpcSetBarrierColor(float r, float g, float b, float a)
+    {
+        material.color = new Color(r, g, b, a);
+    }
 }

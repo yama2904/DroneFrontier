@@ -329,7 +329,7 @@ public class LaserBullet : NetworkBehaviour
             charge.Play();
             audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.BEAM_CAHRGE);
             audioSource.time = 0.2f;
-            audioSource.volume = SoundManager.BaseSEVolume;
+            audioSource.volume = SoundManager.BaseSEVolume * 0.15f;
             audioSource.Play();
         }
         else
@@ -387,7 +387,7 @@ public class LaserBullet : NetworkBehaviour
 
         //レーザー音の再生
         audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.BEAM);
-        audioSource.volume = SoundManager.BaseSEVolume;
+        audioSource.volume = SoundManager.BaseSEVolume * 0.05f;
         audioSource.loop = true;
         audioSource.Play();
     }
