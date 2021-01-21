@@ -38,8 +38,8 @@ public class StunImpact : NetworkBehaviour
         if (ReferenceEquals(other.gameObject, thrower)) return;
         if (!other.CompareTag(TagNameManager.PLAYER)) return;   //プレイヤーのみ対象
 
-        Player p = other.GetComponent<Player>();
-        if (!p.IsLocalPlayer) return;   //ローカルプレイヤーのみ処理
+        BattlePlayer p = other.GetComponent<BattlePlayer>();
+        if (!p.isLocalPlayer) return;   //ローカルプレイヤーのみ処理
         p.SetStun(stunTime);
 
         //必要なら距離によるスタンの時間を変える処理をいつか加える

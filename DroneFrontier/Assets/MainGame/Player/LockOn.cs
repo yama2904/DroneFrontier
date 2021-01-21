@@ -7,7 +7,7 @@ using System.Linq;
 public class LockOn : MonoBehaviour, ILockOn
 {
     //プレイヤー系変数
-    [SerializeField] Player player = null;
+    [SerializeField] BattlePlayer player = null;
     Transform playerTransform = null;
 
     //カメラ用変数

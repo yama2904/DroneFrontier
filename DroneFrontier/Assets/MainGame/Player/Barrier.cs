@@ -8,6 +8,8 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
     const float MAX_HP = 100;
     [SyncVar] float syncHP = MAX_HP;
     public float HP { get { return syncHP; } }
+    Material material = null;
+    Color barrierColor = null;
 
     [SyncVar] bool syncIsStrength = false;
     [SyncVar] bool syncIsWeak = false;
@@ -48,6 +50,8 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
         audios = GetComponents<AudioSource>();
         audios[(int)SE.DAMAGE].clip = SoundManager.GetAudioClip(SoundManager.SE.BARRIER_DAMAGE);
         audios[(int)SE.DESTROY].clip = SoundManager.GetAudioClip(SoundManager.SE.DESTROY_BARRIER);
+
+        material = GetComponent<Renderer>().material;
     }
 
     void Start()
@@ -139,10 +143,12 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
         if (syncHP < 0)
         {
             syncHP = 0;
+            RpcSetBarrierColor(255, 0, 0, 0);
             RpcPlaySE((int)SE.DESTROY);
         }
         regeneCountTime = 0;
         isRegene = false;
+
         RpcPlaySE((int)SE.DAMAGE);
 
 
@@ -156,6 +162,12 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
 
         audios[index].volume = SoundManager.BaseSEVolume;
         audios[index].Play();
+    }
+
+    [ClientRpc]
+    void RpcSetBarrierColor(float r, float g, float b, float a)
+    {
+        material.color = new Color(r, g, b, a);
     }
 
     #endregion

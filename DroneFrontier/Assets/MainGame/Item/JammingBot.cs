@@ -26,8 +26,8 @@ public class JammingBot : NetworkBehaviour
         //生成した自分のジャミングボットをプレイヤーがロックオン・照射しないように設定
         if (creater.CompareTag(TagNameManager.PLAYER))
         {
-            creater.GetComponent<Player>().SetNotLockOnObject(gameObject);
-            creater.GetComponent<Player>().SetNotRadarObject(gameObject);
+            creater.GetComponent<BattlePlayer>().SetNotLockOnObject(gameObject);
+            creater.GetComponent<BattlePlayer>().SetNotRadarObject(gameObject);
         }
     }
 
@@ -36,8 +36,8 @@ public class JammingBot : NetworkBehaviour
         //SetNotLockOnObject、SetNotRadarObjectを解除
         if (creater.CompareTag(TagNameManager.PLAYER))
         {
-            creater.GetComponent<Player>().UnSetNotLockOnObject(gameObject);
-            creater.GetComponent<Player>().UnSetNotRadarObject(gameObject);
+            creater.GetComponent<BattlePlayer>().UnSetNotLockOnObject(gameObject);
+            creater.GetComponent<BattlePlayer>().UnSetNotRadarObject(gameObject);
         }
 
 

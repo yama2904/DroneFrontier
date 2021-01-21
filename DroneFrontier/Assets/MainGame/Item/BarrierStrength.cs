@@ -9,7 +9,7 @@ public class BarrierStrength : NetworkBehaviour
     static float strengthTime = 10.0f;   //強化時間
 
     //バリアを強化する
-    public static bool Strength(Player player)
+    public static bool Strength(BattlePlayer player)
     {
         return player.SetBarrierStrength(strengthRate, strengthTime);
     }

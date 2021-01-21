@@ -10,7 +10,7 @@ public class MagnetArea : MonoBehaviour
     //バグ防止用
     class HitPlayerData
     {
-        public Player player;
+        public BattlePlayer player;
         public int id;
     }
 
@@ -23,8 +23,8 @@ public class MagnetArea : MonoBehaviour
         //プレイヤーのみ判定
         if (!other.CompareTag(TagNameManager.PLAYER)) return;
 
-        Player player = other.GetComponent<Player>();   //名前省略        
-        if (!player.IsLocalPlayer) return;  //ローカルプレイヤーのみ判定
+        BattlePlayer player = other.GetComponent<BattlePlayer>();   //名前省略        
+        if (!player.isLocalPlayer) return;  //ローカルプレイヤーのみ判定
 
         //バグ防止用
         //既に範囲内に入っているプレイヤーは除外
@@ -39,7 +39,7 @@ public class MagnetArea : MonoBehaviour
 
 
         //デバッグ用
-        Debug.Log(other.GetComponent<Player>().name + ": in磁場エリア");
+        Debug.Log(other.GetComponent<BattlePlayer>().name + ": in磁場エリア");
     }
 
     private void OnTriggerExit(Collider other)
@@ -47,8 +47,8 @@ public class MagnetArea : MonoBehaviour
         //プレイヤーのみ判定
         if (!other.CompareTag(TagNameManager.PLAYER)) return;
 
-        Player player = other.GetComponent<Player>();   //名前省略        
-        if (!player.IsLocalPlayer) return;  //ローカルプレイヤーのみ判定
+        BattlePlayer player = other.GetComponent<BattlePlayer>();   //名前省略        
+        if (!player.isLocalPlayer) return;  //ローカルプレイヤーのみ判定
 
         //抜けるプレイヤーをリストから探す
         int index = hitPlayerDatas.FindIndex(p => ReferenceEquals(p.player, player));
@@ -60,6 +60,6 @@ public class MagnetArea : MonoBehaviour
 
 
         //デバッグ用
-        Debug.Log(other.GetComponent<Player>().name + ": out磁場エリア");
+        Debug.Log(other.GetComponent<BattlePlayer>().name + ": out磁場エリア");
     }
 }

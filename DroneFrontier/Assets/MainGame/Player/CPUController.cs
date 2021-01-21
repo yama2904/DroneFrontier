@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CPUController : BasePlayer
+public class CPUController : PlayerBaseAction
 {
     //デバッグ用
     [SerializeField] float speed = 0.1f;
@@ -10,35 +10,35 @@ public class CPUController : BasePlayer
     [SerializeField] bool isMove = true;
     float deltaTime = 1;
 
-    protected override void Start()
-    {
-        HP = 30;
-        MoveSpeed = speed;
-        MaxSpeed = 30.0f;
+    //protected override void Start()
+    //{
+    //    HP = 30;
+    //    MoveSpeed = speed;
+    //    MaxSpeed = 30.0f;
 
-        SetWeapon(Weapon.MAIN, BaseWeapon.Weapon.GATLING);
-    }
+    //    SetWeapon(Weapon.MAIN, BaseWeapon.Weapon.GATLING);
+    //}
 
-    protected override void Update()
-    {
-        base.Update();
+    //protected override void Update()
+    //{
+    //    base.Update();
 
-        if (isAtack)
-        {
-            UseWeapon(Weapon.SUB);
-        }
+    //    if (isAtack)
+    //    {
+    //        UseWeapon(Weapon.SUB);
+    //    }
 
-        //デバッグ用
-        if (isMove)
-        {
-            transform.position += new Vector3(MoveSpeed * Mathf.Sin(deltaTime), 0, 0);
-        }
-        deltaTime += Time.deltaTime;
-    }
+    //    //デバッグ用
+    //    if (isMove)
+    //    {
+    //        transform.position += new Vector3(MoveSpeed * Mathf.Sin(deltaTime), 0, 0);
+    //    }
+    //    deltaTime += Time.deltaTime;
+    //}
 
-    //サブウェポンをセットする
-    public void SetSubWeapon(BaseWeapon.Weapon weapon)
-    {
-        SetWeapon(Weapon.SUB, weapon);
-    }
+    ////サブウェポンをセットする
+    //public void SetSubWeapon(BaseWeapon.Weapon weapon)
+    //{
+    //    SetWeapon(Weapon.SUB, weapon);
+    //}
 }

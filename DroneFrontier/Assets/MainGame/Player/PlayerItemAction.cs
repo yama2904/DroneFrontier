@@ -16,7 +16,7 @@ public class PlayerItemAction : NetworkBehaviour
         if (type == Item.ItemType.BARRIER_STRENGTH)
         {
             //強化できなかったらアイテムを消去しない
-            if (!BarrierStrength.Strength(GetComponent<Player>()))
+            if (!BarrierStrength.Strength(GetComponent<BattlePlayer>()))
             {
                 Debug.Log("バリア強化中なので使用できません");
                 return false;

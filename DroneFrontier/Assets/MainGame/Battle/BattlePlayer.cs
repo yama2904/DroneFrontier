@@ -5,44 +5,35 @@ using UnityEngine.UI;
 using System;
 using Mirror;
 
-public class Player : NetworkBehaviour
+public class BattlePlayer : NetworkBehaviour
 {
-    [SyncVar] float syncHP = 0;
-    public float HP { get { return syncHP; } } //HP
-    public bool IsLocalPlayer { get { return isLocalPlayer; } }
+    [SyncVar, SerializeField] float HP = 30;
 
     //破壊されたか
     [SyncVar] bool syncIsDestroy = false;
     public bool IsDestroy { get { return syncIsDestroy; } }
 
     //コンポーネント用
-    Rigidbody _Rigidbody = null;
-    Transform cacheTransform = null;  //キャッシュ用
+    Transform cacheTransform = null;
+    PlayerBaseAction baseAction = null;
     PlayerItemAction itemAction = null;
     PlayerStatusAction statusAction = null;
     bool isPlayerStatusInit = false;
 
+    //移動用
+    [SerializeField, Tooltip("移動速度")] float moveSpeed = 100f;      //移動速度
+    [HideInInspector] float maxSpeed = 100;       //最高速度
+    [HideInInspector] float minSpeed = 100;       //最低速度
+
+    //回転用
+    [SerializeField, Tooltip("回転速度")] public float rotateSpeed = 5.0f;
+
     //ドローンが移動した際にオブジェクトが傾く処理用
-    [SerializeField] Transform droneObject = null;
     float moveRotateSpeed = 0.02f;
     Quaternion frontMoveRotate = Quaternion.Euler(50, 0, 0);
     Quaternion leftMoveRotate = Quaternion.Euler(0, 0, 60);
     Quaternion rightMoveRotate = Quaternion.Euler(0, 0, -60);
     Quaternion backMoveRotate = Quaternion.Euler(-70, 0, 0);
-
-
-    //移動用
-    [SerializeField, Tooltip("移動速度")] float moveSpeed = 20;      //移動速度
-    float maxSpeed = 0;       //最高速度
-    float minSpeed = 0;       //最低速度
-
-    //回転用
-    [SerializeField, Tooltip("回転速度")] float rotateSpeed = 5.0f;
-    [SerializeField, Tooltip("上下の回転制限角度")] float limitCameraTiltX = 40.0f;
-
-    //カメラ
-    [SerializeField] Camera cameraInspector = null;
-    Camera _camera = null;
 
     //バリア
     [SerializeField] Barrier barrierInspector = null;
@@ -111,10 +102,6 @@ public class Player : NetworkBehaviour
     AudioSource[] audios;
 
 
-    //デバッグ用
-    bool isV = true;
-
-
     #region Init
 
     [Command]
@@ -157,10 +144,6 @@ public class Player : NetworkBehaviour
     public override void OnStartClient()
     {
         base.OnStartClient();
-        if (!IsLocalPlayer)
-        {
-            GetComponent<AudioListener>().enabled = false;
-        }
 
         //AudioSourceの初期化
         audios = GetComponents<AudioSource>();
@@ -181,7 +164,6 @@ public class Player : NetworkBehaviour
     public override void OnStartLocalPlayer()
     {
         base.OnStartLocalPlayer();
-        _camera.depth++;
         boostGaugeImage.enabled = true;
         boostGaugeImage.fillAmount = 1;
         boostGaugeFrameImage.enabled = true;
@@ -197,13 +179,14 @@ public class Player : NetworkBehaviour
 
     void Awake()
     {
-        cacheTransform = transform; //キャッシュ用
-
         //コンポーネントの初期化
-        _Rigidbody = GetComponent<Rigidbody>();
+        cacheTransform = transform;
+        baseAction = GetComponent<PlayerBaseAction>();
         itemAction = GetComponent<PlayerItemAction>();
         statusAction = GetComponent<PlayerStatusAction>();
-        _camera = cameraInspector;
+
+        maxSpeed = moveSpeed * 10;
+        minSpeed = moveSpeed * 0.2f;
 
         for (int i = 0; i < (int)ItemNum.NONE; i++)
         {
@@ -213,12 +196,6 @@ public class Player : NetworkBehaviour
 
     void Start()
     {
-        //パラメータ初期化
-        syncHP = 30;
-        //moveSpeed = 20.0f;
-        maxSpeed = moveSpeed * boostAccele;
-        minSpeed = moveSpeed * 0.3f;
-
         //配列初期化
         for (int i = 0; i < (int)Weapon.NONE; i++)
         {
@@ -246,19 +223,17 @@ public class Player : NetworkBehaviour
             }
         }
 
-        //デバッグ用
-        if (Input.GetKeyDown(KeyCode.V))
+        //サブウェポンのUpdate
+        if (subWeapon != null)
         {
-            isV = !isV;
-            Debug.Log("移動処理切り替え");
-        }
-
-        //回転処理
-        if (MainGameManager.IsCursorLock)
-        {
-            float x = Input.GetAxis("Mouse X");
-            float y = Input.GetAxis("Mouse Y");
-            Rotate(x, y, rotateSpeed * CameraManager.CameraSpeed);
+            //Start系で初期化するとネットワークのラグでウェポンが生成されていないので
+            //Update内で初期化
+            if (!initSubWeapon)
+            {
+                subWeapon.GetComponent<BaseWeapon>().Init();
+                initSubWeapon = true;
+            }
+            subWeapon.GetComponent<BaseWeapon>().UpdateMe();
         }
 
 
@@ -268,12 +243,12 @@ public class Player : NetworkBehaviour
         //前進
         if (Input.GetKey(KeyCode.W))
         {
-            Move(moveSpeed, maxSpeed, cacheTransform.forward);
-            CmdCallRotateDroneObject(frontMoveRotate, moveRotateSpeed);
+            baseAction.Move(moveSpeed, cacheTransform.forward);
+            baseAction.CmdCallRotateDroneObject(frontMoveRotate, moveRotateSpeed);
         }
         else
         {
-            CmdCallRotateDroneObject(Quaternion.identity, moveRotateSpeed);
+            baseAction.CmdCallRotateDroneObject(Quaternion.identity, moveRotateSpeed);
         }
 
         //左移動
@@ -281,12 +256,12 @@ public class Player : NetworkBehaviour
         {
             Quaternion leftAngle = Quaternion.Euler(0, -90, 0);
             Vector3 left = leftAngle.normalized * cacheTransform.forward;
-            Move(moveSpeed, maxSpeed, left);
-            CmdCallRotateDroneObject(leftMoveRotate, moveRotateSpeed);
+            baseAction.Move(moveSpeed, left);
+            baseAction.CmdCallRotateDroneObject(leftMoveRotate, moveRotateSpeed);
         }
         else
         {
-            CmdCallRotateDroneObject(Quaternion.identity, moveRotateSpeed);
+            baseAction.CmdCallRotateDroneObject(Quaternion.identity, moveRotateSpeed);
         }
 
         //後退
@@ -294,12 +269,12 @@ public class Player : NetworkBehaviour
         {
             Quaternion backwardAngle = Quaternion.Euler(0, 180, 0);
             Vector3 backward = backwardAngle.normalized * cacheTransform.forward;
-            Move(moveSpeed, maxSpeed, backward);
-            CmdCallRotateDroneObject(backMoveRotate, moveRotateSpeed);
+            baseAction.Move(moveSpeed, backward);
+            baseAction.CmdCallRotateDroneObject(backMoveRotate, moveRotateSpeed);
         }
         else
         {
-            CmdCallRotateDroneObject(Quaternion.identity, moveRotateSpeed);
+            baseAction.CmdCallRotateDroneObject(Quaternion.identity, moveRotateSpeed);
         }
 
         //右移動
@@ -307,12 +282,12 @@ public class Player : NetworkBehaviour
         {
             Quaternion rightAngle = Quaternion.Euler(0, 90, 0);
             Vector3 right = rightAngle.normalized * cacheTransform.forward;
-            Move(moveSpeed, maxSpeed, right);
-            CmdCallRotateDroneObject(rightMoveRotate, moveRotateSpeed);
+            baseAction.Move(moveSpeed, right);
+            baseAction.CmdCallRotateDroneObject(rightMoveRotate, moveRotateSpeed);
         }
         else
         {
-            CmdCallRotateDroneObject(Quaternion.identity, moveRotateSpeed);
+            baseAction.CmdCallRotateDroneObject(Quaternion.identity, moveRotateSpeed);
         }
 
         //上下移動
@@ -320,10 +295,21 @@ public class Player : NetworkBehaviour
         {
             Quaternion upAngle = Quaternion.Euler(-90, 0, 0);
             Vector3 upward = upAngle.normalized * Vector3.forward;
-            Move(moveSpeed * 2 * Input.mouseScrollDelta.y, maxSpeed * 2, upward);
+            baseAction.Move(moveSpeed * 2 * Input.mouseScrollDelta.y, upward);
         }
 
         #endregion
+
+
+        //
+        //設定画面中はここより下の処理は行わない
+        if (MainGameManager.IsConfig)
+        {
+            return;
+        }
+        //
+        //
+
 
         #region LockOn
 
@@ -374,37 +360,22 @@ public class Player : NetworkBehaviour
 
         #endregion
 
-
-        //
-        //設定画面中はここより下の処理は行わない
-        if (MainGameManager.IsConfig)
+        
+        //回転処理
+        if (MainGameManager.IsCursorLock)
         {
-            return;
+            float x = Input.GetAxis("Mouse X");
+            float y = Input.GetAxis("Mouse Y");
+            baseAction.Rotate(x, y, rotateSpeed * CameraManager.CameraSpeed);
         }
-        //
-        //
 
 
         #region Weapon
-
-        //サブウェポンのUpdate
-        if (subWeapon != null)
-        {
-            //Start系で初期化するとネットワークのラグでウェポンが生成されていないので
-            //Update内で初期化
-            if (!initSubWeapon)
-            {
-                subWeapon.GetComponent<BaseWeapon>().Init();
-                initSubWeapon = true;
-            }
-            subWeapon.GetComponent<BaseWeapon>().UpdateMe();
-        }
-
-
+        
         //攻撃処理しか使わない簡易メソッド
         Action<float> ModifySpeeds = (x) =>
         {
-            ModifySpeed(x);
+            moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, x);
             rotateSpeed *= x;
             lockOnTrackingSpeed *= x;
         };
@@ -477,19 +448,7 @@ public class Player : NetworkBehaviour
             //ブーストが使用可能なゲージ量ならブースト使用
             if (boostGaugeImage.fillAmount >= BOOST_POSSIBLE_MIN)
             {
-                //バトルモードの場合
-                if (MainGameManager.Mode == MainGameManager.GameMode.BATTLE)
-                {
-
-                }
-
-                //レースモードの場合
-                else if (MainGameManager.Mode == MainGameManager.GameMode.RACE)
-                {
-
-                }
-
-                ModifySpeed(boostAccele);
+                moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, boostAccele);
                 isBoost = true;
                 PlaySE((int)SE.Boost, SoundManager.BaseSEVolume, true);    //加速音の再生
 
@@ -511,7 +470,7 @@ public class Player : NetworkBehaviour
                 {
                     boostGaugeImage.fillAmount = 0;
 
-                    ModifySpeed(1 / boostAccele);
+                    moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, 1 / boostAccele);
                     isBoost = false;
                     StopSE((int)SE.Boost);
 
@@ -523,7 +482,7 @@ public class Player : NetworkBehaviour
             //キーを離したらブースト停止
             if (Input.GetKeyUp(KeyCode.Space))
             {
-                ModifySpeed(1 / boostAccele);
+                moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, 1 / boostAccele);
                 isBoost = false;
                 StopSE((int)SE.Boost);
 
@@ -565,74 +524,16 @@ public class Player : NetworkBehaviour
         {
             lockOnTrackingSpeed *= 0.1f;
             rotateSpeed *= 0.1f;
-            ModifySpeed(0.1f);
+            moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, 0.1f);
         }
         if (Input.GetKeyUp(KeyCode.LeftControl))
         {
             lockOnTrackingSpeed *= 10;
             rotateSpeed *= 10;
-            ModifySpeed(10f);
+            moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, 10f);
         }
     }
 
-    //移動処理
-    void Move(float speed, float _maxSpeed, Vector3 direction)
-    {
-        if (!isV)
-        {
-            //最大速度に達していなかったら移動処理
-            if (_Rigidbody.velocity.sqrMagnitude < Mathf.Pow(_maxSpeed, 2))
-            {
-                _Rigidbody.AddForce(direction * speed, ForceMode.Force);
-            }
-        }
-        else
-        {
-            _Rigidbody.AddForce(direction * speed + (direction * speed - _Rigidbody.velocity), ForceMode.Force);
-        }
-    }
-
-    #region RotaetDroneObject
-
-    //移動処理
-    [Command]
-    void CmdCallRotateDroneObject(Quaternion rotate, float speed)
-    {
-        RpcRotateDroneObject(rotate, speed);
-    }
-
-    [ClientRpc]
-    void RpcRotateDroneObject(Quaternion rotate, float speed)
-    {
-        droneObject.localRotation = Quaternion.Slerp(droneObject.localRotation, rotate, speed);
-    }
-
-    #endregion
-
-    //回転処理
-    void Rotate(float valueX, float valueY, float speed)
-    {
-        if (MainGameManager.IsCursorLock)
-        {
-            Vector3 angle = new Vector3(valueX * speed * CameraManager.ReverseX, valueY * speed * CameraManager.ReverseY, 0);
-
-            //カメラの左右回転
-            cacheTransform.RotateAround(cacheTransform.position, Vector3.up, angle.x);
-
-            //カメラの上下の回転に制限をかける
-            Vector3 localAngle = cacheTransform.localEulerAngles;
-            localAngle.x += angle.y * -1;
-            if (localAngle.x > limitCameraTiltX && localAngle.x < 180)
-            {
-                localAngle.x = limitCameraTiltX;
-            }
-            if (localAngle.x < 360 - limitCameraTiltX && localAngle.x > 180)
-            {
-                localAngle.x = 360 - limitCameraTiltX;
-            }
-            cacheTransform.localEulerAngles = localAngle;
-        }
-    }
 
     //攻撃処理
     void UseWeapon(Weapon weapon)
@@ -701,20 +602,6 @@ public class Player : NetworkBehaviour
         }
     }
 
-    //スピードを変更する
-    void ModifySpeed(float speedMgnf)
-    {
-        moveSpeed *= speedMgnf;
-        if (moveSpeed > maxSpeed)
-        {
-            moveSpeed = maxSpeed;
-        }
-        if (moveSpeed < minSpeed)
-        {
-            moveSpeed = minSpeed;
-        }
-    }
-
 
     #region Death
 
@@ -755,16 +642,16 @@ public class Player : NetworkBehaviour
         //バリアが破壊されていたらドローンが直接ダメージを受ける
         else
         {
-            syncHP -= p;
-            if (syncHP < 0)
+            HP -= p;
+            if (HP < 0)
             {
-                syncHP = 0;
+                HP = 0;
                 CmdDestroyMe();
             }
 
 
             //デバッグ用
-            Debug.Log(name + "に" + p + "のダメージ\n残りHP: " + syncHP);
+            Debug.Log(name + "に" + p + "のダメージ\n残りHP: " + HP);
         }
     }
 

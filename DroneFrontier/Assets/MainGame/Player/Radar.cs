@@ -6,7 +6,7 @@ using System.Linq;
 
 public class Radar : MonoBehaviour, IRadar
 {
-    [SerializeField] Player player = null;
+    [SerializeField] BattlePlayer player = null;
     [SerializeField] Camera _camera = null;
     Transform cameraTransform = null;
 

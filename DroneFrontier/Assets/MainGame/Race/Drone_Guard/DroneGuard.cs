@@ -44,8 +44,8 @@ public class DroneGuard : NetworkBehaviour
     {
         if (collision.gameObject.CompareTag(TagNameManager.PLAYER))
         {
-            Player p = collision.gameObject.GetComponent<Player>();
-            if (!p.IsLocalPlayer) return;
+            RacePlayer p = collision.gameObject.GetComponent<RacePlayer>();
+            if (!p.isLocalPlayer) return;
             p.GetComponent<Rigidbody>().AddForce(p.transform.forward * power * -1, ForceMode.Impulse);
         }
     }

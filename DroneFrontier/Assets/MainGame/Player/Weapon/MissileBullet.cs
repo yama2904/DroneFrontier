@@ -50,7 +50,7 @@ public class MissileBullet : Bullet
 
         if (other.CompareTag(TagNameManager.PLAYER))
         {
-            other.GetComponent<Player>().CmdDamage(Power);
+            other.GetComponent<BattlePlayer>().CmdDamage(Power);
             DestroyMe();
         }
         else if (other.CompareTag(TagNameManager.JAMMING_BOT))

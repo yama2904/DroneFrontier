@@ -11,7 +11,7 @@ public class Jamming : NetworkBehaviour
     [SerializeField] GameObject jammingBot = null;
     [SerializeField] Transform jammingBotPosition = null;
     JammingBot createBot = null;
-    List<Player> jamingPlayers = new List<Player>();
+    List<BattlePlayer> jamingPlayers = new List<BattlePlayer>();
 
 
     void Start() { }
@@ -61,7 +61,7 @@ public class Jamming : NetworkBehaviour
     void OnDestroy()
     {
         //ジャミングを解除する
-        foreach (Player p in jamingPlayers)
+        foreach (BattlePlayer p in jamingPlayers)
         {
             p.UnSetJamming();
         }
@@ -72,8 +72,8 @@ public class Jamming : NetworkBehaviour
     {
         if (!other.CompareTag(TagNameManager.PLAYER)) return;   //プレイヤーのみ対象
 
-        Player p = other.GetComponent<Player>();
-        if (!p.IsLocalPlayer) return;   //ローカルプレイヤーのみ処理
+        BattlePlayer p = other.GetComponent<BattlePlayer>();
+        if (!p.isLocalPlayer) return;   //ローカルプレイヤーのみ処理
         if (ReferenceEquals(p.gameObject, creater)) return; //ジャミングを付与しないプレイヤーならスキップ
 
         p.SetJamming(); //ジャミング付与
@@ -84,8 +84,8 @@ public class Jamming : NetworkBehaviour
     {
         if (!other.CompareTag(TagNameManager.PLAYER)) return;   //プレイヤーのみ対象
 
-        Player p = other.GetComponent<Player>();
-        if (!p.IsLocalPlayer) return;   //ローカルプレイヤーのみ処理
+        BattlePlayer p = other.GetComponent<BattlePlayer>();
+        if (!p.isLocalPlayer) return;   //ローカルプレイヤーのみ処理
         if (ReferenceEquals(p.gameObject, creater)) return; //ジャミングを付与しないプレイヤーならスキップ
 
         //リストにない場合は処理しない

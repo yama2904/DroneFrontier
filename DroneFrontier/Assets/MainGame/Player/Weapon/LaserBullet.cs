@@ -285,7 +285,7 @@ public class LaserBullet : NetworkBehaviour
 
                 if (o.CompareTag(TagNameManager.PLAYER))
                 {
-                    o.GetComponent<Player>().CmdDamage(power);
+                    o.GetComponent<BattlePlayer>().CmdDamage(power);
                 }
                 else if (o.CompareTag(TagNameManager.JAMMING_BOT))
                 {

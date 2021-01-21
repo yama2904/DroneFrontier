@@ -108,7 +108,7 @@ public class Explosion : NetworkBehaviour
                     return;
                 }
             }
-            other.GetComponent<Player>().CmdDamage(CalcPower(other.transform.position));
+            other.GetComponent<BattlePlayer>().CmdDamage(CalcPower(other.transform.position));
             wasHitObjects.Add(other);
 
 

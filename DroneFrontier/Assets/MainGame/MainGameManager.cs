@@ -39,11 +39,11 @@ public class MainGameManager : MonoBehaviour
     static List<PlayerData> playerDatas = new List<PlayerData>();
 
     //ゲーム上のプレイヤー・CPU情報
-    [SerializeField] Player playerInspector = null;
+    [SerializeField] BattlePlayer playerInspector = null;
     [SerializeField] CPUController cpuInspector = null;
-    static Player player = null;
+    static BattlePlayer player = null;
     static CPUController cpu = null;
-    static List<BasePlayer> basePlayers = new List<BasePlayer>();
+    static List<PlayerBaseAction> basePlayers = new List<PlayerBaseAction>();
 
 
     //設定画面移動時のマスク用変数
@@ -137,24 +137,24 @@ public class MainGameManager : MonoBehaviour
             }
         }
 
-        //破壊されたドローンがあるか調べる
-        for (int i = basePlayers.Count - 1; i >= 0; i--)
-        {
-            //破壊されていたらランキング用リストに名前を入れてドローンをリストから削除
-            if (basePlayers[i].IsDestroy)
-            {
-                ResultButtonsController.Rank rank = (ResultButtonsController.Rank)basePlayers.Count - 1;
-                ResultButtonsController.SetRank(basePlayers[i].name, rank);
-                basePlayers.RemoveAt(i);
-            }
-        }
+        ////破壊されたドローンがあるか調べる
+        //for (int i = basePlayers.Count - 1; i >= 0; i--)
+        //{
+        //    //破壊されていたらランキング用リストに名前を入れてドローンをリストから削除
+        //    if (basePlayers[i].IsDestroy)
+        //    {
+        //        ResultButtonsController.Rank rank = (ResultButtonsController.Rank)basePlayers.Count - 1;
+        //        ResultButtonsController.SetRank(basePlayers[i].name, rank);
+        //        basePlayers.RemoveAt(i);
+        //    }
+        //}
 
-        //ドローンが1機に残ったらリザルトに移動
-        if (basePlayers.Count == 1)
-        {
-            ResultButtonsController.SetRank(basePlayers[0].name, ResultButtonsController.Rank.RANK_1ST);
-            Invoke(nameof(MoveResult), 3.0f);
-        }
+        ////ドローンが1機に残ったらリザルトに移動
+        //if (basePlayers.Count == 1)
+        //{
+        //    ResultButtonsController.SetRank(basePlayers[0].name, ResultButtonsController.Rank.RANK_1ST);
+        //    Invoke(nameof(MoveResult), 3.0f);
+        //}
 
 
         //デバッグ用

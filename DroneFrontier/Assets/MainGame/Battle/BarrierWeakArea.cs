@@ -14,7 +14,7 @@ public class BarrierWeakArea : MonoBehaviour
 
     class HitPlayerData
     {
-        public Player player;
+        public BattlePlayer player;
         public float deltaTime; //計測用
     }
 
@@ -68,8 +68,8 @@ public class BarrierWeakArea : MonoBehaviour
 
             if (o.CompareTag(TagNameManager.PLAYER))
             {
-                Player player = o.GetComponent<Player>();
-                if (player.IsLocalPlayer)
+                BattlePlayer player = o.GetComponent<BattlePlayer>();
+                if (player.isLocalPlayer)
                 {
 
                     //既にリスト内に存在しているか調べる
