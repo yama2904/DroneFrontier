@@ -39,9 +39,9 @@ public class MainGameManager : MonoBehaviour
     static List<PlayerData> playerDatas = new List<PlayerData>();
 
     //ゲーム上のプレイヤー・CPU情報
-    [SerializeField] BattlePlayer playerInspector = null;
+    [SerializeField] BattleDrone playerInspector = null;
     [SerializeField] CPUController cpuInspector = null;
-    static BattlePlayer player = null;
+    static BattleDrone player = null;
     static CPUController cpu = null;
     static List<PlayerBaseAction> basePlayers = new List<PlayerBaseAction>();
 
