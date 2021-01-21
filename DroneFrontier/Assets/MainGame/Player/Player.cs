@@ -32,7 +32,7 @@ public class Player : NetworkBehaviour
 
 
     //移動用
-    [SerializeField, Tooltip("移動速度")] float moveSpeed = 0;      //移動速度
+    [SerializeField, Tooltip("移動速度")] float moveSpeed = 20;      //移動速度
     float maxSpeed = 0;       //最高速度
     float minSpeed = 0;       //最低速度
 
@@ -211,7 +211,7 @@ public class Player : NetworkBehaviour
     {
         //パラメータ初期化
         syncHP = 30;
-        moveSpeed = 20.0f;
+        //moveSpeed = 20.0f;
         maxSpeed = moveSpeed * boostAccele;
         minSpeed = moveSpeed * 0.3f;
 
