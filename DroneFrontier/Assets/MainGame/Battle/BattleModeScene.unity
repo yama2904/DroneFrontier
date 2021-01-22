@@ -661,6 +661,16 @@ PrefabInstance:
       propertyPath: m_Name
       value: StageObjects
       objectReference: {fileID: 0}
+    - target: {fileID: 5789679920427220385, guid: 6ab92a73fc8c78149b44e43fb9ab8533,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 3d90da8c80be8f2448ca4ebb7675ed2a, type: 2}
+    - target: {fileID: 5789679920427220385, guid: 6ab92a73fc8c78149b44e43fb9ab8533,
+        type: 3}
+      propertyPath: m_Materials.Array.data[1]
+      value: 
+      objectReference: {fileID: 2100000, guid: f172155518e51fe48b97868e8db2496a, type: 2}
     - target: {fileID: 7550534666436478073, guid: 6ab92a73fc8c78149b44e43fb9ab8533,
         type: 3}
       propertyPath: m_LocalPosition.x
