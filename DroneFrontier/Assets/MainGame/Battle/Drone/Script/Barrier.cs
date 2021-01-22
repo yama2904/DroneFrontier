@@ -219,7 +219,7 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
 
         //バリアの色変え
         float value = syncHP / MAX_HP;
-        RpcSetBarrierColor(value, value, 0, 1 - value);
+        RpcSetBarrierColor(1 - value, value, 0, value * 0.5f);
 
 
         //デバッグ用

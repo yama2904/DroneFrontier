@@ -51,7 +51,6 @@ public class MissileBullet : Bullet
         if (other.CompareTag(TagNameManager.PLAYER))
         {
             other.GetComponent<BattleDrone>().CmdDamage(Power);
-            DestroyMe();
         }
         else if (other.CompareTag(TagNameManager.JAMMING_BOT))
         {
@@ -61,8 +60,8 @@ public class MissileBullet : Bullet
                 return;
             }
             jb.CmdDamage(Power);
-            DestroyMe();
         }
+        DestroyMe();
     }
 
     void DestroyMe()

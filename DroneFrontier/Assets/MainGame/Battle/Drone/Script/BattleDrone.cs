@@ -522,14 +522,10 @@ public class BattleDrone : NetworkBehaviour
         //デバッグ用
         if (Input.GetKeyDown(KeyCode.LeftControl))
         {
-            lockOnTrackingSpeed *= 0.1f;
-            rotateSpeed *= 0.1f;
             moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, 0.1f);
         }
         if (Input.GetKeyUp(KeyCode.LeftControl))
         {
-            lockOnTrackingSpeed *= 10;
-            rotateSpeed *= 10;
             moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, 10f);
         }
     }
