@@ -38,12 +38,12 @@ public class MainGameManager : MonoBehaviour
     }
     static List<PlayerData> playerDatas = new List<PlayerData>();
 
-    //ゲーム上のプレイヤー・CPU情報
-    [SerializeField] BattleDrone playerInspector = null;
-    [SerializeField] CPUController cpuInspector = null;
-    static BattleDrone player = null;
-    static CPUController cpu = null;
-    static List<PlayerBaseAction> basePlayers = new List<PlayerBaseAction>();
+    ////ゲーム上のプレイヤー・CPU情報
+    //[SerializeField] BattleDrone playerInspector = null;
+    //[SerializeField] CPUController cpuInspector = null;
+    //static BattleDrone player = null;
+    //static CPUController cpu = null;
+    //static List<PlayerBaseAction> basePlayers = new List<PlayerBaseAction>();
 
 
     //設定画面移動時のマスク用変数
@@ -63,8 +63,8 @@ public class MainGameManager : MonoBehaviour
 
     void Awake()
     {
-        player = playerInspector;
-        cpu = cpuInspector;
+        //player = playerInspector;
+        //cpu = cpuInspector;
         screenMaskImage = screenMaskImageInspector;
 
 
@@ -183,8 +183,8 @@ public class MainGameManager : MonoBehaviour
         IsMulti = false;
         IsConfig = false;
         Mode = GameMode.NONE;
-        playerDatas.Clear();
-        basePlayers.Clear();
+        //playerDatas.Clear();
+        //basePlayers.Clear();
         Cursor.lockState = CursorLockMode.None;
     }
 
@@ -224,17 +224,17 @@ public class MainGameManager : MonoBehaviour
     //プレイヤー又はCPUを追加する
     public static void SetPlayer(string name, BaseWeapon.Weapon weapon, bool isPlayer)
     {
-        //不正な値なら弾く
-        if (name == "" || weapon == BaseWeapon.Weapon.NONE)
-        {
-            return;
-        }
+        ////不正な値なら弾く
+        //if (name == "" || weapon == BaseWeapon.Weapon.NONE)
+        //{
+        //    return;
+        //}
 
-        PlayerData pd = new PlayerData();
-        pd.name = name;
-        pd.weapon = weapon;
-        pd.isPlayer = isPlayer;
+        //PlayerData pd = new PlayerData();
+        //pd.name = name;
+        //pd.weapon = weapon;
+        //pd.isPlayer = isPlayer;
 
-        playerDatas.Add(pd);
+        //playerDatas.Add(pd);
     }
 }
