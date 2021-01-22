@@ -121,8 +121,9 @@ MonoBehaviour:
   destroyTime: 0.6
   shotPerSecond: 2
   _recast: 2
-  _bulletsNum: 5
+  _maxBullets: 5
   _power: 8
+  UIImage: {fileID: 7699756624624785600, guid: a7c1cd4ef5ddfb94eb854662288f34d9, type: 3}
 --- !u!114 &9183892475949393920
 MonoBehaviour:
   m_ObjectHideFlags: 0

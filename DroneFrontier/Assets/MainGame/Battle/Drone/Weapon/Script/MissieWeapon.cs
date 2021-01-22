@@ -8,20 +8,22 @@ public class MissieWeapon : BaseWeapon
 {
     [SerializeField] MissileBullet missile = null;  //複製する弾丸
     SyncList<GameObject> settingBullets = new SyncList<GameObject>();
-    int useMissile = -1;
+    const int USE_INDEX = 0;
+    bool setMissile = false;
 
     //弾丸のパラメータ
     [SerializeField, Tooltip("1秒間に進む距離")] float speedPerSecond = 13.0f;  //1秒間に進む量
     [SerializeField, Tooltip("射程")] float destroyTime = 2.0f;      //発射してから消えるまでの時間(射程)
-    [SerializeField, Tooltip("誘導力")] float trackingPower = 2.3f;    //追従力
+    [SerializeField, Tooltip("誘導力")] float trackingPower = 2.3f;  //追従力
     [SerializeField, Tooltip("1秒間に発射する弾数")] float shotPerSecond = 1.0f;    //1秒間に発射する弾数
 
     [SerializeField, Tooltip("リキャスト時間")] float _recast = 10f;
     [SerializeField, Tooltip("ストック可能な弾数")] int _maxBullets = 3;
     [SerializeField, Tooltip("威力")] float _power = 20f;
 
+    //所持弾数のUI用
     const float UI_POS_X = 75f;
-    const string IMAGE_PARENT_NAME = "UIParaent";
+    const string IMAGE_PARENT_NAME = "UIParent";
     const string IMAGE_NAME = "front";
     [SerializeField] RectTransform UIImage = null;
     Image[] UIs;
@@ -45,7 +47,7 @@ public class MissieWeapon : BaseWeapon
     {
         BulletPower = 20.0f;
         CmdCreateMissile();
-        useMissile = 0;
+        setMissile = true;
 
         //所持弾数のUI作成
         UIs = new Image[_maxBullets];
@@ -62,7 +64,7 @@ public class MissieWeapon : BaseWeapon
     public override void UpdateMe()
     {
         //発射間隔のカウント
-        if (useMissile <= -1)
+        if (!setMissile)
         {
             ShotCountTime += Time.deltaTime;
             if (ShotCountTime > ShotInterval)
@@ -71,7 +73,7 @@ public class MissieWeapon : BaseWeapon
                 if (BulletsRemain > 0)  //弾丸が残っていない場合は処理しない
                 {
                     CmdCreateMissile();
-                    useMissile = 0;
+                    setMissile = true;
 
 
                     //デバッグ用
@@ -121,10 +123,6 @@ public class MissieWeapon : BaseWeapon
     [Command(ignoreAuthority = true)]
     void CmdCreateMissile()
     {
-        if (useMissile >= 0)
-        {
-            return;
-        }
         MissileBullet m = CreateMissile();
         NetworkServer.Spawn(m.gameObject, connectionToClient);
 
@@ -139,7 +137,7 @@ public class MissieWeapon : BaseWeapon
         if (ShotCountTime < ShotInterval) return;
 
         //バグ防止
-        if (useMissile <= -1) return;
+        if (!setMissile) return;
         if (settingBullets.Count <= 0) return;
 
         //残り弾数が0だったら撃たない
@@ -148,7 +146,7 @@ public class MissieWeapon : BaseWeapon
 
         //ミサイル発射
         CmdShot(target);
-        useMissile = -1;
+        setMissile = false;
 
 
         //所持弾丸のUIを灰色に変える
@@ -173,9 +171,9 @@ public class MissieWeapon : BaseWeapon
     [Command(ignoreAuthority = true)]
     void CmdShot(GameObject target)
     {
-        MissileBullet m = settingBullets[useMissile].GetComponent<MissileBullet>();
+        MissileBullet m = settingBullets[USE_INDEX].GetComponent<MissileBullet>();
         m.CmdShot(target);
 
-        settingBullets.RemoveAt(useMissile);
+        settingBullets.RemoveAt(USE_INDEX);
     }
 }

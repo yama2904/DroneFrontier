@@ -66,7 +66,7 @@ public class BattleDrone : NetworkBehaviour
     }
     [SyncVar] GameObject mainWeapon = null;
     [SyncVar] GameObject subWeapon = null;
-    public static BaseWeapon.Weapon SetSubWeapon { private get; set; } = BaseWeapon.Weapon.LASER;
+    public static BaseWeapon.Weapon SetSubWeapon { private get; set; } = BaseWeapon.Weapon.MISSILE;
     bool[] usingWeapons = new bool[(int)Weapon.NONE];    //使用中の武器
     [SerializeField, Tooltip("攻撃中の移動速度の低下率")] float atackingDownSpeed = 0.5f;   //攻撃中の移動速度の低下率
     bool initSubWeapon = false;
@@ -81,7 +81,8 @@ public class BattleDrone : NetworkBehaviour
         NONE
     }
     Item.ItemType[] items = new Item.ItemType[(int)ItemNum.NONE];
-    [SerializeField] Image itemFrameImage = null;
+    [SerializeField] Image itemFrameImage1 = null;
+    [SerializeField] Image itemFrameImage2 = null;
 
 
     //サウンド
@@ -167,7 +168,8 @@ public class BattleDrone : NetworkBehaviour
         boostGaugeImage.enabled = true;
         boostGaugeImage.fillAmount = 1;
         boostGaugeFrameImage.enabled = true;
-        itemFrameImage.enabled = true;
+        itemFrameImage1.enabled = true;
+        itemFrameImage2.enabled = true;
 
         CmdCreateMainWeapon();
         CmdCreateSubWeapon();

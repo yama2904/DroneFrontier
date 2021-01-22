@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using Mirror;
 
 public class Shotgun : BaseWeapon
@@ -21,6 +22,14 @@ public class Shotgun : BaseWeapon
     [SerializeField, Tooltip("ストック可能な弾数")] int _maxBullets = 5;
     [SerializeField, Tooltip("威力")] float _power = 8f;
 
+    //所持弾数のUI用
+    const float UI_POS_X = 60f;
+    const string IMAGE_PARENT_NAME = "UIParent";
+    const string IMAGE_NAME = "front";
+    [SerializeField] RectTransform UIImage = null;
+    Image[] UIs;
+
+
     public override void OnStartClient()
     {
         base.OnStartClient();
@@ -37,7 +46,7 @@ public class Shotgun : BaseWeapon
         MaxBullets = _maxBullets;
         BulletsRemain = MaxBullets;
         BulletPower = _power;
-        
+
         //乱数のシード値の設定
         Random.InitState(System.DateTime.Now.Millisecond);
     }
@@ -46,44 +55,51 @@ public class Shotgun : BaseWeapon
     {
         //リキャストと発射間隔のカウント
         base.Update();
-
-        //リキャスト時間経過したら弾数を1個補充
-        if (RecastCountTime >= Recast)
-        {
-            //残り弾数が最大弾数に達していなかったら補充
-            if (BulletsRemain < MaxBullets)
-            {
-                BulletsRemain++;        //弾数を回復
-                RecastCountTime = 0;    //リキャストのカウントをリセット
-
-
-                //デバッグ用
-                Debug.Log("ショットガンの弾丸が1回分補充されました");
-            }
-        }
     }
 
     public override void Init()
     {
+        //所持弾数のUI作成
+        UIs = new Image[_maxBullets];
+        for (int i = 0; i < _maxBullets; i++)
+        {
+            RectTransform canvas = Instantiate(UIImage);
+            canvas.SetParent(transform);
+            RectTransform parent = canvas.Find(IMAGE_PARENT_NAME).GetComponent<RectTransform>();
+            parent.localPosition = new Vector3(UI_POS_X * i, 0);
+            UIs[i] = parent.Find(IMAGE_NAME).GetComponent<Image>();
+        }
     }
 
     public override void UpdateMe()
     {
+        //最大弾数持っているなら処理しない
+        if (BulletsRemain >= MaxBullets) return;
+
+        //リキャスト時間経過したら弾数を1個補充
+        if (RecastCountTime >= Recast)
+        {
+            UIs[BulletsRemain].fillAmount = 1f;
+            BulletsRemain++;        //弾数を回復
+            RecastCountTime = 0;    //リキャストのカウントをリセット
+
+
+            //デバッグ用
+            Debug.Log("ショットガンの弾丸が1回分補充されました");
+        }
+        else
+        {
+            UIs[BulletsRemain].fillAmount = RecastCountTime / Recast;
+        }
     }
 
     public override void Shot(GameObject target = null)
     {
         //前回発射して発射間隔分の時間が経過していなかったら撃たない
-        if (ShotCountTime < ShotInterval)
-        {
-            return;
-        }
+        if (ShotCountTime < ShotInterval) return;
 
         //残り弾数が0だったら撃たない
-        if (BulletsRemain <= 0)
-        {
-            return;
-        }
+        if (BulletsRemain <= 0) return;
 
         //弾を散らす
         for (int i = -1; i <= 1; i++)
@@ -93,6 +109,13 @@ public class Shotgun : BaseWeapon
                 CmdCreateBullet(shotPos.position, transform.rotation, angle * i, angle * j, target);
             }
         }
+
+        //所持弾丸のUIを灰色に変える
+        for (int i = BulletsRemain - 1; i < MaxBullets; i++)
+        {
+            UIs[i].fillAmount = 0;
+        }
+
         //残り弾丸がMAXで撃つと一瞬で弾丸が1個回復するので
         //残り弾丸がMAXで撃った場合のみリキャストを0にする
         if (BulletsRemain == MaxBullets)
