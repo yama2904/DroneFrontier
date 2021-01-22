@@ -7,7 +7,7 @@ public class MissieWeapon : BaseWeapon
 {
     [SerializeField] MissileBullet missile = null;  //複製する弾丸
     SyncList<GameObject> settingBullets = new SyncList<GameObject>();
-    [SyncVar] int useMissile = -1;
+    int useMissile = -1;
 
     //弾丸のパラメータ
     [SerializeField, Tooltip("1秒間に進む距離")] float speedPerSecond = 13.0f;  //1秒間に進む量
@@ -38,6 +38,7 @@ public class MissieWeapon : BaseWeapon
     {
         BulletPower = 20.0f;
         CmdCreateMissile();
+        useMissile = 0;
     }
 
     public override void UpdateMe()
@@ -52,10 +53,11 @@ public class MissieWeapon : BaseWeapon
                 if (BulletsRemain > 0)  //弾丸が残っていない場合は処理しない
                 {
                     CmdCreateMissile();
+                    useMissile = 0;
 
 
                     //デバッグ用
-                    Debug.Log("ミサイルの弾丸が1回分補充されました");
+                    Debug.Log("ミサイル発射可能");
                 }
             }
         }
@@ -68,6 +70,10 @@ public class MissieWeapon : BaseWeapon
             {
                 BulletsRemain++;        //弾数を回復
                 RecastCountTime = 0;    //リキャストのカウントをリセット
+
+
+                //デバッグ用
+                Debug.Log("ミサイルの弾丸が1回分補充されました");
             }
         }
     }
@@ -100,7 +106,6 @@ public class MissieWeapon : BaseWeapon
         NetworkServer.Spawn(m.gameObject, connectionToClient);
 
         settingBullets.Add(m.gameObject);
-        useMissile = settingBullets.Count - 1;
     }
 
     #endregion
@@ -111,7 +116,8 @@ public class MissieWeapon : BaseWeapon
         if (ShotCountTime < ShotInterval) return;
 
         //バグ防止
-        if (useMissile == -1) return;
+        if (useMissile <= -1) return;
+        if (settingBullets.Count <= 0) return;
 
         //残り弾数が0だったら撃たない
         if (BulletsRemain <= 0) return;
@@ -119,6 +125,7 @@ public class MissieWeapon : BaseWeapon
 
         //ミサイル発射
         CmdShot(target);
+        useMissile = -1;
 
 
         if (BulletsRemain == BulletsNum)
@@ -140,6 +147,5 @@ public class MissieWeapon : BaseWeapon
         m.CmdShot(target);
 
         settingBullets.RemoveAt(useMissile);
-        useMissile = -1;
     }
 }
