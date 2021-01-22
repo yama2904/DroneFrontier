@@ -112,7 +112,7 @@ MonoBehaviour:
   weaponLocalPos: {fileID: 2032177690770584973}
   shotPos: {fileID: 3853599449480899470}
   parentNetId: 0
-  missile: {fileID: 5741596557835123230, guid: 4e623a5a535f118479e6cd28d219f667, type: 3}
+  missile: {fileID: 1587428493, guid: ced0661d0222eab4a80aaed9059f78c3, type: 3}
   speedPerSecond: 30
   destroyTime: 2
   trackingPower: 2.5
