@@ -18,7 +18,7 @@ public class Shotgun : BaseWeapon
     [SerializeField, Tooltip("1秒間に発射する弾数")] float shotPerSecond = 2.0f;    //1秒間に発射する弾数
 
     [SerializeField, Tooltip("リキャスト時間")] float _recast = 2f;
-    [SerializeField, Tooltip("ストック可能な弾数")] int _bulletsNum = 5;
+    [SerializeField, Tooltip("ストック可能な弾数")] int _maxBullets = 5;
     [SerializeField, Tooltip("威力")] float _power = 8f;
 
     public override void OnStartClient()
@@ -34,8 +34,8 @@ public class Shotgun : BaseWeapon
         Recast = _recast;
         ShotInterval = 1.0f / shotPerSecond;
         ShotCountTime = ShotInterval;
-        BulletsNum = _bulletsNum;
-        BulletsRemain = BulletsNum;
+        MaxBullets = _maxBullets;
+        BulletsRemain = MaxBullets;
         BulletPower = _power;
         
         //乱数のシード値の設定
@@ -51,7 +51,7 @@ public class Shotgun : BaseWeapon
         if (RecastCountTime >= Recast)
         {
             //残り弾数が最大弾数に達していなかったら補充
-            if (BulletsRemain < BulletsNum)
+            if (BulletsRemain < MaxBullets)
             {
                 BulletsRemain++;        //弾数を回復
                 RecastCountTime = 0;    //リキャストのカウントをリセット
@@ -95,7 +95,7 @@ public class Shotgun : BaseWeapon
         }
         //残り弾丸がMAXで撃つと一瞬で弾丸が1個回復するので
         //残り弾丸がMAXで撃った場合のみリキャストを0にする
-        if (BulletsRemain == BulletsNum)
+        if (BulletsRemain == MaxBullets)
         {
             RecastCountTime = 0;
         }

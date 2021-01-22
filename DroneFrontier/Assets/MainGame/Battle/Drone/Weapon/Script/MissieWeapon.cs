@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using Mirror;
 
 public class MissieWeapon : BaseWeapon
@@ -16,8 +17,14 @@ public class MissieWeapon : BaseWeapon
     [SerializeField, Tooltip("1秒間に発射する弾数")] float shotPerSecond = 1.0f;    //1秒間に発射する弾数
 
     [SerializeField, Tooltip("リキャスト時間")] float _recast = 10f;
-    [SerializeField, Tooltip("ストック可能な弾数")] int _bulletsNum = 3;
+    [SerializeField, Tooltip("ストック可能な弾数")] int _maxBullets = 3;
     [SerializeField, Tooltip("威力")] float _power = 20f;
+
+    const float UI_POS_X = 75f;
+    const string IMAGE_PARENT_NAME = "UIParaent";
+    const string IMAGE_NAME = "front";
+    [SerializeField] RectTransform UIImage = null;
+    Image[] UIs;
 
 
     public override void OnStartClient()
@@ -26,8 +33,8 @@ public class MissieWeapon : BaseWeapon
         Recast = _recast;
         ShotInterval = 1.0f / shotPerSecond;
         ShotCountTime = ShotInterval;
-        BulletsNum = _bulletsNum;
-        BulletsRemain = BulletsNum;
+        MaxBullets = _maxBullets;
+        BulletsRemain = MaxBullets;
         BulletPower = _power;
     }
 
@@ -39,6 +46,17 @@ public class MissieWeapon : BaseWeapon
         BulletPower = 20.0f;
         CmdCreateMissile();
         useMissile = 0;
+
+        //所持弾数のUI作成
+        UIs = new Image[_maxBullets];
+        for (int i = 0; i < _maxBullets; i++)
+        {
+            RectTransform canvas = Instantiate(UIImage);
+            canvas.SetParent(transform);
+            RectTransform parent = canvas.Find(IMAGE_PARENT_NAME).GetComponent<RectTransform>();
+            parent.localPosition = new Vector3(UI_POS_X * i, 0);
+            UIs[i] = parent.Find(IMAGE_NAME).GetComponent<Image>();
+        }
     }
 
     public override void UpdateMe()
@@ -63,17 +81,22 @@ public class MissieWeapon : BaseWeapon
         }
 
         //リキャスト時間経過したら弾数を1個補充
-        if (BulletsRemain < BulletsNum)     //最大弾数持っていたら処理しない
+        if (BulletsRemain < MaxBullets)     //最大弾数持っていたら処理しない
         {
             RecastCountTime += Time.deltaTime;
             if (RecastCountTime >= Recast)
             {
+                UIs[BulletsRemain].fillAmount = 1f;
                 BulletsRemain++;        //弾数を回復
                 RecastCountTime = 0;    //リキャストのカウントをリセット
 
 
                 //デバッグ用
                 Debug.Log("ミサイルの弾丸が1回分補充されました");
+            }
+            else
+            {
+                UIs[BulletsRemain].fillAmount = RecastCountTime / Recast;
             }
         }
     }
@@ -128,7 +151,14 @@ public class MissieWeapon : BaseWeapon
         useMissile = -1;
 
 
-        if (BulletsRemain == BulletsNum)
+        //所持弾丸のUIを灰色に変える
+        for (int i = BulletsRemain - 1; i < MaxBullets; i++)
+        {
+            UIs[i].fillAmount = 0;
+        }
+
+        //弾数を減らしてリキャスト開始
+        if (BulletsRemain == MaxBullets)
         {
             RecastCountTime = 0;
         }

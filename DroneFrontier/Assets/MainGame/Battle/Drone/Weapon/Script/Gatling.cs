@@ -29,8 +29,8 @@ public class Gatling : BaseWeapon
         Recast = 0;
         ShotInterval = 1.0f / shotPerSecond;
         ShotCountTime = ShotInterval;
-        BulletsNum = 10;
-        BulletsRemain = BulletsNum;
+        MaxBullets = 10;
+        BulletsRemain = MaxBullets;
         BulletPower = _power;
     }
 
@@ -43,7 +43,7 @@ public class Gatling : BaseWeapon
         if (RecastCountTime >= Recast)
         {
             //残り弾数が最大弾数に達していなかったら補充
-            if (BulletsRemain < BulletsNum)
+            if (BulletsRemain < MaxBullets)
             {
                 BulletsRemain++;        //弾数を回復
                 RecastCountTime = 0;    //リキャストのカウントをリセット
@@ -78,7 +78,7 @@ public class Gatling : BaseWeapon
 
         //残り弾丸がMAXで撃つと一瞬で弾丸が1個回復するので
         //残り弾丸がMAXで撃った場合のみリキャストを0にする
-        if (BulletsRemain == BulletsNum)
+        if (BulletsRemain == MaxBullets)
         {
             RecastCountTime = 0;
         }

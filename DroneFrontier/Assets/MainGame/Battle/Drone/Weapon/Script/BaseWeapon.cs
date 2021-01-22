@@ -18,7 +18,7 @@ public abstract class BaseWeapon : NetworkBehaviour, IWeapon
     //プロパティ用
     float recast = 0;
     float shotInterval = 0;
-    int bulletsNum = 0;
+    int maxBullets = 0;
     int bulletsRemain = 0;
 
     //リキャスト時間
@@ -47,16 +47,16 @@ public abstract class BaseWeapon : NetworkBehaviour, IWeapon
         }
     }
 
-    //弾数
-    protected int BulletsNum
+    //最大弾数
+    protected int MaxBullets
     {
         get
         {
-            return bulletsNum;
+            return maxBullets;
         }
         set
         {
-            if (value >= 0) bulletsNum = value;
+            if (value >= 0) maxBullets = value;
 
         }
     }
