@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 87040ab11952ee349a3b311b2204f9d3
+guid: 634b366360d993244867c9b22549be2e
 ModelImporter:
   serializedVersion: 19300
   internalIDToNameTable: []
@@ -7,38 +7,23 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: aiStandardSurface1
-    second: {fileID: 2100000, guid: 0dbc2bfb6f0510e4a8f14958e71fbbc0, type: 2}
+      name: jamming_blk_mate
+    second: {fileID: 2100000, guid: 96bbf97fa59576f4d830d1511cccb812, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: aiStandardSurface2
-    second: {fileID: 2100000, guid: fa3e5038d9653f2449feda5f3a2653bd, type: 2}
+      name: jamming_blu_mate
+    second: {fileID: 2100000, guid: 8ba4d30a15960ca48a43b0f3b85e88bb, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: aiStandardSurface3
-    second: {fileID: 2100000, guid: 12f0fc4c6158f2c4684d26ae637c9191, type: 2}
+      name: jamming_cbn_mate
+    second: {fileID: 2100000, guid: 688ba1bf165a38c4cae1eea514dd8a39, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: aiStandardSurface4
-    second: {fileID: 2100000, guid: 6f84e5c30b277dc40bded2c771628ec7, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: aiStandardSurface7
-    second: {fileID: 2100000, guid: 60a09ac90a3bd7c48993770a2eb06d74, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: aiStandardSurface9
-    second: {fileID: 2100000, guid: 35f9c4bc7857ea547a75466f11bf0da4, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: lambert1
-    second: {fileID: 2100000, guid: 659c51c68d31da5468dc08622c5154d4, type: 2}
+      name: jamming_puropera_mate
+    second: {fileID: 2100000, guid: d80e91c5bcc49684780e4f2895a9978c, type: 2}
   materials:
     materialImportMode: 1
     materialName: 0
@@ -69,7 +54,7 @@ ModelImporter:
     isReadable: 0
   meshes:
     lODScreenPercentages: []
-    globalScale: 8
+    globalScale: 50
     meshCompression: 0
     addColliders: 0
     useSRGBMaterialColor: 1
@@ -115,7 +100,7 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
-    globalScale: 8
+    globalScale: 0.5
     rootMotionBoneName: 
     hasTranslationDoF: 0
     hasExtraRoot: 0
