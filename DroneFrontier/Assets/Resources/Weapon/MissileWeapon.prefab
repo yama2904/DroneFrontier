@@ -116,7 +116,10 @@ MonoBehaviour:
   speedPerSecond: 30
   destroyTime: 2
   trackingPower: 2.5
-  shotPerSecond: 0.2
+  shotPerSecond: 1
+  _recast: 1
+  _bulletsNum: 3
+  _power: 20
 --- !u!114 &-3027676268421260177
 MonoBehaviour:
   m_ObjectHideFlags: 0

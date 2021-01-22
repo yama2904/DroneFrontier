@@ -61,10 +61,9 @@ public class Explosion : NetworkBehaviour
     private void OnTriggerEnter(Collider other)
     {
         //当たり判定を行わないオブジェクトだったら処理をしない
-        if (ReferenceEquals(other.gameObject, Shooter))
-        {
-            return;
-        }
+        if (ReferenceEquals(other.gameObject, Shooter)) return;
+        if (other.CompareTag(TagNameManager.BULLET)) return;
+
         CmdTrigger(other.gameObject);
     }
 
