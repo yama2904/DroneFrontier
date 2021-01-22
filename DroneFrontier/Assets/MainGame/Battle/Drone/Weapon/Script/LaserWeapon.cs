@@ -14,7 +14,7 @@ public class LaserWeapon : BaseWeapon
     [SerializeField, Tooltip("1秒間にヒットする回数")] float hitPerSecond = 5.0f;  //1秒間にヒットする回数
 
     [SerializeField] Image laserGaugeImage = null;
-    float gaugeAmout = 1.0f;
+    [SerializeField] Image laserGaugeFrameImage = null;
 
     //攻撃中のフラグ
     enum ShotFlag
@@ -39,7 +39,6 @@ public class LaserWeapon : BaseWeapon
         ShotInterval = 1.0f / hitPerSecond;
         ShotCountTime = ShotInterval;
         BulletPower = _power;
-        gaugeAmout = 1.0f;
     }
     
     public override void Init()
@@ -50,6 +49,7 @@ public class LaserWeapon : BaseWeapon
         }
         CmdInit();
         laserGaugeImage.enabled = true;
+        laserGaugeFrameImage.enabled = true;
         laserGaugeImage.fillAmount = 1.0f;
     }
 
@@ -82,13 +82,13 @@ public class LaserWeapon : BaseWeapon
         if (!isShots[(int)ShotFlag.SHOT_START])
         {
             //処理が無駄なのでゲージがMAXならスキップ
-            if (gaugeAmout < 1.0f)
+            if (laserGaugeImage.fillAmount < 1.0f)
             {
                 //ゲージを回復
-                gaugeAmout += 1.0f / Recast * Time.deltaTime;
-                if (gaugeAmout > 1.0f)
+                laserGaugeImage.fillAmount += 1.0f / Recast * Time.deltaTime;
+                if (laserGaugeImage.fillAmount > 1.0f)
                 {
-                    gaugeAmout = 1.0f;
+                    laserGaugeImage.fillAmount = 1.0f;
 
 
                     //デバッグ用
@@ -96,7 +96,6 @@ public class LaserWeapon : BaseWeapon
                 }
             }
         }
-        laserGaugeImage.fillAmount = gaugeAmout;
     }
 
     void LateUpdate()
@@ -138,7 +137,7 @@ public class LaserWeapon : BaseWeapon
         //発射に必要な最低限のゲージがないと発射しない
         if (!isShots[(int)ShotFlag.SHOT_START])
         {
-            if (gaugeAmout < SHOT_POSSIBLE_MIN)
+            if (laserGaugeImage.fillAmount < SHOT_POSSIBLE_MIN)
             {
                 return;
             }
@@ -153,10 +152,10 @@ public class LaserWeapon : BaseWeapon
         if (lb.IsShotBeam)
         {
             //ゲージを減らす
-            gaugeAmout -= 1.0f / maxShotTime * Time.deltaTime;
-            if (gaugeAmout <= 0)    //ゲージがなくなったらレーザーを止める
+            laserGaugeImage.fillAmount -= 1.0f / maxShotTime * Time.deltaTime;
+            if (laserGaugeImage.fillAmount <= 0)    //ゲージがなくなったらレーザーを止める
             {
-                gaugeAmout = 0;
+                laserGaugeImage.fillAmount = 0;
                 isShots[(int)ShotFlag.SHOT_SHOTING] = false;
             }
         }
