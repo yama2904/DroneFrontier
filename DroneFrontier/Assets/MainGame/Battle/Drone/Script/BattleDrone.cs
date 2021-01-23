@@ -18,7 +18,7 @@ public class BattleDrone : NetworkBehaviour
     PlayerBaseAction baseAction = null;
     PlayerItemAction itemAction = null;
     PlayerStatusAction statusAction = null;
-    bool isPlayerStatusInit = false;
+    bool isStatusActionInit = false;
 
     //移動用
     [SerializeField, Tooltip("移動速度")] float moveSpeed = 100f;      //移動速度
@@ -80,9 +80,6 @@ public class BattleDrone : NetworkBehaviour
 
         NONE
     }
-    Item.ItemType[] items = new Item.ItemType[(int)ItemNum.NONE];
-    [SerializeField] Image itemFrameImage1 = null;
-    [SerializeField] Image itemFrameImage2 = null;
 
 
     //サウンド
@@ -168,8 +165,7 @@ public class BattleDrone : NetworkBehaviour
         boostGaugeImage.enabled = true;
         boostGaugeImage.fillAmount = 1;
         boostGaugeFrameImage.enabled = true;
-        itemFrameImage1.enabled = true;
-        itemFrameImage2.enabled = true;
+        itemAction.Init((int)ItemNum.NONE);
 
         CmdCreateMainWeapon();
         CmdCreateSubWeapon();
@@ -189,11 +185,6 @@ public class BattleDrone : NetworkBehaviour
 
         maxSpeed = moveSpeed * 10;
         minSpeed = moveSpeed * 0.2f;
-
-        for (int i = 0; i < (int)ItemNum.NONE; i++)
-        {
-            items[i] = Item.ItemType.NONE;
-        }
     }
 
     void Start()
@@ -216,12 +207,12 @@ public class BattleDrone : NetworkBehaviour
         }
 
         //PlayerStatusActionの初期化
-        if (!isPlayerStatusInit)
+        if (!isStatusActionInit && statusAction != null)
         {
             if (barrier != null && lockOn != null && radar != null)  //エラー防止
             {
                 statusAction.Init(barrier.GetComponent<Barrier>(), lockOn, radar, minSpeed, maxSpeed);
-                isPlayerStatusInit = true;
+                isStatusActionInit = true;
             }
         }
 
@@ -374,7 +365,7 @@ public class BattleDrone : NetworkBehaviour
 
         #endregion
 
-        
+
         //回転処理
         if (MainGameManager.IsCursorLock)
         {
@@ -385,7 +376,7 @@ public class BattleDrone : NetworkBehaviour
 
 
         #region Weapon
-        
+
         //攻撃処理しか使わない簡易メソッド
         Action<float> ModifySpeeds = (x) =>
         {
@@ -578,16 +569,10 @@ public class BattleDrone : NetworkBehaviour
     //アイテム使用
     void UseItem(ItemNum item)
     {
-        Item.ItemType t = items[(int)item];   //名前省略
-
         //アイテム枠1にアイテムを持っていたら使用
-        if (t != Item.ItemType.NONE)
+        if (itemAction.UseItem((int)item))
         {
-            if (itemAction.UseItem(t))
-            {
-                PlaySE((int)SE.USE_ITEM, SoundManager.BaseSEVolume);    //アイテム使用音の再生
-                items[(int)item] = Item.ItemType.NONE;
-            }
+            PlaySE((int)SE.USE_ITEM, SoundManager.BaseSEVolume);    //アイテム使用音の再生
         }
     }
 
@@ -786,25 +771,14 @@ public class BattleDrone : NetworkBehaviour
         {
             if (other.CompareTag(TagNameManager.ITEM))
             {
-                //アイテム所持枠に空きがあるか調べる
-                for (int num = 0; num < (int)ItemNum.NONE; num++)
-                {
-                    //空きがある
-                    if (items[num] == Item.ItemType.NONE)
-                    {
-                        Item item = other.GetComponent<Item>();
-                        if (item.type == Item.ItemType.NONE) continue;
-
-                        items[num] = item.type;
-                        item.type = Item.ItemType.NONE;  //通信のラグのせいで1つのアイテムを2回取るバグの防止
-                        CmdDestroy(other.gameObject);
+                Item item = other.GetComponent<Item>();
+                if (itemAction.SetItem(item.type)) {
+                    item.type = Item.ItemType.NONE;  //通信のラグのせいで1つのアイテムを2回取るバグの防止
+                    CmdDestroy(item.gameObject);
 
 
-                        //デバッグ用
-                        Debug.Log("アイテム取得");
-
-                        break;
-                    }
+                    //デバッグ用
+                    Debug.Log("アイテム取得");
                 }
             }
         }

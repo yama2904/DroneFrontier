@@ -23,10 +23,11 @@ public class Shotgun : BaseWeapon
     [SerializeField, Tooltip("威力")] float _power = 8f;
 
     //所持弾数のUI用
-    const float UI_POS_X = 60f;
-    const string IMAGE_PARENT_NAME = "UIParent";
-    const string IMAGE_NAME = "front";
-    [SerializeField] RectTransform UIImage = null;
+    const float UI_POS_DIFF_X = 1.2f;
+    const float UI_POS_Y = 175f;
+    [SerializeField] Canvas UIParentCanvas = null;
+    [SerializeField] Image bulletUIBack = null;
+    [SerializeField] Image bulletUIFront = null;
     Image[] UIs;
 
 
@@ -63,11 +64,19 @@ public class Shotgun : BaseWeapon
         UIs = new Image[_maxBullets];
         for (int i = 0; i < _maxBullets; i++)
         {
-            RectTransform canvas = Instantiate(UIImage);
-            canvas.SetParent(transform);
-            RectTransform parent = canvas.Find(IMAGE_PARENT_NAME).GetComponent<RectTransform>();
-            parent.localPosition = new Vector3(UI_POS_X * i, 0);
-            UIs[i] = parent.Find(IMAGE_NAME).GetComponent<Image>();
+            //bulletUIBackの生成
+            RectTransform back = Instantiate(bulletUIBack).GetComponent<RectTransform>();
+            back.SetParent(UIParentCanvas.transform);
+            back.anchoredPosition = new Vector2((back.sizeDelta.x * i * UI_POS_DIFF_X) + back.sizeDelta.x, UI_POS_Y);
+
+            //bulletUIFrontの生成
+            RectTransform front = Instantiate(bulletUIFront).GetComponent<RectTransform>();
+            front.SetParent(UIParentCanvas.transform);
+            front.anchoredPosition = new Vector2((front.sizeDelta.x * i * UI_POS_DIFF_X) + front.sizeDelta.x, UI_POS_Y);
+
+            //配列に追加
+            UIs[i] = front.GetComponent<Image>();
+            UIs[i].fillAmount = 1f;
         }
     }
 

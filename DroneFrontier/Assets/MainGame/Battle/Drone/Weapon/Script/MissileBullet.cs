@@ -45,6 +45,7 @@ public class MissileBullet : Bullet
         //当たり判定を行わないオブジェクトだったら処理をしない
         if (ReferenceEquals(other.gameObject, Shooter)) return;
         if (other.CompareTag(TagNameManager.BULLET)) return;
+        if (other.CompareTag(TagNameManager.ITEM)) return;
 
         if (other.CompareTag(TagNameManager.PLAYER))
         {
