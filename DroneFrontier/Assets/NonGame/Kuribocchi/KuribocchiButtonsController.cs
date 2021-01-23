@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Mirror.Discovery;
 
 public class KuribocchiButtonsController : MonoBehaviour
 {
@@ -26,7 +27,7 @@ public class KuribocchiButtonsController : MonoBehaviour
 
     //マルチ
     public void SelectRiajuu()
-    {  
+    {
         inputNameObject.SetActive(true);  //名前入力の表示
         screenMask.SetActive(true);       //後ろのボタンを押せなくする
         BrightnessManager.SetGameAlfa(0.7f);    //後ろを暗くする
@@ -40,9 +41,9 @@ public class KuribocchiButtonsController : MonoBehaviour
 
 
     //マッチング
-    public void SelectMatching()
+    public void SelectHost()
     {
-        if(inputField.text != "")
+        if (inputField.text != "")
         {
             playerName = inputField.text;
             inputNameObject.SetActive(false);    //名前入力の非表示
@@ -50,9 +51,25 @@ public class KuribocchiButtonsController : MonoBehaviour
             BrightnessManager.SetGameAlfa(0);    //明るさを元に戻す
             MainGameManager.IsMulti = true;      //マルチモードに設定
 
-            BaseScreenManager.SetScreen(BaseScreenManager.Screen.MATCHING);
+            CustomNetworkDiscoveryHUD.Instance.StartHost();
+            //BaseScreenManager.SetScreen(BaseScreenManager.Screen.MATCHING);
         }
     }
+
+    public void SelectClient()
+    {
+        if (inputField.text == "") return;
+        if (!CustomNetworkDiscoveryHUD.Instance.StartClient()) return;
+
+        playerName = inputField.text;
+        inputNameObject.SetActive(false);    //名前入力の非表示
+        screenMask.SetActive(false);         //後ろのボタンを押せるようにする
+        BrightnessManager.SetGameAlfa(0);    //明るさを元に戻す
+        MainGameManager.IsMulti = true;      //マルチモードに設定
+
+        //BaseScreenManager.SetScreen(BaseScreenManager.Screen.MATCHING);
+    }
+
 
     //名前入力中の戻る
     public void SelectBack_InputName()

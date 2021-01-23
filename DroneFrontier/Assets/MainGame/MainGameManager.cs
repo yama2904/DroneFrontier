@@ -200,7 +200,7 @@ public class MainGameManager : MonoBehaviour
     void MoveResult()
     {
         Init();
-        NonGameManager.MainGameToResult();
+        NonGameManager.LoadNonGameScene(BaseScreenManager.Screen.RESULT);
     }
 
 

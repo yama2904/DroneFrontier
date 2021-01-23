@@ -819,7 +819,7 @@ MonoBehaviour:
   showDebugMessages: 0
   serverTickRate: 30
   offlineScene: Assets/MainGame/Race/RaceModeScene.unity
-  onlineScene: Assets/Yama_Test/TestScene.unity
+  onlineScene: Assets/MainGame/Battle/BattleModeScene.unity
   transport: {fileID: 5004313539606390321}
   networkAddress: localhost
   maxConnections: 4

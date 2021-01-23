@@ -56,14 +56,14 @@ namespace Mirror.Discovery
                 networkDiscovery.AdvertiseServer();
             }
 
-            // Dedicated server
-            if (GUILayout.Button("Start Server"))
-            {
-                discoveredServers.Clear();
-                NetworkManager.singleton.StartServer();
+            //// Dedicated server
+            //if (GUILayout.Button("Start Server"))
+            //{
+            //    discoveredServers.Clear();
+            //    NetworkManager.singleton.StartServer();
 
-                networkDiscovery.AdvertiseServer();
-            }
+            //    networkDiscovery.AdvertiseServer();
+            //}
 
             GUILayout.EndHorizontal();
 

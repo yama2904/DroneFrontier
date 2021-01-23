@@ -1,8 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Mirror;
 
-public class MatchingButtonsController : MonoBehaviour
+public class MatchingButtonsController : NetworkBehaviour
 {
     void Start()
     {
@@ -21,6 +22,10 @@ public class MatchingButtonsController : MonoBehaviour
 
     public void SelectBack()
     {
-        BaseScreenManager.SetScreen(BaseScreenManager.Screen.KURIBOCCHI);
+        if (isServer)
+        {
+            NetworkManager.singleton.StopHost();
+        }
+        NonGameManager.LoadNonGameScene(BaseScreenManager.Screen.KURIBOCCHI);
     }
 }

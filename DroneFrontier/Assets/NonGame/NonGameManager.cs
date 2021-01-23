@@ -6,8 +6,8 @@ using UnityEngine.SceneManagement;
 public class NonGameManager : MonoBehaviour
 {
     static List<MainGameManager.PlayerData> playerDatas = new List<MainGameManager.PlayerData>();
+    static BaseScreenManager.Screen startScreen = BaseScreenManager.Screen.TITLE;
     static bool isStarted = false;
-    static bool isResult = false;
 
     void Start()
     {
@@ -25,15 +25,11 @@ public class NonGameManager : MonoBehaviour
             BaseScreenManager.LoadScreen((BaseScreenManager.Screen)screen);
         }
 
-        if (isResult)
+        if(startScreen == BaseScreenManager.Screen.NONE)
         {
-            isResult = false;
-            BaseScreenManager.SetScreen(BaseScreenManager.Screen.RESULT);
+            startScreen = BaseScreenManager.Screen.TITLE;
         }
-        else
-        {
-            BaseScreenManager.SetScreen(BaseScreenManager.Screen.TITLE);
-        }
+        BaseScreenManager.SetScreen(startScreen);
     }
 
     void Update()
@@ -65,9 +61,9 @@ public class NonGameManager : MonoBehaviour
         SceneManager.LoadScene("MainGameScene");
     }
 
-    public static void MainGameToResult()
+    public static void LoadNonGameScene(BaseScreenManager.Screen startScreen)
     {
-        isResult = true;
+        NonGameManager.startScreen = startScreen;
         SceneManager.LoadScene("NonGameScene");
     }
 }

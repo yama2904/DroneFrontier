@@ -1517,6 +1517,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62420f42f7e2e504c9077116f76fb81f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
 --- !u!1 &4274916017394602487
 GameObject:
   m_ObjectHideFlags: 0
