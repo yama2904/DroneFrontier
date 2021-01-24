@@ -6,13 +6,13 @@ namespace Mirror.Discovery
     [DisallowMultipleComponent]
     //[AddComponentMenu("Network/NetworkDiscoveryHUD")]
     [HelpURL("https://mirror-networking.com/docs/Articles/Components/NetworkDiscovery.html")]
-    [RequireComponent(typeof(NetworkDiscovery))]
+    //[RequireComponent(typeof(NetworkDiscovery))]
     public class CustomNetworkDiscoveryHUD : MonoBehaviour
     {
         readonly Dictionary<long, ServerResponse> discoveredServers = new Dictionary<long, ServerResponse>();
         Vector2 scrollViewPos = Vector2.zero;
 
-        public NetworkDiscovery networkDiscovery;
+        public NewNetworkDiscovery networkDiscovery;
         long serverId = -1;
         bool isStartClient = false;
 
@@ -28,67 +28,13 @@ namespace Mirror.Discovery
         {
             if (networkDiscovery == null)
             {
-                networkDiscovery = GetComponent<NetworkDiscovery>();
+                networkDiscovery = GetComponent<NewNetworkDiscovery>();
                 UnityEditor.Events.UnityEventTools.AddPersistentListener(networkDiscovery.OnServerFound, OnDiscoveredServer);
                 UnityEditor.Undo.RecordObjects(new Object[] { this, networkDiscovery }, "Set NetworkDiscovery");
             }
         }
 #endif
 
-        //void OnGUI()
-        //{
-        //    if (NetworkManager.singleton == null)
-        //        return;
-
-        //    if (NetworkServer.active || NetworkClient.active)
-        //        return;
-
-        //    if (!NetworkClient.isConnected && !NetworkServer.active && !NetworkClient.active)
-        //        DrawGUI();
-        //}
-
-        //void DrawGUI()
-        //{
-        //    GUILayout.BeginHorizontal();
-
-        //    if (GUILayout.Button("Find Servers"))
-        //    {
-        //        discoveredServers.Clear();
-        //        networkDiscovery.StartDiscovery();
-        //    }
-
-        //    // LAN Host
-        //    if (GUILayout.Button("Start Host"))
-        //    {
-        //        discoveredServers.Clear();
-        //        NetworkManager.singleton.StartHost();
-        //        networkDiscovery.AdvertiseServer();
-        //    }
-
-        //    // Dedicated server
-        //    if (GUILayout.Button("Start Server"))
-        //    {
-        //        discoveredServers.Clear();
-        //        NetworkManager.singleton.StartServer();
-
-        //        networkDiscovery.AdvertiseServer();
-        //    }
-
-        //    GUILayout.EndHorizontal();
-
-        //    // show list of found server
-
-        //    GUILayout.Label($"Discovered Servers [{discoveredServers.Count}]:");
-
-        //    // servers
-        //    scrollViewPos = GUILayout.BeginScrollView(scrollViewPos);
-
-        //    foreach (ServerResponse info in discoveredServers.Values)
-        //        if (GUILayout.Button(info.EndPoint.Address.ToString()))
-        //            Connect(info);
-
-        //    GUILayout.EndScrollView();
-        //}
 
         private void Update()
         {
@@ -97,6 +43,7 @@ namespace Mirror.Discovery
 
             Debug.Log("Update");
             Connect(discoveredServers[serverId]);
+            networkDiscovery.StopDiscovery();
             isStartClient = true;
         }
 
@@ -127,30 +74,19 @@ namespace Mirror.Discovery
                 discoveredServers.Clear();
                 NetworkManager.singleton.StartHost();
                 networkDiscovery.AdvertiseServer();
-
-                //foreach (ServerResponse info in discoveredServers.Values)
-                //        Connect(info);
-                //if (GUILayout.Button(info.EndPoint.Address.ToString()))
             }
         }
 
-        public bool StartClient()
+        public void StartClient()
         {
-            if (NetworkManager.singleton == null) return false;
+            if (NetworkManager.singleton == null) return;
 
-            if (NetworkServer.active || NetworkClient.active) return false;
+            if (NetworkServer.active || NetworkClient.active) return;
 
-            if (NetworkClient.isConnected && NetworkServer.active && NetworkClient.active) return false;
+            if (NetworkClient.isConnected && NetworkServer.active && NetworkClient.active) return;
 
             discoveredServers.Clear();
             networkDiscovery.StartDiscovery();
-
-            Debug.Log("StartClient");
-            return true;
-            //foreach (ServerResponse info in discoveredServers.Values)
-            //    Connect(info);
-            //if (GUILayout.Button(info.EndPoint.Address.ToString()))
-
         }
 
         private void OnDestroy()

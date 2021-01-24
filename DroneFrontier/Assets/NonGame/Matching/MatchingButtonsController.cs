@@ -5,19 +5,12 @@ using Mirror;
 
 public class MatchingButtonsController : NetworkBehaviour
 {
-    void Start()
-    {
-        
-    }
-    
-    void Update()
-    {
-        
-    }
+    void Start() { }
+    void Update() { }
 
     public void SelectDecision()
     {
-        
+
     }
 
     public void SelectBack()

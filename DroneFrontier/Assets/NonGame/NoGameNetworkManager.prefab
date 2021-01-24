@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 44203507864318135}
-  - component: {fileID: 44203507864318132}
+  - component: {fileID: 5591026080427057210}
   - component: {fileID: 44203507864318129}
   - component: {fileID: 44203507864318134}
   - component: {fileID: 44203507864318128}
@@ -34,7 +34,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &44203507864318132
+--- !u!114 &5591026080427057210
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -43,7 +43,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 44203507864318130}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cc7d9eb93a7671441b7c110e1a8a30fe, type: 3}
+  m_Script: {fileID: 11500000, guid: 03cf809690a4cba4695455c91848e764, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   dontDestroyOnLoad: 1
@@ -59,8 +59,9 @@ MonoBehaviour:
   disconnectInactiveConnections: 0
   disconnectInactiveTimeout: 60
   authenticator: {fileID: 0}
-  playerPrefab: {fileID: 0}
-  autoCreatePlayer: 0
+  playerPrefab: {fileID: 2579965352790506082, guid: 42978d1e4a5d18441a9f5cfb43572661,
+    type: 3}
+  autoCreatePlayer: 1
   playerSpawnMethod: 0
   spawnPrefabs: []
 --- !u!114 &44203507864318129

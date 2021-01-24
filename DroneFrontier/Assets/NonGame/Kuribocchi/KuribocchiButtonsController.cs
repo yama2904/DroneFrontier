@@ -10,7 +10,7 @@ public class KuribocchiButtonsController : MonoBehaviour
     [SerializeField] GameObject screenMask = null;  //名前入力中に後ろのボタンを押せないようにするため
     [SerializeField] InputField inputField = null;
 
-    string playerName = "";
+    public static string playerName = "";
 
     void Start()
     {
@@ -50,6 +50,7 @@ public class KuribocchiButtonsController : MonoBehaviour
             screenMask.SetActive(false);         //後ろのボタンを押せるようにする
             BrightnessManager.SetGameAlfa(0);    //明るさを元に戻す
             MainGameManager.IsMulti = true;      //マルチモードに設定
+            MatchingManager.playerNames.Add(playerName);
 
             CustomNetworkDiscoveryHUD.Instance.StartHost();
             //BaseScreenManager.SetScreen(BaseScreenManager.Screen.MATCHING);
@@ -59,13 +60,13 @@ public class KuribocchiButtonsController : MonoBehaviour
     public void SelectClient()
     {
         if (inputField.text == "") return;
-        if (!CustomNetworkDiscoveryHUD.Instance.StartClient()) return;
+        CustomNetworkDiscoveryHUD.Instance.StartClient();
 
         playerName = inputField.text;
-        inputNameObject.SetActive(false);    //名前入力の非表示
-        screenMask.SetActive(false);         //後ろのボタンを押せるようにする
-        BrightnessManager.SetGameAlfa(0);    //明るさを元に戻す
-        MainGameManager.IsMulti = true;      //マルチモードに設定
+        //inputNameObject.SetActive(false);    //名前入力の非表示
+        //screenMask.SetActive(false);         //後ろのボタンを押せるようにする
+        //BrightnessManager.SetGameAlfa(0);    //明るさを元に戻す
+        //MainGameManager.IsMulti = true;      //マルチモードに設定
 
         //BaseScreenManager.SetScreen(BaseScreenManager.Screen.MATCHING);
     }

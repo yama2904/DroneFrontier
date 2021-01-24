@@ -1,4 +1,6 @@
-﻿using System.Net;
+﻿using System.Collections.Generic;
+using System;
+using System.Net;
 using Mirror;
 using Mirror.Discovery;
 
@@ -12,16 +14,35 @@ public class DiscoveryRequest : NetworkMessage
 {
     // Add properties for whatever information you want sent by clients
     // in their broadcast messages that servers will consume.
+    public string name = "";
 }
 
+//応答
 public class DiscoveryResponse : NetworkMessage
 {
     // Add properties for whatever information you want the server to return to
     // clients for them to display or consume for establishing a connection.
+    public IPEndPoint EndPoint { get; set; }
+    public Uri uri;
+    public long serverId;
 }
 
-public class NewNetworkDiscovery : NetworkDiscoveryBase<DiscoveryRequest, DiscoveryResponse>
+public class NewNetworkDiscovery : NetworkDiscoveryBase<ServerRequest, ServerResponse>
 {
+    public long ServerId { get; private set; }
+    public Transport transport;
+    public ServerFoundUnityEvent OnServerFound;
+
+    public override void Start()
+    {
+        ServerId = RandomLong();
+
+        if (transport == null)
+            transport = Transport.activeTransport;
+
+        base.Start();
+    }
+
     #region Server
 
     /// <summary>
@@ -33,10 +54,11 @@ public class NewNetworkDiscovery : NetworkDiscoveryBase<DiscoveryRequest, Discov
     /// </remarks>
     /// <param name="request">Request comming from client</param>
     /// <param name="endpoint">Address of the client that sent the request</param>
-    protected override void ProcessClientRequest(DiscoveryRequest request, IPEndPoint endpoint)
-    {
-        base.ProcessClientRequest(request, endpoint);
-    }
+    //protected override void ProcessClientRequest(DiscoveryRequest request, IPEndPoint endpoint)
+    //{
+    //    //クライアントに返信
+    //    base.ProcessClientRequest(request, endpoint);
+    //}
 
     /// <summary>
     /// Process the request from a client
@@ -48,9 +70,27 @@ public class NewNetworkDiscovery : NetworkDiscoveryBase<DiscoveryRequest, Discov
     /// <param name="request">Request comming from client</param>
     /// <param name="endpoint">Address of the client that sent the request</param>
     /// <returns>A message containing information about this server</returns>
-    protected override DiscoveryResponse ProcessRequest(DiscoveryRequest request, IPEndPoint endpoint) 
+    protected override ServerResponse ProcessRequest(ServerRequest request, IPEndPoint endpoint)
     {
-        return new DiscoveryResponse();
+        // In this case we don't do anything with the request
+        // but other discovery implementations might want to use the data
+        // in there,  This way the client can ask for
+        // specific game mode or something                        
+        try
+        {
+            // this is an example reply message,  return your own
+            // to include whatever is relevant for your game
+            MatchingManager.playerNames.Add(request.name);
+            return new ServerResponse
+            {
+                serverId = ServerId,
+                uri = transport.ServerUri()
+            };
+        }
+        catch (NotImplementedException)
+        {
+            throw;
+        }
     }
 
     #endregion
@@ -64,9 +104,13 @@ public class NewNetworkDiscovery : NetworkDiscoveryBase<DiscoveryRequest, Discov
     /// Override if you wish to include additional data in the discovery message
     /// such as desired game mode, language, difficulty, etc... </remarks>
     /// <returns>An instance of ServerRequest with data to be broadcasted</returns>
-    protected override DiscoveryRequest GetRequest()
+    protected override ServerRequest GetRequest()
     {
-        return new DiscoveryRequest();
+        //サーバを検出するためのブロードキャストメッセージ
+        return new ServerRequest
+        {
+            name = KuribocchiButtonsController.playerName
+        };
     }
 
     /// <summary>
@@ -78,7 +122,19 @@ public class NewNetworkDiscovery : NetworkDiscoveryBase<DiscoveryRequest, Discov
     /// </remarks>
     /// <param name="response">Response that came from the server</param>
     /// <param name="endpoint">Address of the server that replied</param>
-    protected override void ProcessResponse(DiscoveryResponse response, IPEndPoint endpoint) { }
+    protected override void ProcessResponse(ServerResponse response, IPEndPoint endpoint)
+    {
+        //サーバからの回答を処理
+        response.EndPoint = endpoint;
+
+        UriBuilder realUri = new UriBuilder(response.uri)
+        {
+            Host = response.EndPoint.Address.ToString()
+        };
+        response.uri = realUri.Uri;
+
+        CustomNetworkDiscoveryHUD.Instance.OnDiscoveredServer(response);
+    }
 
     #endregion
 }
