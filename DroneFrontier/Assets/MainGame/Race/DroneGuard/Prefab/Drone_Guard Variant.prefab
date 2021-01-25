@@ -138,10 +138,30 @@ PrefabInstance:
       propertyPath: m_LocalPosition.y
       value: 0.0024
       objectReference: {fileID: 0}
+    - target: {fileID: -3058024149560069956, guid: 5090c1d92c3e3034a85460b495fcf820,
+        type: 3}
+      propertyPath: m_CastShadows
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: -927199367670048503, guid: 5090c1d92c3e3034a85460b495fcf820,
         type: 3}
       propertyPath: m_Name
       value: Drone_Guard Variant
+      objectReference: {fileID: 0}
+    - target: {fileID: 245057565240620769, guid: 5090c1d92c3e3034a85460b495fcf820,
+        type: 3}
+      propertyPath: m_CastShadows
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1249680337386786420, guid: 5090c1d92c3e3034a85460b495fcf820,
+        type: 3}
+      propertyPath: m_CastShadows
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4191006633811747052, guid: 5090c1d92c3e3034a85460b495fcf820,
+        type: 3}
+      propertyPath: m_CastShadows
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4640101262243217197, guid: 5090c1d92c3e3034a85460b495fcf820,
         type: 3}
