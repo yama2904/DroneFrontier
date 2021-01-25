@@ -6,8 +6,16 @@ using Mirror;
 
 public class MatchingManager : NetworkBehaviour
 {
-    [SerializeField] MatchingButtonsController createScreen = null;
-    static MatchingButtonsController createdScreen = null;
+    static MatchingManager singleton;
+    public static MatchingManager Singleton { get { return singleton; } }
+    void Awake()
+    {
+        singleton = this;
+    }
+
+    [SerializeField] MatchingButtonsController matchingScreen = null;
+    [SerializeField] WeaponSelectButtonsController weaponSelectScreen = null;
+    static GameObject createScreen = null;
     public static List<string> playerNames = new List<string>();
     static bool isStarted = false;
 
@@ -23,19 +31,30 @@ public class MatchingManager : NetworkBehaviour
     [ClientRpc]
     void RpcAddPlayer(string[] names)
     {
-        //if (isServer) return;
         if (!isStarted)
         {
+            if (isServer)
+            {
+                GetComponent<NetworkRoomPlayer>().readyToBegin = false;
+            }
             BrightnessManager.SetGameAlfa(0);
-            createdScreen = Instantiate(createScreen);
-            createdScreen.Init(isServer);
+            MatchingButtonsController mc = Instantiate(matchingScreen);
+            mc.Init(isServer);
+            createScreen = mc.gameObject;
 
             isStarted = true;
         }
         playerNames.Clear();
         playerNames = names.ToList();
-        createdScreen.SetPlayerList(names);
+        createScreen.GetComponent<MatchingButtonsController>().SetPlayerList(names);
     }
 
     void Update() { }
+
+    [ClientRpc]
+    public void RpcSetWeaponSelectScreen()
+    {
+        Destroy(createScreen);
+        Instantiate(weaponSelectScreen);
+    }
 }

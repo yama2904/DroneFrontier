@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using Mirror;
 
 public class MatchingButtonsController : NetworkBehaviour
@@ -29,12 +30,13 @@ public class MatchingButtonsController : NetworkBehaviour
             Button b = Instantiate(decisinButton);
             b.transform.SetParent(canvas.transform);
             b.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, -400);
+            b.onClick.AddListener(SelectDecision);
         }
     }
 
     public void SelectDecision()
     {
-
+        MatchingManager.Singleton.RpcSetWeaponSelectScreen();
     }
 
     public void SelectBack()
