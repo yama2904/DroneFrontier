@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 44203507864318135}
   - component: {fileID: 5591026080427057210}
   - component: {fileID: 44203507864318129}
-  - component: {fileID: 44203507864318134}
+  - component: {fileID: 3698117585487547870}
   - component: {fileID: 44203507864318128}
   m_Layer: 0
   m_Name: NoGameNetworkManager
@@ -27,7 +27,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 44203507864318130}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
@@ -59,7 +59,7 @@ MonoBehaviour:
   disconnectInactiveConnections: 0
   disconnectInactiveTimeout: 60
   authenticator: {fileID: 0}
-  playerPrefab: {fileID: 2579965352790506082, guid: 42978d1e4a5d18441a9f5cfb43572661,
+  playerPrefab: {fileID: 3758977139362248019, guid: aedbe4351cfd0d54bb38896070012749,
     type: 3}
   autoCreatePlayer: 1
   playerSpawnMethod: 0
@@ -85,7 +85,7 @@ MonoBehaviour:
   ReceiveWindowSize: 128
   debugLog: 0
   debugGUI: 0
---- !u!114 &44203507864318134
+--- !u!114 &3698117585487547870
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -94,11 +94,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 44203507864318130}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c761308e733c51245b2e8bb4201f46dc, type: 3}
+  m_Script: {fileID: 11500000, guid: 74da2deed5bc3dd43883eaf8c0a7540a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  secretHandshake: -8414144191287008869
-  serverBroadcastListenPort: 47789
+  secretHandshake: 8680290613986308701
+  serverBroadcastListenPort: 47777
   ActiveDiscoveryInterval: 3
   transport: {fileID: 44203507864318129}
   OnServerFound:
@@ -109,7 +109,7 @@ MonoBehaviour:
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_ObjectArgumentAssemblyTypeName: 
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -127,4 +127,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 018f6724c3f5a9547bf8343bb7c7e032, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  networkDiscovery: {fileID: 44203507864318134}
+  networkDiscovery: {fileID: 3698117585487547870}

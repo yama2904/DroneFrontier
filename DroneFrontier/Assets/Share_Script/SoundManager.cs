@@ -13,6 +13,8 @@ public class SoundManager : MonoBehaviour
     public enum BGM
     {
         DRONE_UP,
+        LOOP,
+        THREE_MIN,
 
         NONE
     }
@@ -101,6 +103,8 @@ public class SoundManager : MonoBehaviour
     {
         string[] BGMPath = new string[(int)BGM.NONE];
         BGMPath[(int)BGM.DRONE_UP] = "Drone_up";
+        BGMPath[(int)BGM.LOOP] = "LoopBGM";
+        BGMPath[(int)BGM.THREE_MIN] = "ThreeMinBGM";
 
         string[] SEPath = new string[(int)SE.NONE];
         SEPath[(int)SE.BARRIER_DAMAGE] = "BarrierDamage";
