@@ -20,8 +20,8 @@ public class Radar : MonoBehaviour, IRadar
         public RectTransform marker;
     }
     List<SearchData> searchDatas = new List<SearchData>();
-    float searchRadius = 100.0f; //照射する範囲
-    [SerializeField, Tooltip("照射距離")] float maxDistance = 0.01f;
+    [SerializeField] float searchRadius = 300.0f; //照射する範囲
+    [SerializeField, Tooltip("照射距離")] float maxDistance = 300f;
 
     //レーダーに照射しないオブジェクト
     List<GameObject> notRadarObjects = new List<GameObject>();
