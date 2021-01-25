@@ -6,8 +6,10 @@ using Mirror;
 
 public class MatchingManager : NetworkBehaviour
 {
-    [SerializeField] GameObject createScreen = null;
+    [SerializeField] MatchingButtonsController createScreen = null;
+    static MatchingButtonsController createdScreen = null;
     public static List<string> playerNames = new List<string>();
+    static bool isStarted = false;
 
     [ServerCallback]
     public override void OnStartClient()
@@ -21,27 +23,19 @@ public class MatchingManager : NetworkBehaviour
     [ClientRpc]
     void RpcAddPlayer(string[] names)
     {
-        if (isServer) return;
+        //if (isServer) return;
+        if (!isStarted)
+        {
+            BrightnessManager.SetGameAlfa(0);
+            createdScreen = Instantiate(createScreen);
+            createdScreen.Init(isServer);
+
+            isStarted = true;
+        }
         playerNames.Clear();
         playerNames = names.ToList();
+        createdScreen.SetPlayerList(names);
     }
 
-    void Start()
-    {
-        BrightnessManager.SetGameAlfa(0);
-        Instantiate(createScreen);
-    }
-    
-    void Update()
-    {
-        if (!isLocalPlayer) return;
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            Debug.Log("Count: " + playerNames.Count);
-            foreach(string s in playerNames)
-            {
-                Debug.Log(s);
-            }
-        }
-    }
+    void Update() { }
 }
