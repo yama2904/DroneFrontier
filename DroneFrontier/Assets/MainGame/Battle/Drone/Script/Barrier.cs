@@ -9,7 +9,6 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
     [SyncVar] float syncHP = MAX_HP;
     public float HP { get { return syncHP; } }
     Material material = null;
-    Color barrierColor;
 
     [SyncVar] bool syncIsStrength = false;
     [SyncVar] bool syncIsWeak = false;
@@ -113,7 +112,7 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
     }
 
     //HPを回復する
-    void Regene(float value)
+    void Regene(float regeneValue)
     {
         syncHP += regeneValue;
         if (syncHP >= MAX_HP)
@@ -126,6 +125,17 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
         {
             Debug.Log("リジェネ後バリアHP: " + syncHP);
         }
+
+        //バリアの色変え
+        float value = syncHP / MAX_HP;
+        if (!IsStrength)
+        {
+            RpcSetBarrierColor(1 - value, value, 0, value * 0.5f);
+        }
+        else
+        {
+            RpcSetBarrierColor(1 - value, 0, value, value * 0.5f);
+        }
     }
 
     //バリアを復活させる
@@ -136,6 +146,10 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
         //修復したら回復処理に移る
         syncHP = resurrectHP;
         isRegene = true;
+
+        //バリアの色変え
+        float value = syncHP / MAX_HP;
+        RpcSetBarrierColor(1 - value, value, 0, value * 0.5f);
 
 
         //デバッグ用
