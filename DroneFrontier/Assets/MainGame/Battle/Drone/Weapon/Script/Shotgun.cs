@@ -144,7 +144,7 @@ public class Shotgun : BaseWeapon
         Bullet b = Instantiate(bullet, pos, rotation);    //弾丸の複製
 
         //弾丸のパラメータ設定
-        b.Shooter = Shooter;    //撃ったプレイヤーを登録
+        b.Shooter = shooter;    //撃ったプレイヤーを登録
         b.Target = target;      //ロックオン中の敵
         b.SpeedPerSecond = speedPerSecond;  //スピード
         b.DestroyTime = destroyTime;        //射程
