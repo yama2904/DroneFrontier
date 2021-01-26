@@ -63,6 +63,7 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
         }
     }
 
+    [ServerCallback]
     void Start()
     {
         damagePercent = 1;
@@ -70,6 +71,7 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
         isRegene = true;    //ゲーム開始時はHPMAXで回復の必要がないのでtrue
     }
 
+    [ServerCallback]
     void Update()
     {
         //バリア弱体化中は回復処理を行わない

@@ -121,7 +121,7 @@ public class MissieWeapon : BaseWeapon
         m.parentNetId = netId;
 
         //弾丸のパラメータ設定
-        m.Shooter = Shooter;    //撃ったプレイヤーを登録
+        m.Shooter = shooter;    //撃ったプレイヤーを登録
         m.SpeedPerSecond = speedPerSecond;  //スピード
         m.DestroyTime = destroyTime;        //射程
         m.TrackingPower = trackingPower;    //誘導力
