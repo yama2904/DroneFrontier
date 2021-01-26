@@ -70,7 +70,7 @@ public class ResultButtonsController : MonoBehaviour
 
     public void SelectEnd()
     {
-        BaseScreenManager.SetScreen(BaseScreenManager.Screen.GAME_MODE_SELECT);
+        BaseScreenManager.SetScreen(BaseScreenManager.Screen.KURIBOCCHI);
     }
 
     public static void SetRank(string name, Rank rank)

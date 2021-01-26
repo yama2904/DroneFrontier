@@ -75,7 +75,7 @@ public class NewNetworkDiscovery : NetworkDiscoveryBase<ServerRequest, ServerRes
         // In this case we don't do anything with the request
         // but other discovery implementations might want to use the data
         // in there,  This way the client can ask for
-        // specific game mode or something                        
+        // specific game mode or something
         try
         {
             // this is an example reply message,  return your own

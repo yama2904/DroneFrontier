@@ -43,7 +43,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 44203507864318130}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 615e6c6589cf9e54cad646b5a11e0529, type: 3}
+  m_Script: {fileID: 11500000, guid: 814a5f9616424424a87e09a55c4a46e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   dontDestroyOnLoad: 1
@@ -52,7 +52,7 @@ MonoBehaviour:
   showDebugMessages: 0
   serverTickRate: 30
   offlineScene: 
-  onlineScene: Assets/Yama_Test/MatchingScene.unity
+  onlineScene: Assets/NonGame/Matching/MatchingScene.unity
   transport: {fileID: 44203507864318129}
   networkAddress: localhost
   maxConnections: 4
@@ -65,11 +65,20 @@ MonoBehaviour:
   playerSpawnMethod: 0
   spawnPrefabs:
   - {fileID: 401324915480606124, guid: ca45090512b05eb438eb8114c1398866, type: 3}
+  - {fileID: 1828820655355802306, guid: 93e16e46795120a498357aae2aa5d570, type: 3}
+  - {fileID: 5690763569030241741, guid: a647e33e02328814da14e0b8b8e75fe6, type: 3}
+  - {fileID: 8400011875109955529, guid: f840aa4b7f6cd6c45bf992380dc4eefc, type: 3}
+  - {fileID: 8599314206727387563, guid: feb2c59dfc66a1b4d8ec63febfba4b3c, type: 3}
+  - {fileID: 7483229619002608348, guid: 28d3844a32c206344bb065ba45dff061, type: 3}
+  - {fileID: 3694063130147409601, guid: ced0661d0222eab4a80aaed9059f78c3, type: 3}
+  - {fileID: 6288059414027088638, guid: fdc401304f7c08043bc900548af95475, type: 3}
+  - {fileID: 2437432638473288414, guid: 24eccdfad1ec7ec4db66c7497ec702e0, type: 3}
+  - {fileID: 3741294095708302916, guid: debfdb94bb6e6904488a042039c09b30, type: 3}
   showRoomGUI: 1
   minPlayers: 1
   roomPlayerPrefab: {fileID: -4659048564045045932, guid: aedbe4351cfd0d54bb38896070012749,
     type: 3}
-  RoomScene: Assets/Yama_Test/MatchingScene.unity
+  RoomScene: Assets/NonGame/Matching/MatchingScene.unity
   GameplayScene: Assets/Yama_Test/TestScene.unity
   _allPlayersReady: 0
   roomSlots: []

@@ -12,7 +12,7 @@ public class MatchingButtonsController : NetworkBehaviour
     [SerializeField] Text Text2PName = null;
     [SerializeField] Text Text3PName = null;
     [SerializeField] Text Text4PName = null;
-    [SerializeField] Button decisinButton = null;
+    [SerializeField] GameObject decisinButton = null;
 
     Color playerTextColor = new Color(0.2f, 0.2f, 0.2f, 1f);
     Color nonPlayerTextColor = new Color(0.32f, 0.41f, 0.72f, 1f);
@@ -27,10 +27,7 @@ public class MatchingButtonsController : NetworkBehaviour
         IsServer = isServer;
         if (isServer)
         {
-            Button b = Instantiate(decisinButton);
-            b.transform.SetParent(canvas.transform);
-            b.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, -400);
-            b.onClick.AddListener(SelectDecision);
+            decisinButton.SetActive(true);
         }
     }
 

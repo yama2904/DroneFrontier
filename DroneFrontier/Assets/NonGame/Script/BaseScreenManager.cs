@@ -10,7 +10,6 @@ public class BaseScreenManager
     public enum Screen
     {
         TITLE,
-        GAME_MODE_SELECT,
         HELP,
         CONFIG,
         KURIBOCCHI,
@@ -29,7 +28,6 @@ public class BaseScreenManager
     static BaseScreenManager()
     {
         paths[(int)Screen.TITLE] = "TitleScreen";
-        paths[(int)Screen.GAME_MODE_SELECT] = "GameModeSelectScreen";
         paths[(int)Screen.HELP] = "HelpScreen";
         paths[(int)Screen.CONFIG] = "ConfigScreen";
         paths[(int)Screen.KURIBOCCHI] = "KuribocchiScreen";

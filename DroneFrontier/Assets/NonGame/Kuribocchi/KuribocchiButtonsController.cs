@@ -33,10 +33,22 @@ public class KuribocchiButtonsController : MonoBehaviour
         BrightnessManager.SetGameAlfa(0.7f);    //後ろを暗くする
     }
 
+    //設定
+    public void SelectConfig()
+    {
+        BaseScreenManager.SetScreen(BaseScreenManager.Screen.CONFIG);
+    }
+
+    //ヘルプ
+    public void SelectHelp()
+    {
+        BaseScreenManager.SetScreen(BaseScreenManager.Screen.HELP);
+    }
+
     //戻る
     public void SelectBack()
     {
-        BaseScreenManager.SetScreen(BaseScreenManager.Screen.GAME_MODE_SELECT);
+        BaseScreenManager.SetScreen(BaseScreenManager.Screen.TITLE);
     }
 
 

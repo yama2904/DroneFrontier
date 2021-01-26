@@ -15,14 +15,22 @@ public class MatchingManager : NetworkBehaviour
     //生成する画像用
     [SerializeField] MatchingButtonsController matchingScreen = null;
     [SerializeField] NetworkWeaponSelectController weaponSelectScreen = null;
+    [SerializeField] GameModeSelectButtonsController gameModeSelectScreen = null;
     static GameObject createMatchingScreen = null;
 
     //ルームに入ったプレイヤーの名前
     public static List<string> playerNames = new List<string>();
 
-    //選択した武器
-    BaseWeapon.Weapon selectWeapon = BaseWeapon.Weapon.NONE;
+    //準備ができたか
     [SyncVar] bool isReady = false;
+
+    public class PlayerData
+    {
+        public string name;
+        public NetworkConnection conn;
+        public BaseWeapon.Weapon weapon;
+    }
+    public static List<PlayerData> playerDatas = new List<PlayerData>();
 
     static bool isStarted = false;
 
@@ -33,15 +41,29 @@ public class MatchingManager : NetworkBehaviour
 
         //シングルトンの作成
         singleton = this;
+
+        CmdAddPlayerData();
     }
-    
+
     [ServerCallback]
     public override void OnStartClient()
     {
         base.OnStartClient();
+
         string[] names = new string[playerNames.Count];
         names = playerNames.ToArray();
         RpcAddPlayer(names);
+    }
+
+    [Command]
+    void CmdAddPlayerData()
+    {
+        playerDatas.Add(new PlayerData
+        {
+            name = playerNames[playerDatas.Count],
+            conn = connectionToClient,
+            weapon = BaseWeapon.Weapon.NONE
+        });
     }
 
     [ClientRpc]
@@ -64,7 +86,7 @@ public class MatchingManager : NetworkBehaviour
     void Update()
     {
         if (!isLocalPlayer) return;
-        if(isReady)
+        if (isReady)
         {
             GetComponent<NetworkRoomPlayer>().CmdChangeReadyState(true);
         }
@@ -91,7 +113,11 @@ public class MatchingManager : NetworkBehaviour
         if (weapon >= (int)BaseWeapon.Weapon.NONE) return;
         if (weapon < 0) return;
 
-        selectWeapon = (BaseWeapon.Weapon)weapon;
+        int index = playerDatas.FindIndex(pd => ReferenceEquals(pd.conn, connectionToClient));
+        if(index >= 0)
+        {
+            playerDatas[index].weapon = (BaseWeapon.Weapon)weapon;
+        }
         isReady = true;
     }
 }

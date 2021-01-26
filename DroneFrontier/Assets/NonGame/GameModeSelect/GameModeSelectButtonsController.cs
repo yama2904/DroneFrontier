@@ -18,21 +18,8 @@ public class GameModeSelectButtonsController : MonoBehaviour
         BaseScreenManager.SetScreen(BaseScreenManager.Screen.KURIBOCCHI);
     }
 
-    //設定
-    public void SelectConfig()
+    public void SelectDecisin()
     {
-        BaseScreenManager.SetScreen(BaseScreenManager.Screen.CONFIG);
-    }
 
-    //ヘルプ
-    public void SelectHelp()
-    {
-        BaseScreenManager.SetScreen(BaseScreenManager.Screen.HELP);
-    }
-
-    //戻る
-    public void SelectBack()
-    {
-        BaseScreenManager.SetScreen(BaseScreenManager.Screen.TITLE);
     }
 }
