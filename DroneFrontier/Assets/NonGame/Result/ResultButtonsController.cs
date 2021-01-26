@@ -10,58 +10,48 @@ public class ResultButtonsController : MonoBehaviour
     [SerializeField] Text NameText3st = null;   //三位の名前を表示するテキスト
     [SerializeField] Text NameText4st = null;   //四位の名前を表示するテキスト
 
-    public enum Rank
-    {
-        RANK_1ST,
-        RANK_2ST,
-        RANK_3ST,
-        RANK_4ST,
-
-        NONE
-    }
-    static string[] ranks = new string[(int)Rank.NONE];
+    static string[] ranking = null;
 
     void Start()
     {
-        //バグ防止
-        for (int i = 0; i < (int)Rank.NONE; i++)
-        {
-            if (ranks[i] == null)
-            {
-                ranks[i] = "";
-            }
-        }
+        //カーソル表示
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
 
-        for (int i = 0; i < (int)Rank.NONE; i++)
+        //バグ防止
+        if (ranking == null) return;
+
+        for (int i = 0; i < ranking.Length; i++)
         {
             switch (i)
             {
-                case (int)Rank.RANK_1ST:
-                    NameText1st.text = ranks[i];
+                //一位
+                case 0:
+                    NameText1st.text = ranking[i];
                     break;
 
-                case (int)Rank.RANK_2ST:
-                    NameText2st.text = ranks[i];
+                //二位
+                case 1:
+                    NameText2st.text = ranking[i];
                     break;
 
-                case (int)Rank.RANK_3ST:
-                    NameText3st.text = ranks[i];
+                //三位
+                case 2:
+                    NameText3st.text = ranking[i];
                     break;
 
-                case (int)Rank.RANK_4ST:
-                    NameText4st.text = ranks[i];
+                //四位
+                case 3:
+                    NameText4st.text = ranking[i];
                     break;
             }
         }
 
         //初期化
-        ranks = new string[(int)Rank.NONE];
+        ranking = null;
     }
 
-    void Update()
-    {
-
-    }
+    void Update() { }
 
     public void SelectOnemore()
     {
@@ -79,8 +69,11 @@ public class ResultButtonsController : MonoBehaviour
         BaseScreenManager.SetScreen(BaseScreenManager.Screen.KURIBOCCHI);
     }
 
-    public static void SetRank(string name, Rank rank)
+    //ランキングをセット
+    //要素0が一位
+    public static void SetRank(string[] names)
     {
-        ranks[(int)rank] = name;
+        ranking = new string[names.Length];
+        ranking = names;
     }
 }

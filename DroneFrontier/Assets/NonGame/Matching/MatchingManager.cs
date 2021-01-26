@@ -65,6 +65,7 @@ public class MatchingManager : NetworkBehaviour
         //準備完了フラグのセット
         if (isReady)
         {
+            isReady = false;
             GetComponent<NetworkRoomPlayer>().CmdChangeReadyState(true);
         }
     }
@@ -91,7 +92,7 @@ public class MatchingManager : NetworkBehaviour
         createMatchingScreen.GetComponent<MatchingButtonsController>().SetPlayerList(names);
     }
 
-    public void DestroyMe()
+    public void Init()
     {
         playerNames.Clear();
         playerDatas.Clear();
@@ -102,12 +103,13 @@ public class MatchingManager : NetworkBehaviour
     public void ExitClient()
     {
         NetworkManager.singleton.StopClient();  //クライアントを停止
-        DestroyMe();
+        Init();
         Mirror.Discovery.CustomNetworkDiscoveryHUD.Singleton.Init();
         NonGameManager.LoadNonGameScene(BaseScreenManager.Screen.KURIBOCCHI);
     }
 
     //切断したプレイヤーをリストから削除
+    [ServerCallback]
     public void RemovePlayer(int index)
     {
         playerNames.RemoveAt(index);

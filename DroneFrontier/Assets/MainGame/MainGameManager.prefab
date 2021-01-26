@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2547274620989005496}
   - component: {fileID: 2547274620989005497}
+  - component: {fileID: -2417105566778372335}
   m_Layer: 0
   m_Name: MainGameManager
   m_TagString: Untagged
@@ -44,12 +45,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7da1b1e8467e919499824ed2ae15a04c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerInspector: {fileID: 3029783880410522382, guid: 1a0c385ac585f5f47a4280fd496438a6,
-    type: 3}
-  cpuInspector: {fileID: 8104096176694376185, guid: c5c00b9cae5608b41a147fb2634d2f23,
+  syncMode: 0
+  syncInterval: 0.1
+  battleManager: {fileID: 5826206719070923701, guid: d3f754749c36de940b3296b60635b9db,
     type: 3}
   screenMaskImageInspector: {fileID: 2547274622470476866}
   offline: 0
+--- !u!114 &-2417105566778372335
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2547274620989005478}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 0
+  serverOnly: 0
+  m_AssetId: 
+  hasSpawned: 0
 --- !u!1 &2547274621473301056
 GameObject:
   m_ObjectHideFlags: 0

@@ -71,8 +71,11 @@ public class BattleDrone : NetworkBehaviour
     [SerializeField, Tooltip("攻撃中の移動速度の低下率")] float atackingDownSpeed = 0.5f;   //攻撃中の移動速度の低下率
     bool initSubWeapon = false;
 
+    //リスポーン
+    [SerializeField, Tooltip("リポーン時間")] float respawnTime = 5.0f;
 
-    //アイテム
+
+    //アイテム枠
     enum ItemNum
     {
         ITEM_1,   //アイテム枠1
@@ -85,7 +88,7 @@ public class BattleDrone : NetworkBehaviour
     //サウンド
     enum SE
     {
-        Boost,          //ブースト
+        BOOST,          //ブースト
         DEATH,          //死亡
         PROPELLER,      //プロペラ
         RADAR,          //レーダー
@@ -145,7 +148,7 @@ public class BattleDrone : NetworkBehaviour
 
         //AudioSourceの初期化
         audios = GetComponents<AudioSource>();
-        audios[(int)SE.Boost].clip = SoundManager.GetAudioClip(SoundManager.SE.BOOST);
+        audios[(int)SE.BOOST].clip = SoundManager.GetAudioClip(SoundManager.SE.BOOST);
         audios[(int)SE.DEATH].clip = SoundManager.GetAudioClip(SoundManager.SE.DEATH);
         audios[(int)SE.PROPELLER].clip = SoundManager.GetAudioClip(SoundManager.SE.PROPELLER);
         audios[(int)SE.RADAR].clip = SoundManager.GetAudioClip(SoundManager.SE.RADAR);
@@ -201,10 +204,8 @@ public class BattleDrone : NetworkBehaviour
 
     void Update()
     {
-        if (!isLocalPlayer)
-        {
-            return;
-        }
+        if (!isLocalPlayer) return;
+        if (!BattleManager.Singleton.StartFlag) return;  //ゲーム開始フラグが立っていなかったら処理しない
 
         //PlayerStatusActionの初期化
         if (!isStatusActionInit && statusAction != null)
@@ -455,7 +456,7 @@ public class BattleDrone : NetworkBehaviour
             {
                 moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, boostAccele);
                 isBoost = true;
-                PlaySE((int)SE.Boost, SoundManager.BaseSEVolume * 0.15f, true);    //加速音の再生
+                PlaySE((int)SE.BOOST, SoundManager.BaseSEVolume * 0.15f, true);    //加速音の再生
 
 
                 //デバッグ用
@@ -477,7 +478,7 @@ public class BattleDrone : NetworkBehaviour
 
                     moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, 1 / boostAccele);
                     isBoost = false;
-                    StopSE((int)SE.Boost);
+                    StopSE((int)SE.BOOST);
 
 
                     //デバッグ用
@@ -489,7 +490,7 @@ public class BattleDrone : NetworkBehaviour
             {
                 moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, 1 / boostAccele);
                 isBoost = false;
-                StopSE((int)SE.Boost);
+                StopSE((int)SE.BOOST);
 
 
                 //デバッグ用
@@ -604,7 +605,7 @@ public class BattleDrone : NetworkBehaviour
     void CmdDestroyMe()
     {
         syncIsDestroy = true;
-        barrier.GetComponent<Barrier>().enabled = false;
+        barrier.GetComponent<Barrier>().enabled = false;  //死んだらバリア処理をしない
         RpcPlaySEDeath();
     }
 
@@ -772,7 +773,8 @@ public class BattleDrone : NetworkBehaviour
             if (other.CompareTag(TagNameManager.ITEM))
             {
                 Item item = other.GetComponent<Item>();
-                if (itemAction.SetItem(item.type)) {
+                if (itemAction.SetItem(item.type))
+                {
                     item.type = Item.ItemType.NONE;  //通信のラグのせいで1つのアイテムを2回取るバグの防止
                     CmdDestroy(item.gameObject);
 

@@ -658,7 +658,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   HP: 30
-  moveSpeed: 100
+  moveSpeed: 800
   rotateSpeed: 5
   barrierInspector: {fileID: -63901356600440695, guid: debfdb94bb6e6904488a042039c09b30,
     type: 3}
@@ -671,6 +671,7 @@ MonoBehaviour:
   maxBoostTime: 5
   boostRecastTime: 6
   atackingDownSpeed: 0.5
+  respawnTime: 5
 --- !u!114 &-1535939887124464326
 MonoBehaviour:
   m_ObjectHideFlags: 0

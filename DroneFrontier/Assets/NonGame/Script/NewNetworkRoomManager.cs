@@ -168,7 +168,7 @@ public class NewNetworkRoomManager : NetworkRoomManager
     public override void OnClientDisconnect(NetworkConnection conn)
     {
         StopClient();  //クライアントを停止
-        MatchingManager.Singleton.DestroyMe();  //MatchingManagerの初期化
+        MatchingManager.Singleton.Init();  //MatchingManagerの初期化
         Mirror.Discovery.CustomNetworkDiscoveryHUD.Singleton.Init();  //DiscoveryHUDの初期化
         NonGameManager.LoadNonGameScene(BaseScreenManager.Screen.KURIBOCCHI);
 

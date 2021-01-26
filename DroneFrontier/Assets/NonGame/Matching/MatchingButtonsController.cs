@@ -55,7 +55,7 @@ public class MatchingButtonsController : NetworkBehaviour
         {
             NetworkManager.singleton.StopHost();    //ホストを停止
             NewNetworkDiscovery.Singleton.StopDiscovery();  //ブロードキャストを止める
-            MatchingManager.Singleton.DestroyMe();
+            MatchingManager.Singleton.Init();
             NonGameManager.LoadNonGameScene(BaseScreenManager.Screen.KURIBOCCHI);
         }
         else

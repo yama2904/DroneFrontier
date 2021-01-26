@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.SceneManagement;
+using Mirror;
 
 
-public class MainGameManager : MonoBehaviour
+public class MainGameManager : NetworkBehaviour
 {
+    [SerializeField] BattleManager battleManager = null;
+
     //マルチモードか
     public static bool IsMulti { get; set; } = false;
 
@@ -63,8 +65,6 @@ public class MainGameManager : MonoBehaviour
 
     void Awake()
     {
-        //player = playerInspector;
-        //cpu = cpuInspector;
         screenMaskImage = screenMaskImageInspector;
 
 
@@ -74,6 +74,15 @@ public class MainGameManager : MonoBehaviour
 
     void Start()
     {
+        if (isServer)
+        {
+            if (Mode == GameMode.BATTLE)
+            {
+                BattleManager bm = Instantiate(battleManager);
+                NetworkServer.Spawn(bm.gameObject);
+            }
+        }
+
         IsMainGaming = true;
         BaseScreenManager.LoadScreen(BaseScreenManager.Screen.CONFIG);  //メインゲームを始めた時点で設定画面をロードする
 
