@@ -107,6 +107,9 @@ public class NetworkWeaponSelectController : NetworkBehaviour
         //選択した武器の情報を送る
         MatchingManager.Singleton.CmdSetWeapon((int)weapon);
 
+        //準備完了
+        MatchingManager.Singleton.SetReady();
+
         //すべてのボタンを押せないようにする
         shotgunSelectButton.interactable = false;
         missileSelectButton.interactable = false;

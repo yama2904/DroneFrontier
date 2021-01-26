@@ -13,7 +13,7 @@ public class TitleManager : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
-            BaseScreenManager.SetScreen(BaseScreenManager.Screen.KURIBOCCHI);
+            BaseScreenManager.SetScreen(BaseScreenManager.Screen.GAME_MODE_SELECT);
         }
     }
 }

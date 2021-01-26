@@ -74,15 +74,23 @@ MonoBehaviour:
   - {fileID: 6288059414027088638, guid: fdc401304f7c08043bc900548af95475, type: 3}
   - {fileID: 2437432638473288414, guid: 24eccdfad1ec7ec4db66c7497ec702e0, type: 3}
   - {fileID: 3741294095708302916, guid: debfdb94bb6e6904488a042039c09b30, type: 3}
-  showRoomGUI: 1
+  - {fileID: 3727995740596519015, guid: 19d03f2bca40fba47abc078c8c6a8712, type: 3}
+  - {fileID: 4035678965032489135, guid: 9073f90d8c9013d42ba11bc1c45f5513, type: 3}
+  - {fileID: 4682843890191404543, guid: ebdc99f08c939844497af790155f08da, type: 3}
+  - {fileID: 401223180371432453, guid: d3a6d9c787cffe744aabe2f3c025b34e, type: 3}
+  - {fileID: 1134113185920709073, guid: 5a310c6edafad474daf4389a5d51b837, type: 3}
+  showRoomGUI: 0
   minPlayers: 1
   roomPlayerPrefab: {fileID: -4659048564045045932, guid: aedbe4351cfd0d54bb38896070012749,
     type: 3}
   RoomScene: Assets/NonGame/Matching/MatchingScene.unity
-  GameplayScene: Assets/Yama_Test/TestScene.unity
+  GameplayScene: Assets/MainGame/Battle/BattleModeScene.unity
   _allPlayersReady: 0
   roomSlots: []
   clientIndex: 0
+  raceDrone: {fileID: 3215491144051122303, guid: 54a58e15937ed7c4e83960a830b2d326,
+    type: 3}
+  raceScene: Assets/MainGame/Race/RaceModeScene.unity
 --- !u!114 &44203507864318129
 MonoBehaviour:
   m_ObjectHideFlags: 0

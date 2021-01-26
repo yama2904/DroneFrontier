@@ -19,6 +19,7 @@ using Mirror;
 public class NewNetworkRoomManager : NetworkRoomManager
 {
     [SerializeField] GameObject raceDrone = null;
+    [SerializeField, Scene] string raceScene;
 
     #region Server Callbacks
 
@@ -136,7 +137,7 @@ public class NewNetworkRoomManager : NetworkRoomManager
         //レースモードならシーン先切り替え
         if (MainGameManager.Mode == MainGameManager.GameMode.RACE)
         {
-            GameplayScene = "RaceModeScene";
+            GameplayScene = raceScene;
         }
         base.OnRoomServerPlayersReady();
     }

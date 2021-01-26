@@ -33,7 +33,14 @@ public class MatchingButtonsController : NetworkBehaviour
 
     public void SelectDecision()
     {
-        MatchingManager.Singleton.CreateWeaponSelectScreen();
+        if (MainGameManager.Mode == MainGameManager.GameMode.BATTLE)
+        {
+            MatchingManager.Singleton.CreateWeaponSelectScreen();
+        }
+        else
+        {
+            MatchingManager.Singleton.RpcStartRace();
+        }
     }
 
     public void SelectBack()

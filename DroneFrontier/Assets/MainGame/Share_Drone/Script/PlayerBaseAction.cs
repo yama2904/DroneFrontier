@@ -52,10 +52,7 @@ public class PlayerBaseAction : NetworkBehaviour
 
     void Update()
     {
-        if (!isLocalPlayer)
-        {
-            return;
-        }
+        if (!isLocalPlayer) return;
     }
 
 
@@ -66,7 +63,7 @@ public class PlayerBaseAction : NetworkBehaviour
     }
 
     #region RotaetDroneObject
-    
+
     [Command]
     public void CmdCallRotateDroneObject(Quaternion rotate, float speed)
     {

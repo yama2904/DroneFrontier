@@ -33,22 +33,10 @@ public class KuribocchiButtonsController : MonoBehaviour
         BrightnessManager.SetGameAlfa(0.7f);    //後ろを暗くする
     }
 
-    //設定
-    public void SelectConfig()
-    {
-        BaseScreenManager.SetScreen(BaseScreenManager.Screen.CONFIG);
-    }
-
-    //ヘルプ
-    public void SelectHelp()
-    {
-        BaseScreenManager.SetScreen(BaseScreenManager.Screen.HELP);
-    }
-
     //戻る
     public void SelectBack()
     {
-        BaseScreenManager.SetScreen(BaseScreenManager.Screen.TITLE);
+        BaseScreenManager.SetScreen(BaseScreenManager.Screen.GAME_MODE_SELECT);
     }
 
 
@@ -65,7 +53,6 @@ public class KuribocchiButtonsController : MonoBehaviour
             MatchingManager.playerNames.Add(playerName);
 
             CustomNetworkDiscoveryHUD.Instance.StartHost();
-            //BaseScreenManager.SetScreen(BaseScreenManager.Screen.MATCHING);
         }
     }
 
@@ -79,8 +66,6 @@ public class KuribocchiButtonsController : MonoBehaviour
         //screenMask.SetActive(false);         //後ろのボタンを押せるようにする
         //BrightnessManager.SetGameAlfa(0);    //明るさを元に戻す
         //MainGameManager.IsMulti = true;      //マルチモードに設定
-
-        //BaseScreenManager.SetScreen(BaseScreenManager.Screen.MATCHING);
     }
 
 

@@ -15,14 +15,13 @@ public class MatchingManager : NetworkBehaviour
     //生成する画像用
     [SerializeField] MatchingButtonsController matchingScreen = null;
     [SerializeField] NetworkWeaponSelectController weaponSelectScreen = null;
-    [SerializeField] GameModeSelectButtonsController gameModeSelectScreen = null;
     static GameObject createMatchingScreen = null;
 
     //ルームに入ったプレイヤーの名前
     public static List<string> playerNames = new List<string>();
 
     //準備ができたか
-    [SyncVar] bool isReady = false;
+    bool isReady = false;
 
     public class PlayerData
     {
@@ -119,5 +118,18 @@ public class MatchingManager : NetworkBehaviour
             playerDatas[index].weapon = (BaseWeapon.Weapon)weapon;
         }
         isReady = true;
+    }
+
+    public void SetReady()
+    {
+        GetComponent<NetworkRoomPlayer>().CmdChangeReadyState(true);
+    }
+
+    //レースモード用
+    //すべてのクライアントの準備を完了させてゲームを開始する
+    [ClientRpc]
+    public void RpcStartRace()
+    {
+        GetComponent<NetworkRoomPlayer>().CmdChangeReadyState(true);
     }
 }

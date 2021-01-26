@@ -76,6 +76,18 @@ public class NewNetworkDiscovery : NetworkDiscoveryBase<ServerRequest, ServerRes
         // but other discovery implementations might want to use the data
         // in there,  This way the client can ask for
         // specific game mode or something
+
+        //選択しているゲームモードが違ったら接続しない
+        MainGameManager.GameMode mode = MainGameManager.GameMode.BATTLE;
+        if (!request.isBattle)
+        {
+            mode = MainGameManager.GameMode.RACE;
+        }
+        if(mode != MainGameManager.Mode)
+        {
+            return new ServerResponse();
+        }
+
         try
         {
             // this is an example reply message,  return your own
@@ -107,10 +119,17 @@ public class NewNetworkDiscovery : NetworkDiscoveryBase<ServerRequest, ServerRes
     protected override ServerRequest GetRequest()
     {
         //サーバを検出するためのブロードキャストメッセージ
-        return new ServerRequest
+        ServerRequest request = new ServerRequest();
+        request.name = KuribocchiButtonsController.playerName;
+        if (MainGameManager.Mode == MainGameManager.GameMode.BATTLE)
         {
-            name = KuribocchiButtonsController.playerName
-        };
+            request.isBattle = true;
+        }
+        else
+        {
+            request.isBattle = false;
+        }
+        return request;
     }
 
     /// <summary>

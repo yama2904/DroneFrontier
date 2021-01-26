@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GameModeSelectButtonsController : MonoBehaviour
+public class GameModeSelectManager : MonoBehaviour
 {
     //バトルモード
     public void SelectBattle()
@@ -18,8 +18,21 @@ public class GameModeSelectButtonsController : MonoBehaviour
         BaseScreenManager.SetScreen(BaseScreenManager.Screen.KURIBOCCHI);
     }
 
-    public void SelectDecisin()
+    //設定
+    public void SelectConfig()
     {
+        BaseScreenManager.SetScreen(BaseScreenManager.Screen.CONFIG);
+    }
 
+    //ヘルプ
+    public void SelectHelp()
+    {
+        BaseScreenManager.SetScreen(BaseScreenManager.Screen.HELP);
+    }
+
+    //戻る
+    public void SelectBack()
+    {
+        BaseScreenManager.SetScreen(BaseScreenManager.Screen.TITLE);
     }
 }

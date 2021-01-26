@@ -89,7 +89,7 @@ public class ConfigButtonsController : MonoBehaviour
         //ゲームモード選択画面に戻る
         else
         {
-            BaseScreenManager.SetScreen(BaseScreenManager.Screen.KURIBOCCHI);
+            BaseScreenManager.SetScreen(BaseScreenManager.Screen.GAME_MODE_SELECT);
         }
     }
 
