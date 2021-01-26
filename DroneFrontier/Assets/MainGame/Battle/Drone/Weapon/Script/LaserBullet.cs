@@ -7,6 +7,7 @@ using Mirror;
 public class LaserBullet : NetworkBehaviour
 {
     //パラメータ
+    [SerializeField, Tooltip("レーザのサイズ(Scaleの代わり")] float scale = 1f;
     public float ShotInterval { private get; set; } = 0;
     float shotCountTime = 0;
     [SerializeField, Tooltip("チャージ時間")] float chargeTime = 3.0f;     //チャージする時間
@@ -56,9 +57,14 @@ public class LaserBullet : NetworkBehaviour
         transform.localPosition = localPos;
         transform.localRotation = localRot;
 
+        //長さをスケールに合わせる
+        lineRange *= scale;
+
         Transform cacheTransform = transform;   //処理の軽量化用キャッシュ
 
         //Charge用処理//
+        Vector3 cLocalScale = charge.transform.localScale;
+        charge.transform.localScale = new Vector3(scale * cLocalScale.x, scale * cLocalScale.y, scale * cLocalScale.z);
         chargeEmission = charge.emission;
         chargeMinmaxcurve = chargeEmission.rateOverTime;
         rateovertimeAddAmout = MAX_RATE_OVER_TIME / chargeTime;  //1秒間で増加するRateOverTime量
@@ -77,6 +83,8 @@ public class LaserBullet : NetworkBehaviour
         for (int i = 0; i < startObjcectTransform.childCount; i++)
         {
             startChilds[i] = startObjcectTransform.GetChild(i).GetComponent<ParticleSystem>();
+            Vector3 sLocalScale = startChilds[i].transform.localScale;
+            startChilds[i].transform.localScale = new Vector3(scale * sLocalScale.x, scale * sLocalScale.y, scale * sLocalScale.z);
         }
         startObjcectTransform.localRotation = midwayObjectTransform.localRotation;  //Midwayと同じ向き
 
@@ -85,6 +93,8 @@ public class LaserBullet : NetworkBehaviour
         for (int i = 0; i < endObjectTransform.childCount; i++)
         {
             ParticleSystem ps = endObjectTransform.GetChild(i).GetComponent<ParticleSystem>();
+            Vector3 eLocalScale = ps.transform.localScale;
+            ps.transform.localScale = new Vector3(scale * eLocalScale.x, scale * eLocalScale.y, scale * eLocalScale.z);
             endChilds.Add(ps);
         }
         //初期座標の保存
@@ -149,7 +159,7 @@ public class LaserBullet : NetworkBehaviour
     {
         //Lineオブジェクト
         Vector3 lineScale = lineTransform.localScale;
-        lineTransform.localScale = new Vector3(length, length, lineScale.z);
+        lineTransform.localScale = new Vector3(length, length, 1.0f);
 
         //Thunderオブジェクト
         Vector3 thunderScale = thunderTransform.localScale;
