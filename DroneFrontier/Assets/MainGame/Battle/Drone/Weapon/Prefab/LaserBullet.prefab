@@ -4840,7 +4840,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   scale: 10
-  chargeTime: 1
+  chargeTime: 3
   lineRadius: 0.1
   lineRange: 10
   parentNetId: 0
