@@ -14,7 +14,7 @@ public class MatchingManager : NetworkBehaviour
     }
 
     [SerializeField] MatchingButtonsController matchingScreen = null;
-    [SerializeField] WeaponSelectButtonsController weaponSelectScreen = null;
+    [SerializeField] NetworkWeaponSelectController weaponSelectScreen = null;
     static GameObject createScreen = null;
     public static List<string> playerNames = new List<string>();
     static bool isStarted = false;
