@@ -49,7 +49,8 @@ MonoBehaviour:
   syncInterval: 0.1
   matchingScreen: {fileID: 2579965352790506083, guid: 42978d1e4a5d18441a9f5cfb43572661,
     type: 3}
-  weaponSelectScreen: {fileID: 0}
+  weaponSelectScreen: {fileID: 8627713488629616251, guid: ca45090512b05eb438eb8114c1398866,
+    type: 3}
 --- !u!114 &-6897879153222393113
 MonoBehaviour:
   m_ObjectHideFlags: 0

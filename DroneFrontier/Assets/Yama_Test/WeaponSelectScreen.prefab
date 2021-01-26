@@ -32,7 +32,7 @@ RectTransform:
   m_Children:
   - {fileID: 401324915334053549}
   m_Father: {fileID: 401324915480606125}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -218,7 +218,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 401324915894874902}
+      - m_Target: {fileID: 0}
         m_MethodName: SelectDecision
         m_Mode: 1
         m_Arguments:
@@ -348,7 +348,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 401324915894874902}
+      - m_Target: {fileID: 0}
         m_MethodName: SelectShotgun
         m_Mode: 1
         m_Arguments:
@@ -556,7 +556,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 401324915894874902}
+      - m_Target: {fileID: 0}
         m_MethodName: SelectLaser
         m_Mode: 1
         m_Arguments:
@@ -686,7 +686,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 401324915894874902}
+      - m_Target: {fileID: 0}
         m_MethodName: SelectMissile
         m_Mode: 1
         m_Arguments:
@@ -781,6 +781,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 401324915480606125}
+  - component: {fileID: 8627713488629616251}
   m_Layer: 0
   m_Name: WeaponSelectScreen
   m_TagString: Untagged
@@ -799,12 +800,27 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 401324915894874901}
   - {fileID: 401324915631437256}
   - {fileID: 401324914042135960}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8627713488629616251
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 401324915480606124}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5787bd7bee330384bbe4e6375e8e1f2c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  messageWindowText: {fileID: 401324914763799907}
+  canvas: {fileID: 401324915631437259}
+  itemSelect: {fileID: 4971392338162511208, guid: 73412e91ab2cb9247af71b13a5613ffe,
+    type: 3}
 --- !u!1 &401324915596230624
 GameObject:
   m_ObjectHideFlags: 0
@@ -918,7 +934,7 @@ RectTransform:
   - {fileID: 401324914796058383}
   - {fileID: 401324914082402887}
   m_Father: {fileID: 401324915480606125}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -985,51 +1001,6 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
---- !u!1 &401324915894874900
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 401324915894874901}
-  - component: {fileID: 401324915894874902}
-  m_Layer: 0
-  m_Name: WeaponSelectButtonsController
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &401324915894874901
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 401324915894874900}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 401324915480606125}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &401324915894874902
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 401324915894874900}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a75899f61c64d0e4291615a81e51c76f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemOnButton: {fileID: 0}
-  messageWindowText: {fileID: 401324914763799907}
 --- !u!1 &666112308875882689
 GameObject:
   m_ObjectHideFlags: 0
