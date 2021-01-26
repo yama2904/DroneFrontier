@@ -7,6 +7,9 @@ public class GameModeSelectManager : MonoBehaviour
     //バトルモード
     public void SelectBattle()
     {
+        //SE再生
+        SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+
         MainGameManager.Mode = MainGameManager.GameMode.BATTLE;
         BaseScreenManager.SetScreen(BaseScreenManager.Screen.KURIBOCCHI);
     }
@@ -14,6 +17,9 @@ public class GameModeSelectManager : MonoBehaviour
     //レースモード
     public void SelectRace()
     {
+        //SE再生
+        SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+
         MainGameManager.Mode = MainGameManager.GameMode.RACE;
         BaseScreenManager.SetScreen(BaseScreenManager.Screen.KURIBOCCHI);
     }
@@ -21,18 +27,27 @@ public class GameModeSelectManager : MonoBehaviour
     //設定
     public void SelectConfig()
     {
+        //SE再生
+        SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+
         BaseScreenManager.SetScreen(BaseScreenManager.Screen.CONFIG);
     }
 
     //ヘルプ
     public void SelectHelp()
     {
+        //SE再生
+        SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+
         BaseScreenManager.SetScreen(BaseScreenManager.Screen.HELP);
     }
 
     //戻る
     public void SelectBack()
     {
+        //SE再生
+        SoundManager.Play(SoundManager.SE.CANCEL, SoundManager.BaseSEVolume);
+
         BaseScreenManager.SetScreen(BaseScreenManager.Screen.TITLE);
     }
 }

@@ -23,6 +23,18 @@ public class NewNetworkRoomManager : NetworkRoomManager
 
     #region Server Callbacks
 
+    //クライアントが切断したときにサーバで呼ぶ
+    public override void OnServerDisconnect(NetworkConnection conn)
+    {
+        int index = MatchingManager.playerDatas.FindIndex(pd => ReferenceEquals(pd.conn, conn));
+        if(index >= 0)
+        {
+            MatchingManager.Singleton.RemovePlayer(index);
+        }
+
+        base.OnServerDisconnect(conn);
+    }
+
     /// <summary>
     /// This is called on the server when the server is started - including when a host is started.
     /// </summary>
@@ -151,6 +163,20 @@ public class NewNetworkRoomManager : NetworkRoomManager
     #endregion
 
     #region Client Callbacks
+
+    //クライアントがサーバから切断されたとき
+    public override void OnClientDisconnect(NetworkConnection conn)
+    {
+        StopClient();  //クライアントを停止
+        MatchingManager.Singleton.DestroyMe();  //MatchingManagerの初期化
+        Mirror.Discovery.CustomNetworkDiscoveryHUD.Singleton.Init();  //DiscoveryHUDの初期化
+        NonGameManager.LoadNonGameScene(BaseScreenManager.Screen.KURIBOCCHI);
+
+        //SEの再生
+        SoundManager.Play(SoundManager.SE.CANCEL, SoundManager.BaseSEVolume);
+
+        base.OnClientDisconnect(conn);
+    }
 
     /// <summary>
     /// This is a hook to allow custom behaviour when the game client enters the room.

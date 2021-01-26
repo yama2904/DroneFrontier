@@ -102,10 +102,17 @@ public class NetworkWeaponSelectController : NetworkBehaviour
     //決定
     public void SelectDecision()
     {
-        if (weapon == BaseWeapon.Weapon.NONE) return;  //バグ防止
+        //バグ防止
+        if (weapon == BaseWeapon.Weapon.NONE) return;  
+
+        //SE再生
+        SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
 
         //選択した武器の情報を送る
         MatchingManager.Singleton.CmdSetWeapon((int)weapon);
+
+        //準備完了
+        MatchingManager.isReady = true;
 
         //すべてのボタンを押せないようにする
         shotgunSelectButton.interactable = false;

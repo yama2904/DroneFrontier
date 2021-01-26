@@ -65,11 +65,17 @@ public class ResultButtonsController : MonoBehaviour
 
     public void SelectOnemore()
     {
+        //SE再生
+        SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+
 
     }
 
     public void SelectEnd()
     {
+        //SE再生
+        SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+
         BaseScreenManager.SetScreen(BaseScreenManager.Screen.KURIBOCCHI);
     }
 

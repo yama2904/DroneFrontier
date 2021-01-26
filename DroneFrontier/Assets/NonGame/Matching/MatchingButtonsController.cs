@@ -33,6 +33,9 @@ public class MatchingButtonsController : NetworkBehaviour
 
     public void SelectDecision()
     {
+        //SE再生
+        SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+
         if (MainGameManager.Mode == MainGameManager.GameMode.BATTLE)
         {
             MatchingManager.Singleton.CreateWeaponSelectScreen();
@@ -45,37 +48,74 @@ public class MatchingButtonsController : NetworkBehaviour
 
     public void SelectBack()
     {
+        //SE再生
+        SoundManager.Play(SoundManager.SE.CANCEL, SoundManager.BaseSEVolume);
+
         if (IsServer)
         {
-            NetworkManager.singleton.StopHost();
+            NetworkManager.singleton.StopHost();    //ホストを停止
+            NewNetworkDiscovery.Singleton.StopDiscovery();  //ブロードキャストを止める
+            MatchingManager.Singleton.DestroyMe();
+            NonGameManager.LoadNonGameScene(BaseScreenManager.Screen.KURIBOCCHI);
         }
-        NonGameManager.LoadNonGameScene(BaseScreenManager.Screen.KURIBOCCHI);
+        else
+        {
+            MatchingManager.Singleton.ExitClient();
+        }
     }
 
     public void SetPlayerList(string[] names)
     {
-        for (int i = 0; i < names.Length; i++)
+        int index = 0;
+        for (; index < names.Length; index++)
         {
-            switch (i)
+            switch (index)
             {
                 case 0:
-                    Text1PName.text = names[i];
+                    Text1PName.text = names[index];
                     Text1PName.color = playerTextColor;
                     break;
 
                 case 1:
-                    Text2PName.text = names[i];
+                    Text2PName.text = names[index];
                     Text2PName.color = playerTextColor;
                     break;
 
                 case 2:
-                    Text3PName.text = names[i];
+                    Text3PName.text = names[index];
                     Text3PName.color = playerTextColor;
                     break;
 
                 case 3:
-                    Text4PName.text = names[i];
+                    Text4PName.text = names[index];
                     Text4PName.color = playerTextColor;
+                    break;
+            }
+        }
+
+        //プレイヤーの名前がない欄は募集中にテキストを変える
+        for(; index < 4; index++)
+        {
+            switch (index)
+            {
+                case 0:
+                    Text1PName.text = nonPlayerText;
+                    Text1PName.color = nonPlayerTextColor;
+                    break;
+
+                case 1:
+                    Text2PName.text = nonPlayerText;
+                    Text2PName.color = nonPlayerTextColor;
+                    break;
+
+                case 2:
+                    Text3PName.text = nonPlayerText;
+                    Text3PName.color = nonPlayerTextColor;
+                    break;
+
+                case 3:
+                    Text4PName.text = nonPlayerText;
+                    Text4PName.color = nonPlayerTextColor;
                     break;
             }
         }

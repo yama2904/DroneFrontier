@@ -13,6 +13,9 @@ public class TitleManager : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
+            //SE再生
+            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+
             BaseScreenManager.SetScreen(BaseScreenManager.Screen.GAME_MODE_SELECT);
         }
     }

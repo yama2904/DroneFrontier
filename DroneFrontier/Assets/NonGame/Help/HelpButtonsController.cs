@@ -25,6 +25,9 @@ public class HelpButtonsController : MonoBehaviour
     //戻る
     public void SelectBack()
     {
+        //SE再生
+        SoundManager.Play(SoundManager.SE.CANCEL, SoundManager.BaseSEVolume);
+
         BaseScreenManager.SetScreen(BaseScreenManager.Screen.GAME_MODE_SELECT);
     }
 }

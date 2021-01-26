@@ -14,7 +14,6 @@ public class DiscoveryRequest : NetworkMessage
 {
     // Add properties for whatever information you want sent by clients
     // in their broadcast messages that servers will consume.
-    public string name = "";
 }
 
 //応答
@@ -29,6 +28,15 @@ public class DiscoveryResponse : NetworkMessage
 
 public class NewNetworkDiscovery : NetworkDiscoveryBase<ServerRequest, ServerResponse>
 {
+    //シングルトン
+    static NewNetworkDiscovery singleton;
+    public static NewNetworkDiscovery Singleton { get { return singleton; } }
+
+    void Awake()
+    {
+        singleton = this;
+    }
+
     public long ServerId { get; private set; }
     public Transport transport;
     public ServerFoundUnityEvent OnServerFound;
@@ -152,7 +160,7 @@ public class NewNetworkDiscovery : NetworkDiscoveryBase<ServerRequest, ServerRes
         };
         response.uri = realUri.Uri;
 
-        CustomNetworkDiscoveryHUD.Instance.OnDiscoveredServer(response);
+        CustomNetworkDiscoveryHUD.Singleton.OnDiscoveredServer(response);
     }
 
     #endregion

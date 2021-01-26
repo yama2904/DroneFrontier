@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 
 public class NonGameManager : MonoBehaviour
 {
+    [SerializeField] GameObject createNetworkManager = null;
     static List<MainGameManager.PlayerData> playerDatas = new List<MainGameManager.PlayerData>();
     static BaseScreenManager.Screen startScreen = BaseScreenManager.Screen.TITLE;
     static bool isStarted = false;
@@ -13,6 +14,7 @@ public class NonGameManager : MonoBehaviour
     {
         if (!isStarted)
         {
+            Instantiate(createNetworkManager);
             ConfigManager.InitConfig();
             MainGameManager.IsMulti = false;
         }

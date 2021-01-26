@@ -63,7 +63,12 @@ public class ConfigButtonsController : MonoBehaviour
     //設定初期化
     public void InitSetting()
     {
+        //初期化
         ConfigManager.InitConfig();
+
+        //SE再生
+        SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+
         //Sliderの値の設定
         BGMSlider.value = SoundManager.BaseBGMVolume;
         SESlider.value = SoundManager.BaseSEVolume;
@@ -81,6 +86,9 @@ public class ConfigButtonsController : MonoBehaviour
     //戻る
     public void SelectBack()
     {
+        //SE再生
+        SoundManager.Play(SoundManager.SE.CANCEL, SoundManager.BaseSEVolume);
+
         //メインゲーム中なら設定画面のを非表示
         if (MainGameManager.IsMainGaming)
         {

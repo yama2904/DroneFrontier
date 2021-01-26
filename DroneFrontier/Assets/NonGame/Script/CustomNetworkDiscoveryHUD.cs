@@ -4,9 +4,7 @@ using UnityEngine;
 namespace Mirror.Discovery
 {
     [DisallowMultipleComponent]
-    //[AddComponentMenu("Network/NetworkDiscoveryHUD")]
     [HelpURL("https://mirror-networking.com/docs/Articles/Components/NetworkDiscovery.html")]
-    //[RequireComponent(typeof(NetworkDiscovery))]
     public class CustomNetworkDiscoveryHUD : MonoBehaviour
     {
         readonly Dictionary<long, ServerResponse> discoveredServers = new Dictionary<long, ServerResponse>();
@@ -16,11 +14,12 @@ namespace Mirror.Discovery
         long serverId = -1;
         bool isStartClient = false;
 
-        static CustomNetworkDiscoveryHUD instance;
-        public static CustomNetworkDiscoveryHUD Instance { get { return instance; } }
+        //シングルトン
+        static CustomNetworkDiscoveryHUD singleton;
+        public static CustomNetworkDiscoveryHUD Singleton { get { return singleton; } }
         void Awake()
         {
-            instance = this;
+            singleton = this;
         }
 
 #if UNITY_EDITOR
@@ -92,6 +91,12 @@ namespace Mirror.Discovery
         private void OnDestroy()
         {
             networkDiscovery.StopDiscovery();
+        }
+
+        public void Init()
+        {
+            isStartClient = false;
+            serverId = -1;
         }
     }
 }

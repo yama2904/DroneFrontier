@@ -8,7 +8,7 @@ public class CPUSelectButtonsController : MonoBehaviour
     const short MAX_CPU_NUM = 3;
     const short MIN_CPU_NUM = 1;
 
-    [SerializeField] Text CPUNumText = null;    
+    [SerializeField] Text CPUNumText = null;
     short cpuNum;
 
     //CPUリスト用
@@ -34,7 +34,7 @@ public class CPUSelectButtonsController : MonoBehaviour
     GameObject[] CPULists = new GameObject[(int)List.NONE];  //CPUリスト
     Weapon[] CPUsWeapon = new Weapon[(int)List.NONE];    //各CPUの武器
     Button[] buttons = new Button[(int)List.NONE * (int)Weapon.NONE];  //CPUの武器を選択するボタン(2次元配列を1次元にまとめる)
-    
+
     //色用変数
     const string SELECT_BUTTON_COLOR = "#A2A2A2";       //ボタンを押したときの色の16進数
     const string NOT_SELECT_BUTTON_COLOR = "#FFFFFF";   //他のボタンが押されている時の色の16進数
@@ -62,7 +62,7 @@ public class CPUSelectButtonsController : MonoBehaviour
         buttonName[(int)Weapon.SHOTGUN] = "SelectShotgun";
         buttonName[(int)Weapon.MISSILE] = "SelectMissile";
         buttonName[(int)Weapon.LASER] = "SelectLaser";
-        
+
 
         //CPUListsとbuttonsの要素の初期化
         for (int i = 0; i < (int)List.NONE; i++)
@@ -92,8 +92,8 @@ public class CPUSelectButtonsController : MonoBehaviour
 
     //CPUの数を増やす
     public void SelectNumUp()
-    {        
-        if(cpuNum < MAX_CPU_NUM)
+    {
+        if (cpuNum < MAX_CPU_NUM)
         {
             cpuNum++;
             CPUNumText.text = cpuNum.ToString();
@@ -105,7 +105,7 @@ public class CPUSelectButtonsController : MonoBehaviour
     //CPUの数を減らす
     public void SelectNumDonw()
     {
-        if(cpuNum > MIN_CPU_NUM)
+        if (cpuNum > MIN_CPU_NUM)
         {
             cpuNum--;
             CPUNumText.text = cpuNum.ToString();
@@ -166,7 +166,10 @@ public class CPUSelectButtonsController : MonoBehaviour
     //決定
     public void SelectDecision()
     {
-        for(int i = 0; i < cpuNum; i++)
+        //SE再生
+        SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+
+        for (int i = 0; i < cpuNum; i++)
         {
             string cpuName = "CPU" + (i + 1);
             BaseWeapon.Weapon cpuWeapon = ConverWeaponToBaseWepon(CPUsWeapon[i]);
@@ -177,12 +180,11 @@ public class CPUSelectButtonsController : MonoBehaviour
 
     public void SelectBack()
     {
-        //ソロモードなら戻る
-        if (!MainGameManager.IsMulti)
-        {
-            NonGameManager.ClearSetedPlayers();
-            BaseScreenManager.SetScreen(BaseScreenManager.Screen.KURIBOCCHI);
-        }
+        //SE再生
+        SoundManager.Play(SoundManager.SE.CANCEL, SoundManager.BaseSEVolume);
+
+        NonGameManager.ClearSetedPlayers();
+        BaseScreenManager.SetScreen(BaseScreenManager.Screen.KURIBOCCHI);
     }
 
 
@@ -210,7 +212,7 @@ public class CPUSelectButtonsController : MonoBehaviour
     BaseWeapon.Weapon ConverWeaponToBaseWepon(Weapon weapon)
     {
         int w = (int)weapon;
-        if(w == (int)Weapon.SHOTGUN)
+        if (w == (int)Weapon.SHOTGUN)
         {
             return BaseWeapon.Weapon.SHOTGUN;
         }
