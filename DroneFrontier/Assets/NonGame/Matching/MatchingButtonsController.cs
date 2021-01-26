@@ -36,7 +36,7 @@ public class MatchingButtonsController : NetworkBehaviour
 
     public void SelectDecision()
     {
-        MatchingManager.Singleton.RpcSetWeaponSelectScreen();
+        MatchingManager.Singleton.CreateWeaponSelectScreen();
     }
 
     public void SelectBack()
