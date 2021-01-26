@@ -21,7 +21,7 @@ public class MatchingManager : NetworkBehaviour
     public static List<string> playerNames = new List<string>();
 
     //準備ができたか
-    bool isReady = false;
+    static bool isReady = false;
 
     public class PlayerData
     {
@@ -120,16 +120,11 @@ public class MatchingManager : NetworkBehaviour
         isReady = true;
     }
 
-    public void SetReady()
-    {
-        GetComponent<NetworkRoomPlayer>().CmdChangeReadyState(true);
-    }
-
     //レースモード用
     //すべてのクライアントの準備を完了させてゲームを開始する
     [ClientRpc]
     public void RpcStartRace()
     {
-        GetComponent<NetworkRoomPlayer>().CmdChangeReadyState(true);
+        isReady = true;
     }
 }
