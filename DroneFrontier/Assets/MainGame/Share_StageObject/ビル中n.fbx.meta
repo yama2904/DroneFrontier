@@ -3,7 +3,37 @@ guid: 0493bb28462940d4e91286bfe0243ca5
 ModelImporter:
   serializedVersion: 19300
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: bill_mate
+    second: {fileID: 2100000, guid: 63bc5ec82f1706c459221d3b9634cc90, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: door_mate
+    second: {fileID: 2100000, guid: fd6df79e07996dc46a190566b7f6a2e3, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: door_nobu_mate
+    second: {fileID: 2100000, guid: a8ad71fc00f6f38409467774588963bd, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: fensu_mate
+    second: {fileID: 2100000, guid: 3d90da8c80be8f2448ca4ebb7675ed2a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: okujou_mate
+    second: {fileID: 2100000, guid: 1af911526861bb94bbd804fa56767b04, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: window_mate
+    second: {fileID: 2100000, guid: f8a4a670d847955449df7933f4583d5e, type: 2}
   materials:
     materialImportMode: 1
     materialName: 0
@@ -80,7 +110,7 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
-    globalScale: 2
+    globalScale: 200
     rootMotionBoneName: 
     hasTranslationDoF: 0
     hasExtraRoot: 0
