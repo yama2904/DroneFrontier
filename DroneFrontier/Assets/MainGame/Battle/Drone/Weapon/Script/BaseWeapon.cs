@@ -84,9 +84,7 @@ public abstract class BaseWeapon : NetworkBehaviour, IWeapon
         transform.localRotation = weaponLocalPos.localRotation;
     }
 
-    void Awake()
-    {
-    }
+    void Awake() { }
     protected abstract void Start();
 
     //リキャスト時間と発射間隔を管理する
@@ -107,6 +105,7 @@ public abstract class BaseWeapon : NetworkBehaviour, IWeapon
 
     public abstract void Init();
     public abstract void UpdateMe();
+    public abstract void ResetWeapon();
     public abstract void Shot(GameObject target = null);
 
     public virtual void SetChild(Transform parent)
@@ -116,6 +115,7 @@ public abstract class BaseWeapon : NetworkBehaviour, IWeapon
         //t.localPosition = weaponLocalPos.localPosition;
         //t.localRotation = weaponLocalPos.localRotation;
     }
+
 
     public enum Weapon
     {
@@ -134,7 +134,7 @@ public abstract class BaseWeapon : NetworkBehaviour, IWeapon
         if (weapon == Weapon.SHOTGUN)
         {
             //ResourcesフォルダからShotgunオブジェクトを複製してロード
-           o = Instantiate(Resources.Load(FOLDER_PATH + "Shotgun")) as GameObject;
+            o = Instantiate(Resources.Load(FOLDER_PATH + "Shotgun")) as GameObject;
         }
         else if (weapon == Weapon.GATLING)
         {

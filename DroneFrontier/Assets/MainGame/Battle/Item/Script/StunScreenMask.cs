@@ -65,4 +65,15 @@ public class StunScreenMask : MonoBehaviour
         subtractAlfa = 1 / (divideTime * 2);
         Invoke(nameof(StartUpdate), maxMaskTime);
     }
+
+    //スタン解除
+    public void UnSetStun()
+    {
+        alfa = 0;
+        screenMaskImage.color = new Color(RED, GREEN, BLUE, alfa);
+
+        IsStun = false;
+        isStartUpdate = false;
+        screenMaskImage.enabled = false;
+    }
 }
