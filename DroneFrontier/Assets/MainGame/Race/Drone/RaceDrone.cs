@@ -154,6 +154,18 @@ public class RaceDrone : NetworkBehaviour
             Vector3 upward = upAngle.normalized * Vector3.forward;
             baseAction.Move(moveSpeed * 2 * Input.mouseScrollDelta.y, upward);
         }
+        if (Input.GetKey(KeyCode.R))
+        {
+            Quaternion upAngle = Quaternion.Euler(-90, 0, 0);
+            Vector3 upward = upAngle.normalized * Vector3.forward;
+            baseAction.Move(moveSpeed, upward);
+        }
+        if (Input.GetKey(KeyCode.F))
+        {
+            Quaternion downAngle = Quaternion.Euler(90, 0, 0);
+            Vector3 down = downAngle.normalized * Vector3.forward;
+            baseAction.Move(moveSpeed, down);
+        }
 
         #endregion
 
