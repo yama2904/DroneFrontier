@@ -205,7 +205,7 @@ public class BattleDrone : NetworkBehaviour
     void Update()
     {
         if (!isLocalPlayer) return;
-        if (!BattleManager.Singleton.StartFlag) return;  //ゲーム開始フラグが立っていなかったら処理しない
+        //if (!BattleManager.Singleton.StartFlag) return;  //ゲーム開始フラグが立っていなかったら処理しない
 
         //PlayerStatusActionの初期化
         if (!isStatusActionInit && statusAction != null)
