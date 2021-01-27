@@ -9,6 +9,8 @@ public class MainGameManager : NetworkBehaviour
 {
     [SerializeField] BattleManager battleManager = null;
 
+    public static List<GameObject> players = new List<GameObject>();
+
     //マルチモードか
     public static bool IsMulti { get; set; } = false;
 
