@@ -39,6 +39,8 @@ public class BattleManager : NetworkBehaviour
         {
             //playerDatasの初期化
             GameObject[] drones = GameObject.FindGameObjectsWithTag(TagNameManager.PLAYER);
+            Debug.Log(drones);
+            Debug.Log(drones.Length);
             PlayerData.droneNum = drones.Length;
             playerDatas = new PlayerData[drones.Length];
             for (int i = 0; i < drones.Length; i++)
