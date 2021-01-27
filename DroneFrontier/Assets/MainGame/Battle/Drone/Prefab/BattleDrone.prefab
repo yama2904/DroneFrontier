@@ -671,6 +671,7 @@ MonoBehaviour:
   maxBoostTime: 5
   boostRecastTime: 6
   atackingDownSpeed: 0.5
+  stock: 2
   respawnTime: 5
 --- !u!114 &-1535939887124464326
 MonoBehaviour:

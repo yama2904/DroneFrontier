@@ -50,6 +50,18 @@ public class PlayerItemAction : NetworkBehaviour
         }
     }
 
+    public void ResetItem()
+    {
+        foreach (ItemData id in itemDatas)
+        {
+            if (!id.isUsing) continue;
+
+            Destroy(id.createImage);
+            id.type = Item.ItemType.NONE;
+            id.isUsing = false;
+        }
+    }
+
     //所持アイテムを更新する
     //成功したらtrue
     public bool SetItem(Item.ItemType type)

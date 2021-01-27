@@ -113,6 +113,33 @@ public class MissieWeapon : BaseWeapon
         }
     }
 
+    public override void ResetWeapon()
+    {
+        RecastCountTime = 0;
+        ShotCountTime = ShotInterval;
+        BulletsRemain = MaxBullets;
+
+        //弾数UIのリセット
+        for (int i = 0; i < UIs.Length; i++)
+        {
+            UIs[i].fillAmount = 1f;
+        }
+
+        //既にある弾丸の削除と新しい弾丸の生成
+        if (setMissile)
+        {
+            CmdDestroyMissile();
+        }
+        CmdCreateMissile();
+        setMissile = true;
+    }
+
+    [Command]
+    void CmdDestroyMissile()
+    {
+        NetworkServer.Destroy(settingBullets[USE_INDEX]);
+    }
+
     #region CreateMissile
 
     MissileBullet CreateMissile()

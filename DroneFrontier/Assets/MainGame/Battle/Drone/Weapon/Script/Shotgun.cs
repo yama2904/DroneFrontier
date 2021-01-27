@@ -102,6 +102,19 @@ public class Shotgun : BaseWeapon
         }
     }
 
+    public override void ResetWeapon()
+    {
+        RecastCountTime = 0;
+        ShotCountTime = ShotInterval;
+        BulletsRemain = MaxBullets;
+
+        //弾数UIのリセット
+        for(int i = 0; i < UIs.Length; i++)
+        {
+            UIs[i].fillAmount = 1f;
+        }
+    }
+
     public override void Shot(GameObject target = null)
     {
         //前回発射して発射間隔分の時間が経過していなかったら撃たない

@@ -40,7 +40,7 @@ public class LaserWeapon : BaseWeapon
         ShotCountTime = ShotInterval;
         BulletPower = _power;
     }
-    
+
     public override void Init()
     {
         for (int i = 0; i < (int)ShotFlag.NONE; i++)
@@ -73,10 +73,7 @@ public class LaserWeapon : BaseWeapon
     protected override void Update() { }
     public override void UpdateMe()
     {
-        if (isShots.Count <= 0)
-        {
-            return;
-        }
+        if (isShots.Count <= 0) return;
 
         //撃っていない間はリキャストの管理
         if (!isShots[(int)ShotFlag.SHOT_START])
@@ -100,10 +97,7 @@ public class LaserWeapon : BaseWeapon
 
     void LateUpdate()
     {
-        if (isShots.Count <= 0)
-        {
-            return;
-        }
+        if (isShots.Count <= 0) return;
 
         //攻撃中かどうか
         if (isShots[(int)ShotFlag.SHOT_START])
@@ -126,13 +120,20 @@ public class LaserWeapon : BaseWeapon
 
     #endregion
 
+    public override void ResetWeapon()
+    {
+        ShotCountTime = ShotInterval;
+        laserGaugeImage.fillAmount = 1.0f;
+
+        //フラグ初期化
+        isShots[(int)ShotFlag.SHOT_START] = false;
+        isShots[(int)ShotFlag.SHOT_SHOTING] = false;
+    }
+
 
     public override void Shot(GameObject target = null)
     {
-        if (isShots.Count <= 0)
-        {
-            return;
-        }
+        if (isShots.Count <= 0) return;
 
         //発射に必要な最低限のゲージがないと発射しない
         if (!isShots[(int)ShotFlag.SHOT_START])

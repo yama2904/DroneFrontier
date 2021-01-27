@@ -10,18 +10,24 @@ public class BattleManager : NetworkBehaviour
     public static BattleManager Singleton { get { return singleton; } }
 
     //プレイヤー情報
-    class PlayerData
+    public class PlayerData
     {
         public BattleDrone drone = null;
         public int ranking = 1;
         public bool isDestroy = false;
-        public static int droneNum = -1;  //残っているドローンの数
+        public static int droneNum = 0;  //残っているドローンの数
     }
-    PlayerData[] playerDatas;
+    static List<PlayerData> playerDatas = new List<PlayerData>();
+
+    //ランキング
+    string[] ranking;
 
     //ゲーム開始のカウントダウンが鳴ったらtrue
     bool startFlag = false;
     public bool StartFlag { get { return startFlag; } }
+
+    public int disconnectionClientCount = 0;
+    bool isFinished = false;
 
 
     void Awake()
@@ -34,21 +40,6 @@ public class BattleManager : NetworkBehaviour
     {
         //ゲームが開始して3秒後にカウントダウンSEを鳴らす
         Invoke(nameof(PlayStartSE), 3.0f);
-
-        if (isServer)
-        {
-            //playerDatasの初期化
-            GameObject[] drones = GameObject.FindGameObjectsWithTag(TagNameManager.PLAYER);
-            Debug.Log(drones);
-            Debug.Log(drones.Length);
-            PlayerData.droneNum = drones.Length;
-            playerDatas = new PlayerData[drones.Length];
-            for (int i = 0; i < drones.Length; i++)
-            {
-                playerDatas[i] = new PlayerData();
-                playerDatas[i].drone = drones[i].GetComponent<BattleDrone>();
-            }
-        }
     }
 
     [ServerCallback]
@@ -71,23 +62,21 @@ public class BattleManager : NetworkBehaviour
         //最後のプレイヤーが残ったら終了処理
         if (PlayerData.droneNum <= 1)
         {
-            string[] ranking = new string[playerDatas.Length];
-            foreach (PlayerData pd in playerDatas)
+            if (!isFinished)
             {
-                ranking[pd.ranking - 1] = pd.drone.name;
+                ranking = new string[playerDatas.Count];
+                foreach (PlayerData pd in playerDatas)
+                {
+                    ranking[pd.ranking - 1] = pd.drone.name;
+                }
+                StartCoroutine(FinishGame(ranking));
+                isFinished = true;
             }
-            StartCoroutine(FinishGame(ranking));
         }
 
         //クライアントが全て切断されたらホストもリザルト移動
-        if(NetworkManager.singleton.numPlayers == 1)
+        if (disconnectionClientCount >= playerDatas.Count - 1)
         {
-            string[] ranking = new string[playerDatas.Length];
-            foreach (PlayerData pd in playerDatas)
-            {
-                ranking[pd.ranking - 1] = pd.drone.name;
-            }
-
             NetworkManager.singleton.StopHost();    //ホストを停止
             MatchingManager.Singleton.Init();
             ResultButtonsController.SetRank(ranking);
@@ -123,7 +112,7 @@ public class BattleManager : NetworkBehaviour
         SoundManager.Play(SoundManager.SE.FINISH, SoundManager.BaseSEVolume);
     }
 
-    
+    [ClientRpc]
     void RpcMoveResultScreen(string[] ranking)
     {
         //サーバだけ実行しない
@@ -135,5 +124,15 @@ public class BattleManager : NetworkBehaviour
 
         //リザルト画面に移動
         NonGameManager.LoadNonGameScene(BaseScreenManager.Screen.RESULT);
+    }
+
+
+    public static void AddPlayerData(BattleDrone drone)
+    {
+        playerDatas.Add(new PlayerData
+        {
+            drone = drone
+        });
+        PlayerData.droneNum++;
     }
 }

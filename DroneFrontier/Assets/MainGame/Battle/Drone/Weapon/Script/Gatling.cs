@@ -51,13 +51,9 @@ public class Gatling : BaseWeapon
         }
     }
 
-    public override void Init()
-    {
-    }
-
-    public override void UpdateMe()
-    {
-    }
+    public override void Init() { }
+    public override void UpdateMe() { }
+    public override void ResetWeapon() { }
 
     public override void Shot(GameObject target = null)
     {

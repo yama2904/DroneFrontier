@@ -26,10 +26,17 @@ public class NewNetworkRoomManager : NetworkRoomManager
     //クライアントが切断したときにサーバで呼ぶ
     public override void OnServerDisconnect(NetworkConnection conn)
     {
-        int index = MatchingManager.playerDatas.FindIndex(pd => ReferenceEquals(pd.conn, conn));
-        if(index >= 0)
+        if (MainGameManager.IsMainGaming)
         {
-            MatchingManager.Singleton.RemovePlayer(index);
+            BattleManager.Singleton.disconnectionClientCount++;
+        }
+        else
+        {
+            int index = MatchingManager.playerDatas.FindIndex(pd => ReferenceEquals(pd.conn, conn));
+            if (index >= 0)
+            {
+                MatchingManager.Singleton.RemovePlayer(index);
+            }
         }
 
         base.OnServerDisconnect(conn);
@@ -100,7 +107,8 @@ public class NewNetworkRoomManager : NetworkRoomManager
         {
             createDrone = raceDrone;
         }
-        var player = Instantiate(createDrone, GetStartPosition().position, GetStartPosition().rotation);
+        Transform startPos = GetStartPosition();
+        var player = Instantiate(createDrone, startPos.position, startPos.rotation);
         int index = MatchingManager.playerDatas.FindIndex(pd => ReferenceEquals(pd.conn, conn));
         if (index >= 0)
         {

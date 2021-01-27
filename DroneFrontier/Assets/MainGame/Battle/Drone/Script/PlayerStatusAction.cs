@@ -84,6 +84,16 @@ public class PlayerStatusAction : NetworkBehaviour
         }
     }
 
+    public void ResetStatus()
+    {
+        for(int i = 0; i < (int)Status.NONE; i++)
+        {
+            isStatus[i] = false;
+        }
+        createdStunScreenMask.UnSetStun();
+        speedDownList.Clear();
+    }
+
     public bool GetIsStatus(Status status)
     {
         if (isStatus.Count <= 0) return false;  //バグ防止

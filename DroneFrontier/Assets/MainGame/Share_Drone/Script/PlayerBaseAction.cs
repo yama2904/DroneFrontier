@@ -11,8 +11,8 @@ public class PlayerBaseAction : NetworkBehaviour
     Rigidbody _rigidbody = null;
     Transform cacheTransform = null;  //キャッシュ用
 
-    //ドローンが移動した際にオブジェクトが傾く処理用
-    [SerializeField] Transform droneObject = null;
+    //ドローンのオブジェクトのみ動かす用
+    [SerializeField] public Transform droneObject = null;
 
     //回転用
     [SerializeField, Tooltip("上下の回転制限角度")] float limitCameraTiltX = 40f;

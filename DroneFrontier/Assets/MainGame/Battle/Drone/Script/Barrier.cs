@@ -21,11 +21,11 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
     [SerializeField] float regeneValue = 5.0f;       //バリアが回復する量
     [SerializeField] float resurrectBarrierTime = 15.0f;   //バリアが破壊されてから修復される時間
     [SerializeField] float resurrectBarrierHP = 10.0f;     //バリアが復活した際のHP
-    [SyncVar] float regeneCountTime;    //計測用
-    [SyncVar] bool isRegene;    //回復中か
+    [SyncVar] float syncRegeneCountTime;    //計測用
+    [SyncVar] bool syncIsRegene;    //回復中か
 
-    [SyncVar] float damagePercent;    //ダメージ倍率
-    [SyncVar, HideInInspector] public uint parentNetId = 0;
+    [SyncVar] float syncDamagePercent;    //ダメージ倍率
+    [SyncVar, HideInInspector] public uint syncParentNetId = 0;
 
     //サウンド
     enum SE
@@ -41,7 +41,7 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
     public override void OnStartClient()
     {
         base.OnStartClient();
-        GameObject parent = NetworkIdentity.spawned[parentNetId].gameObject;
+        GameObject parent = NetworkIdentity.spawned[syncParentNetId].gameObject;
         transform.SetParent(parent.transform);
         transform.localPosition = new Vector3(0, 0, 0);
 
@@ -66,9 +66,24 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
     [ServerCallback]
     void Start()
     {
-        damagePercent = 1;
-        regeneCountTime = 0;
-        isRegene = true;    //ゲーム開始時はHPMAXで回復の必要がないのでtrue
+        syncDamagePercent = 1;
+        syncRegeneCountTime = 0;
+        syncIsRegene = true;    //ゲーム開始時はHPMAXで回復の必要がないのでtrue
+    }
+
+    public void ResetBarrier()
+    {
+        syncHP = MAX_HP;
+        syncDamagePercent = 1;
+        syncRegeneCountTime = 0;
+        syncIsRegene = true;    //ゲーム開始時はHPMAXで回復の必要がないのでtrue
+        syncIsStrength = false;
+        syncIsWeak = false;
+        syncInterval = 0;
+        
+        //バリアの色変え
+        float value = syncHP / MAX_HP;
+        RpcSetBarrierColor(1 - value, value, 0, value * 0.5f);
     }
 
     [ServerCallback]
@@ -83,34 +98,34 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
         //バリアが破壊されていたら修復処理
         if (syncHP <= 0)
         {
-            if (regeneCountTime >= resurrectBarrierTime)
+            if (syncRegeneCountTime >= resurrectBarrierTime)
             {
                 ResurrectBarrier(resurrectBarrierHP);
-                regeneCountTime = 0;
+                syncRegeneCountTime = 0;
             }
         }
         //バリアが回復を始めるまで待つ
-        else if (!isRegene)
+        else if (!syncIsRegene)
         {
-            if (regeneCountTime >= regeneStartTime)
+            if (syncRegeneCountTime >= regeneStartTime)
             {
-                isRegene = true;
-                regeneCountTime = 0;
+                syncIsRegene = true;
+                syncRegeneCountTime = 0;
             }
         }
         //バリアの回復処理
         else
         {
-            if (regeneCountTime >= regeneInterval)
+            if (syncRegeneCountTime >= regeneInterval)
             {
                 if (syncHP < MAX_HP)
                 {
                     Regene(regeneValue);
                 }
-                regeneCountTime = 0;
+                syncRegeneCountTime = 0;
             }
         }
-        regeneCountTime += Time.deltaTime;
+        syncRegeneCountTime += Time.deltaTime;
     }
 
     //HPを回復する
@@ -147,7 +162,7 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
 
         //修復したら回復処理に移る
         syncHP = resurrectHP;
-        isRegene = true;
+        syncIsRegene = true;
 
         //バリアの色変え
         float value = syncHP / MAX_HP;
@@ -164,7 +179,7 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
     [Command(ignoreAuthority = true)]
     public void CmdDamage(float power)
     {
-        float p = Useful.DecimalPointTruncation(power * damagePercent, 1);  //小数点第2以下切り捨て
+        float p = Useful.DecimalPointTruncation(power * syncDamagePercent, 1);  //小数点第2以下切り捨て
         syncHP -= p;
         if (syncHP < 0)
         {
@@ -172,8 +187,8 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
             RpcSetBarrierColor(255, 0, 0, 0);
             RpcPlaySE((int)SE.DESTROY);
         }
-        regeneCountTime = 0;
-        isRegene = false;
+        syncRegeneCountTime = 0;
+        syncIsRegene = false;
         RpcPlaySE((int)SE.DAMAGE);
 
         //バリアの色変え
@@ -211,7 +226,7 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
     [Command(ignoreAuthority = true)]
     public void CmdBarrierStrength(float strengthPrercent, float time)
     {
-        damagePercent = 1 - strengthPrercent;
+        syncDamagePercent = 1 - strengthPrercent;
         Invoke(nameof(EndStrength), time);
         syncIsStrength = true;
 
@@ -230,7 +245,7 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
         {
             return;
         }
-        damagePercent = 1;
+        syncDamagePercent = 1;
         syncIsStrength = false;
 
         //バリアの色変え
@@ -256,7 +271,7 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
 
         if (syncIsStrength)
         {
-            damagePercent = 1;
+            syncDamagePercent = 1;
             syncIsStrength = false;
 
 
@@ -272,8 +287,8 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
             Debug.Log("バリアHP: " + syncHP);
         }
 
-        isRegene = false;
-        regeneCountTime = 0;
+        syncIsRegene = false;
+        syncRegeneCountTime = 0;
 
         syncIsWeak = true;
     }
