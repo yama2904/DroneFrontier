@@ -28,7 +28,7 @@ public class NewNetworkRoomManager : NetworkRoomManager
     {
         if (MainGameManager.IsMainGaming)
         {
-            BattleManager.Singleton.disconnectionClientCount++;
+            MainGameManager.Singleton.disconnectionClientCount++;
         }
         else
         {

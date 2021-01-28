@@ -14489,7 +14489,6 @@ MonoBehaviour:
   syncInterval: 0.1
   thrower: {fileID: 0}
   stunTime: 9
-  destroyTime: 0.5
 --- !u!135 &6044247564831494911
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -14501,7 +14500,7 @@ SphereCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 8
+  m_Radius: 220
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &3422052658085530785
 MonoBehaviour:

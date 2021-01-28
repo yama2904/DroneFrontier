@@ -51,6 +51,9 @@ public class NetworkWeaponSelectController : NetworkBehaviour
         BaseWeapon.Weapon w = BaseWeapon.Weapon.SHOTGUN;  //名前省略
         if (weapon != w)
         {
+            //SE再生
+            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+
             messageWindowText.text = SHOTGUN_TEXT;
             SetWeaponButtonsColor(w);
             weapon = w;
@@ -62,6 +65,9 @@ public class NetworkWeaponSelectController : NetworkBehaviour
         BaseWeapon.Weapon w = BaseWeapon.Weapon.MISSILE;  //名前省略
         if (weapon != w)
         {
+            //SE再生
+            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+
             messageWindowText.text = MISSILE_TEXT;
             SetWeaponButtonsColor(w);
             weapon = w;
@@ -73,6 +79,9 @@ public class NetworkWeaponSelectController : NetworkBehaviour
         BaseWeapon.Weapon w = BaseWeapon.Weapon.LASER;  //名前省略
         if (weapon != w)
         {
+            //SE再生
+            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+
             messageWindowText.text = LASER_TEXT;
             SetWeaponButtonsColor(w);
             weapon = w;
@@ -132,6 +141,9 @@ public class NetworkWeaponSelectController : NetworkBehaviour
         //色変更
         if (!isItemOnButton)
         {
+            //SE再生
+            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+
             MainGameManager.IsItem = true;
             itemOnButton.image.color = selectItemButtonColor;
             itemOffButton.image.color = notSelectButtonColor;
@@ -145,6 +157,9 @@ public class NetworkWeaponSelectController : NetworkBehaviour
         //色変更
         if (isItemOnButton)
         {
+            //SE再生
+            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+
             MainGameManager.IsItem = false;
             itemOnButton.image.color = notSelectButtonColor;
             itemOffButton.image.color = selectItemButtonColor;

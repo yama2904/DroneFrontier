@@ -46,9 +46,15 @@ public class RaceDrone : NetworkBehaviour
     AudioSource[] audios;
 
 
+    //ゴールしたらtrue
+    bool isGoal = false;
+    public bool IsGoal { get { return isGoal; } }
+
+
     public override void OnStartClient()
     {
         base.OnStartClient();
+        RaceManager.AddPlayerData(this);
 
         //AudioSourceの初期化
         audios = GetComponents<AudioSource>();
@@ -63,6 +69,8 @@ public class RaceDrone : NetworkBehaviour
     public override void OnStartLocalPlayer()
     {
         base.OnStartLocalPlayer();
+
+        //ブースト初期化
         boostGaugeImage.enabled = true;
         boostGaugeImage.fillAmount = 1;
         boostGaugeFrameImage.enabled = true;
@@ -80,18 +88,15 @@ public class RaceDrone : NetworkBehaviour
         maxSpeed = moveSpeed * 10;
         minSpeed = moveSpeed * 0.2f;
     }
-    
+
     void Start()
     {
-        
     }
-    
+
     void Update()
     {
-        if (!isLocalPlayer)
-        {
-            return;
-        }
+        if (!isLocalPlayer) return;
+        if (!MainGameManager.Singleton.StartFlag) return;  //ゲーム開始フラグが立っていなかったら処理しない
 
 
         #region Move
@@ -280,4 +285,17 @@ public class RaceDrone : NetworkBehaviour
     }
 
     #endregion
+
+    [ServerCallback]
+    private void OnTriggerEnter(Collider other)
+    {
+        if (isGoal) return;
+
+        if (other.CompareTag(TagNameManager.GOAL))
+        {
+            isGoal = true;
+
+            Debug.Log(name + ": Goal");
+        }
+    }
 }

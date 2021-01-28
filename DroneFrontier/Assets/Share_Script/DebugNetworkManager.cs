@@ -7,7 +7,7 @@ using Mirror;
 	API Reference: https://mirror-networking.com/docs/api/Mirror.NetworkManager.html
 */
 
-public class NewNetworkManager : NetworkManager
+public class DebugNetworkManager : NetworkManager
 {
     #region Unity Callbacks
 
@@ -145,7 +145,8 @@ public class NewNetworkManager : NetworkManager
     /// <param name="conn">Connection from client.</param>
     public override void OnServerAddPlayer(NetworkConnection conn)
     {
-        var player = Instantiate(playerPrefab, GetStartPosition().position, Quaternion.identity);
+        Transform startPos = GetStartPosition();
+        var player = Instantiate(playerPrefab, startPos.position, startPos.rotation);
         NetworkServer.AddPlayerForConnection(conn, player);
     }
 

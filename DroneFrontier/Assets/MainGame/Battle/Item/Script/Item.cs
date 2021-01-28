@@ -24,10 +24,7 @@ public class Item : NetworkBehaviour
     public override void OnStartClient()
     {
         base.OnStartClient();
-    }
 
-    void Start()
-    {
         if (type == ItemType.NONE) return;
 
         GameObject o = null;

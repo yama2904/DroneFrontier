@@ -132,9 +132,9 @@ MonoBehaviour:
   stunImpact: {fileID: 1134113185920709072, guid: 5a310c6edafad474daf4389a5d51b837,
     type: 3}
   throwRotate: {fileID: 364162735733947447}
-  throwPower: 800
+  throwPower: 1200
   impactTime: 1
-  gravity: 60
+  gravity: 95
 --- !u!114 &15590335615065024
 MonoBehaviour:
   m_ObjectHideFlags: 0

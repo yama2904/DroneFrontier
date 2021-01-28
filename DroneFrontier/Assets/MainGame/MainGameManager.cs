@@ -7,6 +7,10 @@ using Mirror;
 
 public class MainGameManager : NetworkBehaviour
 {
+    //シングルトン
+    static MainGameManager singleton;
+    public static MainGameManager Singleton { get { return singleton; } }
+
     [SerializeField] BattleManager battleManager = null;
     [SerializeField] RaceManager raceManager = null;
 
@@ -43,8 +47,16 @@ public class MainGameManager : NetworkBehaviour
     }
     static List<PlayerData> playerDatas = new List<PlayerData>();
 
-    //プレイヤーの数
-    public static int playerNum = 0;
+
+    //ゲーム開始のカウントダウンが鳴ったらtrue
+    bool startFlag = false;
+    public bool StartFlag { get { return startFlag; } }
+
+    string[] ranking = new string[MatchingManager.PlayerNum];
+
+    //切断したクライアントの数
+    //ホスト専用変数
+    [HideInInspector] public int disconnectionClientCount = 0;
 
 
     //設定画面移動時のマスク用変数
@@ -60,15 +72,26 @@ public class MainGameManager : NetworkBehaviour
 
     //デバッグ用
     public static bool IsCursorLock { get; private set; } = true;
+    [Header("デバッグ用")]
     [SerializeField] bool offline = false;
+    [SerializeField] GameMode debugGameMode = GameMode.NONE;
+    [SerializeField] bool solo = false;
+
 
     void Awake()
     {
+        //シングルトンの作成
+        singleton = this;
+
         screenMaskImage = screenMaskImageInspector;
 
 
         //デバッグ用
         IsMulti = !offline;
+        if (solo)
+        {
+            startFlag = true;
+        }
     }
 
     void Start()
@@ -80,17 +103,35 @@ public class MainGameManager : NetworkBehaviour
                 BattleManager bm = Instantiate(battleManager);
                 NetworkServer.Spawn(bm.gameObject);
             }
-            else if(Mode == GameMode.RACE)
+            else if (Mode == GameMode.RACE)
             {
                 RaceManager rm = Instantiate(raceManager);
                 NetworkServer.Spawn(rm.gameObject);
             }
             else
             {
-                //エラー
-                Application.Quit();
+                //デバッグ用
+                if (debugGameMode == GameMode.BATTLE)
+                {
+                    BattleManager bm = Instantiate(battleManager);
+                    NetworkServer.Spawn(bm.gameObject);
+                }
+                else if (debugGameMode == GameMode.RACE)
+                {
+                    RaceManager rm = Instantiate(raceManager);
+                    NetworkServer.Spawn(rm.gameObject);
+                }
+                else
+                {
+                    //エラー
+                    Application.Quit();
+                }
             }
+
+            //3秒後にカウントダウンSE
+            Invoke(nameof(RpcPlayStartSE), 3.0f);
         }
+
 
         IsMainGaming = true;
         BaseScreenManager.LoadScreen(BaseScreenManager.Screen.CONFIG);  //メインゲームを始めた時点で設定画面をロードする
@@ -104,21 +145,20 @@ public class MainGameManager : NetworkBehaviour
         Cursor.visible = false;
     }
 
+    [ClientRpc]
+    void RpcPlayStartSE()
+    {
+        SoundManager.Play(SoundManager.SE.START_COUNT_DOWN_D, SoundManager.BaseSEVolume);
+        Invoke(nameof(SetStartFlagTrue), 3.5f);
+    }
+
+    void SetStartFlagTrue()
+    {
+        startFlag = true;
+    }
+
     void Update()
     {
-        //設定画面を開く
-        if (Input.GetKeyDown(KeyCode.M))
-        {
-            if (IsConfig)
-            {
-                ConfigToMainGame();
-            }
-            else
-            {
-                MainGameToConfig();
-            }
-        }
-
         //デバッグ用
         if (Input.GetKeyDown(KeyCode.Escape))
         {
@@ -134,6 +174,37 @@ public class MainGameManager : NetworkBehaviour
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
                 Debug.Log("カメラロック解除");
+            }
+        }
+
+        if (!startFlag) return;
+
+        //設定画面を開く
+        if (Input.GetKeyDown(KeyCode.M))
+        {
+            if (IsConfig)
+            {
+                ConfigToMainGame();
+            }
+            else
+            {
+                MainGameToConfig();
+            }
+        }
+
+
+        //クライアントが全て切断されたらホストもリザルト移動
+        if (isServer)
+        {
+            if (solo) return;   //デバッグ用
+            if (disconnectionClientCount >= MatchingManager.PlayerNum - 1)
+            {
+                NetworkManager.singleton.StopHost();    //ホストを停止
+                MatchingManager.Singleton.Init();
+                ResultButtonsController.SetRank(ranking);
+
+                //リザルト画面に移動
+                NonGameManager.LoadNonGameScene(BaseScreenManager.Screen.RESULT);
             }
         }
     }
@@ -157,12 +228,6 @@ public class MainGameManager : NetworkBehaviour
         IsConfig = true;
     }
 
-    void MoveResult()
-    {
-        Init();
-        NonGameManager.LoadNonGameScene(BaseScreenManager.Screen.RESULT);
-    }
-
 
     //設定画面からメインゲームに移動する
     public static void ConfigToMainGame()
@@ -184,17 +249,64 @@ public class MainGameManager : NetworkBehaviour
     //プレイヤー又はCPUを追加する
     public static void SetPlayer(string name, BaseWeapon.Weapon weapon, bool isPlayer)
     {
-        ////不正な値なら弾く
-        //if (name == "" || weapon == BaseWeapon.Weapon.NONE)
-        //{
-        //    return;
-        //}
 
-        //PlayerData pd = new PlayerData();
-        //pd.name = name;
-        //pd.weapon = weapon;
-        //pd.isPlayer = isPlayer;
+    }
 
-        //playerDatas.Add(pd);
+    [Server]
+    public void FinishGame(string[] ranking)
+    {
+        //デバッグ用
+        if (solo) return;
+
+
+        int index = 0;
+        for (; index < MatchingManager.PlayerNum; index++)
+        {
+            if (index < 0 || index >= ranking.Length) break;  //配列の範囲外ならやめる
+            this.ranking[index] = ranking[index];
+        }
+
+        //引数の配列の要素が足りなかったら空白文字で補う
+        for (; index < MatchingManager.PlayerNum; index++)
+        {
+            this.ranking[index] = "";
+        }
+
+        StartCoroutine(FinishGameCoroutine(this.ranking));
+    }
+
+    IEnumerator FinishGameCoroutine(string[] ranking)
+    {
+        yield return new WaitForSeconds(1.0f);
+        RpcPlayFinishSE();
+
+        yield return new WaitForSeconds(3.0f);
+        RpcMoveResultScreen(ranking);
+    }
+
+    [ClientRpc]
+    void RpcPlayFinishSE()
+    {
+        SoundManager.Play(SoundManager.SE.FINISH, SoundManager.BaseSEVolume);
+    }
+
+    [ClientRpc]
+    void RpcMoveResultScreen(string[] ranking)
+    {
+        //サーバだけ実行しない
+        if (isServer) return;
+
+        Debug.Log("foreach");
+        foreach (string s in ranking)
+        {
+            Debug.Log(s);
+        }
+
+        NetworkManager.singleton.StopClient();  //クライアントを停止
+        Mirror.Discovery.CustomNetworkDiscoveryHUD.Singleton.Init();
+        ResultButtonsController.SetRank(ranking);
+
+        //リザルト画面に移動
+        NonGameManager.LoadNonGameScene(BaseScreenManager.Screen.RESULT);
     }
 }

@@ -30,6 +30,9 @@ public class MatchingManager : NetworkBehaviour
         public BaseWeapon.Weapon weapon;
     }
     public static List<PlayerData> playerDatas = new List<PlayerData>();
+    
+    //プレイヤーの数
+    public static int PlayerNum { get { return playerDatas.Count; } }
 
 
     public override void OnStartLocalPlayer()

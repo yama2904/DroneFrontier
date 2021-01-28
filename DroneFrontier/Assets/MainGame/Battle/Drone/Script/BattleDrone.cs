@@ -154,7 +154,6 @@ public class BattleDrone : NetworkBehaviour
     public override void OnStartClient()
     {
         base.OnStartClient();
-
         BattleManager.AddPlayerData(this, isLocalPlayer);
 
         //AudioSourceの初期化
@@ -226,7 +225,7 @@ public class BattleDrone : NetworkBehaviour
     void Update()
     {
         if (!isLocalPlayer) return;
-        if (!BattleManager.Singleton.StartFlag) return;  //ゲーム開始フラグが立っていなかったら処理しない
+        if (!MainGameManager.Singleton.StartFlag) return;  //ゲーム開始フラグが立っていなかったら処理しない
         if (IsGameOver || syncIsRespawning || syncIsDestroy) return;  //死亡・リスポーン処理中は操作不可
 
         //デバッグ用
@@ -642,7 +641,7 @@ public class BattleDrone : NetworkBehaviour
         syncIsDestroy = true;
         RpcDestroyMe();
 
-        if (syncStock < 0)
+        if (syncStock <= 0)
         {
             Invoke(nameof(Death), fallTime);
         }
@@ -880,7 +879,7 @@ public class BattleDrone : NetworkBehaviour
     private void OnTriggerStay(Collider other)
     {
         if (!isLocalPlayer) return;
-        if (!BattleManager.Singleton.StartFlag) return;  //ゲーム開始フラグが立っていなかったら処理しない
+        if (!MainGameManager.Singleton.StartFlag) return;  //ゲーム開始フラグが立っていなかったら処理しない
         if (IsGameOver || syncIsRespawning || syncIsDestroy) return;  //死亡・リスポーン処理中は操作不可
 
         //Eキーでアイテム取得
@@ -905,7 +904,7 @@ public class BattleDrone : NetworkBehaviour
     private void OnCollisionEnter(Collision collision)
     {
         if (!isLocalPlayer) return;
-        if (!BattleManager.Singleton.StartFlag) return;  //ゲーム開始フラグが立っていなかったら処理しない
+        if (!MainGameManager.Singleton.StartFlag) return;  //ゲーム開始フラグが立っていなかったら処理しない
         if (IsGameOver || syncIsRespawning || syncIsDestroy) return;  //死亡・リスポーン処理中は操作不可
 
         //ステージの見えない壁に当たったらSE

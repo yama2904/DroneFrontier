@@ -12,7 +12,6 @@ public class Test : MonoBehaviour
 
     private void Awake()
     {
-        
     }
 
     void Start()
@@ -30,7 +29,7 @@ public class Test : MonoBehaviour
     {
         if (playBGM)
         {
-            if(SoundManager.IsPlayingBGM == SoundManager.BGM.NONE)
+            if (SoundManager.IsPlayingBGM == SoundManager.BGM.NONE)
             {
                 SoundManager.Play(SoundManager.BGM.DRONE_UP, 1.0f);
             }

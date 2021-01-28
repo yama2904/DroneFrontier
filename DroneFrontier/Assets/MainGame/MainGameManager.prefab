@@ -49,6 +49,8 @@ MonoBehaviour:
   syncInterval: 0.1
   battleManager: {fileID: 5826206719070923701, guid: d3f754749c36de940b3296b60635b9db,
     type: 3}
+  raceManager: {fileID: 5820283822635167806, guid: f0c786aca5c92174485c99386edabe89,
+    type: 3}
   screenMaskImageInspector: {fileID: 2547274622470476866}
   offline: 0
 --- !u!114 &-2417105566778372335

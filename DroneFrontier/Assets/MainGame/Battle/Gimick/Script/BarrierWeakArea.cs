@@ -71,9 +71,8 @@ public class BarrierWeakArea : MonoBehaviour
                 BattleDrone player = o.GetComponent<BattleDrone>();
                 if (player.isLocalPlayer)
                 {
-
                     //既にリスト内に存在しているか調べる
-                    int index = hitPlayerDatas.FindIndex(p => ReferenceEquals(p.player, player));
+                    int index = hitPlayerDatas.FindIndex(p => p.player.netId == player.netId);
                     if (index == -1)
                     {
                         //存在していなかったらバリアを弱体化

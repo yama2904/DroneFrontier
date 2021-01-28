@@ -15,22 +15,11 @@ public class BattleManager : NetworkBehaviour
         public BattleDrone drone = null;
         public int ranking = 1;
         public bool isDestroy = false;
-        public static int droneNum = 0;  //残っているドローンの数
+        public static int droneNum = MatchingManager.PlayerNum;  //残っているドローンの数
     }
     static List<PlayerData> playerDatas = new List<PlayerData>();
     static BattleDrone localDrone = null;
     int useIndex = 0;
-
-    //ランキング
-    string[] ranking;
-
-    //ゲーム開始のカウントダウンが鳴ったらtrue
-    bool startFlag = false;
-    public bool StartFlag { get { return startFlag; } }
-
-    //切断したクライアントの数
-    //ホスト専用変数
-    public int disconnectionClientCount = 0;
 
     //ゲーム終了処理を行ったらtrue
     bool isFinished = false;
@@ -43,7 +32,7 @@ public class BattleManager : NetworkBehaviour
         if (!MainGameManager.IsItem)
         {
             GameObject[] items = GameObject.FindGameObjectsWithTag(TagNameManager.ITEM);
-            foreach(GameObject item in items)
+            foreach (GameObject item in items)
             {
                 Destroy(item);
             }
@@ -56,15 +45,11 @@ public class BattleManager : NetworkBehaviour
         singleton = this;
     }
 
-    void Start()
-    {
-        //ゲームが開始して3秒後にカウントダウンSEを鳴らす
-        Invoke(nameof(PlayStartSE), 3.0f);
-    }
+    void Start() { }
 
     void Update()
     {
-        if (!startFlag) return;
+        if (!MainGameManager.Singleton.StartFlag) return;
 
         //ゲームオーバーになったら他のプレイヤーのカメラにスペースキーで切り替える
         if (Input.GetKeyDown(KeyCode.Space))
@@ -85,6 +70,11 @@ public class BattleManager : NetworkBehaviour
                     //破壊されていたらスキップ
                     BattleDrone drone = playerDatas[useIndex].drone;
                     if (drone.IsGameOver)
+                    {
+                        useIndex++;
+                    }
+                    //自分のドローンだったらスキップ
+                    else if(drone.netId == localDrone.netId)
                     {
                         useIndex++;
                     }
@@ -115,72 +105,23 @@ public class BattleManager : NetworkBehaviour
             {
                 if (!isFinished)
                 {
-                    ranking = new string[playerDatas.Count];
+                    string[] ranking = new string[playerDatas.Count];
                     foreach (PlayerData pd in playerDatas)
                     {
                         ranking[pd.ranking - 1] = pd.drone.name;
                     }
-                    StartCoroutine(FinishGame(ranking));
+                    MainGameManager.Singleton.FinishGame(ranking);
                     isFinished = true;
                 }
-            }
-
-            //クライアントが全て切断されたらホストもリザルト移動
-            if (disconnectionClientCount >= playerDatas.Count - 1)
-            {
-                NetworkManager.singleton.StopHost();    //ホストを停止
-                MatchingManager.Singleton.Init();
-                ResultButtonsController.SetRank(ranking);
-
-                //リザルト画面に移動
-                NonGameManager.LoadNonGameScene(BaseScreenManager.Screen.RESULT);
             }
         }
     }
 
-    void PlayStartSE()
-    {
-        SoundManager.Play(SoundManager.SE.START_COUNT_DOWN_D, SoundManager.BaseSEVolume);
-        Invoke(nameof(SetStartFlagTrue), 3.5f);
-    }
-
-    void SetStartFlagTrue()
-    {
-        startFlag = true;
-    }
-
-
-    IEnumerator FinishGame(string[] ranking)
-    {
-        yield return new WaitForSeconds(1.0f);
-        RpcPlayFinishSE();
-        yield return new WaitForSeconds(4.0f);
-        RpcMoveResultScreen(ranking);
-    }
-
-    [ClientRpc]
-    void RpcPlayFinishSE()
-    {
-        SoundManager.Play(SoundManager.SE.FINISH, SoundManager.BaseSEVolume);
-    }
-
-    [ClientRpc]
-    void RpcMoveResultScreen(string[] ranking)
-    {
-        //サーバだけ実行しない
-        if (isServer) return;
-
-        NetworkManager.singleton.StopClient();  //クライアントを停止
-        Mirror.Discovery.CustomNetworkDiscoveryHUD.Singleton.Init();
-        ResultButtonsController.SetRank(ranking);
-
-        //リザルト画面に移動
-        NonGameManager.LoadNonGameScene(BaseScreenManager.Screen.RESULT);
-    }
-
-
     public static void AddPlayerData(BattleDrone drone, bool isLocalPlayer)
     {
+        //既にリストにあったら処理しない
+        if (playerDatas.FindIndex(pd => pd.drone.netId == drone.netId) >= 0) return;
+
         if (isLocalPlayer)
         {
             localDrone = drone;
@@ -190,6 +131,5 @@ public class BattleManager : NetworkBehaviour
         {
             drone = drone
         });
-        PlayerData.droneNum++;
     }
 }

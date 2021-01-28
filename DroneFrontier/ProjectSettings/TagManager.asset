@@ -11,6 +11,7 @@ TagManager:
   - Gimmick
   - Jamming
   - WorldWall
+  - Goal
   layers:
   - Default
   - TransparentFX

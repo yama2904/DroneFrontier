@@ -28,7 +28,7 @@ public class MagnetArea : MonoBehaviour
 
         //バグ防止用
         //既に範囲内に入っているプレイヤーは除外
-        int index = hitPlayerDatas.FindIndex(p => ReferenceEquals(p.player, player));
+        int index = hitPlayerDatas.FindIndex(p => p.player.netId == player.netId);
         if (index != -1) return;
 
         //プレイヤーに状態異常を与えてリストに格納
@@ -51,7 +51,7 @@ public class MagnetArea : MonoBehaviour
         if (!player.isLocalPlayer) return;  //ローカルプレイヤーのみ判定
 
         //抜けるプレイヤーをリストから探す
-        int index = hitPlayerDatas.FindIndex(p => ReferenceEquals(p.player, player));
+        int index = hitPlayerDatas.FindIndex(p => p.player.netId == player.netId);
         if (index == -1) return;   //バグ防止用
         player.UnSetSpeedDown(hitPlayerDatas[index].id);
 
