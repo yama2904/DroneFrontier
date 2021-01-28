@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Mirror;
 
-public class PlayerStatusAction : NetworkBehaviour
+public class DroneStatusAction : NetworkBehaviour
 {
     //弱体や強化などの状態
     public enum Status
@@ -20,7 +20,7 @@ public class PlayerStatusAction : NetworkBehaviour
     List<bool> isStatus = new List<bool>();   //状態異常が付与されているか
 
     //バリア用
-    Barrier barrier = null;
+    DroneBarrierAction barrier = null;
 
     //スタン用
     [SerializeField] StunScreenMask stunScreenMask = null;
@@ -39,7 +39,7 @@ public class PlayerStatusAction : NetworkBehaviour
 
     void Start() { }
 
-    public void Init(Barrier barrier, LockOn lockOn, Radar radar, float minSpeed, float maxSpeed)
+    public void Init(LockOn lockOn, Radar radar, float minSpeed, float maxSpeed)
     {
         //配列初期化
         for (int i = 0; i < (int)Status.NONE; i++)
@@ -47,7 +47,7 @@ public class PlayerStatusAction : NetworkBehaviour
             isStatus.Add(false);
         }
 
-        this.barrier = barrier;
+        barrier = GetComponent<DroneBarrierAction>();
         this.lockOn = lockOn;
         this.radar = radar;
         this.minSpeed = minSpeed;

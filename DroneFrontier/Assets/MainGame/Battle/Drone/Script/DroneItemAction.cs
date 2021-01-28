@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Mirror;
 
-public class PlayerItemAction : NetworkBehaviour
+public class DroneItemAction : NetworkBehaviour
 {
     //アイテムを使用した際に生成するオブジェクト
     [SerializeField] Jamming jamming = null;

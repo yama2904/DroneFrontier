@@ -8,20 +8,16 @@ using Mirror;
 public class BattleDrone : NetworkBehaviour
 {
     const float MAX_HP = 30;
-    [SyncVar, SerializeField] float HP = MAX_HP;
-
-    //破壊されたか
-    [SyncVar] bool syncIsDestroy = false;
-    public bool IsDestroy { get { return syncIsDestroy; } }
+    [SyncVar, SerializeField] float syncHP = MAX_HP;
 
     //コンポーネント用
     Transform cacheTransform = null;
     Rigidbody _rigidbody = null;
     Animator animator = null;
-    PlayerBaseAction baseAction = null;
-    PlayerItemAction itemAction = null;
-    PlayerStatusAction statusAction = null;
-    bool isStatusActionInit = false;
+    DroneBaseAction baseAction = null;
+    DroneBarrierAction barrierAction = null;
+    DroneItemAction itemAction = null;
+    DroneStatusAction statusAction = null;
 
     //移動用
     [SerializeField, Tooltip("移動速度")] float moveSpeed = 100f;      //移動速度
@@ -38,10 +34,6 @@ public class BattleDrone : NetworkBehaviour
     Quaternion leftMoveRotate = Quaternion.Euler(0, 0, 60);
     Quaternion rightMoveRotate = Quaternion.Euler(0, 0, -60);
     Quaternion backMoveRotate = Quaternion.Euler(-70, 0, 0);
-
-    //バリア
-    [SerializeField] Barrier barrierInspector = null;
-    [SyncVar] GameObject barrier = null;
 
     //ロックオン
     [SerializeField] LockOn lockOn = null;
@@ -68,8 +60,8 @@ public class BattleDrone : NetworkBehaviour
 
         NONE
     }
-    [SyncVar] GameObject mainWeapon = null;
-    [SyncVar] GameObject subWeapon = null;
+    BaseWeapon mainWeapon = null;
+    BaseWeapon subWeapon = null;
     public BaseWeapon.Weapon SetSubWeapon { get; set; } = BaseWeapon.Weapon.LASER;
     bool[] usingWeapons = new bool[(int)Weapon.NONE];    //使用中の武器
     [SerializeField, Tooltip("攻撃中の移動速度の低下率")] float atackingDownSpeed = 0.5f;   //攻撃中の移動速度の低下率
@@ -78,16 +70,21 @@ public class BattleDrone : NetworkBehaviour
     //死亡処理用
     Quaternion deathRotate = Quaternion.Euler(28, -28, -28);
     float deathRotateSpeed = 2f;
-    [SyncVar] float syncGravityAccele = 1f;
-    
+    [SyncVar] float syncGravityAccele = 1f;  //落下加速用
+    [SyncVar] bool syncIsDestroy = false;    //ドローンが破壊されたときtrue
+    public bool IsDestroy { get { return syncIsDestroy; } }
+
     //リスポーン用
     [SyncVar, SerializeField] int syncStock = 2;
-    [SerializeField, Tooltip("リポーン時間")] float respawnTime = 5.0f;
+    [SerializeField, Tooltip("死亡後の落下時間")] float fallTime = 5.0f;
     Vector3 startPos;
     Quaternion startRotate;
     [SyncVar] bool syncIsRespawning = false;
 
-    [SyncVar] bool syncFallDrone = false;    //ドローンが落下している時true
+    //ゲームオーバーになったらtrue
+    [SyncVar] bool syncIsGameOver = false;
+    public bool IsGameOver { get { return syncIsGameOver; } }
+
 
     //アイテム枠
     enum ItemNum
@@ -102,13 +99,9 @@ public class BattleDrone : NetworkBehaviour
     //サウンド
     enum SE
     {
+        ONE_SHOT,       //ループしない1回きりのSE再生用
         BOOST,          //ブースト
-        DEATH,          //死亡
         PROPELLER,      //プロペラ
-        RADAR,          //レーダー
-        RESPAWN,        //リスポーン
-        USE_ITEM,       //アイテム使用
-        WALL_STUN,      //見えない壁に触れる
         JAMMING,        //ジャミング
         MAGNETIC_AREA,  //磁場エリア内
 
@@ -119,40 +112,42 @@ public class BattleDrone : NetworkBehaviour
 
     #region Init
 
+    //メイン武器の生成
     [Command]
     void CmdCreateMainWeapon()
     {
-        GameObject weapon = BaseWeapon.CreateWeapon(gameObject, BaseWeapon.Weapon.GATLING);
-        weapon.GetComponent<BaseWeapon>().parentNetId = netId;
-        NetworkServer.Spawn(weapon, connectionToClient);
-        mainWeapon = weapon;
-
+        BaseWeapon weapon = BaseWeapon.CreateWeapon(gameObject, BaseWeapon.Weapon.GATLING);
+        weapon.parentNetId = netId;
+        NetworkServer.Spawn(weapon.gameObject, connectionToClient);
+        RpcSetWeapon(weapon.gameObject, true);
 
         Debug.Log("CreateMainWeapon");
     }
 
+    //サブ武器の生成
     [Command]
     void CmdCreateSubWeapon()
     {
-        GameObject weapon = BaseWeapon.CreateWeapon(gameObject, SetSubWeapon);
-        weapon.GetComponent<BaseWeapon>().parentNetId = netId;
-        NetworkServer.Spawn(weapon, connectionToClient);
-        subWeapon = weapon;
-
+        BaseWeapon weapon = BaseWeapon.CreateWeapon(gameObject, SetSubWeapon);
+        weapon.parentNetId = netId;
+        NetworkServer.Spawn(weapon.gameObject, connectionToClient);
+        RpcSetWeapon(weapon.gameObject, false);
 
         Debug.Log("CreateSubWeapon");
     }
 
-    [Command]
-    void CmdCreateBarrier()
+    //生成した武器情報を渡す
+    [ClientRpc]
+    void RpcSetWeapon(GameObject weapon, bool setMainWeapon)
     {
-        Barrier b = Instantiate(barrierInspector);
-        b.syncParentNetId = netId;
-        NetworkServer.Spawn(b.gameObject, connectionToClient);
-        barrier = b.gameObject;
-
-
-        Debug.Log("CreateBarrier");
+        if (setMainWeapon)
+        {
+            mainWeapon = weapon.GetComponent<BaseWeapon>();
+        }
+        else
+        {
+            subWeapon = weapon.GetComponent<BaseWeapon>();
+        }
     }
 
 
@@ -160,43 +155,43 @@ public class BattleDrone : NetworkBehaviour
     {
         base.OnStartClient();
 
-        if (isServer)
-        {
-            BattleManager.AddPlayerData(this);
-        }
+        BattleManager.AddPlayerData(this);
 
         //AudioSourceの初期化
         audios = GetComponents<AudioSource>();
         audios[(int)SE.BOOST].clip = SoundManager.GetAudioClip(SoundManager.SE.BOOST);
-        audios[(int)SE.DEATH].clip = SoundManager.GetAudioClip(SoundManager.SE.DEATH);
         audios[(int)SE.PROPELLER].clip = SoundManager.GetAudioClip(SoundManager.SE.PROPELLER);
-        audios[(int)SE.RADAR].clip = SoundManager.GetAudioClip(SoundManager.SE.RADAR);
-        audios[(int)SE.RESPAWN].clip = SoundManager.GetAudioClip(SoundManager.SE.RESPAWN);
-        audios[(int)SE.USE_ITEM].clip = SoundManager.GetAudioClip(SoundManager.SE.USE_ITEM);
-        audios[(int)SE.WALL_STUN].clip = SoundManager.GetAudioClip(SoundManager.SE.WALL_STUN);
         audios[(int)SE.JAMMING].clip = SoundManager.GetAudioClip(SoundManager.SE.JAMMING_NOISE);
         audios[(int)SE.MAGNETIC_AREA].clip = SoundManager.GetAudioClip(SoundManager.SE.MAGNETIC_AREA);
 
         //プロペラは延々流す
-        PlaySE((int)SE.PROPELLER, SoundManager.BaseSEVolume, true);
+        PlayLoopSE((int)SE.PROPELLER, SoundManager.BaseSEVolume);
     }
 
     public override void OnStartLocalPlayer()
     {
         base.OnStartLocalPlayer();
+
+        //ブースト初期化
         boostGaugeImage.enabled = true;
         boostGaugeImage.fillAmount = 1;
         boostGaugeFrameImage.enabled = true;
-        itemAction.Init((int)ItemNum.NONE);
 
+        //コンポーネント初期化
+        itemAction.Init((int)ItemNum.NONE);
+        if (lockOn != null && radar != null)  //エラー防止
+        {
+            statusAction.Init(lockOn, radar, minSpeed, maxSpeed);
+        }
+
+        //武器の初期化
         CmdCreateMainWeapon();
         CmdCreateSubWeapon();
-        CmdCreateBarrier();
 
+        //初期値保存
         startPos = transform.position;
         startRotate = transform.rotation;
-
-
+        
         Debug.Log("End: OnStartLocalPlayer");
     }
 
@@ -206,9 +201,10 @@ public class BattleDrone : NetworkBehaviour
         cacheTransform = transform;
         _rigidbody = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
-        baseAction = GetComponent<PlayerBaseAction>();
-        itemAction = GetComponent<PlayerItemAction>();
-        statusAction = GetComponent<PlayerStatusAction>();
+        baseAction = GetComponent<DroneBaseAction>();
+        barrierAction = GetComponent<DroneBarrierAction>();
+        itemAction = GetComponent<DroneItemAction>();
+        statusAction = GetComponent<DroneStatusAction>();
 
         initSpeed = moveSpeed;
         maxSpeed = moveSpeed * 10;
@@ -231,18 +227,15 @@ public class BattleDrone : NetworkBehaviour
     {
         if (!isLocalPlayer) return;
         //if (!BattleManager.Singleton.StartFlag) return;  //ゲーム開始フラグが立っていなかったら処理しない
-        if (syncFallDrone)
+        if (IsGameOver || syncIsRespawning) return;  //死亡・リスポーン処理中は操作不可
+        //落下処理
+        if (syncIsDestroy)
         {
-            //ドローンを傾ける
-            baseAction.droneObject.localRotation = Quaternion.Slerp(baseAction.droneObject.localRotation, deathRotate, deathRotateSpeed * Time.deltaTime);
-            
-            //プロペラ減速
-            animator.speed *= 0.993f;  
-
             //加速しながら落ちる
             _rigidbody.AddForce(new Vector3(0, -10 * syncGravityAccele, 0), ForceMode.Acceleration);
-            syncGravityAccele += 10 * Time.deltaTime;
 
+            //落下処理を全クライアントに処理
+            CmdFallDrone();
             return;
         }
 
@@ -251,17 +244,6 @@ public class BattleDrone : NetworkBehaviour
         {
             CmdDamage(10000);
             CmdDamage(100);
-        }
-        
-
-        //PlayerStatusActionの初期化
-        if (!isStatusActionInit && statusAction != null)
-        {
-            if (barrier != null && lockOn != null && radar != null)  //エラー防止
-            {
-                statusAction.Init(barrier.GetComponent<Barrier>(), lockOn, radar, minSpeed, maxSpeed);
-                isStatusActionInit = true;
-            }
         }
 
         //サブウェポンのUpdate
@@ -285,11 +267,11 @@ public class BattleDrone : NetworkBehaviour
         if (Input.GetKey(KeyCode.W))
         {
             baseAction.Move(moveSpeed, cacheTransform.forward);
-            baseAction.CmdCallRotateDroneObject(frontMoveRotate, moveRotateSpeed * Time.deltaTime);
+            baseAction.CmdRotateDroneObject(frontMoveRotate, moveRotateSpeed * Time.deltaTime);
         }
         else
         {
-            baseAction.CmdCallRotateDroneObject(Quaternion.identity, moveRotateSpeed * Time.deltaTime);
+            baseAction.CmdRotateDroneObject(Quaternion.identity, moveRotateSpeed * Time.deltaTime);
         }
 
         //左移動
@@ -298,11 +280,11 @@ public class BattleDrone : NetworkBehaviour
             Quaternion leftAngle = Quaternion.Euler(0, -90, 0);
             Vector3 left = leftAngle.normalized * cacheTransform.forward;
             baseAction.Move(moveSpeed, left);
-            baseAction.CmdCallRotateDroneObject(leftMoveRotate, moveRotateSpeed * Time.deltaTime);
+            baseAction.CmdRotateDroneObject(leftMoveRotate, moveRotateSpeed * Time.deltaTime);
         }
         else
         {
-            baseAction.CmdCallRotateDroneObject(Quaternion.identity, moveRotateSpeed * Time.deltaTime);
+            baseAction.CmdRotateDroneObject(Quaternion.identity, moveRotateSpeed * Time.deltaTime);
         }
 
         //後退
@@ -311,11 +293,11 @@ public class BattleDrone : NetworkBehaviour
             Quaternion backwardAngle = Quaternion.Euler(0, 180, 0);
             Vector3 backward = backwardAngle.normalized * cacheTransform.forward;
             baseAction.Move(moveSpeed, backward);
-            baseAction.CmdCallRotateDroneObject(backMoveRotate, moveRotateSpeed * Time.deltaTime);
+            baseAction.CmdRotateDroneObject(backMoveRotate, moveRotateSpeed * Time.deltaTime);
         }
         else
         {
-            baseAction.CmdCallRotateDroneObject(Quaternion.identity, moveRotateSpeed * Time.deltaTime);
+            baseAction.CmdRotateDroneObject(Quaternion.identity, moveRotateSpeed * Time.deltaTime);
         }
 
         //右移動
@@ -324,11 +306,11 @@ public class BattleDrone : NetworkBehaviour
             Quaternion rightAngle = Quaternion.Euler(0, 90, 0);
             Vector3 right = rightAngle.normalized * cacheTransform.forward;
             baseAction.Move(moveSpeed, right);
-            baseAction.CmdCallRotateDroneObject(rightMoveRotate, moveRotateSpeed * Time.deltaTime);
+            baseAction.CmdRotateDroneObject(rightMoveRotate, moveRotateSpeed * Time.deltaTime);
         }
         else
         {
-            baseAction.CmdCallRotateDroneObject(Quaternion.identity, moveRotateSpeed * Time.deltaTime);
+            baseAction.CmdRotateDroneObject(Quaternion.identity, moveRotateSpeed * Time.deltaTime);
         }
 
         //上下移動
@@ -369,7 +351,7 @@ public class BattleDrone : NetworkBehaviour
         //ロックオン使用
         if (Input.GetKey(KeyCode.LeftShift))
         {
-            if (!statusAction.GetIsStatus(PlayerStatusAction.Status.JAMMING))
+            if (!statusAction.GetIsStatus(DroneStatusAction.Status.JAMMING))
             {
                 ILockOn l = lockOn;
                 l.StartLockOn(lockOnTrackingSpeed);
@@ -387,17 +369,17 @@ public class BattleDrone : NetworkBehaviour
         #region Radar
 
         //ジャミング中は処理しない
-        if (!statusAction.GetIsStatus(PlayerStatusAction.Status.JAMMING))
+        if (!statusAction.GetIsStatus(DroneStatusAction.Status.JAMMING))
         {
             //レーダー音の再生
             if (Input.GetKeyDown(KeyCode.Q))
             {
-                PlaySE((int)SE.RADAR, SoundManager.BaseSEVolume);
+                PlayOneShotSE(SoundManager.SE.RADAR, SoundManager.BaseSEVolume);
             }
             //レーダー使用
             if (Input.GetKey(KeyCode.Q))
             {
-                if (!statusAction.GetIsStatus(PlayerStatusAction.Status.JAMMING))
+                if (!statusAction.GetIsStatus(DroneStatusAction.Status.JAMMING))
                 {
                     IRadar r = radar;
                     r.StartRadar();
@@ -503,7 +485,7 @@ public class BattleDrone : NetworkBehaviour
             {
                 moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, boostAccele);
                 isBoost = true;
-                PlaySE((int)SE.BOOST, SoundManager.BaseSEVolume * 0.15f, true);    //加速音の再生
+                PlayLoopSE((int)SE.BOOST, SoundManager.BaseSEVolume * 0.15f);    //加速音の再生
 
 
                 //デバッグ用
@@ -587,22 +569,14 @@ public class BattleDrone : NetworkBehaviour
     //攻撃処理
     void UseWeapon(Weapon weapon)
     {
-        GameObject o;
+        BaseWeapon bw = null;
         if (weapon == Weapon.MAIN)
         {
-            if (mainWeapon == null)
-            {
-                return;
-            }
-            o = mainWeapon;
+            bw = mainWeapon;
         }
         else if (weapon == Weapon.SUB)
         {
-            if (subWeapon == null)
-            {
-                return;
-            }
-            o = subWeapon;
+            bw = subWeapon;
         }
         else
         {
@@ -610,8 +584,7 @@ public class BattleDrone : NetworkBehaviour
         }
 
         ILockOn l = lockOn;
-        IWeapon w = o.GetComponent<BaseWeapon>();
-        w.Shot(l.Target);
+        bw.Shot(l.Target);
     }
 
     //アイテム使用
@@ -620,139 +593,150 @@ public class BattleDrone : NetworkBehaviour
         //アイテム枠1にアイテムを持っていたら使用
         if (itemAction.UseItem((int)item))
         {
-            PlaySE((int)SE.USE_ITEM, SoundManager.BaseSEVolume);    //アイテム使用音の再生
+            PlayOneShotSE(SoundManager.SE.USE_ITEM, SoundManager.BaseSEVolume);
         }
     }
-
-    //武器作成
-    void SetWeapon(Weapon weapon, BaseWeapon.Weapon weaponType)
-    {
-        GameObject create = BaseWeapon.CreateWeapon(gameObject, weaponType);
-        create.GetComponent<BaseWeapon>().SetChild(cacheTransform);
-
-        if (weapon == Weapon.MAIN)
-        {
-            mainWeapon = create;
-            Debug.Log(mainWeapon);
-        }
-        else if (weapon == Weapon.SUB)
-        {
-            subWeapon = create;
-        }
-        else
-        {
-            return;
-        }
-    }
-
 
     //プレイヤーにダメージを与える
     [Command(ignoreAuthority = true)]
     public void CmdDamage(float power)
     {
-        if (IsDestroy)
-        {
-            return;
-        }
+        if (IsGameOver || syncIsRespawning || syncIsDestroy) return;
 
-        IBarrier b = barrier.GetComponent<Barrier>();
-        float p = Useful.DecimalPointTruncation(power, 1);  //小数点第2以下切り捨て
+        //小数点第2以下切り捨て
+        float p = Useful.DecimalPointTruncation(power, 1);  
 
         //バリアが破壊されていなかったらバリアにダメージを肩代わりさせる
-        if (b.HP > 0)
+        if (barrierAction.HP > 0)
         {
-            b.CmdDamage(p);
+            barrierAction.Damage(p);
         }
         //バリアが破壊されていたらドローンが直接ダメージを受ける
         else
         {
-            HP -= p;
-            if (HP < 0)
+            syncHP -= power;
+            if (syncHP < 0)
             {
-                HP = 0;
-                CmdDestroyMe();
+                syncHP = 0;
+                DestroyMe();
             }
 
-
             //デバッグ用
-            Debug.Log(name + "に" + p + "のダメージ\n残りHP: " + HP);
+            Debug.Log(name + "に" + power + "のダメージ\n残りHP: " + syncHP);
         }
     }
 
 
     #region Death
 
-    [Command(ignoreAuthority = true)]
-    void CmdDestroyMe()
+    void DestroyMe()
     {
-        barrier.GetComponent<Barrier>().enabled = false;  //死んだらバリア処理をしない
-        RpcPlayDeathSE();
         syncGravityAccele = 1f;
-        syncFallDrone = true;
+        syncIsDestroy = true;
+        RpcDestroyMe();
 
-        //Updateが呼ばれなくなるので代わりに呼ぶ
-        lockOn.GetComponent<LockOn>().ReleaseLockOn();
-        radar.GetComponent<Radar>().ReleaseRadar();
-
-        if (syncStock <= 0)
+        if (syncStock < 0)
         {
-            syncIsDestroy = true;
+            Invoke(nameof(Death), fallTime);
         }
         else
         {
             syncStock--;
-            Invoke(nameof(Respawn), respawnTime);
+            Invoke(nameof(Respawn), fallTime);
         }
     }
 
     [ClientRpc]
-    void RpcPlayDeathSE()
+    void RpcDestroyMe()
     {
-        PlaySE((int)SE.DEATH, SoundManager.BaseSEVolume);
+        if (isLocalPlayer)
+        {
+            //死んだのでロックオン・レーダー解除
+            lockOn.GetComponent<LockOn>().ReleaseLockOn();
+            radar.GetComponent<Radar>().ReleaseRadar();
+        }
+        PlayOneShotSE(SoundManager.SE.DEATH, SoundManager.BaseSEVolume);
+    }
+
+    void Death()
+    {
+        syncIsGameOver = true;
+        gameObject.SetActive(false);
     }
 
     //リスポーン処理
     void Respawn()
     {
-        HP = MAX_HP;
-        moveSpeed = initSpeed;
+        //全クライアント用リスポーン処理
+        RpcRespawn();
 
-        //座標の初期化
-        cacheTransform.localRotation = Quaternion.identity;
-        cacheTransform.position = startPos;
+        //HP初期化
+        syncHP = MAX_HP;
+
+        //落下停止
+        syncIsDestroy = false;
+    }
+
+    [ClientRpc]
+    void RpcRespawn()
+    {
+        if (isLocalPlayer)
+        {
+            //移動の初期化
+            moveSpeed = initSpeed;
+
+            //初期位置に移動
+            cacheTransform.position = startPos;
+
+            //所持アイテム初期化
+            itemAction.ResetItem();
+
+            //状態異常初期化
+            statusAction.ResetStatus();
+
+            //ブーストゲージ回復
+            boostGaugeImage.fillAmount = 1f;
+            isBoost = false;
+
+            //サブ武器初期化
+            subWeapon.GetComponent<BaseWeapon>().ResetWeapon();
+
+            //バリア復活
+            barrierAction.CmdInit();
+
+            _rigidbody.velocity = new Vector3(0, 0, 0);
+        }
+
+        //角度の初期化
         cacheTransform.rotation = startRotate;
-
-        //バリア復活
-        Barrier b = barrier.GetComponent<Barrier>();
-        b.enabled = true;
-        b.ResetBarrier();
-
-        //所持アイテム初期化
-        itemAction.ResetItem();
-
-        //状態異常初期化
-        statusAction.ResetStatus();
+        baseAction.droneObject.localRotation = Quaternion.identity;
+        mainWeapon.transform.localRotation = Quaternion.identity;
+        subWeapon.transform.localRotation = Quaternion.identity;
 
         //プロペラ再生
         animator.speed = 1f;
 
-        //ブーストゲージ回復
-        boostGaugeImage.fillAmount = 1f;
-        isBoost = false;
+        //リスポーンSE再生
+        PlayOneShotSE(SoundManager.SE.RESPAWN, SoundManager.BaseSEVolume);
+    }
 
-        //サブ武器初期化
-        subWeapon.GetComponent<BaseWeapon>().ResetWeapon();
-
-
-        _rigidbody.velocity = new Vector3(0, 0, 0);
-        RpcPlayRespawnSE();
-        syncFallDrone = false;
+    [Command]
+    void CmdFallDrone()
+    {
+        RpcFallDrone();
+        syncGravityAccele += 20 * Time.deltaTime;
     }
 
     [ClientRpc]
-    void RpcPlayRespawnSE()
+    void RpcFallDrone()
     {
-        PlaySE((int)SE.RESPAWN, SoundManager.BaseSEVolume);
+        //ドローンを傾ける
+        baseAction.droneObject.localRotation = Quaternion.Slerp(baseAction.droneObject.localRotation, deathRotate, deathRotateSpeed * Time.deltaTime);
+        mainWeapon.transform.localRotation = Quaternion.Slerp(mainWeapon.transform.localRotation, deathRotate, deathRotateSpeed * Time.deltaTime);
+        subWeapon.transform.localRotation = Quaternion.Slerp(subWeapon.transform.localRotation, deathRotate, deathRotateSpeed * Time.deltaTime);
+
+        //プロペラ減速
+        animator.speed *= 0.993f;
     }
 
     #endregion
@@ -790,8 +774,8 @@ public class BattleDrone : NetworkBehaviour
 
     #region Sound
 
-    //SE再生
-    void PlaySE(int index, float volume, bool loop = false)
+    //ループSE再生
+    void PlayLoopSE(int index, float volume)
     {
         if (index >= (int)SE.NONE) return;
         if (volume > 1.0f)
@@ -800,7 +784,7 @@ public class BattleDrone : NetworkBehaviour
         }
 
         audios[index].volume = volume;
-        audios[index].loop = loop;
+        audios[index].loop = true;
         audios[index].Play();
     }
 
@@ -809,6 +793,16 @@ public class BattleDrone : NetworkBehaviour
     {
         if (index >= (int)SE.NONE) return;
         audios[index].Stop();
+    }
+
+    //1回のみ発生する再生のSE
+    public void PlayOneShotSE(SoundManager.SE se, float volume)
+    {
+        if (se == SoundManager.SE.NONE) return;
+
+        AudioSource audio = audios[(int)SE.ONE_SHOT];
+        audio.volume = volume;
+        audio.PlayOneShot(SoundManager.GetAudioClip(se));
     }
 
     #endregion
@@ -838,7 +832,7 @@ public class BattleDrone : NetworkBehaviour
     public void SetJamming()
     {
         statusAction.SetJamming();
-        PlaySE((int)SE.JAMMING, SoundManager.BaseSEVolume, true);
+        PlayLoopSE((int)SE.JAMMING, SoundManager.BaseSEVolume);
     }
 
     //ジャミング解除
@@ -857,7 +851,7 @@ public class BattleDrone : NetworkBehaviour
     //スピードダウン
     public int SetSpeedDown(float downPercent)
     {
-        PlaySE((int)SE.MAGNETIC_AREA, SoundManager.BaseSEVolume, true);
+        PlayLoopSE((int)SE.MAGNETIC_AREA, SoundManager.BaseSEVolume);
         return statusAction.SetSpeedDown(ref moveSpeed, downPercent);
     }
 
@@ -873,7 +867,7 @@ public class BattleDrone : NetworkBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        if (syncFallDrone) return;
+        if (syncIsDestroy) return;
 
         //Eキーでアイテム取得
         if (Input.GetKey(KeyCode.E))
@@ -884,7 +878,7 @@ public class BattleDrone : NetworkBehaviour
                 if (itemAction.SetItem(item.type))
                 {
                     item.type = Item.ItemType.NONE;  //通信のラグのせいで1つのアイテムを2回取るバグの防止
-                    CmdDestroy(item.gameObject);
+                    CmdDestroyObject(item.gameObject);
 
 
                     //デバッグ用
@@ -897,7 +891,7 @@ public class BattleDrone : NetworkBehaviour
     #region スポーンせずに元からシーン上に配置しているオブジェクトを削除する用
 
     [Command(ignoreAuthority = true)]
-    void CmdDestroy(GameObject o)
+    void CmdDestroyObject(GameObject o)
     {
         RpcDestroy(o);
     }

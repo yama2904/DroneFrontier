@@ -110,7 +110,7 @@ public abstract class BaseWeapon : NetworkBehaviour, IWeapon
 
     public virtual void SetChild(Transform parent)
     {
-        //Transform t = GetComponent<NetworkTransform>().transform;
+        //Transform t = transform;
         //t.SetParent(parent);
         //t.localPosition = weaponLocalPos.localPosition;
         //t.localRotation = weaponLocalPos.localRotation;
@@ -127,7 +127,7 @@ public abstract class BaseWeapon : NetworkBehaviour, IWeapon
         NONE
     }
 
-    public static GameObject CreateWeapon(GameObject shooter, Weapon weapon)
+    public static BaseWeapon CreateWeapon(GameObject shooter, Weapon weapon)
     {
         const string FOLDER_PATH = "Weapon/";
         GameObject o = null;
@@ -156,7 +156,8 @@ public abstract class BaseWeapon : NetworkBehaviour, IWeapon
             //エラー
             Application.Quit();
         }
-        o.GetComponent<BaseWeapon>().shooter = shooter;
-        return o;
+        BaseWeapon bw = o.GetComponent<BaseWeapon>();
+        bw.shooter = shooter;
+        return bw;
     }
 }

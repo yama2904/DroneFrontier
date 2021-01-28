@@ -3,12 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 
-public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
+public class DroneBarrierAction : NetworkBehaviour
 {
+    [SerializeField] GameObject barrierObject = null;
+    BattleDrone drone = null;
+
     const float MAX_HP = 100;
     [SyncVar] float syncHP = MAX_HP;
     public float HP { get { return syncHP; } }
     Material material = null;
+    const float TRANS_COLOR = 0.5f;
 
     [SyncVar] bool syncIsStrength = false;
     [SyncVar] bool syncIsWeak = false;
@@ -27,74 +31,26 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
     [SyncVar] float syncDamagePercent;    //ダメージ倍率
     [SyncVar, HideInInspector] public uint syncParentNetId = 0;
 
-    //サウンド
-    enum SE
-    {
-        DAMAGE,    //ダメージ受けたとき
-        DESTROY,   //バリア破壊
 
-        NONE
-    }
-    AudioSource[] audios;
-
+    void Start() { }
 
     public override void OnStartClient()
     {
         base.OnStartClient();
-        GameObject parent = NetworkIdentity.spawned[syncParentNetId].gameObject;
-        transform.SetParent(parent.transform);
-        transform.localPosition = new Vector3(0, 0, 0);
 
-        //AudioSource初期化
-        audios = GetComponents<AudioSource>();
-        audios[(int)SE.DAMAGE].clip = SoundManager.GetAudioClip(SoundManager.SE.BARRIER_DAMAGE);
-        audios[(int)SE.DESTROY].clip = SoundManager.GetAudioClip(SoundManager.SE.DESTROY_BARRIER);
-
-        //バリアの色変え
-        material = GetComponent<Renderer>().material;
-        float value = syncHP / MAX_HP;
-        if (!IsStrength)
-        {
-            material.color = new Color(1 - value, value, 0, value * 0.5f);
-        }
-        else
-        {
-            material.color = new Color(1 - value, 0, value, value * 0.5f);
-        }
-    }
-
-    [ServerCallback]
-    void Start()
-    {
-        syncDamagePercent = 1;
-        syncRegeneCountTime = 0;
-        syncIsRegene = true;    //ゲーム開始時はHPMAXで回復の必要がないのでtrue
-    }
-
-    [Command]
-    public void CmdResetBarrier()
-    {
-        syncHP = MAX_HP;
-        syncDamagePercent = 1;
-        syncRegeneCountTime = 0;
-        syncIsRegene = true;    //ゲーム開始時はHPMAXで回復の必要がないのでtrue
-        syncIsStrength = false;
-        syncIsWeak = false;
-        syncInterval = 0;
-        
-        //バリアの色変え
-        float value = syncHP / MAX_HP;
-        RpcSetBarrierColor(1 - value, value, 0, value * 0.5f);
+        drone = GetComponent<BattleDrone>();
+        material = barrierObject.GetComponent<Renderer>().material;
+        CmdInit();
     }
 
     [ServerCallback]
     void Update()
     {
         //バリア弱体化中は回復処理を行わない
-        if (syncIsWeak)
-        {
-            return;
-        }
+        if (syncIsWeak) return;
+
+        //ドローンが破壊されていたら回復処理を行わない
+        if (drone.IsDestroy) return;
 
         //バリアが破壊されていたら修復処理
         if (syncHP <= 0)
@@ -129,7 +85,21 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
         syncRegeneCountTime += Time.deltaTime;
     }
 
+    [Command(ignoreAuthority = true)]
+    public void CmdInit()
+    {
+        syncHP = MAX_HP;
+        syncRegeneCountTime = 0;
+        syncDamagePercent = 1;
+        syncIsRegene = true;
+        syncIsStrength = false;
+        syncIsWeak = false;
+        RpcSetActiveBarrier(true);
+        RpcSetBarrierColor(1, false);
+    }
+
     //HPを回復する
+    [Server]
     void Regene(float regeneValue)
     {
         syncHP += regeneValue;
@@ -146,17 +116,11 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
 
         //バリアの色変え
         float value = syncHP / MAX_HP;
-        if (!IsStrength)
-        {
-            RpcSetBarrierColor(1 - value, value, 0, value * 0.5f);
-        }
-        else
-        {
-            RpcSetBarrierColor(1 - value, 0, value, value * 0.5f);
-        }
+        RpcSetBarrierColor(value, IsStrength);
     }
 
     //バリアを復活させる
+    [Server]
     void ResurrectBarrier(float resurrectHP)
     {
         if (syncHP > 0) return;
@@ -165,10 +129,10 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
         syncHP = resurrectHP;
         syncIsRegene = true;
 
-        //バリアの色変え
+        //バリア復活
+        RpcSetActiveBarrier(true);
         float value = syncHP / MAX_HP;
-        RpcSetBarrierColor(1 - value, value, 0, value * 0.5f);
-
+        RpcSetBarrierColor(value, IsStrength);
 
         //デバッグ用
         Debug.Log("バリア修復");
@@ -177,42 +141,28 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
     #region Damage
 
     //バリアに引数分のダメージを与える
-    [Command(ignoreAuthority = true)]
-    public void CmdDamage(float power)
+    [Server]
+    public void Damage(float power)
     {
         float p = Useful.DecimalPointTruncation(power * syncDamagePercent, 1);  //小数点第2以下切り捨て
         syncHP -= p;
+
+        //バリアHPが0になったらバリアを非表示
         if (syncHP < 0)
         {
             syncHP = 0;
-            RpcSetBarrierColor(255, 0, 0, 0);
-            RpcPlaySE((int)SE.DESTROY);
+            RpcSetActiveBarrier(false);
+            RpcPlaySE(SoundManager.SE.DESTROY_BARRIER);
         }
         syncRegeneCountTime = 0;
         syncIsRegene = false;
-        RpcPlaySE((int)SE.DAMAGE);
+        RpcPlaySE(SoundManager.SE.BARRIER_DAMAGE);
 
         //バリアの色変え
         float value = syncHP / MAX_HP;
-        if (!IsStrength)
-        {
-            RpcSetBarrierColor(1 - value, value, 0, value * 0.5f);
-        }
-        else
-        {
-            RpcSetBarrierColor(1 - value, 0, value, value * 0.5f);
-        }
+        RpcSetBarrierColor(value, IsStrength);
 
         Debug.Log("バリアに" + p + "のダメージ\n残りHP: " + syncHP);
-    }
-
-    [ClientRpc]
-    void RpcPlaySE(int index)
-    {
-        if (index >= (int)SE.NONE) return;
-
-        audios[index].volume = SoundManager.BaseSEVolume;
-        audios[index].Play();
     }
 
     #endregion
@@ -233,7 +183,7 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
 
         //バリアの色変え
         float value = syncHP / MAX_HP;
-        RpcSetBarrierColor(1 - value, 0, value, value * 0.5f);
+        RpcSetBarrierColor(value, IsStrength);
 
 
         //デバッグ用
@@ -251,7 +201,7 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
 
         //バリアの色変え
         float value = syncHP / MAX_HP;
-        RpcSetBarrierColor(1 - value, value, 0, value * 0.5f);
+        RpcSetBarrierColor(value, IsStrength);
 
 
         //デバッグ用
@@ -275,14 +225,12 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
             syncDamagePercent = 1;
             syncIsStrength = false;
 
-
             //デバッグ用
             Debug.Log("バリア強化解除");
         }
         else
         {
             syncHP = Useful.DecimalPointTruncation((syncHP *= 0.5f), 1);
-
 
             //デバッグ用
             Debug.Log("バリアHP: " + syncHP);
@@ -302,9 +250,7 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
         {
             ResurrectBarrier(resurrectBarrierHP);
         }
-
         syncIsWeak = false;
-
 
         //デバッグ用
         Debug.Log("バリア弱体化解除");
@@ -313,8 +259,27 @@ public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
     #endregion
 
     [ClientRpc]
-    void RpcSetBarrierColor(float r, float g, float b, float a)
+    void RpcPlaySE(SoundManager.SE se)
     {
-        material.color = new Color(r, g, b, a);
+        drone.PlayOneShotSE(se, SoundManager.BaseSEVolume);
+    }
+
+    [ClientRpc]
+    void RpcSetBarrierColor(float value, bool isStrength)
+    {
+        if (!isStrength)
+        {
+            material.color = new Color(1 - value, value, 0, value * TRANS_COLOR);
+        }
+        else
+        {
+            material.color = new Color(1 - value, 0, value, value * TRANS_COLOR);
+        }
+    }
+
+    [ClientRpc]
+    void RpcSetActiveBarrier(bool flag)
+    {
+        barrierObject.SetActive(flag);
     }
 }

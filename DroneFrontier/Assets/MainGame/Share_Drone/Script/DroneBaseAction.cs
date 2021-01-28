@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 
-public class PlayerBaseAction : NetworkBehaviour
+public class DroneBaseAction : NetworkBehaviour
 {
     public bool IsLocalPlayer { get { return isLocalPlayer; } }
 
@@ -65,7 +65,7 @@ public class PlayerBaseAction : NetworkBehaviour
     #region RotaetDroneObject
 
     [Command]
-    public void CmdCallRotateDroneObject(Quaternion rotate, float speed)
+    public void CmdRotateDroneObject(Quaternion rotate, float speed)
     {
         RpcRotateDroneObject(rotate, speed);
     }
