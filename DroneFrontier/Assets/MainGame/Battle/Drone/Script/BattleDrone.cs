@@ -226,10 +226,8 @@ public class BattleDrone : NetworkBehaviour
     void Update()
     {
         if (!isLocalPlayer) return;
-        //if (!BattleManager.Singleton.StartFlag) return;  //ゲーム開始フラグが立っていなかったら処理しない
-        if (IsGameOver || syncIsRespawning) return;  //死亡・リスポーン処理中は操作不可
-        //落下処理
-        if (syncIsDestroy) return;
+        if (!BattleManager.Singleton.StartFlag) return;  //ゲーム開始フラグが立っていなかったら処理しない
+        if (IsGameOver || syncIsRespawning || syncIsDestroy) return;  //死亡・リスポーン処理中は操作不可
 
         //デバッグ用
         if (Input.GetKeyDown(KeyCode.Y))
@@ -881,7 +879,9 @@ public class BattleDrone : NetworkBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        if (syncIsDestroy) return;
+        if (!isLocalPlayer) return;
+        if (!BattleManager.Singleton.StartFlag) return;  //ゲーム開始フラグが立っていなかったら処理しない
+        if (IsGameOver || syncIsRespawning || syncIsDestroy) return;  //死亡・リスポーン処理中は操作不可
 
         //Eキーでアイテム取得
         if (Input.GetKey(KeyCode.E))
@@ -900,6 +900,19 @@ public class BattleDrone : NetworkBehaviour
                 }
             }
         }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (!isLocalPlayer) return;
+        if (!BattleManager.Singleton.StartFlag) return;  //ゲーム開始フラグが立っていなかったら処理しない
+        if (IsGameOver || syncIsRespawning || syncIsDestroy) return;  //死亡・リスポーン処理中は操作不可
+
+        //ステージの見えない壁に当たったらSE
+        if (collision.gameObject.CompareTag(TagNameManager.WORLD_WALL))
+        {
+            PlayOneShotSE(SoundManager.SE.WALL_STUN, SoundManager.BaseSEVolume);
+        }            
     }
 
     #region スポーンせずに元からシーン上に配置しているオブジェクトを削除する用

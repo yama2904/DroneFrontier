@@ -36,6 +36,20 @@ public class BattleManager : NetworkBehaviour
     bool isFinished = false;
 
 
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+
+        if (!MainGameManager.IsItem)
+        {
+            GameObject[] items = GameObject.FindGameObjectsWithTag(TagNameManager.ITEM);
+            foreach(GameObject item in items)
+            {
+                Destroy(item);
+            }
+        }
+    }
+
     void Awake()
     {
         //シングルトンの作成
