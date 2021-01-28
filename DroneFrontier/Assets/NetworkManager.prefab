@@ -47,7 +47,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dontDestroyOnLoad: 1
-  runInBackground: 0
+  runInBackground: 1
   autoStartServerBuild: 1
   showDebugMessages: 0
   serverTickRate: 30
@@ -73,7 +73,6 @@ MonoBehaviour:
   - {fileID: 3694063130147409601, guid: ced0661d0222eab4a80aaed9059f78c3, type: 3}
   - {fileID: 6288059414027088638, guid: fdc401304f7c08043bc900548af95475, type: 3}
   - {fileID: 2437432638473288414, guid: 24eccdfad1ec7ec4db66c7497ec702e0, type: 3}
-  - {fileID: 3741294095708302916, guid: debfdb94bb6e6904488a042039c09b30, type: 3}
   - {fileID: 3727995740596519015, guid: 19d03f2bca40fba47abc078c8c6a8712, type: 3}
   - {fileID: 4035678965032489135, guid: 9073f90d8c9013d42ba11bc1c45f5513, type: 3}
   - {fileID: 4682843890191404543, guid: ebdc99f08c939844497af790155f08da, type: 3}

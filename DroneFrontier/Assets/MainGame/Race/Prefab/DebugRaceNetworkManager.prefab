@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 8335875255951916169}
   - component: {fileID: 8335875255951916170}
   m_Layer: 0
-  m_Name: RaceNetworkManager
+  m_Name: DebugRaceNetworkManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -47,7 +47,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dontDestroyOnLoad: 1
-  runInBackground: 0
+  runInBackground: 1
   autoStartServerBuild: 1
   showDebugMessages: 0
   serverTickRate: 30
