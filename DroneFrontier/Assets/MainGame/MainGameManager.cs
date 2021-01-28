@@ -8,6 +8,7 @@ using Mirror;
 public class MainGameManager : NetworkBehaviour
 {
     [SerializeField] BattleManager battleManager = null;
+    [SerializeField] RaceManager raceManager = null;
 
     public static List<GameObject> players = new List<GameObject>();
 
@@ -42,12 +43,8 @@ public class MainGameManager : NetworkBehaviour
     }
     static List<PlayerData> playerDatas = new List<PlayerData>();
 
-    ////ゲーム上のプレイヤー・CPU情報
-    //[SerializeField] BattleDrone playerInspector = null;
-    //[SerializeField] CPUController cpuInspector = null;
-    //static BattleDrone player = null;
-    //static CPUController cpu = null;
-    //static List<PlayerBaseAction> basePlayers = new List<PlayerBaseAction>();
+    //プレイヤーの数
+    public static int playerNum = 0;
 
 
     //設定画面移動時のマスク用変数
@@ -83,6 +80,16 @@ public class MainGameManager : NetworkBehaviour
                 BattleManager bm = Instantiate(battleManager);
                 NetworkServer.Spawn(bm.gameObject);
             }
+            else if(Mode == GameMode.RACE)
+            {
+                RaceManager rm = Instantiate(raceManager);
+                NetworkServer.Spawn(rm.gameObject);
+            }
+            else
+            {
+                //エラー
+                Application.Quit();
+            }
         }
 
         IsMainGaming = true;
@@ -91,42 +98,6 @@ public class MainGameManager : NetworkBehaviour
         //設定画面に移動した際のマスクの暗さと色を設定
         screenMaskImage.color = new Color(MASK_COLOR_RED, MASK_COLOR_GREEN, MASK_COLOR_BLUE, MASK_COLOR_ALFA);
         screenMaskImage.enabled = false;
-
-
-        ////プレイヤーとCPUを配置
-        //for (int i = 0; i < playerDatas.Count; i++)
-        //{
-        //    BasePlayer p;
-        //    if (playerDatas[i].isPlayer)
-        //    {
-        //        p = Instantiate(player);
-        //    }
-        //    else
-        //    {
-        //        CPUController c = Instantiate(cpu);
-        //        c.SetSubWeapon(playerDatas[i].weapon);
-        //        p = c;
-        //    }
-        //    p.transform.Translate(0, 0, i * 2.0f);
-        //    p.name = playerDatas[i].name;
-
-        //    basePlayers.Add(p);
-        //}
-
-        ////デバッグ用
-        //if (playerDatas.Count == 0)
-        //{
-        //    GameObject[] p = GameObject.FindGameObjectsWithTag(TagNameManager.PLAYER);
-        //    foreach (GameObject o in p)
-        //    {
-        //        basePlayers.Add(o.GetComponent<BasePlayer>());
-        //    }
-        //    GameObject[] c = GameObject.FindGameObjectsWithTag(TagNameManager.CPU);
-        //    foreach (GameObject o in c)
-        //    {
-        //        basePlayers.Add(o.GetComponent<BasePlayer>());
-        //    }
-        //}
 
         //カーソルロック
         Cursor.lockState = CursorLockMode.Locked;
@@ -147,26 +118,6 @@ public class MainGameManager : NetworkBehaviour
                 MainGameToConfig();
             }
         }
-
-        ////破壊されたドローンがあるか調べる
-        //for (int i = basePlayers.Count - 1; i >= 0; i--)
-        //{
-        //    //破壊されていたらランキング用リストに名前を入れてドローンをリストから削除
-        //    if (basePlayers[i].IsDestroy)
-        //    {
-        //        ResultButtonsController.Rank rank = (ResultButtonsController.Rank)basePlayers.Count - 1;
-        //        ResultButtonsController.SetRank(basePlayers[i].name, rank);
-        //        basePlayers.RemoveAt(i);
-        //    }
-        //}
-
-        ////ドローンが1機に残ったらリザルトに移動
-        //if (basePlayers.Count == 1)
-        //{
-        //    ResultButtonsController.SetRank(basePlayers[0].name, ResultButtonsController.Rank.RANK_1ST);
-        //    Invoke(nameof(MoveResult), 3.0f);
-        //}
-
 
         //デバッグ用
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -194,8 +145,6 @@ public class MainGameManager : NetworkBehaviour
         IsMulti = false;
         IsConfig = false;
         Mode = GameMode.NONE;
-        //playerDatas.Clear();
-        //basePlayers.Clear();
         Cursor.lockState = CursorLockMode.None;
     }
 
