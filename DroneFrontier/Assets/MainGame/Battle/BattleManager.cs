@@ -51,7 +51,7 @@ public class BattleManager : NetworkBehaviour
         foreach (PlayerData pd in playerDatas)
         {
             if (pd.isDestroy) continue;
-            if (pd.drone.IsDestroy)
+            if (pd.drone.IsGameOver)
             {
                 pd.ranking = PlayerData.droneNum;   //ランキングの記録
                 pd.isDestroy = true;

@@ -269,9 +269,44 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2051380594277933704, guid: 04a790c88243bbf4e941d9b59c6dfd0a,
         type: 3}
+      propertyPath: spawnPrefabs.Array.size
+      value: 13
+      objectReference: {fileID: 0}
+    - target: {fileID: 2051380594277933704, guid: 04a790c88243bbf4e941d9b59c6dfd0a,
+        type: 3}
       propertyPath: onlineScene
       value: Assets/Yama_Test/TestScene.unity
       objectReference: {fileID: 0}
+    - target: {fileID: 2051380594277933704, guid: 04a790c88243bbf4e941d9b59c6dfd0a,
+        type: 3}
+      propertyPath: spawnPrefabs.Array.data[8]
+      value: 
+      objectReference: {fileID: 3727995740596519015, guid: 19d03f2bca40fba47abc078c8c6a8712,
+        type: 3}
+    - target: {fileID: 2051380594277933704, guid: 04a790c88243bbf4e941d9b59c6dfd0a,
+        type: 3}
+      propertyPath: spawnPrefabs.Array.data[9]
+      value: 
+      objectReference: {fileID: 4035678965032489135, guid: 9073f90d8c9013d42ba11bc1c45f5513,
+        type: 3}
+    - target: {fileID: 2051380594277933704, guid: 04a790c88243bbf4e941d9b59c6dfd0a,
+        type: 3}
+      propertyPath: spawnPrefabs.Array.data[10]
+      value: 
+      objectReference: {fileID: 4682843890191404543, guid: ebdc99f08c939844497af790155f08da,
+        type: 3}
+    - target: {fileID: 2051380594277933704, guid: 04a790c88243bbf4e941d9b59c6dfd0a,
+        type: 3}
+      propertyPath: spawnPrefabs.Array.data[11]
+      value: 
+      objectReference: {fileID: 401223180371432453, guid: d3a6d9c787cffe744aabe2f3c025b34e,
+        type: 3}
+    - target: {fileID: 2051380594277933704, guid: 04a790c88243bbf4e941d9b59c6dfd0a,
+        type: 3}
+      propertyPath: spawnPrefabs.Array.data[12]
+      value: 
+      objectReference: {fileID: 1134113185920709073, guid: 5a310c6edafad474daf4389a5d51b837,
+        type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 04a790c88243bbf4e941d9b59c6dfd0a, type: 3}
 --- !u!1 &333569204
@@ -341,13 +376,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 333569204}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalRotation: {x: 0.28167537, y: -0, z: -0, w: 0.95950985}
+  m_LocalPosition: {x: 0, y: 7.76, z: -17.63}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 32.72, y: 0, z: 0}
 --- !u!1 &390666730
 GameObject:
   m_ObjectHideFlags: 0

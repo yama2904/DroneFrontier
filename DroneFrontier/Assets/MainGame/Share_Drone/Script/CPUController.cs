@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CPUController : PlayerBaseAction
+public class CPUController : DroneBaseAction
 {
     //デバッグ用
     [SerializeField] float speed = 0.1f;
