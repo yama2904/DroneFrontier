@@ -60,8 +60,8 @@ public class BattleDrone : NetworkBehaviour
 
         NONE
     }
-    BaseWeapon mainWeapon = null;
-    BaseWeapon subWeapon = null;
+    [SyncVar] GameObject syncMainWeapon = null;
+    [SyncVar] GameObject syncSubWeapon = null;
     public BaseWeapon.Weapon SetSubWeapon { get; set; } = BaseWeapon.Weapon.LASER;
     bool[] usingWeapons = new bool[(int)Weapon.NONE];    //使用中の武器
     [SerializeField, Tooltip("攻撃中の移動速度の低下率")] float atackingDownSpeed = 0.5f;   //攻撃中の移動速度の低下率
@@ -142,11 +142,11 @@ public class BattleDrone : NetworkBehaviour
     {
         if (setMainWeapon)
         {
-            mainWeapon = weapon.GetComponent<BaseWeapon>();
+            syncMainWeapon = weapon;
         }
         else
         {
-            subWeapon = weapon.GetComponent<BaseWeapon>();
+            syncSubWeapon = weapon;
         }
     }
 
@@ -155,7 +155,7 @@ public class BattleDrone : NetworkBehaviour
     {
         base.OnStartClient();
 
-        BattleManager.AddPlayerData(this);
+        BattleManager.AddPlayerData(this, isLocalPlayer);
 
         //AudioSourceの初期化
         audios = GetComponents<AudioSource>();
@@ -191,7 +191,7 @@ public class BattleDrone : NetworkBehaviour
         //初期値保存
         startPos = transform.position;
         startRotate = transform.rotation;
-        
+
         Debug.Log("End: OnStartLocalPlayer");
     }
 
@@ -229,15 +229,7 @@ public class BattleDrone : NetworkBehaviour
         //if (!BattleManager.Singleton.StartFlag) return;  //ゲーム開始フラグが立っていなかったら処理しない
         if (IsGameOver || syncIsRespawning) return;  //死亡・リスポーン処理中は操作不可
         //落下処理
-        if (syncIsDestroy)
-        {
-            //加速しながら落ちる
-            _rigidbody.AddForce(new Vector3(0, -10 * syncGravityAccele, 0), ForceMode.Acceleration);
-
-            //落下処理を全クライアントに処理
-            CmdFallDrone();
-            return;
-        }
+        if (syncIsDestroy) return;
 
         //デバッグ用
         if (Input.GetKeyDown(KeyCode.Y))
@@ -247,16 +239,16 @@ public class BattleDrone : NetworkBehaviour
         }
 
         //サブウェポンのUpdate
-        if (subWeapon != null)
+        if (syncSubWeapon != null)
         {
             //Start系で初期化するとネットワークのラグでウェポンが生成されていないので
             //Update内で初期化
             if (!initSubWeapon)
             {
-                subWeapon.GetComponent<BaseWeapon>().Init();
+                syncSubWeapon.GetComponent<BaseWeapon>().Init();
                 initSubWeapon = true;
             }
-            subWeapon.GetComponent<BaseWeapon>().UpdateMe();
+            syncSubWeapon.GetComponent<BaseWeapon>().UpdateMe();
         }
 
 
@@ -565,6 +557,21 @@ public class BattleDrone : NetworkBehaviour
         }
     }
 
+    private void FixedUpdate()
+    {
+        if (!isLocalPlayer) return;
+        if (syncIsDestroy)
+        {
+            //加速しながら落ちる
+            _rigidbody.AddForce(new Vector3(0, -10 * syncGravityAccele, 0), ForceMode.Acceleration);
+
+            //落下処理を全クライアントに処理
+            CmdFallDrone();
+
+            return;
+        }
+    }
+
 
     //攻撃処理
     void UseWeapon(Weapon weapon)
@@ -572,11 +579,13 @@ public class BattleDrone : NetworkBehaviour
         BaseWeapon bw = null;
         if (weapon == Weapon.MAIN)
         {
-            bw = mainWeapon;
+            if (syncMainWeapon == null) return;
+            bw = syncMainWeapon.GetComponent<BaseWeapon>();
         }
         else if (weapon == Weapon.SUB)
         {
-            bw = subWeapon;
+            if (syncSubWeapon == null) return;
+            bw = syncSubWeapon.GetComponent<BaseWeapon>();
         }
         else
         {
@@ -604,7 +613,7 @@ public class BattleDrone : NetworkBehaviour
         if (IsGameOver || syncIsRespawning || syncIsDestroy) return;
 
         //小数点第2以下切り捨て
-        float p = Useful.DecimalPointTruncation(power, 1);  
+        float p = Useful.DecimalPointTruncation(power, 1);
 
         //バリアが破壊されていなかったらバリアにダメージを肩代わりさせる
         if (barrierAction.HP > 0)
@@ -658,6 +667,7 @@ public class BattleDrone : NetworkBehaviour
         PlayOneShotSE(SoundManager.SE.DEATH, SoundManager.BaseSEVolume);
     }
 
+    
     void Death()
     {
         syncIsGameOver = true;
@@ -683,6 +693,7 @@ public class BattleDrone : NetworkBehaviour
         if (isLocalPlayer)
         {
             //移動の初期化
+            _rigidbody.velocity = new Vector3(0, 0, 0);
             moveSpeed = initSpeed;
 
             //初期位置に移動
@@ -699,19 +710,17 @@ public class BattleDrone : NetworkBehaviour
             isBoost = false;
 
             //サブ武器初期化
-            subWeapon.GetComponent<BaseWeapon>().ResetWeapon();
+            syncSubWeapon.GetComponent<BaseWeapon>().ResetWeapon();
 
             //バリア復活
             barrierAction.CmdInit();
-
-            _rigidbody.velocity = new Vector3(0, 0, 0);
         }
 
         //角度の初期化
         cacheTransform.rotation = startRotate;
         baseAction.droneObject.localRotation = Quaternion.identity;
-        mainWeapon.transform.localRotation = Quaternion.identity;
-        subWeapon.transform.localRotation = Quaternion.identity;
+        syncMainWeapon.transform.localRotation = Quaternion.identity;
+        syncSubWeapon.transform.localRotation = Quaternion.identity;
 
         //プロペラ再生
         animator.speed = 1f;
@@ -732,8 +741,8 @@ public class BattleDrone : NetworkBehaviour
     {
         //ドローンを傾ける
         baseAction.droneObject.localRotation = Quaternion.Slerp(baseAction.droneObject.localRotation, deathRotate, deathRotateSpeed * Time.deltaTime);
-        mainWeapon.transform.localRotation = Quaternion.Slerp(mainWeapon.transform.localRotation, deathRotate, deathRotateSpeed * Time.deltaTime);
-        subWeapon.transform.localRotation = Quaternion.Slerp(subWeapon.transform.localRotation, deathRotate, deathRotateSpeed * Time.deltaTime);
+        syncMainWeapon.transform.localRotation = Quaternion.Slerp(syncMainWeapon.transform.localRotation, deathRotate, deathRotateSpeed * Time.deltaTime);
+        syncSubWeapon.transform.localRotation = Quaternion.Slerp(syncSubWeapon.transform.localRotation, deathRotate, deathRotateSpeed * Time.deltaTime);
 
         //プロペラ減速
         animator.speed *= 0.993f;
@@ -864,6 +873,11 @@ public class BattleDrone : NetworkBehaviour
 
     #endregion
 
+    public void SetCameraDepth(int depth)
+    {
+        baseAction._Camera.depth = depth;
+    }
+
 
     private void OnTriggerStay(Collider other)
     {
@@ -903,4 +917,16 @@ public class BattleDrone : NetworkBehaviour
     }
 
     #endregion
+
+    [Command(ignoreAuthority = true)]
+    void CmdDebugLog(string text)
+    {
+        RpcDebugLog(text);
+    }
+
+    [ClientRpc]
+    void RpcDebugLog(string text)
+    {
+        Debug.Log(text);
+    }
 }

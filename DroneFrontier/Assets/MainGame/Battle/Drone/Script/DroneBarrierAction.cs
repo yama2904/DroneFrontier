@@ -178,7 +178,7 @@ public class DroneBarrierAction : NetworkBehaviour
     public void CmdBarrierStrength(float strengthPrercent, float time)
     {
         syncDamagePercent = 1 - strengthPrercent;
-        Invoke(nameof(EndStrength), time);
+        Invoke(nameof(CmdEndStrength), time);
         syncIsStrength = true;
 
         //バリアの色変え
@@ -189,8 +189,9 @@ public class DroneBarrierAction : NetworkBehaviour
         //デバッグ用
         Debug.Log("バリア強化");
     }
-    //time秒後にバリア強化を終了させる
-    void EndStrength()
+    //バリア強化を終了させる
+    [Command(ignoreAuthority = true)]
+    void CmdEndStrength()
     {
         if (syncIsWeak)
         {

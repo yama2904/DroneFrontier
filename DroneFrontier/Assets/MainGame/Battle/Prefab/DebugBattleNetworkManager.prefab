@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 2051380594277933702}
   - component: {fileID: 2051380594277933701}
   m_Layer: 0
-  m_Name: BattleNetworkManager
+  m_Name: DebugBattleNetworkManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -47,7 +47,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dontDestroyOnLoad: 1
-  runInBackground: 0
+  runInBackground: 1
   autoStartServerBuild: 1
   showDebugMessages: 0
   serverTickRate: 30

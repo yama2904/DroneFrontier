@@ -18,6 +18,8 @@ public class BattleManager : NetworkBehaviour
         public static int droneNum = 0;  //残っているドローンの数
     }
     static List<PlayerData> playerDatas = new List<PlayerData>();
+    static BattleDrone localDrone = null;
+    int useIndex = 0;
 
     //ランキング
     string[] ranking;
@@ -26,7 +28,11 @@ public class BattleManager : NetworkBehaviour
     bool startFlag = false;
     public bool StartFlag { get { return startFlag; } }
 
+    //切断したクライアントの数
+    //ホスト専用変数
     public int disconnectionClientCount = 0;
+
+    //ゲーム終了処理を行ったらtrue
     bool isFinished = false;
 
 
@@ -42,47 +48,79 @@ public class BattleManager : NetworkBehaviour
         Invoke(nameof(PlayStartSE), 3.0f);
     }
 
-    [ServerCallback]
     void Update()
     {
         if (!startFlag) return;
 
-        //負けたプレイヤーの走査
-        foreach (PlayerData pd in playerDatas)
+        //ゲームオーバーになったら他のプレイヤーのカメラにスペースキーで切り替える
+        if (Input.GetKeyDown(KeyCode.Space))
         {
-            if (pd.isDestroy) continue;
-            if (pd.drone.IsGameOver)
+            if (localDrone.IsGameOver)
             {
-                pd.ranking = PlayerData.droneNum;   //ランキングの記録
-                pd.isDestroy = true;
-                PlayerData.droneNum--;  //残りドローンを減らす
-            }
-        }
-
-        //最後のプレイヤーが残ったら終了処理
-        if (PlayerData.droneNum <= 1)
-        {
-            if (!isFinished)
-            {
-                ranking = new string[playerDatas.Count];
-                foreach (PlayerData pd in playerDatas)
+                //次のプレイヤーのカメラに切り替える
+                int initIndex = useIndex;
+                playerDatas[useIndex].drone.SetCameraDepth(0);
+                do
                 {
-                    ranking[pd.ranking - 1] = pd.drone.name;
-                }
-                StartCoroutine(FinishGame(ranking));
-                isFinished = true;
+                    useIndex++;
+                    if (useIndex >= playerDatas.Count || useIndex < 0)
+                    {
+                        useIndex = 0;
+                    }
+
+                    //破壊されていたらスキップ
+                    BattleDrone drone = playerDatas[useIndex].drone;
+                    if (drone.IsGameOver)
+                    {
+                        useIndex++;
+                    }
+                    else
+                    {
+                        drone.SetCameraDepth(5);
+                    }
+                } while (useIndex != initIndex);
             }
         }
 
-        //クライアントが全て切断されたらホストもリザルト移動
-        if (disconnectionClientCount >= playerDatas.Count - 1)
+        if (isServer)
         {
-            NetworkManager.singleton.StopHost();    //ホストを停止
-            MatchingManager.Singleton.Init();
-            ResultButtonsController.SetRank(ranking);
+            //負けたプレイヤーの走査
+            foreach (PlayerData pd in playerDatas)
+            {
+                if (pd.isDestroy) continue;
+                if (pd.drone.IsGameOver)
+                {
+                    pd.ranking = PlayerData.droneNum;   //ランキングの記録
+                    pd.isDestroy = true;
+                    PlayerData.droneNum--;  //残りドローンを減らす
+                }
+            }
 
-            //リザルト画面に移動
-            NonGameManager.LoadNonGameScene(BaseScreenManager.Screen.RESULT);
+            //最後のプレイヤーが残ったら終了処理
+            if (PlayerData.droneNum <= 1)
+            {
+                if (!isFinished)
+                {
+                    ranking = new string[playerDatas.Count];
+                    foreach (PlayerData pd in playerDatas)
+                    {
+                        ranking[pd.ranking - 1] = pd.drone.name;
+                    }
+                    StartCoroutine(FinishGame(ranking));
+                    isFinished = true;
+                }
+            }
+
+            //クライアントが全て切断されたらホストもリザルト移動
+            if (disconnectionClientCount >= playerDatas.Count - 1)
+            {
+                NetworkManager.singleton.StopHost();    //ホストを停止
+                MatchingManager.Singleton.Init();
+                ResultButtonsController.SetRank(ranking);
+
+                //リザルト画面に移動
+                NonGameManager.LoadNonGameScene(BaseScreenManager.Screen.RESULT);
+            }
         }
     }
 
@@ -127,8 +165,13 @@ public class BattleManager : NetworkBehaviour
     }
 
 
-    public static void AddPlayerData(BattleDrone drone)
+    public static void AddPlayerData(BattleDrone drone, bool isLocalPlayer)
     {
+        if (isLocalPlayer)
+        {
+            localDrone = drone;
+        }
+
         playerDatas.Add(new PlayerData
         {
             drone = drone

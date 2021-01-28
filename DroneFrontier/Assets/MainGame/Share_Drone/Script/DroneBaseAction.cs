@@ -19,6 +19,7 @@ public class DroneBaseAction : NetworkBehaviour
 
     //カメラ
     [SerializeField] Camera _camera = null;
+    public Camera _Camera { get { return _camera; } }
 
 
     #region Init
