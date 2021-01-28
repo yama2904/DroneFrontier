@@ -5,40 +5,42 @@ using Mirror;
 
 public class DroneGuard : NetworkBehaviour
 {
-    enum Pattern
-    {
-        ONE,
-        TWO,
-        THREE,
+    [Header("移動方向")]
+    [SerializeField, Tooltip("X軸に移動")] bool dirX = false;
+    [SerializeField, Tooltip("Y軸に移動")] bool dirY = false;
+    [SerializeField, Tooltip("Z軸に移動")] bool dirZ = false;
 
-        NONE
-    }
+    [Header("移動速度")]
+    [SerializeField] float speed = 10f;
 
-    [SerializeField] Pattern pattern = Pattern.NONE;
+    [Header("移動距離")]
+    [SerializeField] float range = 7.5f;
+
+    [Header("反発力")]
     [SerializeField] float power = 200;
 
     Transform cacheTransform = null;
-    float initPos;    
+    Vector3 initPos;
 
     void Start()
     {
         cacheTransform = transform;
-        initPos = cacheTransform.position.y;
+        initPos = cacheTransform.position;
     }
 
     void Update()
     {
-        if (pattern == Pattern.ONE)
+        if (dirX)
         {
-            cacheTransform.position = new Vector3(cacheTransform.position.x, initPos + Mathf.PingPong(Time.time * 10, 7.5f), cacheTransform.position.z);
+            cacheTransform.position = new Vector3(initPos.x + Mathf.PingPong(Time.time * speed, range), initPos.y, initPos.z);
         }
-        if(pattern == Pattern.TWO)
+        if (dirY)
         {
-            cacheTransform.position = new Vector3(cacheTransform.position.x, initPos + Mathf.PingPong(Time.time * 15, 9.5f), cacheTransform.position.z);
+            cacheTransform.position = new Vector3(initPos.x, initPos.y + Mathf.PingPong(Time.time * speed, range), initPos.z);
         }
-        if(pattern == Pattern.THREE)
+        if (dirZ)
         {
-            cacheTransform.position = new Vector3(cacheTransform.position.x, initPos + Mathf.PingPong(Time.time * 5, 5.5f), cacheTransform.position.z);
+            cacheTransform.position = new Vector3(initPos.x, initPos.y, initPos.z + Mathf.PingPong(Time.time * speed, range));
         }
     }
 
