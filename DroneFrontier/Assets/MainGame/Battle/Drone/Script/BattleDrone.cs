@@ -672,6 +672,12 @@ public class BattleDrone : NetworkBehaviour
     void Death()
     {
         syncIsGameOver = true;
+        RpcSetActiveFalse();
+    }
+
+    [ClientRpc]
+    void RpcSetActiveFalse()
+    {
         gameObject.SetActive(false);
     }
 

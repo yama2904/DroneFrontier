@@ -20,14 +20,12 @@ public class MatchingManager : NetworkBehaviour
     //ルームに入ったプレイヤーの名前
     public static List<string> playerNames = new List<string>();
 
-    //準備ができたか
-    public static bool isReady = false;
-
     public class PlayerData
     {
         public string name;
         public NetworkConnection conn;
         public BaseWeapon.Weapon weapon;
+        public bool isReady;
     }
     public static List<PlayerData> playerDatas = new List<PlayerData>();
     
@@ -61,16 +59,33 @@ public class MatchingManager : NetworkBehaviour
         }
     }
 
+    [ServerCallback]
     void Update()
     {
-        if (!isLocalPlayer) return;
+        if (MainGameManager.IsMainGaming) return;
 
         //準備完了フラグのセット
-        if (isReady)
+        int readyCount = 0;
+        foreach(PlayerData pd in playerDatas)
         {
-            isReady = false;
-            GetComponent<NetworkRoomPlayer>().CmdChangeReadyState(true);
+            if (pd.isReady)
+            {
+                readyCount++;
+            }
         }
+
+        //すべてのクライアントの準備が完了したらBGMを止めてシーン移動
+        if(readyCount == PlayerNum)
+        {
+            RpcSetReadyAllClient();
+        }
+    }
+
+    [ClientRpc]
+    void RpcSetReadyAllClient()
+    {
+        SoundManager.StopBGM();
+        GetComponent<NetworkRoomPlayer>().CmdChangeReadyState(true);
     }
 
 
@@ -82,7 +97,8 @@ public class MatchingManager : NetworkBehaviour
         {
             name = playerNames[playerDatas.Count],
             conn = connectionToClient,
-            weapon = BaseWeapon.Weapon.NONE
+            weapon = BaseWeapon.Weapon.NONE,
+            isReady = false
         });
     }
 
@@ -99,7 +115,6 @@ public class MatchingManager : NetworkBehaviour
     {
         playerNames.Clear();
         playerDatas.Clear();
-        isReady = false;
     }
 
     //クライアントの退出
@@ -149,6 +164,7 @@ public class MatchingManager : NetworkBehaviour
         if(index >= 0)
         {
             playerDatas[index].weapon = (BaseWeapon.Weapon)weapon;
+            playerDatas[index].isReady = true;
         }
     }
 
@@ -157,6 +173,7 @@ public class MatchingManager : NetworkBehaviour
     [ClientRpc]
     public void RpcStartRace()
     {
-        isReady = true;
+        SoundManager.StopBGM();
+        GetComponent<NetworkRoomPlayer>().CmdChangeReadyState(true);
     }
 }

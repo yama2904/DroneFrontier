@@ -12,6 +12,10 @@ public class NonGameManager : MonoBehaviour
 
     void Start()
     {
+        //BGMの再生
+        SoundManager.StopBGM();
+        SoundManager.Play(SoundManager.BGM.DRONE_UP, SoundManager.BaseBGMVolume);
+
         if (!isStarted)
         {
             Instantiate(createNetworkManager);

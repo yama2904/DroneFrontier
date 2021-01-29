@@ -159,6 +159,7 @@ public class NewNetworkRoomManager : NetworkRoomManager
         {
             GameplayScene = raceScene;
         }
+
         base.OnRoomServerPlayersReady();
     }
 

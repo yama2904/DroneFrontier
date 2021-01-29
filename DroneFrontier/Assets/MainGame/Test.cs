@@ -8,8 +8,6 @@ public class Test : MonoBehaviour
     float deltaTime;
     int count;
 
-    [SerializeField] bool playBGM = true;
-
     private void Awake()
     {
     }
@@ -18,29 +16,10 @@ public class Test : MonoBehaviour
     {
         deltaTime = 0;
         count = 0;
-
-        if (playBGM)
-        {
-            SoundManager.Play(SoundManager.BGM.DRONE_UP, 1.0f);
-        }
     }
 
     void Update()
     {
-        if (playBGM)
-        {
-            if (SoundManager.IsPlayingBGM == SoundManager.BGM.NONE)
-            {
-                SoundManager.Play(SoundManager.BGM.DRONE_UP, 1.0f);
-            }
-        }
-        else
-        {
-            if (SoundManager.IsPlayingBGM != SoundManager.BGM.NONE)
-            {
-                SoundManager.StopBGM();
-            }
-        }
     }
 
     private void FixedUpdate()
