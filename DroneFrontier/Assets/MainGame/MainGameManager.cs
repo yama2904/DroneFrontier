@@ -73,7 +73,6 @@ public class MainGameManager : NetworkBehaviour
     //デバッグ用
     public static bool IsCursorLock { get; private set; } = true;
     [Header("デバッグ用")]
-    [SerializeField] bool offline = false;
     [SerializeField] GameMode debugGameMode = GameMode.NONE;
     [SerializeField] bool solo = false;
 
@@ -87,7 +86,7 @@ public class MainGameManager : NetworkBehaviour
 
 
         //デバッグ用
-        IsMulti = !offline;
+        IsMulti = true;
         if (solo)
         {
             startFlag = true;
