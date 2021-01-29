@@ -12,6 +12,7 @@ TagManager:
   - Jamming
   - WorldWall
   - Goal
+  - ItemSpawn
   layers:
   - Default
   - TransparentFX

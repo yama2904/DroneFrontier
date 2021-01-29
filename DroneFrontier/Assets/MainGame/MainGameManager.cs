@@ -77,6 +77,14 @@ public class MainGameManager : NetworkBehaviour
     [SerializeField] bool solo = false;
 
 
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+
+        //乱数のシード値の設定
+        Random.InitState(System.DateTime.Now.Millisecond);
+    }
+
     void Awake()
     {
         //シングルトンの作成

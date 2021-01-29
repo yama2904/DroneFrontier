@@ -47,9 +47,6 @@ public class Shotgun : BaseWeapon
         MaxBullets = _maxBullets;
         BulletsRemain = MaxBullets;
         BulletPower = _power;
-
-        //乱数のシード値の設定
-        Random.InitState(System.DateTime.Now.Millisecond);
     }
 
     protected override void Update()

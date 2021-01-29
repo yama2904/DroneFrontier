@@ -24,17 +24,58 @@ public class BattleManager : NetworkBehaviour
     //ゲーム終了処理を行ったらtrue
     bool isFinished = false;
 
+    //アイテム
+    [SerializeField, Tooltip("スポーンするアイテム")] Item spawnItem = null;
+    [SerializeField, Tooltip("フィールド上に出現させるアイテムの上限")] int itemLimitNum = 10;
+    [SerializeField, Tooltip("アイテムが出現する間隔")] float itemSpawnInterval = 10f;
+
 
     public override void OnStartClient()
     {
         base.OnStartClient();
 
+        //フィールド上のアイテム処理
+        GameObject[] items = GameObject.FindGameObjectsWithTag(TagNameManager.ITEM_SPAWN);
         if (!MainGameManager.IsItem)
         {
-            GameObject[] items = GameObject.FindGameObjectsWithTag(TagNameManager.ITEM);
             foreach (GameObject item in items)
             {
                 Destroy(item);
+            }
+        }
+        else
+        {
+            if (isServer)
+            {
+                //アイテムのランダムスポーン
+                int itemCount = 0;
+                int index = 0;
+                bool[] useIndex = new bool[items.Length];
+                while(itemCount < itemLimitNum)
+                {
+                    //既にスポーン済みならスキップ
+                    if (useIndex[index]) continue;
+
+                    //フィールド上の全てのアイテムをスポーンしていたら終了
+                    if (itemCount >= items.Length) break;
+
+                    //ランダムでスポーン
+                    if(Random.Range(0, 2) == 0)
+                    {
+                        Item item = Instantiate(spawnItem, items[index].transform);
+                        item.InitItemType();
+                        NetworkServer.Spawn(item.gameObject, connectionToClient);
+
+                        itemCount++;  //カウントの更新
+                        useIndex[index] = true; //使用した配列要素をメモ
+                    }
+
+                    index++;
+                    if(index >= items.Length)   //配列の末尾に到達したら0に戻す
+                    {
+                        index = 0;
+                    }
+                }
             }
         }
     }

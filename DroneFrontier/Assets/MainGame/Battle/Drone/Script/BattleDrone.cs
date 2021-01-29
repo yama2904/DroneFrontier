@@ -908,9 +908,9 @@ public class BattleDrone : NetworkBehaviour
             if (other.CompareTag(TagNameManager.ITEM))
             {
                 Item item = other.GetComponent<Item>();
-                if (itemAction.SetItem(item.type))
+                if (itemAction.SetItem(item.Type))
                 {
-                    item.type = Item.ItemType.NONE;  //通信のラグのせいで1つのアイテムを2回取るバグの防止
+                    //item.type = Item.ItemType.NONE;  //通信のラグのせいで1つのアイテムを2回取るバグの防止
                     CmdDestroyObject(item.gameObject);
 
 
