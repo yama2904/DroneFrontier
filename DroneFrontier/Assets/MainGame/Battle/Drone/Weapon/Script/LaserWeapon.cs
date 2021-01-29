@@ -58,12 +58,12 @@ public class LaserWeapon : BaseWeapon
     {
         LaserBullet lb = Instantiate(laserBullet);
         lb.parentNetId = netId;
-        lb.Init(connectionToClient);
         lb.localPos = shotPos.localPosition;
         lb.localRot = shotPos.localRotation;
         lb.ShotInterval = ShotInterval;
 
         NetworkServer.Spawn(lb.gameObject, connectionToClient);
+        lb.isLocalPlayer = true;
         createBullet = lb.gameObject;
     }
 
