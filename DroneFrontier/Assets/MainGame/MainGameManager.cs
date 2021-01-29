@@ -77,6 +77,14 @@ public class MainGameManager : NetworkBehaviour
     [SerializeField] bool solo = false;
 
 
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+
+        //乱数のシード値の設定
+        Random.InitState(System.DateTime.Now.Millisecond);
+    }
+
     void Awake()
     {
         //シングルトンの作成
@@ -148,12 +156,13 @@ public class MainGameManager : NetworkBehaviour
     void RpcPlayStartSE()
     {
         SoundManager.Play(SoundManager.SE.START_COUNT_DOWN_D, SoundManager.BaseSEVolume);
-        Invoke(nameof(SetStartFlagTrue), 3.5f);
+        Invoke(nameof(SetStartFlagTrue), 4.5f);
     }
 
     void SetStartFlagTrue()
     {
         startFlag = true;
+        SoundManager.Play(SoundManager.BGM.LOOP, SoundManager.BaseBGMVolume);
     }
 
     void Update()
@@ -271,7 +280,14 @@ public class MainGameManager : NetworkBehaviour
             this.ranking[index] = "";
         }
 
+        RpcStopBGM();
         StartCoroutine(FinishGameCoroutine(this.ranking));
+    }
+
+    [ClientRpc]
+    void RpcStopBGM()
+    {
+        SoundManager.StopBGM();
     }
 
     IEnumerator FinishGameCoroutine(string[] ranking)

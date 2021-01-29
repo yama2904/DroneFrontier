@@ -24,17 +24,58 @@ public class BattleManager : NetworkBehaviour
     //ゲーム終了処理を行ったらtrue
     bool isFinished = false;
 
+    //アイテム
+    [SerializeField, Tooltip("スポーンするアイテム")] Item spawnItem = null;
+    [SerializeField, Tooltip("フィールド上に出現させるアイテムの上限")] int itemLimitNum = 10;
+    [SerializeField, Tooltip("アイテムが出現する間隔")] float itemSpawnInterval = 10f;
+
 
     public override void OnStartClient()
     {
         base.OnStartClient();
 
+        //フィールド上のアイテム処理
+        GameObject[] items = GameObject.FindGameObjectsWithTag(TagNameManager.ITEM_SPAWN);
         if (!MainGameManager.IsItem)
         {
-            GameObject[] items = GameObject.FindGameObjectsWithTag(TagNameManager.ITEM);
             foreach (GameObject item in items)
             {
                 Destroy(item);
+            }
+        }
+        else
+        {
+            if (isServer)
+            {
+                //アイテムのランダムスポーン
+                int itemCount = 0;
+                int index = 0;
+                bool[] useIndex = new bool[items.Length];
+                while(itemCount < itemLimitNum)
+                {
+                    //既にスポーン済みならスキップ
+                    if (useIndex[index]) continue;
+
+                    //フィールド上の全てのアイテムをスポーンしていたら終了
+                    if (itemCount >= items.Length) break;
+
+                    //ランダムでスポーン
+                    if(Random.Range(0, 2) == 0)
+                    {
+                        Item item = Instantiate(spawnItem, items[index].transform);
+                        item.InitItemType();
+                        NetworkServer.Spawn(item.gameObject, connectionToClient);
+
+                        itemCount++;  //カウントの更新
+                        useIndex[index] = true; //使用した配列要素をメモ
+                    }
+
+                    index++;
+                    if(index >= items.Length)   //配列の末尾に到達したら0に戻す
+                    {
+                        index = 0;
+                    }
+                }
             }
         }
     }
@@ -68,19 +109,14 @@ public class BattleManager : NetworkBehaviour
                     }
 
                     //破壊されていたらスキップ
-                    BattleDrone drone = playerDatas[useIndex].drone;
-                    if (drone.IsGameOver)
-                    {
-                        useIndex++;
-                    }
-                    //自分のドローンだったらスキップ
-                    else if(drone.netId == localDrone.netId)
+                    PlayerData pd = playerDatas[useIndex];
+                    if (pd.isDestroy)
                     {
                         useIndex++;
                     }
                     else
                     {
-                        drone.SetCameraDepth(5);
+                        pd.drone.SetCameraDepth(5);
                     }
                 } while (useIndex != initIndex);
             }
@@ -88,18 +124,6 @@ public class BattleManager : NetworkBehaviour
 
         if (isServer)
         {
-            //負けたプレイヤーの走査
-            foreach (PlayerData pd in playerDatas)
-            {
-                if (pd.isDestroy) continue;
-                if (pd.drone.IsGameOver)
-                {
-                    pd.ranking = PlayerData.droneNum;   //ランキングの記録
-                    pd.isDestroy = true;
-                    PlayerData.droneNum--;  //残りドローンを減らす
-                }
-            }
-
             //最後のプレイヤーが残ったら終了処理
             if (PlayerData.droneNum <= 1)
             {
@@ -131,5 +155,22 @@ public class BattleManager : NetworkBehaviour
         {
             drone = drone
         });
+    }
+
+    public void SetDestroyedDrone(uint netId)
+    {
+        int index = playerDatas.FindIndex(playerData => playerData.drone.netId == netId);
+        if (index == -1) return;  //対応するドローンがなかったら処理しない
+
+        PlayerData pd = playerDatas[index];  //名前省略
+        if (pd.isDestroy) return;  //既に死亡処理を行っていたら処理しない
+
+        //リスト情報の変更
+        pd.ranking = PlayerData.droneNum;   //ランキングの記録
+        pd.isDestroy = true;
+        PlayerData.droneNum--;  //残りドローンを減らす
+
+        //カメラ切り替え
+        pd.drone.SetCameraDepth(-1);
     }
 }

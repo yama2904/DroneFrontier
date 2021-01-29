@@ -151,7 +151,7 @@ public class DroneBarrierAction : NetworkBehaviour
         syncHP -= p;
 
         //バリアHPが0になったらバリアを非表示
-        if (syncHP < 0)
+        if (syncHP <= 0)
         {
             syncHP = 0;
             RpcSetActiveBarrier(false);

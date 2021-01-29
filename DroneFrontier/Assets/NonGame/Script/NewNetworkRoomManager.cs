@@ -159,6 +159,7 @@ public class NewNetworkRoomManager : NetworkRoomManager
         {
             GameplayScene = raceScene;
         }
+
         base.OnRoomServerPlayersReady();
     }
 
@@ -175,13 +176,22 @@ public class NewNetworkRoomManager : NetworkRoomManager
     //クライアントがサーバから切断されたとき
     public override void OnClientDisconnect(NetworkConnection conn)
     {
+        if (!MainGameManager.IsMainGaming)
+        {
+            //SEの再生
+            SoundManager.Play(SoundManager.SE.CANCEL, SoundManager.BaseSEVolume);
+        }
+        else
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+
         StopClient();  //クライアントを停止
         MatchingManager.Singleton.Init();  //MatchingManagerの初期化
         Mirror.Discovery.CustomNetworkDiscoveryHUD.Singleton.Init();  //DiscoveryHUDの初期化
         NonGameManager.LoadNonGameScene(BaseScreenManager.Screen.KURIBOCCHI);
 
-        //SEの再生
-        SoundManager.Play(SoundManager.SE.CANCEL, SoundManager.BaseSEVolume);
 
         base.OnClientDisconnect(conn);
     }
