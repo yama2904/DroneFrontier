@@ -58,6 +58,7 @@ public class LaserWeapon : BaseWeapon
     {
         LaserBullet lb = Instantiate(laserBullet);
         lb.parentNetId = netId;
+        lb.Init(connectionToClient);
         lb.localPos = shotPos.localPosition;
         lb.localRot = shotPos.localRotation;
         lb.ShotInterval = ShotInterval;

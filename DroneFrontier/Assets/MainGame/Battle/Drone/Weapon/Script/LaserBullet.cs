@@ -16,6 +16,7 @@ public class LaserBullet : NetworkBehaviour
     public bool IsShotBeam { get; private set; } = false;
     bool isStartCharge = false;
     AudioSource audioSource = null;
+    NetworkConnection localPlayer;
 
     //親子付け用
     [SyncVar, HideInInspector] public uint parentNetId = 0;
@@ -115,6 +116,11 @@ public class LaserBullet : NetworkBehaviour
         }
     }
 
+    public void Init(NetworkConnection conn)
+    {
+        localPlayer = conn;
+    }
+
     //リストから必要な要素だけ抜き取る
     List<RaycastHit> FilterTargetRaycast(List<RaycastHit> hits, GameObject shooter)
     {
@@ -159,7 +165,16 @@ public class LaserBullet : NetworkBehaviour
     {
         //Lineオブジェクト
         Vector3 lineScale = lineTransform.localScale;
-        lineTransform.localScale = new Vector3(length, length, 1.0f);
+
+        //そのままレーザーを太くすると他プレイヤーから見ると異常に太く見えるので
+        //ローカルプレイヤーのみ太くする
+        float localScaleY = length;
+        if (ReferenceEquals(connectionToClient, localPlayer))
+        {
+            localScaleY *= 30;
+            Debug.Log("a");
+        }
+        lineTransform.localScale = new Vector3(length, localScaleY, 1.0f);
 
         //Thunderオブジェクト
         Vector3 thunderScale = thunderTransform.localScale;

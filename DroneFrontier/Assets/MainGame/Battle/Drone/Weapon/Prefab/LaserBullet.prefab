@@ -4843,6 +4843,7 @@ MonoBehaviour:
   chargeTime: 3
   lineRadius: 0.1
   lineRange: 100
+  laserScaleY: 100
   parentNetId: 0
   localPos: {x: 0, y: 0, z: 0}
   localRot: {x: 0, y: 0, z: 0, w: 1}

@@ -36,6 +36,7 @@ public class MatchingButtonsController : NetworkBehaviour
         //SE再生
         SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
 
+        NewNetworkDiscovery.Singleton.StopDiscovery();  //ブロードキャストを止める
         if (MainGameManager.Mode == MainGameManager.GameMode.BATTLE)
         {
             MatchingManager.Singleton.CreateWeaponSelectScreen();
@@ -94,7 +95,7 @@ public class MatchingButtonsController : NetworkBehaviour
         }
 
         //プレイヤーの名前がない欄は募集中にテキストを変える
-        for(; index < 4; index++)
+        for (; index < 4; index++)
         {
             switch (index)
             {
