@@ -672,12 +672,13 @@ public class BattleDrone : NetworkBehaviour
     void Death()
     {
         syncIsGameOver = true;
-        RpcSetActiveFalse();
+        RpcDeath();
     }
 
     [ClientRpc]
-    void RpcSetActiveFalse()
+    void RpcDeath()
     {
+        BattleManager.Singleton.SetDestroyedDrone(netId);
         gameObject.SetActive(false);
     }
 
