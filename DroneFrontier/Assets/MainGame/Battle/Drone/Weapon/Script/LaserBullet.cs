@@ -167,7 +167,6 @@ public class LaserBullet : NetworkBehaviour
         if (isLocalPlayer)
         {
             localScaleY *= 30;
-            Debug.Log("a");
         }
         lineTransform.localScale = new Vector3(length, localScaleY, 1.0f);
 

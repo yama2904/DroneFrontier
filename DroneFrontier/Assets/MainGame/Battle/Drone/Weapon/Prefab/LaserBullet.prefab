@@ -4843,7 +4843,7 @@ MonoBehaviour:
   chargeTime: 3
   lineRadius: 0.1
   lineRange: 100
-  laserScaleY: 100
+  isLocalPlayer: 0
   parentNetId: 0
   localPos: {x: 0, y: 0, z: 0}
   localRot: {x: 0, y: 0, z: 0, w: 1}
@@ -4908,7 +4908,7 @@ AudioSource:
   Priority: 128
   DopplerLevel: 1
   MinDistance: 1
-  MaxDistance: 30
+  MaxDistance: 300
   Pan2D: 0
   rolloffMode: 2
   BypassEffects: 0

@@ -80,6 +80,8 @@ public class BattleDrone : NetworkBehaviour
     Vector3 startPos;
     Quaternion startRotate;
     [SyncVar] bool syncIsRespawning = false;
+    [SyncVar] bool nonDamage = false; //無敵
+    [SerializeField, Tooltip("リスポーン後の無敵時間")] float nonDamageTime = 4f;
 
     //ゲームオーバーになったらtrue
     [SyncVar] bool syncIsGameOver = false;
@@ -602,12 +604,14 @@ public class BattleDrone : NetworkBehaviour
             PlayOneShotSE(SoundManager.SE.USE_ITEM, SoundManager.BaseSEVolume);
         }
     }
+        
 
     //プレイヤーにダメージを与える
     [Command(ignoreAuthority = true)]
     public void CmdDamage(float power)
     {
         if (IsGameOver || syncIsRespawning || syncIsDestroy) return;
+        if (nonDamage) return;  //無敵中はダメージ処理をしない
 
         //小数点第2以下切り捨て
         float p = Useful.DecimalPointTruncation(power, 1);
@@ -682,6 +686,15 @@ public class BattleDrone : NetworkBehaviour
 
         //落下停止
         syncIsDestroy = false;
+
+        //一時的に無敵
+        nonDamage = true;
+        Invoke(nameof(SetNonDamageFalse), nonDamageTime);
+    }
+
+    void SetNonDamageFalse()
+    {
+        nonDamage = false;
     }
 
     [ClientRpc]
