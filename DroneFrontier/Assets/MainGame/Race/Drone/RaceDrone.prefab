@@ -370,7 +370,7 @@ MeshRenderer:
   m_Materials:
   - {fileID: 2100000, guid: 9e1f2f17a9708b3478f5f0214088ebf0, type: 2}
   - {fileID: 2100000, guid: 05a72513e1b5a0e428b2825fdfbe1233, type: 2}
-  - {fileID: 2100000, guid: 0dbc2bfb6f0510e4a8f14958e71fbbc0, type: 2}
+  - {fileID: 2100000, guid: 7a56218b7ebb18c43a6fc2b30be284ca, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -427,7 +427,7 @@ Transform:
   m_GameObject: {fileID: 3215491144051122303}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.01, y: 0.01, z: 0.01}
+  m_LocalScale: {x: 0.2, y: 0.2, z: 0.2}
   m_Children:
   - {fileID: 8468956971570744406}
   - {fileID: 4395704207437532614}
@@ -478,13 +478,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
-  moveSpeed: 200
+  moveSpeed: 700
   rotateSpeed: 5
   boostGaugeImage: {fileID: 474087749837010726}
   boostGaugeFrameImage: {fileID: 7931701155835120130}
-  boostAccele: 3
-  maxBoostTime: 10
-  boostRecastTime: 8
+  boostAccele: 1.5
+  maxBoostTime: 5
+  boostRecastTime: 10
 --- !u!114 &1357172807644066273
 MonoBehaviour:
   m_ObjectHideFlags: 0
