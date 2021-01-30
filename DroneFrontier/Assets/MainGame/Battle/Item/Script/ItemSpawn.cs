@@ -29,11 +29,11 @@ public class ItemSpawn : NetworkBehaviour
         
     }
 
-    void Update()
+    void LateUpdate()
     {
-        if(transform.position.y < 56.0f)
+        if(transform.position.y < 57.0f)
         {
-            transform.position = new Vector3(transform.position.x, 56.0f, transform.position.z);
+            transform.position = new Vector3(transform.position.x, 57.0f, transform.position.z);
         }
     }
 

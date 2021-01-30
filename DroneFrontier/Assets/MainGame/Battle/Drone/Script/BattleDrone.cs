@@ -27,6 +27,7 @@ public class BattleDrone : NetworkBehaviour
 
     //回転用
     [SerializeField, Tooltip("回転速度")] public float rotateSpeed = 5.0f;
+    float initRotateSpeed = 0;
 
     //ドローンが移動した際にオブジェクトが傾く処理用
     float moveRotateSpeed = 2f;
@@ -38,6 +39,7 @@ public class BattleDrone : NetworkBehaviour
     //ロックオン
     [SerializeField] LockOn lockOn = null;
     [SerializeField, Tooltip("ロックオンした際に敵に向く速度")] float lockOnTrackingSpeed = 0.1f;
+    float initLockOnTrackingSpeed = 0;
 
     //レーダー
     [SerializeField] Radar radar = null;
@@ -158,6 +160,21 @@ public class BattleDrone : NetworkBehaviour
         base.OnStartClient();
         BattleManager.AddPlayerData(this, isLocalPlayer);
 
+        //コンポーネントの初期化
+        cacheTransform = transform;
+        _rigidbody = GetComponent<Rigidbody>();
+        animator = GetComponent<Animator>();
+        baseAction = GetComponent<DroneBaseAction>();
+        barrierAction = GetComponent<DroneBarrierAction>();
+        itemAction = GetComponent<DroneItemAction>();
+        statusAction = GetComponent<DroneStatusAction>();
+
+        initSpeed = moveSpeed;
+        maxSpeed = moveSpeed * 10;
+        minSpeed = moveSpeed * 0.2f;
+        initRotateSpeed = rotateSpeed;
+        initLockOnTrackingSpeed = lockOnTrackingSpeed;
+
         //AudioSourceの初期化
         audios = GetComponents<AudioSource>();
         audios[(int)SE.BOOST].clip = SoundManager.GetAudioClip(SoundManager.SE.BOOST);
@@ -198,18 +215,6 @@ public class BattleDrone : NetworkBehaviour
 
     void Awake()
     {
-        //コンポーネントの初期化
-        cacheTransform = transform;
-        _rigidbody = GetComponent<Rigidbody>();
-        animator = GetComponent<Animator>();
-        baseAction = GetComponent<DroneBaseAction>();
-        barrierAction = GetComponent<DroneBarrierAction>();
-        itemAction = GetComponent<DroneItemAction>();
-        statusAction = GetComponent<DroneStatusAction>();
-
-        initSpeed = moveSpeed;
-        maxSpeed = moveSpeed * 10;
-        minSpeed = moveSpeed * 0.2f;
     }
 
     void Start()
@@ -544,15 +549,24 @@ public class BattleDrone : NetworkBehaviour
             UseItem(ItemNum.ITEM_2);
         }
 
-
-        //デバッグ用
-        if (Input.GetKeyDown(KeyCode.LeftControl))
+        //スピードのバグが起きたときに無理やり戻す
+        bool useWeapon = false;
+        foreach(bool use in usingWeapons)
         {
-            moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, 0.1f);
+            if (use)
+            {
+                useWeapon = true;
+                break;
+            }
         }
-        if (Input.GetKeyUp(KeyCode.LeftControl))
+        if (!useWeapon)
         {
-            moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, 10f);
+            if (!statusAction.GetIsStatus(DroneStatusAction.Status.SPEED_DOWN) && !isBoost)
+            {
+                moveSpeed = initSpeed;
+                rotateSpeed = initRotateSpeed;
+                lockOnTrackingSpeed = initLockOnTrackingSpeed;
+            }
         }
     }
 

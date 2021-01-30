@@ -732,7 +732,10 @@ MonoBehaviour:
   thirdDownSpeed: 0
   thirdDownTime: 0
   thirdDownPos: 0
-  billObject: {fileID: 5110377035062909816}
+  downObject1: {fileID: 0}
+  downObject2: {fileID: 0}
+  downObject3: {fileID: 0}
+  billObject: {fileID: 2145001673751627018}
   particles: {fileID: 6973817192985818628}
 --- !u!1 &9188244316252557202
 GameObject:

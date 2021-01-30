@@ -29,11 +29,17 @@ public class DownBill : MonoBehaviour
     [SerializeField, Tooltip("沈下開始時間")] float thirdDownTime = 240f;
     [SerializeField, Tooltip("沈下が終了するY座標")] float thirdDownPos = -45f;
 
-    [Header("触れるでない")]
-    [SerializeField] GameObject billObject = null;
-    [SerializeField] GameObject particles = null;
+    [Header("ついでに他一緒に沈下させたい奴")]
+    [SerializeField] Transform downObject1 = null;
+    [SerializeField] Transform downObject2 = null;
+    [SerializeField] Transform downObject3 = null;
+    [SerializeField] Transform downObject4 = null;
+    [SerializeField] Transform downObject5 = null;
 
-    Transform cacheTransform = null;
+    [Header("触れるでない")]
+    [SerializeField] Transform billObject = null;
+    [SerializeField] GameObject particles = null;
+    
     bool isFirst = false;
     bool isSecond = false;
     bool isThird = false;
@@ -42,7 +48,6 @@ public class DownBill : MonoBehaviour
     void Start()
     {
         particles.SetActive(false);
-        cacheTransform = billObject.transform;
 
         if (downNum == DownNum.ONE)
         {
@@ -65,8 +70,31 @@ public class DownBill : MonoBehaviour
     {
         if (isFirst)
         {
-            cacheTransform.Translate(0, firstDownSpeed * Time.deltaTime * -1, 0);
-            if (cacheTransform.localPosition.y < firstDownPos)
+            //オブジェクトの沈下
+            billObject.Translate(0, firstDownSpeed * Time.deltaTime * -1, 0);
+            if(downObject1 != null)
+            {
+                downObject1.Translate(0, firstDownSpeed * Time.deltaTime * -1, 0);
+            }
+            if (downObject2 != null)
+            {
+                downObject2.Translate(0, firstDownSpeed * Time.deltaTime * -1, 0);
+            }
+            if(downObject3 != null)
+            {
+                downObject3.Translate(0, firstDownSpeed * Time.deltaTime * -1, 0);
+            }
+            if(downObject4 != null)
+            {
+                downObject4.Translate(0, firstDownSpeed * Time.deltaTime * -1, 0);
+            }
+            if(downObject5 != null)
+            {
+                downObject5.Translate(0, firstDownSpeed * Time.deltaTime * -1, 0);
+            }
+
+            //沈下停止ラインの判定
+            if (billObject.localPosition.y < firstDownPos)
             {
                 isFirst = false;
                 if (!isSecond)
@@ -77,8 +105,31 @@ public class DownBill : MonoBehaviour
         }
         else if (isSecond)
         {
-            cacheTransform.Translate(0, secondDownSpeed * Time.deltaTime * -1, 0);
-            if (cacheTransform.localPosition.y < secondDownPos)
+            //オブジェクトの沈下
+            billObject.Translate(0, secondDownSpeed * Time.deltaTime * -1, 0);
+            if (downObject1 != null)
+            {
+                downObject1.Translate(0, secondDownSpeed * Time.deltaTime * -1, 0);
+            }
+            if (downObject2 != null)
+            {
+                downObject2.Translate(0, secondDownSpeed * Time.deltaTime * -1, 0);
+            }
+            if (downObject3 != null)
+            {
+                downObject3.Translate(0, secondDownSpeed * Time.deltaTime * -1, 0);
+            }
+            if (downObject4 != null)
+            {
+                downObject4.Translate(0, secondDownSpeed * Time.deltaTime * -1, 0);
+            }
+            if (downObject5 != null)
+            {
+                downObject5.Translate(0, secondDownSpeed * Time.deltaTime * -1, 0);
+            }
+
+            //沈下停止ラインの判定
+            if (billObject.localPosition.y < secondDownPos)
             {
                 isSecond = false;
                 if (!isThird)
@@ -89,8 +140,31 @@ public class DownBill : MonoBehaviour
         }
         else if (isThird)
         {
-            cacheTransform.Translate(0, thirdDownSpeed * Time.deltaTime * -1, 0);
-            if (cacheTransform.localPosition.y < thirdDownPos)
+            //オブジェクトの沈下
+            billObject.Translate(0, thirdDownSpeed * Time.deltaTime * -1, 0);
+            if (downObject1 != null)
+            {
+                downObject1.Translate(0, thirdDownSpeed * Time.deltaTime * -1, 0);
+            }
+            if (downObject2 != null)
+            {
+                downObject2.Translate(0, thirdDownSpeed * Time.deltaTime * -1, 0);
+            }
+            if (downObject3 != null)
+            {
+                downObject3.Translate(0, thirdDownSpeed * Time.deltaTime * -1, 0);
+            }
+            if (downObject4 != null)
+            {
+                downObject4.Translate(0, thirdDownSpeed * Time.deltaTime * -1, 0);
+            }
+            if (downObject5 != null)
+            {
+                downObject5.Translate(0, thirdDownSpeed * Time.deltaTime * -1, 0);
+            }
+
+            //沈下停止ラインの判定
+            if (billObject.localPosition.y < thirdDownPos)
             {
                 Destroy(gameObject);
             }

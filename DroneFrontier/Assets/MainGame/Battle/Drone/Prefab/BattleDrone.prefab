@@ -664,12 +664,13 @@ MonoBehaviour:
   radar: {fileID: 1741952939186093208}
   boostGaugeImage: {fileID: 9146485382857112573}
   boostGaugeFrameImage: {fileID: 1614975427682338521}
-  boostAccele: 3
+  boostAccele: 2.1
   maxBoostTime: 5
-  boostRecastTime: 6
+  boostRecastTime: 8
   atackingDownSpeed: 0.5
   syncStock: 2
   fallTime: 5
+  nonDamageTime: 4
 --- !u!114 &-1535939887124464326
 MonoBehaviour:
   m_ObjectHideFlags: 0
