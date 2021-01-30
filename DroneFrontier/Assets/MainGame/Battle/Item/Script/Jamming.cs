@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 using Mirror;
 
 public class Jamming : NetworkBehaviour
@@ -8,19 +9,22 @@ public class Jamming : NetworkBehaviour
     [SyncVar] GameObject creater;
     [SerializeField, Tooltip("ジャミングボットの生存時間")] float destroyTime = 60.0f;
 
-    [SerializeField] GameObject jammingBot = null;
+    [SerializeField] JammingBot jammingBot = null;
     [SerializeField] Transform jammingBotPosition = null;
-    JammingBot createBot = null;
+    GameObject createBot = null;
+    bool isCreateBot = false;
     List<BattleDrone> jamingPlayers = new List<BattleDrone>();
 
 
     void Start() { }
+
+    [ServerCallback]
     void Update()
     {
-        if (createBot == null) return;
-        if (createBot.IsDestroy)
+        if (!isCreateBot) return;
+        if (createBot == null)
         {
-            Destroy(gameObject);
+            NetworkServer.Destroy(gameObject);
         }
     }
 
@@ -28,16 +32,54 @@ public class Jamming : NetworkBehaviour
     [Command(ignoreAuthority = true)]
     public void CmdCreateBot(GameObject creater)
     {
+        //キャッシュ
+        Transform t = transform;
+
         this.creater = creater;
-        transform.position = creater.transform.position;
+        t.position = creater.transform.position;
 
         //ボット生成
-        JammingBot jb = Instantiate(jammingBot, jammingBotPosition).GetComponent<JammingBot>();
-        jb.parentNetId = netId;
-        jb.creater = creater;
+        JammingBot jb = Instantiate(jammingBot);
 
-        NetworkServer.Spawn(jb.gameObject);
-        RpcSetCreateBot(jb.gameObject);
+        jb.creater = creater;
+        createBot = jb.gameObject;
+        NetworkServer.Spawn(createBot);
+        isCreateBot = true;
+
+        //ボットを生成した場所にオブジェクトがあるとオブジェクトの中にBotが入りこんで
+        //破壊不可になるのでオブジェクトがある場合は避ける
+        var hits = Physics.SphereCastAll(
+            t.position, jammingBot.transform.localScale.x, t.up, jammingBotPosition.localPosition.y)
+            .Where(h => !ReferenceEquals(creater, h.transform.gameObject))
+            .Where(h => !h.transform.CompareTag(TagNameManager.JAMMING))
+            .Where(h => !h.transform.CompareTag(TagNameManager.ITEM))
+            .Where(h => !h.transform.CompareTag(TagNameManager.BULLET))
+            .Where(h => !h.transform.CompareTag(TagNameManager.GIMMICK))
+            .ToArray();
+                
+        if (hits.Length > 0)
+        {
+            //一番近いオブジェクトの手前に避ける
+            RaycastHit hit = hits[0];
+            float minTargetDistance = float.MaxValue;   //初期化
+            foreach (RaycastHit h in hits)
+            {
+                //距離が最小だったら更新
+                if (h.distance < minTargetDistance)
+                {
+                    minTargetDistance = h.distance;
+                    hit = h;
+                }
+            }
+
+            createBot.transform.position = new Vector3(
+                jammingBotPosition.position.x, hit.point.y - 8f, jammingBotPosition.position.z);
+        }
+        else
+        {
+            createBot.transform.position = jammingBotPosition.position;
+        }
+
 
         //一定時間後にボットを削除
         Invoke(nameof(DestroyMe), destroyTime);
@@ -45,12 +87,6 @@ public class Jamming : NetworkBehaviour
 
         //デバッグ用
         Debug.Log("ジャミングボット生成");
-    }
-
-    [ClientRpc]
-    void RpcSetCreateBot(GameObject o)
-    {
-        createBot = o.GetComponent<JammingBot>();
     }
 
     void DestroyMe()
@@ -66,7 +102,6 @@ public class Jamming : NetworkBehaviour
             if (p == null) continue;
             p.UnSetJamming();
         }
-        Destroy(gameObject);
     }
 
     private void OnTriggerEnter(Collider other)

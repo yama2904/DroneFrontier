@@ -6,22 +6,18 @@ using Mirror;
 public class JammingBot : NetworkBehaviour
 {
     [SyncVar] float HP = 30.0f;
-    [SyncVar, HideInInspector] public uint parentNetId = 0;
     [SyncVar, HideInInspector] public GameObject creater = null;
-    [SyncVar] bool syncIsDestroy = false;
-    public bool IsDestroy { get { return syncIsDestroy; } }
 
 
     public override void OnStartClient()
     {
         base.OnStartClient();
-        GameObject parent = NetworkIdentity.spawned[parentNetId].gameObject;
-        transform.SetParent(parent.transform);
+        Transform t = transform;  //キャッシュ
 
         //ボットの向きを変える
-        Vector3 angle = transform.localEulerAngles;
+        Vector3 angle = t.localEulerAngles;
         angle.y += creater.transform.localEulerAngles.y;
-        transform.localEulerAngles = angle;
+        t.localEulerAngles = angle;
 
         //生成した自分のジャミングボットをプレイヤーがロックオン・照射しないように設定
         if (creater.CompareTag(TagNameManager.PLAYER))
@@ -41,8 +37,7 @@ public class JammingBot : NetworkBehaviour
             creater.GetComponent<BattleDrone>().UnSetNotLockOnObject(gameObject);
             creater.GetComponent<BattleDrone>().UnSetNotRadarObject(gameObject);
         }
-
-
+        
         //デバッグ用
         Debug.Log("ジャミングボット破壊");
     }
@@ -55,7 +50,7 @@ public class JammingBot : NetworkBehaviour
         if (HP < 0)
         {
             HP = 0;
-            syncIsDestroy = true;
+            NetworkServer.Destroy(gameObject);
         }
     }
 }

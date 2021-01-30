@@ -64,7 +64,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0.1
   destroyTime: 60
-  jammingBot: {fileID: 4682843890191404543, guid: ebdc99f08c939844497af790155f08da,
+  jammingBot: {fileID: -262730393769487688, guid: ebdc99f08c939844497af790155f08da,
     type: 3}
   jammingBotPosition: {fileID: 6319352941471360500}
 --- !u!114 &-6304882260566110974
@@ -4879,7 +4879,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4203096131300491781}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 2, z: 0}
+  m_LocalPosition: {x: 0, y: 10, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 4181416708060167856}

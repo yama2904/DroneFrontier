@@ -9,8 +9,9 @@ public class BarrierWeakLaser : MonoBehaviour
     float lineRange = 3000f;     //射程
     [SerializeField, Tooltip("バリアの弱体化時間")] float barrierWeakTime = 15.0f;  //バリアの弱体化時間
 
-    //キャッシュ用のtransform
+    //キャッシュ用
     Transform cacheTransform = null;
+    LineRenderer lineRenderer = null;
 
     class HitPlayerData
     {
@@ -21,13 +22,21 @@ public class BarrierWeakLaser : MonoBehaviour
     //ヒットしているプレイヤーを格納
     List<HitPlayerData> hitPlayerDatas = new List<HitPlayerData>();
 
+
+    //レーザーの太さ
+    const float MAX_WIDTH = 100f;
+    float laserWidth = 0;
+    bool setingWidth = false;  //太さを変えるならtrue
+
     //レーザーを発生させるか
     bool laserFlag = false;
+
 
     void Start()
     {
         //キャッシュ用
         cacheTransform = transform;
+        lineRenderer = GetComponent<LineRenderer>();
         ModifyLaserLength(0);
     }
 
@@ -56,7 +65,36 @@ public class BarrierWeakLaser : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (!laserFlag) return;
+        if (laserFlag)
+        {
+            //徐々に太くする
+            if (setingWidth)
+            {
+                laserWidth += MAX_WIDTH * Time.deltaTime;
+                if (laserWidth >= MAX_WIDTH)
+                {
+                    laserWidth = MAX_WIDTH;
+                    setingWidth = false;
+                }
+                SetWidth(laserWidth);
+            }
+        }
+        else
+        {
+            //徐々に細くする
+            if (setingWidth)
+            {
+                laserWidth -= MAX_WIDTH * Time.deltaTime;
+                if(laserWidth <= 0)
+                {
+                    laserWidth = 0;
+                    setingWidth = false;
+                    ModifyLaserLength(0);
+                }
+                SetWidth(laserWidth);
+            }
+            return;
+        }
 
         var hits = Physics.SphereCastAll(
             cacheTransform.position,    //発射座標
@@ -144,10 +182,13 @@ public class BarrierWeakLaser : MonoBehaviour
 
     public void SetLaser(bool flag)
     {
-        if (!flag)
-        {
-            ModifyLaserLength(0);
-        }
         laserFlag = flag;
+        setingWidth = true;
+    }
+
+    void SetWidth(float width)
+    {
+        lineRenderer.startWidth = width;
+        lineRenderer.endWidth = width;
     }
 }

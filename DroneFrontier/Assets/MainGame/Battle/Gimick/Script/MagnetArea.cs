@@ -7,6 +7,9 @@ public class MagnetArea : MonoBehaviour
     [SerializeField, Tooltip("速度低下率")] float downPercent = 0.7f;  //下がる倍率
     public float DownPercent { get { return downPercent; } }
 
+    const float MIN_SIZE = 400f;
+    const float MAX_SIZE = 800f;
+
     //バグ防止用
     class HitPlayerData
     {

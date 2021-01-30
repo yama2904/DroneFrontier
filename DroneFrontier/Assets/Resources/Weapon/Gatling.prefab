@@ -221,7 +221,7 @@ MonoBehaviour:
   destroyTime: 1
   trackingPower: 3
   shotPerSecond: 10
-  _power: 3
+  _power: 1
 --- !u!1001 &7656308088440253387
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -287,17 +287,17 @@ PrefabInstance:
     - target: {fileID: -4216859302048453862, guid: 668fd1822a1131542b9717d3452cbc26,
         type: 3}
       propertyPath: m_LocalScale.x
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: -4216859302048453862, guid: 668fd1822a1131542b9717d3452cbc26,
         type: 3}
       propertyPath: m_LocalScale.y
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: -4216859302048453862, guid: 668fd1822a1131542b9717d3452cbc26,
         type: 3}
       propertyPath: m_LocalScale.z
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: -1504981713932161579, guid: 668fd1822a1131542b9717d3452cbc26,
         type: 3}

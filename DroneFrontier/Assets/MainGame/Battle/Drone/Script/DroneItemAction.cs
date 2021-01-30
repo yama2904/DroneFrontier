@@ -100,6 +100,9 @@ public class DroneItemAction : NetworkBehaviour
         return false;
     }
 
+
+    //アイテムを使用する
+    //成功したらtrue
     public bool UseItem(int number)
     {
         //バグ防止
@@ -120,10 +123,7 @@ public class DroneItemAction : NetworkBehaviour
 
         return true;
     }
-
-
-    //アイテムを使用する
-    //成功したらtrue
+    
     bool UseItem(Item.ItemType type)
     {
         //バリア強化
@@ -145,7 +145,7 @@ public class DroneItemAction : NetworkBehaviour
         //スタングレネード
         else if (type == Item.ItemType.STUN_GRENADE)
         {
-            CmdCreateStunGrenade(netId);
+            CmdCreateStunGrenade(gameObject);
         }
 
         //デバッグ用
@@ -164,10 +164,10 @@ public class DroneItemAction : NetworkBehaviour
     }
 
     [Command(ignoreAuthority = true)]
-    void CmdCreateStunGrenade(uint netId)
+    void CmdCreateStunGrenade(GameObject player)
     {
         StunGrenade s = Instantiate(stunGrenade);
-        s.ThrowGrenade(gameObject);
         NetworkServer.Spawn(s.gameObject);
+        s.CmdThrowGrenade(player);
     }
 }
