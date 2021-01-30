@@ -46,6 +46,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
+  spawnItem: {fileID: 2683203826378725459, guid: 19d03f2bca40fba47abc078c8c6a8712,
+    type: 3}
+  itemLimitNum: 10
+  itemSpawnInterval: 10
 --- !u!114 &142472775378172193
 MonoBehaviour:
   m_ObjectHideFlags: 0

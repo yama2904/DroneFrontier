@@ -51,16 +51,25 @@ public class BattleManager : NetworkBehaviour
                 int itemCount = 0;
                 int index = 0;
                 bool[] useIndex = new bool[items.Length];
-                while(itemCount < itemLimitNum)
+                float quitCount = 0;  //無限ループ防止用
+                while (itemCount < itemLimitNum)
                 {
-                    //既にスポーン済みならスキップ
-                    if (useIndex[index]) continue;
+                    quitCount++;
+                    if (quitCount > 1000)
+                    {
+                        Application.Quit();
+                        break;
+                    }
 
                     //フィールド上の全てのアイテムをスポーンしていたら終了
                     if (itemCount >= items.Length) break;
 
+                    //既にスポーン済みならスキップ
+                    if (useIndex[index]) continue;
+
+
                     //ランダムでスポーン
-                    if(Random.Range(0, 2) == 0)
+                    if (Random.Range(0, 2) == 0)
                     {
                         Item item = Instantiate(spawnItem, items[index].transform);
                         item.InitItemType();
@@ -71,7 +80,7 @@ public class BattleManager : NetworkBehaviour
                     }
 
                     index++;
-                    if(index >= items.Length)   //配列の末尾に到達したら0に戻す
+                    if (index >= items.Length)   //配列の末尾に到達したら0に戻す
                     {
                         index = 0;
                     }

@@ -911,7 +911,8 @@ public class BattleDrone : NetworkBehaviour
                 if (itemAction.SetItem(item.Type))
                 {
                     //item.type = Item.ItemType.NONE;  //通信のラグのせいで1つのアイテムを2回取るバグの防止
-                    CmdDestroyObject(item.gameObject);
+                    //CmdDestroyObject(item.gameObject);
+                    NetworkServer.Destroy(item.gameObject);
 
 
                     //デバッグ用
