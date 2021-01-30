@@ -49,6 +49,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
+  spawnItem: {fileID: 2683203826378725459, guid: 19d03f2bca40fba47abc078c8c6a8712,
+    type: 3}
   spawnPercent: 0.5
 --- !u!33 &-3962734474549516601
 MeshFilter:

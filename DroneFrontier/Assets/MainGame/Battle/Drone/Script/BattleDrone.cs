@@ -598,7 +598,7 @@ public class BattleDrone : NetworkBehaviour
     //アイテム使用
     void UseItem(ItemNum item)
     {
-        //アイテム枠1にアイテムを持っていたら使用
+        //アイテム枠にアイテムを持っていたら使用
         if (itemAction.UseItem((int)item))
         {
             PlayOneShotSE(SoundManager.SE.USE_ITEM, SoundManager.BaseSEVolume);
@@ -910,9 +910,8 @@ public class BattleDrone : NetworkBehaviour
                 Item item = other.GetComponent<Item>();
                 if (itemAction.SetItem(item.Type))
                 {
-                    //item.type = Item.ItemType.NONE;  //通信のラグのせいで1つのアイテムを2回取るバグの防止
-                    //CmdDestroyObject(item.gameObject);
-                    NetworkServer.Destroy(item.gameObject);
+                    CmdDestroy(item.netId);
+                    Destroy(item.gameObject);   //通信ラグで2回取得するバグの防止
 
 
                     //デバッグ用
@@ -920,6 +919,12 @@ public class BattleDrone : NetworkBehaviour
                 }
             }
         }
+    }
+
+    [Command]
+    void CmdDestroy(uint netId)
+    {
+        NetworkServer.Destroy(NetworkIdentity.spawned[netId].gameObject);
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -934,22 +939,6 @@ public class BattleDrone : NetworkBehaviour
             PlayOneShotSE(SoundManager.SE.WALL_STUN, SoundManager.BaseSEVolume);
         }            
     }
-
-    #region スポーンせずに元からシーン上に配置しているオブジェクトを削除する用
-
-    [Command(ignoreAuthority = true)]
-    void CmdDestroyObject(GameObject o)
-    {
-        RpcDestroy(o);
-    }
-
-    [ClientRpc]
-    void RpcDestroy(GameObject o)
-    {
-        Destroy(o);
-    }
-
-    #endregion
 
     [Command(ignoreAuthority = true)]
     void CmdDebugLog(string text)

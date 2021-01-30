@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 using Mirror;
 
 public class BattleManager : NetworkBehaviour
@@ -24,10 +25,8 @@ public class BattleManager : NetworkBehaviour
     //ゲーム終了処理を行ったらtrue
     bool isFinished = false;
 
-    //アイテム
-    [SerializeField, Tooltip("スポーンするアイテム")] Item spawnItem = null;
-    [SerializeField, Tooltip("フィールド上に出現させるアイテムの上限")] int itemLimitNum = 10;
-    [SerializeField, Tooltip("アイテムが出現する間隔")] float itemSpawnInterval = 10f;
+    //ゲーム開始時に生成
+    [SerializeField] ItemSpawnManager itemSpawnManager = null;
 
 
     public override void OnStartClient()
@@ -35,56 +34,12 @@ public class BattleManager : NetworkBehaviour
         base.OnStartClient();
 
         //フィールド上のアイテム処理
-        GameObject[] items = GameObject.FindGameObjectsWithTag(TagNameManager.ITEM_SPAWN);
         if (!MainGameManager.IsItem)
         {
+            GameObject[] items = GameObject.FindGameObjectsWithTag(TagNameManager.ITEM_SPAWN);
             foreach (GameObject item in items)
             {
                 Destroy(item);
-            }
-        }
-        else
-        {
-            if (isServer)
-            {
-                //アイテムのランダムスポーン
-                int itemCount = 0;
-                int index = 0;
-                bool[] useIndex = new bool[items.Length];
-                float quitCount = 0;  //無限ループ防止用
-                while (itemCount < itemLimitNum)
-                {
-                    quitCount++;
-                    if (quitCount > 1000)
-                    {
-                        Application.Quit();
-                        break;
-                    }
-
-                    //フィールド上の全てのアイテムをスポーンしていたら終了
-                    if (itemCount >= items.Length) break;
-
-                    //既にスポーン済みならスキップ
-                    if (useIndex[index]) continue;
-
-
-                    //ランダムでスポーン
-                    if (Random.Range(0, 2) == 0)
-                    {
-                        Item item = Instantiate(spawnItem, items[index].transform);
-                        item.InitItemType();
-                        NetworkServer.Spawn(item.gameObject, connectionToClient);
-
-                        itemCount++;  //カウントの更新
-                        useIndex[index] = true; //使用した配列要素をメモ
-                    }
-
-                    index++;
-                    if (index >= items.Length)   //配列の末尾に到達したら0に戻す
-                    {
-                        index = 0;
-                    }
-                }
             }
         }
     }
@@ -95,7 +50,12 @@ public class BattleManager : NetworkBehaviour
         singleton = this;
     }
 
-    void Start() { }
+    [ServerCallback]
+    void Start()
+    {
+        GameObject manager = Instantiate(itemSpawnManager).gameObject;
+        NetworkServer.Spawn(manager, connectionToClient);
+    }
 
     void Update()
     {

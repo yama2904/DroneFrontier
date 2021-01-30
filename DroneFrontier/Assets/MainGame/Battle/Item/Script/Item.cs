@@ -14,23 +14,24 @@ public class Item : NetworkBehaviour
 
         NONE
     }
-    [SyncVar, HideInInspector] int type = (int)ItemType.NONE;
+    [SyncVar] int type = (int)ItemType.NONE;
+    [SyncVar, HideInInspector] public uint parentNetId = 0;
     public ItemType Type
     {
         get { return (ItemType)type; }
-        //set
-        //{
-        //    int v = value;
-        //    if(v < 0)
-        //    {
-        //        v = 0;
-        //    }
-        //    if(v > (int)ItemType.NONE)
-        //    {
-        //        v = (int)ItemType.NONE - 1;
-        //    }
-        //    type = v;
-        //}
+        set
+        {
+            int v = (int)value;
+            if (v < 0)
+            {
+                v = 0;
+            }
+            if (v > (int)ItemType.NONE)
+            {
+                v = (int)ItemType.NONE - 1;
+            }
+            type = v;
+        }
     }
 
     [SerializeField] GameObject barrierObecjt = null;
@@ -41,6 +42,12 @@ public class Item : NetworkBehaviour
     public override void OnStartClient()
     {
         base.OnStartClient();
+
+        //親オブジェクトの設定
+        GameObject parent = NetworkIdentity.spawned[parentNetId].gameObject;
+        transform.SetParent(parent.transform);
+        transform.localPosition = new Vector3(0, 0, 0);
+        transform.localRotation = Quaternion.identity;
 
         if (type == (int)ItemType.NONE) return;
 
@@ -64,8 +71,14 @@ public class Item : NetworkBehaviour
     }
 
     [Server]
-    public void InitItemType()
+    public void SetRandomItemType()
     {
-        type = Random.Range(0, (int)ItemType.NONE);        
+        type = Random.Range(0, (int)ItemType.NONE);
+    }
+
+    [ServerCallback]
+    private void OnDestroy()
+    {
+        ItemSpawnManager.Singleton.NewItemSpawn();
     }
 }
