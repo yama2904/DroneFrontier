@@ -686,7 +686,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6486999264325237623}
-  - component: {fileID: -4511287616101187397}
+  - component: {fileID: 3872544501319665099}
   m_Layer: 0
   m_Name: MidBill_Battl;e
   m_TagString: Untagged
@@ -710,7 +710,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &-4511287616101187397
+--- !u!114 &3872544501319665099
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -719,15 +719,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 7808444259899902308}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b83487effaefccc4aba4ca3c955c6ab1, type: 3}
+  m_Script: {fileID: 11500000, guid: f73dce1ec6943054b8a52c5851fbb640, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  downNum: 1
   firstDownSpeed: 10
-  secondDownSpeed: 10
   firstDownTime: 60
+  firstDownPos: -8.5
+  secondDownSpeed: 10
   secondDownTime: 150
-  firsDownPos: -8.5
   secondDownPos: -28
+  thirdDownSpeed: 0
+  thirdDownTime: 0
+  thirdDownPos: 0
   billObject: {fileID: 5110377035062909816}
   particles: {fileID: 6973817192985818628}
 --- !u!1 &9188244316252557202

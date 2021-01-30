@@ -634,7 +634,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5927171516445601549}
-  - component: {fileID: -7118559141408485150}
+  - component: {fileID: -4975761491033130122}
   m_Layer: 0
   m_Name: LowBill_Battle
   m_TagString: Untagged
@@ -658,7 +658,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &-7118559141408485150
+--- !u!114 &-4975761491033130122
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -667,12 +667,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 7213309543296228638}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8edd211cc1a747744ac081d64733c0d9, type: 3}
+  m_Script: {fileID: 11500000, guid: f73dce1ec6943054b8a52c5851fbb640, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  downNum: 0
   firstDownSpeed: 10
   firstDownTime: 60
-  firsDownPos: -20
+  firstDownPos: -20
+  secondDownSpeed: 0
+  secondDownTime: 0
+  secondDownPos: 0
+  thirdDownSpeed: 0
+  thirdDownTime: 0
+  thirdDownPos: 0
   billObject: {fileID: 7636958535306418327}
   particles: {fileID: 2941714488717399030}
 --- !u!1 &7636958535306418327

@@ -246,7 +246,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8833807067985697391}
-  - component: {fileID: 5280747756319331304}
+  - component: {fileID: 3205719222733321809}
   m_Layer: 0
   m_Name: HighBill_Battle
   m_TagString: Untagged
@@ -270,7 +270,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5280747756319331304
+--- !u!114 &3205719222733321809
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -279,17 +279,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 5533979879806707836}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f9dc3e73500c44b4381d279d6232a7de, type: 3}
+  m_Script: {fileID: 11500000, guid: f73dce1ec6943054b8a52c5851fbb640, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  downNum: 2
   firstDownSpeed: 10
-  secondDownSpeed: 10
-  thirdDownSpeed: 10
   firstDownTime: 60
+  firstDownPos: -14
+  secondDownSpeed: 10
   secondDownTime: 150
-  thirdDownTime: 240
-  firsDownPos: -14
   secondDownPos: -24
+  thirdDownSpeed: 10
+  thirdDownTime: 240
   thirdDownPos: -45
   billObject: {fileID: 7216728205094458606}
   particles: {fileID: 2290854938712085763}
