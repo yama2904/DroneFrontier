@@ -236,9 +236,14 @@ public class DroneBarrierAction : NetworkBehaviour
         {
             syncHP = Useful.DecimalPointTruncation((syncHP *= 0.5f), 1);
 
+
             //デバッグ用
             Debug.Log("バリアHP: " + syncHP);
         }
+
+        //バリアの色変え
+        float value = syncHP / MAX_HP;
+        RpcSetBarrierColor(value, IsStrength);
 
         syncIsRegene = false;
         syncRegeneCountTime = 0;

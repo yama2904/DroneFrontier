@@ -14,4 +14,5 @@ public class TagNameManager : MonoBehaviour
     public const string WORLD_WALL = "WorldWall";
     public const string GOAL = "Goal";
     public const string ITEM_SPAWN = "ItemSpawn";
+    public const string TOWER = "Tower";
 }

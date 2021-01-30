@@ -33,6 +33,8 @@ public class JammingBot : NetworkBehaviour
 
     private void OnDestroy()
     {
+        if (creater == null) return; 
+
         //SetNotLockOnObject、SetNotRadarObjectを解除
         if (creater.CompareTag(TagNameManager.PLAYER))
         {

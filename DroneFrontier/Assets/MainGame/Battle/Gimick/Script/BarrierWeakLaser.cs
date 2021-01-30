@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
-public class BarrierWeakArea : MonoBehaviour
+public class BarrierWeakLaser : MonoBehaviour
 {
     [SerializeField, Tooltip("レーザーの当たり判定の半径")] float lineRadius = 0.01f;  //レーザーの半径
-    float lineRange = 100;     //射程
+    float lineRange = 3000f;     //射程
     [SerializeField, Tooltip("バリアの弱体化時間")] float barrierWeakTime = 15.0f;  //バリアの弱体化時間
 
     //キャッシュ用のtransform
@@ -21,11 +21,14 @@ public class BarrierWeakArea : MonoBehaviour
     //ヒットしているプレイヤーを格納
     List<HitPlayerData> hitPlayerDatas = new List<HitPlayerData>();
 
+    //レーザーを発生させるか
+    bool laserFlag = false;
+
     void Start()
     {
         //キャッシュ用
         cacheTransform = transform;
-        ModifyLaserLength(lineRange);
+        ModifyLaserLength(0);
     }
 
     void Update()
@@ -35,8 +38,11 @@ public class BarrierWeakArea : MonoBehaviour
             HitPlayerData h = hitPlayerDatas[i];  //名前省略
             if (h.deltaTime >= barrierWeakTime)
             {
-                //バリアの弱体化をやめる
-                h.player.UnSetBarrierWeak();
+                if (h.player != null)
+                {
+                    //バリアの弱体化をやめる
+                    h.player.UnSetBarrierWeak();
+                }
 
                 //リストから削除
                 hitPlayerDatas.RemoveAt(i);
@@ -50,6 +56,8 @@ public class BarrierWeakArea : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (!laserFlag) return;
+
         var hits = Physics.SphereCastAll(
             cacheTransform.position,    //発射座標
             lineRadius,                 //レーザーの半径
@@ -114,6 +122,7 @@ public class BarrierWeakArea : MonoBehaviour
                    .Where(h => !h.transform.CompareTag(TagNameManager.BULLET))  //弾丸除外
                    .Where(h => !h.transform.CompareTag(TagNameManager.GIMMICK)) //ギミックエリア除外
                    .Where(h => !h.transform.CompareTag(TagNameManager.JAMMING)) //ジャミングエリア除外
+                   .Where(h => !h.transform.CompareTag(TagNameManager.TOWER))   //タワー除外
                    .ToList();
     }
 
@@ -131,5 +140,14 @@ public class BarrierWeakArea : MonoBehaviour
                 hit = h;
             }
         }
+    }
+
+    public void SetLaser(bool flag)
+    {
+        if (!flag)
+        {
+            ModifyLaserLength(0);
+        }
+        laserFlag = flag;
     }
 }

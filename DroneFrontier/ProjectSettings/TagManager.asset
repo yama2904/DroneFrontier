@@ -13,6 +13,7 @@ TagManager:
   - WorldWall
   - Goal
   - ItemSpawn
+  - Tower
   layers:
   - Default
   - TransparentFX

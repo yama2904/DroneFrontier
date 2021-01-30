@@ -45,7 +45,7 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 75, y: 75, z: 75}
+  m_Size: {x: 100, y: 100, z: 100}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &2683203826378725459
 MonoBehaviour:
@@ -61,6 +61,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
+  parentNetId: 0
   barrierObecjt: {fileID: 6364627238785304273, guid: 546ac37d4f7bc9d4f9256484f999fbab,
     type: 3}
   jammingObject: {fileID: 2862172329524480209, guid: 4cf041ce608f09c4fb9ff83d40e278f8,

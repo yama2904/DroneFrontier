@@ -132,7 +132,6 @@ public class DroneItemAction : NetworkBehaviour
             //強化できなかったらアイテムを消去しない
             if (!BarrierStrength.Strength(GetComponent<BattleDrone>()))
             {
-                Debug.Log("バリア強化中なので使用できません");
                 return false;
             }
         }

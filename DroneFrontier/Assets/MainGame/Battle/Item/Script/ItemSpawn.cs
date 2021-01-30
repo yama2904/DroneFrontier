@@ -7,6 +7,7 @@ public class ItemSpawn : NetworkBehaviour
 {
     [SerializeField, Tooltip("スポーンするアイテム")] Item spawnItem = null;
     [SerializeField, Tooltip("スポーン確率(0～1)")] float spawnPercent = 0.5f;
+    [SerializeField, Tooltip("地面にアイテムが潜らない用")] float minPosY = 57f;
     Item spawnedItem = null;
     public float SpawnPercent { get { return spawnPercent; } }
 
@@ -31,9 +32,9 @@ public class ItemSpawn : NetworkBehaviour
 
     void LateUpdate()
     {
-        if(transform.position.y < 57.0f)
+        if(transform.position.y < minPosY)
         {
-            transform.position = new Vector3(transform.position.x, 57.0f, transform.position.z);
+            transform.position = new Vector3(transform.position.x, minPosY, transform.position.z);
         }
     }
 

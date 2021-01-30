@@ -63,6 +63,7 @@ public class Jamming : NetworkBehaviour
         //ジャミングを解除する
         foreach (BattleDrone p in jamingPlayers)
         {
+            if (p == null) continue;
             p.UnSetJamming();
         }
         Destroy(gameObject);
