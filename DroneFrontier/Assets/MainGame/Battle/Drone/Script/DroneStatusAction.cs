@@ -133,7 +133,7 @@ public class DroneStatusAction : NetworkBehaviour
     {
         if (barrier == null) return;
 
-        barrier.CmdReleaseBarrierWeak();
+        barrier.CmdStopBarrierWeak();
         isStatus[(int)Status.BARRIER_WEAK] = false;
     }
 
@@ -152,8 +152,8 @@ public class DroneStatusAction : NetworkBehaviour
         if (lockOn == null) return;
         if (radar == null) return;
 
-        lockOn.ReleaseLockOn();
-        radar.ReleaseRadar();
+        lockOn.StopLockOn();
+        radar.StopRadar();
         isStatus[(int)Status.JAMMING] = true;
     }
 

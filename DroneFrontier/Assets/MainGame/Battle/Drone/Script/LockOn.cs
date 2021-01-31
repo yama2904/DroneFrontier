@@ -20,6 +20,8 @@ public class LockOn : MonoBehaviour
     bool isTarget = false;   //ロックオンしているか
 
     //ロックオン処理用変数
+    Color notLockOnColor = new Color(255, 255, 255, 128);
+    Color lockOnColor = new Color(255, 0, 0, 200);
     [SerializeField] Image lockOnImage = null;    //ロックオンした際に表示する画像
     List<GameObject> notLockOnObjects = new List<GameObject>();
     public float TrackingSpeed { get; set; } = 0;     //ロックオンした際に敵にカメラを向ける速度
@@ -31,73 +33,117 @@ public class LockOn : MonoBehaviour
     {
         playerTransform = player.transform;
         cameraTransform = _camera.transform;
+    }
+
+    void Update()
+    {
+        ////ロックオン中なら追従処理
+        //if (isTarget)
+        //{
+        //    var hits = Physics.SphereCastAll(
+        //        cameraTransform.position,
+        //        20,
+        //        cameraTransform.forward,
+        //        maxDistance).ToList();
+
+        //    hits = FilterTargetObject(hits);
+        //    if(hits.Count <= 0)
+        //    {
+        //        StopLockOn();
+        //        return;
+        //    }
+
+        //    //ロックオンしていた対象がオブジェクトなどに阻まれた場合はロックオン停止
+        //    if (!ReferenceEquals(GetNearestObject(hits).transform.gameObject, Target))
+        //    {
+        //        StopLockOn();
+        //        return;
+        //    }
+
+        //    //ロックオンの対象オブジェクトが消えていないなら継続して追尾
+        //    if (Target != null)
+        //    {
+        //        Vector3 diff = targetTransform.position - cameraTransform.position;   //ターゲットとの距離
+        //        Quaternion rotation = Quaternion.LookRotation(diff);   //ロックオンしたオブジェクトの方向
+
+        //        //カメラの角度からtrackingSpeed(0～1)の速度でロックオンしたオブジェクトの角度に向く
+        //        playerTransform.rotation = Quaternion.Slerp(playerTransform.rotation, rotation, TrackingSpeed);
+        //    }
+        //    //ロックオンしている最中に対象が消滅したらロックオン解除
+        //    else
+        //    {
+        //        StopLockOn();
+        //    }
+        //}
+    }
+
+    public void Init()
+    {
+        lockOnImage.enabled = true;
+        lockOnImage.color = notLockOnColor;
 
         //自分をロックオンしない対象に入れる
         notLockOnObjects.Add(player.gameObject);
     }
 
-    void Update()
-    {
-        //ロックオン中なら追従処理
-        if (isTarget)
-        {
-            //ロックオンの対象オブジェクトが消えていないなら継続して追尾
-            if (Target != null)
-            {
-                Vector3 diff = targetTransform.position - cameraTransform.position;   //ターゲットとの距離
-                Quaternion rotation = Quaternion.LookRotation(diff);      //ロックオンしたオブジェクトの方向
-
-                //カメラの角度からtrackingSpeed(0～1)の速度でロックオンしたオブジェクトの角度に向く
-                playerTransform.rotation = Quaternion.Slerp(playerTransform.rotation, rotation, TrackingSpeed);
-            }
-            //ロックオンしている最中に対象が消えたらロックオン解除
-            else
-            {
-                isTarget = false;
-                lockOnImage.enabled = false;
-            }
-        }
-    }
-
     //リストから必要な要素だけ抜き取る
-    List<GameObject> FilterTargetObject(List<GameObject> hits)
+    List<RaycastHit> FilterTargetObject(List<RaycastHit> hits)
     {
         return hits.Where(h =>
         {
             //各要素の座標をビューポートに変換(画面左下が0:0、右上が1:1)して条件に合うものだけリストに詰め込む
             Vector3 screenPoint = _camera.WorldToViewportPoint(h.transform.position);
             return screenPoint.x > 0.25f && screenPoint.x < 0.75f && screenPoint.y > 0.15f && screenPoint.y < 0.85f && screenPoint.z > 0;
-        }).Where(h => h.CompareTag(TagNameManager.PLAYER) || h.CompareTag(TagNameManager.CPU) ||   //ロックオン対象を選択
-           h.CompareTag(TagNameManager.JAMMING_BOT))
-           .Where(h =>   //notLockOnObjects内のオブジェクトがある場合は除外
-           {
-               if (notLockOnObjects.FindIndex(o => ReferenceEquals(o, h.gameObject)) == -1)
-               {
-                   return true;
-               }
-               return false;
-           })
-          .ToList();
+        }).Where(h => h.transform.CompareTag(TagNameManager.PLAYER) ||
+                 h.transform.CompareTag(TagNameManager.CPU) ||
+                 h.transform.CompareTag(TagNameManager.JAMMING_BOT))
+                 .Where(h =>
+                 {
+                     //notLockOnObjects内のオブジェクトがある場合は除外
+                     if (notLockOnObjects.FindIndex(o => ReferenceEquals(o, h.transform.gameObject)) == -1)
+                     {
+                         return true;
+                     }
+                     return false;
+                 })
+                 .ToList();
+    }
+
+    //リスト内で最も距離が近いRaycastHitを返す
+    RaycastHit GetNearestObject(List<RaycastHit> hits)
+    {
+        RaycastHit hit = hits[0];
+        float minTargetDistance = float.MaxValue;   //初期化
+        foreach (RaycastHit h in hits)
+        {
+            //距離が最小だったら更新
+            if (h.distance < minTargetDistance)
+            {
+                minTargetDistance = h.distance;
+                hit = h;
+            }
+        }
+        return hit;
     }
 
 
     //ロックオンする
-    public void StartLockOn(float speed)
+    public void UseLockOn(float speed)
     {
         TrackingSpeed = speed;
 
-        //何もロックオンしていない場合はロックオン対象を探す
-        if (!isTarget)
-        {
-            //取得したRaycastHit配列から各RaycastHitクラスのgameObjectを抜き取ってリスト化する
-            var hits = Physics.SphereCastAll(
-                cameraTransform.position,
-                searchRadius,
-                cameraTransform.forward,
-                maxDistance).Select(h => h.transform.gameObject).ToList();
+        //取得したRaycastHit配列から必要な情報だけ抜き取ってリスト化
+        var hits = Physics.SphereCastAll(
+            cameraTransform.position,
+            searchRadius,
+            cameraTransform.forward,
+            maxDistance).ToList();
 
-            hits = FilterTargetObject(hits);
-            if (hits.Count > 0)
+        hits = FilterTargetObject(hits);
+        if (hits.Count > 0)
+        {
+            //何もロックオンしていない場合はロックオン対象を探す
+            if (!isTarget)
             {
                 float minTargetDistance = float.MaxValue;   //初期化
                 GameObject t = null;    //target
@@ -114,25 +160,62 @@ public class LockOn : MonoBehaviour
                     if (targetDistance < minTargetDistance)
                     {
                         minTargetDistance = targetDistance;
-                        t = hit.gameObject;
+                        t = hit.transform.gameObject;
                     }
                 }
+
+                //ロックオン画像の色変更
+                lockOnImage.color = lockOnColor;
+
+                //ターゲット用変数更新
                 Target = t;
                 targetTransform = t.transform;
-                lockOnImage.enabled = true;
                 isTarget = true;
             }
+            //既にロックオン済みなら追従処理
+            else
+            {
+                //Raycast内にロックオン中だったオブジェクトがない場合はロックオン解除
+                if(hits.FindIndex(h => ReferenceEquals(h.transform.gameObject, Target)) == -1)
+                {
+                    StopLockOn();
+                    return;
+                }
+
+                //ロックオンの対象オブジェクトが消えていないなら継続して追尾
+                if (Target != null)
+                {
+                    Vector3 diff = targetTransform.position - cameraTransform.position;   //ターゲットとの距離
+                    Quaternion rotation = Quaternion.LookRotation(diff);   //ロックオンしたオブジェクトの方向
+
+                    //カメラの角度からtrackingSpeed(0～1)の速度でロックオンしたオブジェクトの角度に向く
+                    playerTransform.rotation = Quaternion.Slerp(playerTransform.rotation, rotation, TrackingSpeed);
+                }
+                //ロックオンしている最中に対象が消滅したらロックオン解除
+                else
+                {
+                    StopLockOn();
+                }
+            }
+        }
+        else
+        {
+            StopLockOn();
         }
     }
 
-    public void ReleaseLockOn()
+
+    public void StopLockOn()
     {
         if (isTarget)
         {
+            //ロックオン画像の色変更
+            lockOnImage.color = notLockOnColor;
+
+            //ターゲット用変数の更新
             Target = null;
             targetTransform = null;
             isTarget = false;
-            lockOnImage.enabled = false;
         }
     }
 

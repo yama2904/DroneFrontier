@@ -162,7 +162,7 @@ public class MainGameManager : NetworkBehaviour
     void SetStartFlagTrue()
     {
         startFlag = true;
-        SoundManager.Play(SoundManager.BGM.LOOP, SoundManager.BaseBGMVolume);
+        SoundManager.Play(SoundManager.BGM.LOOP, SoundManager.BaseBGMVolume * 0.4f);
     }
 
     void Update()

@@ -63,7 +63,7 @@ public class LaserWeapon : BaseWeapon
         lb.ShotInterval = ShotInterval;
 
         NetworkServer.Spawn(lb.gameObject, connectionToClient);
-        lb.IsLocalPlayer = true;
+        lb.TargetSetIsLocalTrue(connectionToClient);
         createBullet = lb.gameObject;
     }
 

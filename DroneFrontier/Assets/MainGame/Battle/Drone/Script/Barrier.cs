@@ -296,7 +296,7 @@ public class Barrier : NetworkBehaviour
 
     //バリア弱体化解除
     [Command(ignoreAuthority = true)]
-    public void CmdReleaseBarrierWeak()
+    public void CmdStopBarrierWeak()
     {
         if (syncHP <= 0)
         {

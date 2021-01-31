@@ -340,6 +340,7 @@ public class SoundManager : MonoBehaviour
         asd.isFree = false;
         asd.audioSource.volume = AddVolumeBGM(volume);
         asd.audioSource.clip = BGMClips[(int)bgm];
+        asd.audioSource.loop = true;
         asd.audioSource.Play();
 
         playingBGM = bgm;

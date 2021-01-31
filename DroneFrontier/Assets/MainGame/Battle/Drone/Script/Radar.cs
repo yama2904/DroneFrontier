@@ -72,7 +72,7 @@ public class Radar : MonoBehaviour
     }
 
 
-    public void StartRadar()
+    public void UseRadar()
     {
         //取得したRaycastHit配列から各RaycastHitクラスのgameObjectを抜き取ってリスト化する
         var hits = Physics.SphereCastAll(
@@ -147,7 +147,7 @@ public class Radar : MonoBehaviour
         radarMask.enabled = true;
     }
 
-    public void ReleaseRadar()
+    public void StopRadar()
     {
         radarMask.enabled = false;
 

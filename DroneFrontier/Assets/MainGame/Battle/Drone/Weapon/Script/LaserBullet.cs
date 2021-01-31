@@ -8,15 +8,15 @@ public class LaserBullet : NetworkBehaviour
 {
     //パラメータ
     [SerializeField, Tooltip("レーザのサイズ(Scaleの代わり")] float scale = 1f;
-    public float ShotInterval { private get; set; } = 0;
+    [SyncVar, HideInInspector] public float ShotInterval = 0;
     float shotCountTime = 0;
     [SerializeField, Tooltip("チャージ時間")] float chargeTime = 3.0f; 
-    [SerializeField, Tooltip("レーザーの当たり判定の半径")] float lineRadius = 0.01f;
-    [SerializeField, Tooltip("レーザーの射程")] float lineRange = 4.0f; 
+    [SerializeField, Tooltip("レーザーの当たり判定の半径")] float lineRadius = 0.1f;
+    [SerializeField, Tooltip("レーザーの射程")] float lineRange = 100f; 
     public bool IsShotBeam { get; private set; } = false;
     bool isStartCharge = false;
     AudioSource audioSource = null;
-    public bool IsLocalPlayer = false;
+    bool isLocal = false;
 
     //親子付け用
     [SyncVar, HideInInspector] public uint parentNetId = 0;
@@ -139,7 +139,7 @@ public class LaserBullet : NetworkBehaviour
     }
 
     //リスト内で最も距離が近いRaycastHitを返す
-    void SearchNearestObject(out RaycastHit hit, List<RaycastHit> hits)
+    void GetNearestObject(out RaycastHit hit, List<RaycastHit> hits)
     {
         hit = hits[0];
         float minTargetDistance = float.MaxValue;   //初期化
@@ -165,9 +165,9 @@ public class LaserBullet : NetworkBehaviour
         //そのままレーザーを太くすると他プレイヤーから見ると異常に太く見えるので
         //ローカルプレイヤーのみ太くする
         float localScaleY = length;
-        if (IsLocalPlayer)
+        if (isLocal)
         {
-            localScaleY *= 30;
+            localScaleY *= 40;
         }
         lineTransform.localScale = new Vector3(length, localScaleY, 1.0f);
 
@@ -300,7 +300,7 @@ public class LaserBullet : NetworkBehaviour
             //ヒット処理
             if (hits.Count > 0)
             {
-                SearchNearestObject(out RaycastHit hit, hits);
+                GetNearestObject(out RaycastHit hit, hits);
                 GameObject o = hit.transform.gameObject;    //名前省略
 
                 if (o.CompareTag(TagNameManager.PLAYER))
@@ -429,4 +429,10 @@ public class LaserBullet : NetworkBehaviour
     }
 
     #endregion
+
+    [TargetRpc]
+    public void TargetSetIsLocalTrue(NetworkConnection target)
+    {
+        isLocal = true;
+    }
 }

@@ -97,8 +97,8 @@ MonoBehaviour:
   player: {fileID: 0}
   _camera: {fileID: 0}
   lockOnImage: {fileID: 8166928398101119077}
-  searchRadius: 250
-  maxDistance: 250
+  searchRadius: 450
+  maxDistance: 450
 --- !u!1 &8166928398101119079
 GameObject:
   m_ObjectHideFlags: 0

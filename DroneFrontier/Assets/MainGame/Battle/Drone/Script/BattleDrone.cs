@@ -64,7 +64,7 @@ public class BattleDrone : NetworkBehaviour
     }
     [SyncVar] GameObject syncMainWeapon = null;
     [SyncVar] GameObject syncSubWeapon = null;
-    public BaseWeapon.Weapon SetSubWeapon { get; set; } = BaseWeapon.Weapon.MISSILE;
+    public BaseWeapon.Weapon SetSubWeapon { get; set; } = BaseWeapon.Weapon.LASER;
     bool[] usingWeapons = new bool[(int)Weapon.NONE];    //使用中の武器
     [SerializeField, Tooltip("攻撃中の移動速度の低下率")] float atackingDownSpeed = 0.5f;   //攻撃中の移動速度の低下率
     bool initSubWeapon = false;
@@ -189,6 +189,9 @@ public class BattleDrone : NetworkBehaviour
     public override void OnStartLocalPlayer()
     {
         base.OnStartLocalPlayer();
+
+        //ロックオン初期化
+        lockOn.Init();
 
         //ブースト初期化
         boostGaugeImage.enabled = true;
@@ -349,13 +352,13 @@ public class BattleDrone : NetworkBehaviour
         {
             if (!statusAction.GetIsStatus(DroneStatusAction.Status.JAMMING))
             {
-                lockOn.StartLockOn(lockOnTrackingSpeed);
+                lockOn.UseLockOn(lockOnTrackingSpeed);
             }
         }
         //ロックオン解除
         if (Input.GetKeyUp(KeyCode.LeftShift))
         {
-            lockOn.ReleaseLockOn();
+            lockOn.StopLockOn();
         }
 
         #endregion
@@ -375,14 +378,14 @@ public class BattleDrone : NetworkBehaviour
             {
                 if (!statusAction.GetIsStatus(DroneStatusAction.Status.JAMMING))
                 {
-                    radar.StartRadar();
+                    radar.UseRadar();
                 }
             }
         }
         //レーダー終了
         if (Input.GetKeyUp(KeyCode.Q))
         {
-            radar.ReleaseRadar();
+            radar.StopRadar();
         }
 
         #endregion
@@ -671,8 +674,8 @@ public class BattleDrone : NetworkBehaviour
         if (isLocalPlayer)
         {
             //死んだのでロックオン・レーダー解除
-            lockOn.GetComponent<LockOn>().ReleaseLockOn();
-            radar.GetComponent<Radar>().ReleaseRadar();
+            lockOn.GetComponent<LockOn>().StopLockOn();
+            radar.GetComponent<Radar>().StopRadar();
         }
         PlayOneShotSE(SoundManager.SE.DEATH, SoundManager.BaseSEVolume);
     }

@@ -118,9 +118,9 @@ MonoBehaviour:
   bullet: {fileID: -2401255768182461159, guid: 28d3844a32c206344bb065ba45dff061, type: 3}
   angle: 5
   angleDiff: 3
-  speedPerSecond: 120
+  speedPerSecond: 300
   destroyTime: 0.6
-  shotPerSecond: 4
+  shotPerSecond: 1
   _recast: 2
   _maxBullets: 5
   _power: 8
@@ -184,7 +184,7 @@ AudioSource:
   Priority: 128
   DopplerLevel: 1
   MinDistance: 1
-  MaxDistance: 400
+  MaxDistance: 1500
   Pan2D: 0
   rolloffMode: 2
   BypassEffects: 0

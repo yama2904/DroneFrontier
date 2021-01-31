@@ -46,8 +46,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   player: {fileID: 0}
   _camera: {fileID: 0}
-  searchRadius: 300
-  maxDistance: 300
+  searchRadius: 780
+  maxDistance: 780
 --- !u!1 &6725737790598658850
 GameObject:
   m_ObjectHideFlags: 0

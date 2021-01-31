@@ -14,7 +14,7 @@ public class NonGameManager : MonoBehaviour
     {
         //BGMの再生
         SoundManager.StopBGM();
-        SoundManager.Play(SoundManager.BGM.DRONE_UP, SoundManager.BaseBGMVolume);
+        SoundManager.Play(SoundManager.BGM.DRONE_UP, SoundManager.BaseBGMVolume * 0.8f);
 
         if (!isStarted)
         {
