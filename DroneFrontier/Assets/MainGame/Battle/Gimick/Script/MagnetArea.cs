@@ -5,6 +5,9 @@ using Mirror;
 
 public class MagnetArea : NetworkBehaviour
 {
+    [SerializeField] ParticleSystem particle1 = null;
+    [SerializeField] ParticleSystem particle2 = null;
+
     [SerializeField, Tooltip("速度低下率")] float downPercent = 0.7f;  //下がる倍率
     public float DownPercent
     {
@@ -30,25 +33,12 @@ public class MagnetArea : NetworkBehaviour
         public BattleDrone player;
         public int id;
     }
-
     //ヒットしているプレイヤーを格納
     List<HitPlayerData> hitPlayerDatas = new List<HitPlayerData>();
 
-    //レンダラー
-    Renderer _renderer = null;
-
     //エリアが起動中か
-    bool areaFlag = true;
+    bool areaFlag = false;
 
-
-    public override void OnStartClient()
-    {
-        base.OnStartClient();
-
-        //レンダラーの初期化
-        _renderer = GetComponent<Renderer>();
-        SetArea(areaFlag);
-    }
 
     private void OnTriggerEnter(Collider other)
     {
@@ -101,10 +91,16 @@ public class MagnetArea : NetworkBehaviour
 
     public void SetArea(bool flag)
     {
-        if (!flag)
+        if (flag)
+        {
+            //オブジェクトを表示
+            particle1.Play();
+            particle2.Play();
+        }
+        else
         {
             //速度低下中の全てのプレイヤーの速度を戻す
-            foreach(HitPlayerData hpd in hitPlayerDatas)
+            foreach (HitPlayerData hpd in hitPlayerDatas)
             {
                 if (hpd.player == null) continue;
                 hpd.player.UnSetSpeedDown(hpd.id);
@@ -112,12 +108,15 @@ public class MagnetArea : NetworkBehaviour
             hitPlayerDatas.Clear();
 
             //オブジェクトを非表示
-            _renderer.enabled = false;
-        }
-        else
-        {
-            _renderer.enabled = true;
+            particle1.Stop();
+            particle2.Stop();
         }
         areaFlag = flag;
+    }
+
+    [ClientRpc]
+    public void RpcSetArea(bool flag)
+    {
+        SetArea(flag);
     }
 }

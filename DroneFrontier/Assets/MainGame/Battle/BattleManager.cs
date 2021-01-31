@@ -34,7 +34,7 @@ public class BattleManager : NetworkBehaviour
         base.OnStartClient();
 
         //フィールド上のアイテム処理
-        if (!MainGameManager.IsItem)
+        if (!MainGameManager.IsItemSpawn)
         {
             GameObject[] items = GameObject.FindGameObjectsWithTag(TagNameManager.ITEM_SPAWN);
             foreach (GameObject item in items)
@@ -53,8 +53,11 @@ public class BattleManager : NetworkBehaviour
     [ServerCallback]
     void Start()
     {
-        GameObject manager = Instantiate(itemSpawnManager).gameObject;
-        NetworkServer.Spawn(manager, connectionToClient);
+        if (MainGameManager.IsItemSpawn)
+        {
+            GameObject manager = Instantiate(itemSpawnManager).gameObject;
+            NetworkServer.Spawn(manager, connectionToClient);
+        }
     }
 
     void Update()

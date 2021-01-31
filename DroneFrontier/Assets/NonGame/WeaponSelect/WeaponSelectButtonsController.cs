@@ -67,7 +67,7 @@ public class WeaponSelectButtonsController : MonoBehaviour
 
     public void SelectItemOn()
     {
-        MainGameManager.IsItem = true;
+        MainGameManager.IsItemSpawn = true;
 
         //ボタンを押したらインスペクターで設定している色と被るので
         //どちらかボタンが押されたらデフォルトの色を解除
@@ -76,7 +76,7 @@ public class WeaponSelectButtonsController : MonoBehaviour
 
     public void SelectItemOff()
     {
-        MainGameManager.IsItem = false;
+        MainGameManager.IsItemSpawn = false;
 
         //ボタンを押したらインスペクターで設定している色と被るので
         //どちらかボタンが押されたらデフォルトの色を解除

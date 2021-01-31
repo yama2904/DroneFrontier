@@ -26,6 +26,11 @@ public class Radar : MonoBehaviour
     //レーダーに照射しないオブジェクト
     List<GameObject> notRadarObjects = new List<GameObject>();
 
+    const float ONE_SEARCH_TIME = 1f;
+    const float TWO_SEARCH_TIME = 3;
+    const float THREE_SEARCH_TIME = 7f;
+    float deltaTime = 0;  //計測用
+
 
     void Awake()
     {
@@ -74,12 +79,33 @@ public class Radar : MonoBehaviour
 
     public void UseRadar()
     {
+        radarMask.enabled = true;
+
+        //レーダーを使用し続けた秒数に応じて照射距離が変動
+        float searchLength = 0;
+        deltaTime += Time.deltaTime;
+        if (deltaTime < ONE_SEARCH_TIME) return;
+        if (deltaTime < TWO_SEARCH_TIME)
+        {
+            searchLength = maxDistance / 3;
+        }
+        else if (deltaTime < THREE_SEARCH_TIME)
+        {
+            searchLength = (maxDistance / 3) * 2;
+        }
+        else if(deltaTime >= THREE_SEARCH_TIME)
+        {
+            deltaTime = THREE_SEARCH_TIME;
+            searchLength = maxDistance;
+        }
+
+
         //取得したRaycastHit配列から各RaycastHitクラスのgameObjectを抜き取ってリスト化する
         var hits = Physics.SphereCastAll(
             cameraTransform.position,
             searchRadius,
             cameraTransform.forward,
-            maxDistance).Select(h => h.transform.gameObject).ToList();
+            searchLength).Select(h => h.transform.gameObject).ToList();
 
         hits = FilterTargetObject(hits);
         if (hits.Count > 0)
@@ -143,13 +169,12 @@ public class Radar : MonoBehaviour
                 searchDatas.Clear();
             }
         }
-
-        radarMask.enabled = true;
     }
 
     public void StopRadar()
     {
         radarMask.enabled = false;
+        deltaTime = 0;
 
         //マーカーを全て削除する
         foreach (SearchData s in searchDatas)

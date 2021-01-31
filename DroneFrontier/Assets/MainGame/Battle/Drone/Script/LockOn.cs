@@ -34,49 +34,7 @@ public class LockOn : MonoBehaviour
         playerTransform = player.transform;
         cameraTransform = _camera.transform;
     }
-
-    void Update()
-    {
-        ////ロックオン中なら追従処理
-        //if (isTarget)
-        //{
-        //    var hits = Physics.SphereCastAll(
-        //        cameraTransform.position,
-        //        20,
-        //        cameraTransform.forward,
-        //        maxDistance).ToList();
-
-        //    hits = FilterTargetObject(hits);
-        //    if(hits.Count <= 0)
-        //    {
-        //        StopLockOn();
-        //        return;
-        //    }
-
-        //    //ロックオンしていた対象がオブジェクトなどに阻まれた場合はロックオン停止
-        //    if (!ReferenceEquals(GetNearestObject(hits).transform.gameObject, Target))
-        //    {
-        //        StopLockOn();
-        //        return;
-        //    }
-
-        //    //ロックオンの対象オブジェクトが消えていないなら継続して追尾
-        //    if (Target != null)
-        //    {
-        //        Vector3 diff = targetTransform.position - cameraTransform.position;   //ターゲットとの距離
-        //        Quaternion rotation = Quaternion.LookRotation(diff);   //ロックオンしたオブジェクトの方向
-
-        //        //カメラの角度からtrackingSpeed(0～1)の速度でロックオンしたオブジェクトの角度に向く
-        //        playerTransform.rotation = Quaternion.Slerp(playerTransform.rotation, rotation, TrackingSpeed);
-        //    }
-        //    //ロックオンしている最中に対象が消滅したらロックオン解除
-        //    else
-        //    {
-        //        StopLockOn();
-        //    }
-        //}
-    }
-
+    
     public void Init()
     {
         lockOnImage.enabled = true;
@@ -87,7 +45,7 @@ public class LockOn : MonoBehaviour
     }
 
     //リストから必要な要素だけ抜き取る
-    List<RaycastHit> FilterTargetObject(List<RaycastHit> hits)
+    List<GameObject> FilterTargetObject(List<GameObject> hits)
     {
         return hits.Where(h =>
         {
@@ -109,24 +67,6 @@ public class LockOn : MonoBehaviour
                  .ToList();
     }
 
-    //リスト内で最も距離が近いRaycastHitを返す
-    RaycastHit GetNearestObject(List<RaycastHit> hits)
-    {
-        RaycastHit hit = hits[0];
-        float minTargetDistance = float.MaxValue;   //初期化
-        foreach (RaycastHit h in hits)
-        {
-            //距離が最小だったら更新
-            if (h.distance < minTargetDistance)
-            {
-                minTargetDistance = h.distance;
-                hit = h;
-            }
-        }
-        return hit;
-    }
-
-
     //ロックオンする
     public void UseLockOn(float speed)
     {
@@ -137,7 +77,7 @@ public class LockOn : MonoBehaviour
             cameraTransform.position,
             searchRadius,
             cameraTransform.forward,
-            maxDistance).ToList();
+            maxDistance).Select(h=> h.transform.gameObject).ToList();
 
         hits = FilterTargetObject(hits);
         if (hits.Count > 0)
@@ -160,7 +100,7 @@ public class LockOn : MonoBehaviour
                     if (targetDistance < minTargetDistance)
                     {
                         minTargetDistance = targetDistance;
-                        t = hit.transform.gameObject;
+                        t = hit;
                     }
                 }
 
@@ -176,7 +116,7 @@ public class LockOn : MonoBehaviour
             else
             {
                 //Raycast内にロックオン中だったオブジェクトがない場合はロックオン解除
-                if(hits.FindIndex(h => ReferenceEquals(h.transform.gameObject, Target)) == -1)
+                if(hits.FindIndex(h => ReferenceEquals(h, Target)) == -1)
                 {
                     StopLockOn();
                     return;

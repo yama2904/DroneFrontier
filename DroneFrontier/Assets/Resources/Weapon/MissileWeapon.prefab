@@ -194,7 +194,7 @@ MonoBehaviour:
   shotPos: {fileID: 3853599449480899470}
   parentNetId: 0
   missile: {fileID: 1587428493, guid: ced0661d0222eab4a80aaed9059f78c3, type: 3}
-  speedPerSecond: 400
+  speedPerSecond: 500
   destroyTime: 2
   trackingPower: 2.5
   shotPerSecond: 0.2

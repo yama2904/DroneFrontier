@@ -20,7 +20,7 @@ public class MainGameManager : NetworkBehaviour
     public static bool IsMulti { get; set; } = false;
 
     //アイテムを出現させるか
-    public static bool IsItem { get; set; } = true;
+    public static bool IsItemSpawn { get; set; } = true;
 
     //メインゲーム中か
     public static bool IsMainGaming { get; private set; } = false;

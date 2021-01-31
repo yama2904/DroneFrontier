@@ -120,7 +120,7 @@ MonoBehaviour:
   angleDiff: 3
   speedPerSecond: 300
   destroyTime: 0.6
-  shotPerSecond: 1
+  shotPerSecond: 2
   _recast: 2
   _maxBullets: 5
   _power: 8

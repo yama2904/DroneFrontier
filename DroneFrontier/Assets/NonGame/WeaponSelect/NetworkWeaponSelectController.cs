@@ -141,7 +141,7 @@ public class NetworkWeaponSelectController : NetworkBehaviour
             //SE再生
             SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
 
-            MainGameManager.IsItem = true;
+            MainGameManager.IsItemSpawn = true;
             itemOnButton.image.color = selectItemButtonColor;
             itemOffButton.image.color = notSelectButtonColor;
 
@@ -157,7 +157,7 @@ public class NetworkWeaponSelectController : NetworkBehaviour
             //SE再生
             SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
 
-            MainGameManager.IsItem = false;
+            MainGameManager.IsItemSpawn = false;
             itemOnButton.image.color = notSelectButtonColor;
             itemOffButton.image.color = selectItemButtonColor;
 
