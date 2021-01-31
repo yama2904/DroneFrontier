@@ -5,8 +5,6 @@ using Mirror;
 
 public class DroneBaseAction : NetworkBehaviour
 {
-    public bool IsLocalPlayer { get { return isLocalPlayer; } }
-
     //コンポーネント用
     Rigidbody _rigidbody = null;
     Transform cacheTransform = null;  //キャッシュ用
@@ -27,7 +25,7 @@ public class DroneBaseAction : NetworkBehaviour
     public override void OnStartClient()
     {
         base.OnStartClient();
-        if (!IsLocalPlayer)
+        if (!isLocalPlayer)
         {
             GetComponent<AudioListener>().enabled = false;
         }

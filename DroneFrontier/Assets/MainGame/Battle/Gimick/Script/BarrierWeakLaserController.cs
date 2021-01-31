@@ -12,12 +12,12 @@ public class BarrierWeakLaserController : NetworkBehaviour
     Transform cacheTransform = null;
     Vector3 angle;
 
+    //レーザーのパラメータ
     Vector3 startPos = new Vector3(150f, 998f, -293f);
     [SerializeField, Tooltip("ギミックが発生する間隔")] float interval = 60f;
     [SerializeField, Tooltip("発生間隔に追加するランダムな時間の最大値")] int MaxAddInterval = 20;
     [SerializeField, Tooltip("ギミックの発生時間")] float time = 20f;
-
-
+    
     //レーザーの角度
     const float MIN_ANGLE = 20f;
     const float MAX_ANGLE = 50f;

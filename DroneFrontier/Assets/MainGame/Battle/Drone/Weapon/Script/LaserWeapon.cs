@@ -7,11 +7,11 @@ using Mirror;
 
 public class LaserWeapon : BaseWeapon
 {
-    const float SHOT_POSSIBLE_MIN = 0.2f;        //発射可能な最低ゲージ量
+    const float SHOT_POSSIBLE_MIN = 0.2f;  //発射可能な最低ゲージ量
     [SerializeField] LaserBullet laserBullet = null;
     [SyncVar] GameObject createBullet = null;
-    [SerializeField, Tooltip("何秒発射できるか")] float maxShotTime = 5;      //最大何秒発射できるか
-    [SerializeField, Tooltip("1秒間にヒットする回数")] float hitPerSecond = 5.0f;  //1秒間にヒットする回数
+    [SerializeField, Tooltip("何秒発射できるか")] float maxShotTime = 5;
+    [SerializeField, Tooltip("1秒間にヒットする回数")] float hitPerSecond = 5.0f; 
 
     [SerializeField] Image laserGaugeImage = null;
     [SerializeField] Image laserGaugeFrameImage = null;
@@ -63,7 +63,7 @@ public class LaserWeapon : BaseWeapon
         lb.ShotInterval = ShotInterval;
 
         NetworkServer.Spawn(lb.gameObject, connectionToClient);
-        lb.isLocalPlayer = true;
+        lb.IsLocalPlayer = true;
         createBullet = lb.gameObject;
     }
 

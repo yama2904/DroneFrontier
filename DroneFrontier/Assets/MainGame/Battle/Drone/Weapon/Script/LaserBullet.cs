@@ -10,13 +10,13 @@ public class LaserBullet : NetworkBehaviour
     [SerializeField, Tooltip("レーザのサイズ(Scaleの代わり")] float scale = 1f;
     public float ShotInterval { private get; set; } = 0;
     float shotCountTime = 0;
-    [SerializeField, Tooltip("チャージ時間")] float chargeTime = 3.0f;     //チャージする時間
-    [SerializeField, Tooltip("レーザーの当たり判定の半径")] float lineRadius = 0.01f;    //レーザーの半径
-    [SerializeField, Tooltip("レーザーの射程")] float lineRange = 4.0f;      //レーザーの射程
+    [SerializeField, Tooltip("チャージ時間")] float chargeTime = 3.0f; 
+    [SerializeField, Tooltip("レーザーの当たり判定の半径")] float lineRadius = 0.01f;
+    [SerializeField, Tooltip("レーザーの射程")] float lineRange = 4.0f; 
     public bool IsShotBeam { get; private set; } = false;
     bool isStartCharge = false;
     AudioSource audioSource = null;
-    public bool isLocalPlayer = false;
+    public bool IsLocalPlayer = false;
 
     //親子付け用
     [SyncVar, HideInInspector] public uint parentNetId = 0;
@@ -120,8 +120,9 @@ public class LaserBullet : NetworkBehaviour
     List<RaycastHit> FilterTargetRaycast(List<RaycastHit> hits, GameObject shooter)
     {
         //不要な要素を除外する
-        return hits.Where(h => !h.transform.CompareTag(TagNameManager.ITEM))      //アイテム除外
+        return hits.Where(h => !h.transform.CompareTag(TagNameManager.ITEM))    //アイテム除外
                    .Where(h => !h.transform.CompareTag(TagNameManager.BULLET))  //弾丸除外
+                   .Where(h => !h.transform.CompareTag(TagNameManager.GIMMICK)) //ギミック除外
                    .Where(h =>  //撃ったプレイヤーは当たり判定から除外
                    {
                        return !ReferenceEquals(h.transform.gameObject, shooter);
@@ -164,7 +165,7 @@ public class LaserBullet : NetworkBehaviour
         //そのままレーザーを太くすると他プレイヤーから見ると異常に太く見えるので
         //ローカルプレイヤーのみ太くする
         float localScaleY = length;
-        if (isLocalPlayer)
+        if (IsLocalPlayer)
         {
             localScaleY *= 30;
         }

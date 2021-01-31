@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 
-public class Barrier : NetworkBehaviour, IBarrier, IBarrierStatus
+public class Barrier : NetworkBehaviour
 {
     const float MAX_HP = 100;
     [SyncVar] float syncHP = MAX_HP;

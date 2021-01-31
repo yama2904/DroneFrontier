@@ -5,7 +5,7 @@ using Mirror;
 
 public class ItemSpawn : NetworkBehaviour
 {
-    [SerializeField, Tooltip("スポーンするアイテム")] Item spawnItem = null;
+    [SerializeField] Item spawnItem = null;
     [SerializeField, Tooltip("スポーン確率(0～1)")] float spawnPercent = 0.5f;
     [SerializeField, Tooltip("地面にアイテムが潜らない用")] float minPosY = 57f;
     Item spawnedItem = null;

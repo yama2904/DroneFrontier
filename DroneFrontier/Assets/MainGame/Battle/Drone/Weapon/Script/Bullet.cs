@@ -65,9 +65,11 @@ public class Bullet : NetworkBehaviour
     [ServerCallback]
     protected virtual void OnTriggerEnter(Collider other)
     {
-        //撃ったプレイヤーなら当たり判定を行わない
+        //当たり判定を行わないオブジェクトは処理しない
         if (ReferenceEquals(other.gameObject, Shooter)) return;
         if (other.CompareTag(TagNameManager.BULLET)) return;
+        if (other.CompareTag(TagNameManager.ITEM)) return;
+        if (other.CompareTag(TagNameManager.GIMMICK)) return;
 
         //プレイヤーの当たり判定
         if (other.CompareTag(TagNameManager.PLAYER))

@@ -7,16 +7,16 @@ using Mirror;
 public class Shotgun : BaseWeapon
 {
     //ショットガンのパラメータ
-    [SerializeField] Bullet bullet = null;    //弾のオブジェクト
-    [SerializeField, Tooltip("拡散力")] float angle = 10.0f;     //拡散力
-    [SerializeField, Tooltip("拡散力のランダム値")] float angleDiff = 3.0f;  //角度の変動量
+    [SerializeField] Bullet bullet = null;
+    [SerializeField, Tooltip("拡散力")] float angle = 10.0f;
+    [SerializeField, Tooltip("拡散力のランダム値")] float angleDiff = 3.0f;
     AudioSource audioSource = null;
 
     //弾丸のパラメータ
-    [SerializeField, Tooltip("1秒間に進む距離")] float speedPerSecond = 10.0f;  //1秒間に進む量
-    [SerializeField, Tooltip("射程")] float destroyTime = 0.3f;      //発射してから消えるまでの時間(射程)
-    float trackingPower = 0;       //追従力
-    [SerializeField, Tooltip("1秒間に発射する弾数")] float shotPerSecond = 2.0f;    //1秒間に発射する弾数
+    [SerializeField, Tooltip("1秒間に進む距離")] float speedPerSecond = 10.0f;
+    [SerializeField, Tooltip("射程")] float destroyTime = 0.3f; 
+    float trackingPower = 0; 
+    [SerializeField, Tooltip("1秒間に発射する弾数")] float shotPerSecond = 2.0f;
 
     [SerializeField, Tooltip("リキャスト時間")] float _recast = 2f;
     [SerializeField, Tooltip("ストック可能な弾数")] int _maxBullets = 5;

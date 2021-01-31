@@ -170,7 +170,7 @@ public class BattleDrone : NetworkBehaviour
         statusAction = GetComponent<DroneStatusAction>();
 
         initSpeed = moveSpeed;
-        maxSpeed = moveSpeed * 10;
+        maxSpeed = moveSpeed * 3;
         minSpeed = moveSpeed * 0.2f;
         initRotateSpeed = rotateSpeed;
         initLockOnTrackingSpeed = lockOnTrackingSpeed;
@@ -349,15 +349,13 @@ public class BattleDrone : NetworkBehaviour
         {
             if (!statusAction.GetIsStatus(DroneStatusAction.Status.JAMMING))
             {
-                ILockOn l = lockOn;
-                l.StartLockOn(lockOnTrackingSpeed);
+                lockOn.StartLockOn(lockOnTrackingSpeed);
             }
         }
         //ロックオン解除
         if (Input.GetKeyUp(KeyCode.LeftShift))
         {
-            ILockOn l = lockOn;
-            l.ReleaseLockOn();
+            lockOn.ReleaseLockOn();
         }
 
         #endregion
@@ -377,16 +375,14 @@ public class BattleDrone : NetworkBehaviour
             {
                 if (!statusAction.GetIsStatus(DroneStatusAction.Status.JAMMING))
                 {
-                    IRadar r = radar;
-                    r.StartRadar();
+                    radar.StartRadar();
                 }
             }
         }
         //レーダー終了
         if (Input.GetKeyUp(KeyCode.Q))
         {
-            IRadar r = radar;
-            r.ReleaseRadar();
+            radar.ReleaseRadar();
         }
 
         #endregion
@@ -604,9 +600,8 @@ public class BattleDrone : NetworkBehaviour
         {
             return;
         }
-
-        ILockOn l = lockOn;
-        bw.Shot(l.Target);
+        
+        bw.Shot(lockOn.Target);
     }
 
     //アイテム使用
@@ -785,30 +780,26 @@ public class BattleDrone : NetworkBehaviour
     //ロックオンしない対象を設定
     public void SetNotLockOnObject(GameObject o)
     {
-        ILockOn l = lockOn;
-        l.SetNotLockOnObject(o);
+        lockOn.SetNotLockOnObject(o);
     }
 
     //SetNotLockOnObjectで設定したオブジェクトを解除
     public void UnSetNotLockOnObject(GameObject o)
     {
-        ILockOn l = lockOn;
-        l.UnSetNotLockOnObject(o);
+        lockOn.UnSetNotLockOnObject(o);
     }
 
 
     //レーダーに照射しない対象を設定
     public void SetNotRadarObject(GameObject o)
     {
-        IRadar r = radar;
-        r.SetNotRadarObject(o);
+        radar.SetNotRadarObject(o);
     }
 
     //SetNotRadarObjectで設定したオブジェクトを解除
     public void UnSetNotRadarObject(GameObject o)
     {
-        IRadar r = radar;
-        r.UnSetNotRadarObject(o);
+        radar.UnSetNotRadarObject(o);
     }
 
 

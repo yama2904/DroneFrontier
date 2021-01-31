@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
 
-public class LockOn : MonoBehaviour, ILockOn
+public class LockOn : MonoBehaviour
 {
     //プレイヤー系変数
     [SerializeField] BattleDrone player = null;

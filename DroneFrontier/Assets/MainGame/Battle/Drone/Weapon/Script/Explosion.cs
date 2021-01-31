@@ -14,7 +14,7 @@ public class Explosion : NetworkBehaviour
     [SerializeField, Tooltip("lengthReference長さごとにpowerDownRate%ダメージが減少する")] float lengthReference = 0.1f;    //威力減衰の基準の長さ
     AudioSource audioSource = null;
 
-    SyncList<GameObject> wasHitObjects = new SyncList<GameObject>();    //触れたオブジェクトを全て格納する
+    SyncList<GameObject> wasHitObjects = new SyncList<GameObject>();    //ダメージを与えたオブジェクトを全て格納する
     const float DESTROY_TIME = 3.0f;   //生存時間
 
 
@@ -57,23 +57,13 @@ public class Explosion : NetworkBehaviour
         Invoke(nameof(DestroyMe), DESTROY_TIME);
     }
 
-    [ServerCallback]
-    private void OnTriggerEnter(Collider other)
-    {
-        //当たり判定を行わないオブジェクトだったら処理をしない
-        if (ReferenceEquals(other.gameObject, Shooter)) return;
-        if (other.CompareTag(TagNameManager.BULLET)) return;
-
-        CmdTrigger(other.gameObject);
-    }
 
     //相手の座標を入れると距離による最終的な威力を返す
     float CalcPower(Vector3 pos)
     {
         //相手との距離と求める
         float distance = Vector3.Distance(transform.position, pos);
-
-
+        
         //デバッグ用
         Debug.Log("距離: " + distance);
 
@@ -89,52 +79,51 @@ public class Explosion : NetworkBehaviour
         return power * Mathf.Pow(1 - powerDownRate, distance / lengthReference);
     }
 
+    [ServerCallback]
     void DestroyMe()
     {
         NetworkServer.Destroy(gameObject);
     }
 
-    [Command(ignoreAuthority = true)]
-    void CmdTrigger(GameObject other)
+
+    [ServerCallback]
+    private void OnTriggerEnter(Collider other)
     {
+        //当たり判定を行わないオブジェクトだったら処理をしない
+        if (ReferenceEquals(other.gameObject, Shooter)) return;
+        if (other.CompareTag(TagNameManager.BULLET)) return;
+        if (other.CompareTag(TagNameManager.ITEM)) return;
+        if (other.CompareTag(TagNameManager.GIMMICK)) return;
+
         if (other.CompareTag(TagNameManager.PLAYER))
         {
             //既にヒット済のオブジェクトはスルー
             foreach (GameObject o in wasHitObjects)
             {
-                if (ReferenceEquals(other, o))
-                {
-                    return;
-                }
+                if (ReferenceEquals(other, o)) return;
             }
-            other.GetComponent<BattleDrone>().CmdDamage(CalcPower(other.transform.position));
-            wasHitObjects.Add(other);
-
+            other.GetComponent<BattleDrone>().CmdDamage(power);
+            wasHitObjects.Add(other.gameObject);
 
             //デバッグ用
-            Debug.Log("威力: " + CalcPower(other.transform.position));
+            Debug.Log(other.name + "にExplosionで" + CalcPower(other.transform.position) + "ダメージ");
         }
         else if (other.CompareTag(TagNameManager.JAMMING_BOT))
         {
             JammingBot jb = other.GetComponent<JammingBot>();
-            if (ReferenceEquals(jb.creater, Shooter))
-            {
-                return;
-            }
+            if (ReferenceEquals(jb.creater, Shooter)) return;
+
             //既にヒット済のオブジェクトはスルー
             foreach (GameObject o in wasHitObjects)
             {
-                if (ReferenceEquals(other.gameObject, o))
-                {
-                    return;
-                }
+                if (ReferenceEquals(other.gameObject, o)) return;
             }
-            jb.CmdDamage(CalcPower(other.transform.position));
+            other.GetComponent<JammingBot>().CmdDamage(power);
             wasHitObjects.Add(other.gameObject);
 
 
             //デバッグ用
-            Debug.Log("威力: " + CalcPower(other.transform.position));
+            Debug.Log(other.name + "にExplosionで" + CalcPower(other.transform.position) + "ダメージ");
         }
     }
 }

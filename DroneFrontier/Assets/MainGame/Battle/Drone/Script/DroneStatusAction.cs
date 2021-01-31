@@ -41,22 +41,24 @@ public class DroneStatusAction : NetworkBehaviour
 
     public void Init(LockOn lockOn, Radar radar, float minSpeed, float maxSpeed)
     {
-        //配列初期化
-        for (int i = 0; i < (int)Status.NONE; i++)
-        {
-            isStatus.Add(false);
-        }
-
         barrier = GetComponent<DroneBarrierAction>();
         this.lockOn = lockOn;
         this.radar = radar;
         this.minSpeed = minSpeed;
         this.maxSpeed = maxSpeed;
         createdStunScreenMask = Instantiate(stunScreenMask);
+
+        //配列初期化
+        for (int i = 0; i < (int)Status.NONE; i++)
+        {
+            isStatus.Add(false);
+        }
     }
 
     void Update()
     {
+        if (!isLocalPlayer) return;
+
         //フラグの更新
         if (barrier != null)
         {
@@ -81,6 +83,7 @@ public class DroneStatusAction : NetworkBehaviour
         if (!useList)
         {
             speedDownList.Clear();
+            isStatus[(int)Status.SPEED_DOWN] = false;
         }
     }
 
@@ -180,6 +183,7 @@ public class DroneStatusAction : NetworkBehaviour
         }
 
         speedDownList.Add(speedPercent);
+        isStatus[(int)Status.SPEED_DOWN] = true;
         return speedDownList.Count - 1;
     }
 

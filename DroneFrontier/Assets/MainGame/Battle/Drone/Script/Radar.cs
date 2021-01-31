@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
 
-public class Radar : MonoBehaviour, IRadar
+public class Radar : MonoBehaviour
 {
     [SerializeField] BattleDrone player = null;
     [SerializeField] Camera _camera = null;

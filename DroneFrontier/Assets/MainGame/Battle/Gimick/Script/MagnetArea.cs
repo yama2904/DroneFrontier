@@ -1,14 +1,28 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Mirror;
 
-public class MagnetArea : MonoBehaviour
+public class MagnetArea : NetworkBehaviour
 {
     [SerializeField, Tooltip("速度低下率")] float downPercent = 0.7f;  //下がる倍率
-    public float DownPercent { get { return downPercent; } }
-
-    const float MIN_SIZE = 400f;
-    const float MAX_SIZE = 800f;
+    public float DownPercent
+    {
+        get { return downPercent; }
+        set
+        {
+            float v = value;
+            if(v <= 0)
+            {
+                v = 0;
+            }
+            if(v >= 1f)
+            {
+                v = 1f;
+            }
+            downPercent = 1f;
+        }
+    }
 
     //バグ防止用
     class HitPlayerData
@@ -20,9 +34,26 @@ public class MagnetArea : MonoBehaviour
     //ヒットしているプレイヤーを格納
     List<HitPlayerData> hitPlayerDatas = new List<HitPlayerData>();
 
+    //レンダラー
+    Renderer _renderer = null;
+
+    //エリアが起動中か
+    bool areaFlag = true;
+
+
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+
+        //レンダラーの初期化
+        _renderer = GetComponent<Renderer>();
+        SetArea(areaFlag);
+    }
 
     private void OnTriggerEnter(Collider other)
     {
+        if (!areaFlag) return;
+
         //プレイヤーのみ判定
         if (!other.CompareTag(TagNameManager.PLAYER)) return;
 
@@ -36,8 +67,8 @@ public class MagnetArea : MonoBehaviour
 
         //プレイヤーに状態異常を与えてリストに格納
         HitPlayerData hp = new HitPlayerData();
-        hp.id = player.SetSpeedDown(downPercent);
         hp.player = player;
+        hp.id = player.SetSpeedDown(downPercent);
         hitPlayerDatas.Add(hp);
 
 
@@ -47,6 +78,8 @@ public class MagnetArea : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
+        if (!areaFlag) return;
+
         //プレイヤーのみ判定
         if (!other.CompareTag(TagNameManager.PLAYER)) return;
 
@@ -64,5 +97,27 @@ public class MagnetArea : MonoBehaviour
 
         //デバッグ用
         Debug.Log(other.GetComponent<BattleDrone>().name + ": out磁場エリア");
+    }
+
+    public void SetArea(bool flag)
+    {
+        if (!flag)
+        {
+            //速度低下中の全てのプレイヤーの速度を戻す
+            foreach(HitPlayerData hpd in hitPlayerDatas)
+            {
+                if (hpd.player == null) continue;
+                hpd.player.UnSetSpeedDown(hpd.id);
+            }
+            hitPlayerDatas.Clear();
+
+            //オブジェクトを非表示
+            _renderer.enabled = false;
+        }
+        else
+        {
+            _renderer.enabled = true;
+        }
+        areaFlag = flag;
     }
 }

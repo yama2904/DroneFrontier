@@ -12,10 +12,10 @@ public class MissieWeapon : BaseWeapon
     bool setMissile = false;
 
     //弾丸のパラメータ
-    [SerializeField, Tooltip("1秒間に進む距離")] float speedPerSecond = 13.0f;  //1秒間に進む量
-    [SerializeField, Tooltip("射程")] float destroyTime = 2.0f;      //発射してから消えるまでの時間(射程)
-    [SerializeField, Tooltip("誘導力")] float trackingPower = 2.3f;  //追従力
-    [SerializeField, Tooltip("1秒間に発射する弾数")] float shotPerSecond = 1.0f;    //1秒間に発射する弾数
+    [SerializeField, Tooltip("1秒間に進む距離")] float speedPerSecond = 13.0f; 
+    [SerializeField, Tooltip("射程")] float destroyTime = 2.0f;
+    [SerializeField, Tooltip("誘導力")] float trackingPower = 2.3f;
+    [SerializeField, Tooltip("1秒間に発射する弾数")] float shotPerSecond = 1.0f;
 
     [SerializeField, Tooltip("リキャスト時間")] float _recast = 10f;
     [SerializeField, Tooltip("ストック可能な弾数")] int _maxBullets = 3;

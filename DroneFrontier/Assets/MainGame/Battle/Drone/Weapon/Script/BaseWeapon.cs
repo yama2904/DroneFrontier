@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 
-public abstract class BaseWeapon : NetworkBehaviour, IWeapon
+public abstract class BaseWeapon : NetworkBehaviour
 {
     [SerializeField] protected Transform weaponLocalPos = null;
     [SerializeField] protected Transform shotPos = null;
