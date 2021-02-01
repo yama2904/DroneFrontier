@@ -46,6 +46,14 @@ public class MatchingManager : NetworkBehaviour
         mc.Init(isServer);
         createMatchingScreen = mc.gameObject;
 
+        if (MainGameManager.Mode == MainGameManager.GameMode.RACE)
+        {
+            if (!isServer)
+            {
+                GetComponent<NetworkRoomPlayer>().CmdChangeReadyState(true);
+            }
+        }
+
         CmdAddPlayerData();
     }
 
@@ -174,6 +182,9 @@ public class MatchingManager : NetworkBehaviour
     public void RpcStartRace()
     {
         SoundManager.StopBGM();
-        GetComponent<NetworkRoomPlayer>().CmdChangeReadyState(true);
+        if (isServer)
+        {
+            GetComponent<NetworkRoomPlayer>().CmdChangeReadyState(true);
+        }
     }
 }

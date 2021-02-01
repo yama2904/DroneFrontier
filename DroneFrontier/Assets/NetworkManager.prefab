@@ -47,7 +47,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dontDestroyOnLoad: 1
-  runInBackground: 1
+  runInBackground: 0
   autoStartServerBuild: 1
   showDebugMessages: 0
   serverTickRate: 30

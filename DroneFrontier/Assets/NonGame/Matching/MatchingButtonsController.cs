@@ -7,7 +7,6 @@ using Mirror;
 
 public class MatchingButtonsController : NetworkBehaviour
 {
-    [SerializeField] Canvas canvas = null;
     [SerializeField] Text Text1PName = null;
     [SerializeField] Text Text2PName = null;
     [SerializeField] Text Text3PName = null;
