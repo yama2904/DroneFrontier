@@ -125,7 +125,7 @@ public class Shotgun : BaseWeapon
         {
             for (int j = -1; j <= 1; j++)
             {
-                CmdCreateBullet(shotPos.position, transform.rotation, angle * i, angle * j, target);
+                CmdCreateBullet(shotPos.position, shotPos.rotation, angle * i, angle * j, target);
             }
         }
 

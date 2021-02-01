@@ -64,12 +64,15 @@ public class BattleDrone : NetworkBehaviour
     }
     [SyncVar] GameObject syncMainWeapon = null;
     [SyncVar] GameObject syncSubWeapon = null;
-    public BaseWeapon.Weapon SetSubWeapon { get; set; } = BaseWeapon.Weapon.LASER;
+    public BaseWeapon.Weapon SetSubWeapon { get; set; } = BaseWeapon.Weapon.SHOTGUN;
     bool[] usingWeapons = new bool[(int)Weapon.NONE];    //使用中の武器
     [SerializeField, Tooltip("攻撃中の移動速度の低下率")] float atackingDownSpeed = 0.5f;   //攻撃中の移動速度の低下率
     bool initSubWeapon = false;
 
     //死亡処理用
+    [SerializeField] Image stockIcon = null;
+    [SerializeField] Text stockText = null;
+    [SyncVar, SerializeField] int syncStock = 2;
     Quaternion deathRotate = Quaternion.Euler(28, -28, -28);
     float deathRotateSpeed = 2f;
     [SyncVar] float syncGravityAccele = 1f;  //落下加速用
@@ -77,7 +80,6 @@ public class BattleDrone : NetworkBehaviour
     public bool IsDestroy { get { return syncIsDestroy; } }
 
     //リスポーン用
-    [SyncVar, SerializeField] int syncStock = 2;
     [SerializeField, Tooltip("死亡後の落下時間")] float fallTime = 5.0f;
     Vector3 startPos;
     Quaternion startRotate;
@@ -208,6 +210,11 @@ public class BattleDrone : NetworkBehaviour
         //武器の初期化
         CmdCreateMainWeapon();
         CmdCreateSubWeapon();
+
+        //残機UIの初期化
+        stockIcon.enabled = true;
+        stockText.enabled = true;
+        stockText.text = syncStock.ToString();
 
         //初期値保存
         startPos = transform.position;
@@ -706,9 +713,18 @@ public class BattleDrone : NetworkBehaviour
         //落下停止
         syncIsDestroy = false;
 
+        //残機UI変更
+        TargetSetStockTect(connectionToClient, syncStock.ToString());
+
         //一時的に無敵
         nonDamage = true;
         Invoke(nameof(SetNonDamageFalse), nonDamageTime);
+    }
+
+    [TargetRpc]
+    void TargetSetStockTect(NetworkConnection target, string text)
+    {
+        stockText.text = text;
     }
 
     void SetNonDamageFalse()

@@ -19,6 +19,12 @@ public class DroneStatusAction : NetworkBehaviour
     }
     List<bool> isStatus = new List<bool>();   //状態異常が付与されているか
 
+    //アイコン
+    [SerializeField] Image barrierWeakIcon = null;
+    [SerializeField] Image jammingIcon = null;
+    [SerializeField] Image speedDownIcon = null;
+
+
     //バリア用
     DroneBarrierAction barrier = null;
 
@@ -114,6 +120,7 @@ public class DroneStatusAction : NetworkBehaviour
 
         barrier.CmdBarrierStrength(strengthPercent, time);
         isStatus[(int)Status.BARRIER_STRENGTH] = true;
+        
         return true;
     }
 
@@ -126,6 +133,9 @@ public class DroneStatusAction : NetworkBehaviour
 
         barrier.CmdBarrierWeak();
         isStatus[(int)Status.BARRIER_WEAK] = true;
+
+        //アイコン表示
+        barrierWeakIcon.enabled = true;
     }
 
     //バリア弱体化解除
@@ -135,6 +145,9 @@ public class DroneStatusAction : NetworkBehaviour
 
         barrier.CmdStopBarrierWeak();
         isStatus[(int)Status.BARRIER_WEAK] = false;
+
+        //アイコン非表示
+        barrierWeakIcon.enabled = false;
     }
 
 
@@ -155,12 +168,18 @@ public class DroneStatusAction : NetworkBehaviour
         lockOn.StopLockOn();
         radar.StopRadar();
         isStatus[(int)Status.JAMMING] = true;
+
+        //アイコン表示
+        jammingIcon.enabled = true;
     }
 
     //ジャミング解除
     public void UnSetJamming()
     {
         isStatus[(int)Status.JAMMING] = false;
+
+        //アイコン非表示
+        jammingIcon.enabled = false;
     }
 
 
@@ -184,6 +203,10 @@ public class DroneStatusAction : NetworkBehaviour
 
         speedDownList.Add(speedPercent);
         isStatus[(int)Status.SPEED_DOWN] = true;
+
+        //アイコン表示
+        speedDownIcon.enabled = true;
+
         return speedDownList.Count - 1;
     }
 
@@ -192,5 +215,8 @@ public class DroneStatusAction : NetworkBehaviour
     {
         speed /= speedDownList[id];
         speedDownList[id] = NOT_USE_VALUE;
+
+        //アイコン非表示
+        speedDownIcon.enabled = false;
     }
 }
