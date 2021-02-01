@@ -31,6 +31,7 @@ public class BattleManager : NetworkBehaviour
     //残り時間
     [SerializeField] Text timeText = null;
     [SerializeField, Tooltip("制限時間(分)")] int maxTime = 5;
+    Coroutine countCoroutine = null;
     float countTime = 0;
 
 
@@ -64,7 +65,7 @@ public class BattleManager : NetworkBehaviour
             GameObject manager = Instantiate(itemSpawnManager).gameObject;
             NetworkServer.Spawn(manager, connectionToClient);
         }
-        StartCoroutine(CountTime());
+        countCoroutine = StartCoroutine(CountTime());
     }
 
     void Update()
@@ -107,16 +108,7 @@ public class BattleManager : NetworkBehaviour
             //最後のプレイヤーが残ったら終了処理
             if (PlayerData.droneNum <= 1)
             {
-                if (!isFinished)
-                {
-                    string[] ranking = new string[playerDatas.Count];
-                    foreach (PlayerData pd in playerDatas)
-                    {
-                        ranking[pd.ranking - 1] = pd.drone.name;
-                    }
-                    MainGameManager.Singleton.FinishGame(ranking);
-                    isFinished = true;
-                }
+                FinishGame();
             }
         }
     }
@@ -131,15 +123,68 @@ public class BattleManager : NetworkBehaviour
         //スタートフラグが立つまで停止
         while (!MainGameManager.Singleton.StartFlag) yield return null;
 
-        yield return new WaitForSeconds(60f);
-        for(int i = maxTime - 1; i > 0; i--)
+        if (maxTime > 1)
         {
-            timeText.enabled = true;
-            timeText.text = "残 り " + i + " 分";
+            yield return new WaitForSeconds(60f);
+        }
+
+        for (int i = maxTime - 1; i > 1; i--)
+        {
+            RpcSetTextEnabled(true);
+            RpcSetText("残 り " + i + " 分");
 
             yield return new WaitForSeconds(4f);
-            timeText.enabled = false;
+            RpcSetTextEnabled(true);
             yield return new WaitForSeconds(56f);
+        }
+
+        RpcSetTextEnabled(true);
+        RpcSetText("残 り " + 1 + " 分");
+        yield return new WaitForSeconds(1f);
+
+        for (int i = 59; i >= 0; i--)
+        {
+            RpcSetText(i + " 秒");
+            yield return new WaitForSeconds(1f);
+        }
+
+        int rank = 1;
+        foreach (PlayerData pd in playerDatas)
+        {
+            if (pd.isDestroy) continue;
+            pd.ranking = rank;
+            rank++;
+        }
+
+        FinishGame();
+    }
+
+    [ClientRpc]
+    void RpcSetText(string text)
+    {
+        timeText.text = text;
+    }
+
+    [ClientRpc]
+    void RpcSetTextEnabled(bool flag)
+    {
+        timeText.enabled = flag;
+    }
+
+    [Server]
+    void FinishGame()
+    {
+        if (!isFinished)
+        {
+            string[] ranking = new string[playerDatas.Count];
+            foreach (PlayerData pd in playerDatas)
+            {
+                ranking[pd.ranking - 1] = pd.drone.name;
+            }
+            MainGameManager.Singleton.FinishGame(ranking);
+            isFinished = true;
+
+            StopCoroutine(countCoroutine);
         }
     }
 
