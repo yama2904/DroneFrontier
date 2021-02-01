@@ -99,6 +99,9 @@ public class DroneStatusAction : NetworkBehaviour
         {
             isStatus[i] = false;
         }
+        barrierWeakIcon.enabled = false;
+        jammingIcon.enabled = false;
+        speedDownIcon.enabled = false;
         createdStunScreenMask.UnSetStun();
         speedDownList.Clear();
     }

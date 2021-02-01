@@ -759,6 +759,10 @@ public class BattleDrone : NetworkBehaviour
 
             //バリア復活
             barrierAction.CmdInit();
+
+            //SEストップ
+            StopSE((int)SE.MAGNETIC_AREA);
+            StopSE((int)SE.JAMMING);
         }
 
         //角度の初期化

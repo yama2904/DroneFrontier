@@ -29,6 +29,11 @@ public class NewNetworkRoomManager : NetworkRoomManager
         if (MainGameManager.IsMainGaming)
         {
             MainGameManager.Singleton.disconnectionClientCount++;
+            int index = MatchingManager.playerDatas.FindIndex(pd => ReferenceEquals(pd.conn, conn));
+            if(index != -1)
+            {
+                MatchingManager.playerDatas.RemoveAt(index);
+            }
         }
         else
         {
