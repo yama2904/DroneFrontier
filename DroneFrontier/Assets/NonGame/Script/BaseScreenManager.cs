@@ -16,7 +16,6 @@ public class BaseScreenManager
         KURIBOCCHI,
         CPU_SELECT,
         WEAPON_SELECT,
-        MATCHING,
         RESULT,
 
         NONE
@@ -35,7 +34,6 @@ public class BaseScreenManager
         paths[(int)Screen.KURIBOCCHI] = "KuribocchiScreen";
         paths[(int)Screen.CPU_SELECT] = "CPUSelectScreen";
         paths[(int)Screen.WEAPON_SELECT] = "WeaponSelectScreen";
-        paths[(int)Screen.MATCHING] = "MatchingScreen";
         paths[(int)Screen.RESULT] = "ResultScreen";
 
         nowScreen = (int)Screen.NONE;
