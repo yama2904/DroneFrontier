@@ -10,9 +10,9 @@ public class LaserBullet : NetworkBehaviour
     [SerializeField, Tooltip("レーザのサイズ(Scaleの代わり")] float scale = 1f;
     [SyncVar, HideInInspector] public float ShotInterval = 0;
     float shotCountTime = 0;
-    [SerializeField, Tooltip("チャージ時間")] float chargeTime = 3.0f; 
+    [SerializeField, Tooltip("チャージ時間")] float chargeTime = 3.0f;
     [SerializeField, Tooltip("レーザーの当たり判定の半径")] float lineRadius = 0.1f;
-    [SerializeField, Tooltip("レーザーの射程")] float lineRange = 100f; 
+    [SerializeField, Tooltip("レーザーの射程")] float lineRange = 100f;
     public bool IsShotBeam { get; private set; } = false;
     bool isStartCharge = false;
     AudioSource audioSource = null;
@@ -36,14 +36,9 @@ public class LaserBullet : NetworkBehaviour
     [SerializeField] Transform startObjcectTransform = null;
     ParticleSystem[] startChilds;
 
-    //Midway用変数
-    [SerializeField] Transform midwayObjectTransform = null;
+    //Line用変数
     [SerializeField] ParticleSystem lineParticle = null;
-    [SerializeField] ParticleSystem thunderParticle = null;
     Transform lineTransform;
-    Transform thunderTransform;
-    float initThunderScaleZ;    //初期のthunderの長さ(敵にレーザーが当たった際に使う)
-    float initThunderPosZ;      //初期のthunderのz座標
 
     //End用変数
     [SerializeField] Transform endObjectTransform = null;
@@ -73,11 +68,6 @@ public class LaserBullet : NetworkBehaviour
         //Lineオブジェクト
         lineTransform = lineParticle.transform;
 
-        //thunderオブジェクト
-        thunderTransform = thunderParticle.transform;
-        initThunderScaleZ = thunderTransform.localScale.z;   //初期の長さを保存
-        initThunderPosZ = thunderTransform.localPosition.z;  //初期のz座標を保存
-
 
         //Start用処理//
         startChilds = new ParticleSystem[startObjcectTransform.childCount];
@@ -87,7 +77,7 @@ public class LaserBullet : NetworkBehaviour
             Vector3 sLocalScale = startChilds[i].transform.localScale;
             startChilds[i].transform.localScale = new Vector3(scale * sLocalScale.x, scale * sLocalScale.y, scale * sLocalScale.z);
         }
-        startObjcectTransform.localRotation = midwayObjectTransform.localRotation;  //Midwayと同じ向き
+        startObjcectTransform.localRotation = lineTransform.localRotation;  //Midwayと同じ向き
 
 
         //End用処理//
@@ -99,7 +89,7 @@ public class LaserBullet : NetworkBehaviour
             endChilds.Add(ps);
         }
         //初期座標の保存
-        endObjectTransform.localRotation = midwayObjectTransform.localRotation;   //Midwayと同じ向き
+        endObjectTransform.localRotation = lineTransform.localRotation;   //Midwayと同じ向き
 
         audioSource = GetComponent<AudioSource>();
         ModifyLaserLength(lineRange);
@@ -170,22 +160,16 @@ public class LaserBullet : NetworkBehaviour
             localScaleY *= 40;
         }
         lineTransform.localScale = new Vector3(length, localScaleY, 1.0f);
-
-        //Thunderオブジェクト
-        Vector3 thunderScale = thunderTransform.localScale;
-        thunderTransform.localScale = new Vector3(thunderScale.x, thunderScale.y, initThunderScaleZ * length);
-        Vector3 thunderPos = thunderTransform.localPosition;
-        thunderTransform.localPosition = new Vector3(thunderPos.x, thunderPos.y, initThunderPosZ * length);
     }
-    
+
     [Command(ignoreAuthority = true)]
-    void CmdCallRpcModifyLaserLength(float length)
+    void CmdCallModifyLaserLength(float length)
     {
-        RpcModifyLaserLength(length);
+        RpcCallModifyLaserLength(length);
     }
 
     [ClientRpc]
-    void RpcModifyLaserLength(float length)
+    void RpcCallModifyLaserLength(float length)
     {
         ModifyLaserLength(length);
     }
@@ -229,7 +213,6 @@ public class LaserBullet : NetworkBehaviour
 
         //Midwayを止める
         lineParticle.Stop();
-        thunderParticle.Stop();
 
         //Endを止める
         foreach (ParticleSystem p in endChilds)
@@ -245,7 +228,7 @@ public class LaserBullet : NetworkBehaviour
     #endregion
 
 
-    public void Shot(GameObject shooter, float power)
+    public void Shot(GameObject shooter, float power, GameObject target)
     {
         #region Charge
 
@@ -286,13 +269,25 @@ public class LaserBullet : NetworkBehaviour
             //前回ヒットして発射間隔分の時間が経過していなかったら当たり判定を行わない
             if (shotCountTime < ShotInterval) return;
 
+
+            //Y軸の誘導
+            if (isServer)
+            {
+                RpcRotateBullet(target);
+            }
+            else
+            {
+                CmdCallRpcRotateBullet(target);
+            }
+
+
             //レーザーの射線上にヒットした全てのオブジェクトを調べる
             var hits = Physics.SphereCastAll(
-                lineTransform.position,    //レーザーの発射座標
-                lineRadius,                //レーザーの半径
-                lineTransform.forward,     //レーザーの正面
-                lineRange)                 //射程
-                .ToList();  //リスト化  
+                        lineTransform.position,    //レーザーの発射座標
+                        lineRadius,                //レーザーの半径
+                        lineTransform.forward,     //レーザーの正面
+                        lineRange)                 //射程
+                        .ToList();  //リスト化  
 
             hits = FilterTargetRaycast(hits, shooter);
             float lineLength = lineRange;   //レーザーの長さ
@@ -318,7 +313,6 @@ public class LaserBullet : NetworkBehaviour
                 //ヒットした場所にEndオブジェクトを移動させる
                 CmdCallRpcSetEndObjectTransform(hit.point);
 
-
                 shotCountTime = 0;  //発射間隔のカウントをリセット
             }
             else
@@ -327,10 +321,34 @@ public class LaserBullet : NetworkBehaviour
                 CmdCallRpcSetEndObjectTransform(lineTransform.position + (lineTransform.forward * lineRange));
             }
             //レーザーの長さに応じてオブジェクトの座標やサイズを変える
-            CmdCallRpcModifyLaserLength(lineLength);
+            CmdCallModifyLaserLength(lineLength);
         }
 
         #endregion
+    }
+
+    [Command(ignoreAuthority = true)]
+    void CmdCallRpcRotateBullet(GameObject target)
+    {
+        RpcRotateBullet(target);
+    }
+
+    [ClientRpc]
+    void RpcRotateBullet(GameObject target)
+    {
+        if (target != null)
+        {
+            Vector3 diff = target.transform.position - lineTransform.position;
+            Quaternion rotation = Quaternion.LookRotation(diff);  //敵の方向
+
+
+            //カメラの角度からtrackingSpeed(0～1)の速度でロックオンしたオブジェクトの角度に向く
+            lineTransform.rotation = Quaternion.Slerp(lineTransform.rotation, rotation, 0.3f);
+        }
+        else
+        {
+            lineTransform.localRotation = Quaternion.identity;
+        }
     }
 
     #region ChargePlay
@@ -397,7 +415,6 @@ public class LaserBullet : NetworkBehaviour
 
         //Midwayの再生
         lineParticle.Play();
-        thunderParticle.Play();
 
         //Endの再生
         foreach (ParticleSystem p in endChilds)

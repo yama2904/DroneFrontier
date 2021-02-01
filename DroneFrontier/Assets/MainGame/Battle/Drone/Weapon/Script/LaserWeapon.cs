@@ -147,7 +147,7 @@ public class LaserWeapon : BaseWeapon
         }
 
         LaserBullet lb = createBullet.GetComponent<LaserBullet>();
-        lb.Shot(shooter, BulletPower);
+        lb.Shot(shooter, BulletPower, target);
         isShots[(int)ShotFlag.SHOT_SHOTING] = true;
 
         //撃っている間はゲージを減らす
@@ -161,5 +161,5 @@ public class LaserWeapon : BaseWeapon
                 isShots[(int)ShotFlag.SHOT_SHOTING] = false;
             }
         }
-    }
+    }    
 }
