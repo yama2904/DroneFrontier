@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
+using UnityEngine.UI;
 using Mirror;
 
 public class BattleManager : NetworkBehaviour
@@ -28,6 +28,11 @@ public class BattleManager : NetworkBehaviour
     //ゲーム開始時に生成
     [SerializeField] ItemSpawnManager itemSpawnManager = null;
 
+    //残り時間
+    [SerializeField] Text timeText = null;
+    [SerializeField, Tooltip("制限時間(分)")] int maxTime = 5;
+    float countTime = 0;
+
 
     public override void OnStartClient()
     {
@@ -42,6 +47,7 @@ public class BattleManager : NetworkBehaviour
                 Destroy(item);
             }
         }
+        timeText.enabled = false;
     }
 
     void Awake()
@@ -58,6 +64,7 @@ public class BattleManager : NetworkBehaviour
             GameObject manager = Instantiate(itemSpawnManager).gameObject;
             NetworkServer.Spawn(manager, connectionToClient);
         }
+        StartCoroutine(CountTime());
     }
 
     void Update()
@@ -89,6 +96,7 @@ public class BattleManager : NetworkBehaviour
                     else
                     {
                         pd.drone.SetCameraDepth(5);
+                        break;
                     }
                 } while (useIndex != initIndex);
             }
@@ -110,6 +118,28 @@ public class BattleManager : NetworkBehaviour
                     isFinished = true;
                 }
             }
+        }
+    }
+
+    [ServerCallback]
+    private void FixedUpdate()
+    {
+    }
+
+    IEnumerator CountTime()
+    {
+        //スタートフラグが立つまで停止
+        while (!MainGameManager.Singleton.StartFlag) yield return null;
+
+        yield return new WaitForSeconds(60f);
+        for(int i = maxTime - 1; i > 0; i--)
+        {
+            timeText.enabled = true;
+            timeText.text = "残 り " + i + " 分";
+
+            yield return new WaitForSeconds(4f);
+            timeText.enabled = false;
+            yield return new WaitForSeconds(56f);
         }
     }
 

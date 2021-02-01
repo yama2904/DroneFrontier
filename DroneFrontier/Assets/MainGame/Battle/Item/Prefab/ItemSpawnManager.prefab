@@ -63,5 +63,5 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0.1
   maxSpawnNum: 10
-  spawnInterval: 10
+  spawnInterval: 30
   spawnNum: 1

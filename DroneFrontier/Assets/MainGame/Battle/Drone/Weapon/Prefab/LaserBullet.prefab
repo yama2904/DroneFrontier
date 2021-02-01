@@ -4841,9 +4841,9 @@ MonoBehaviour:
   syncInterval: 0
   scale: 10
   ShotInterval: 0
-  chargeTime: 3
-  lineRadius: 0.1
-  lineRange: 100
+  chargeTime: 2
+  lineRadius: 0.2
+  lineRange: 175
   parentNetId: 0
   localPos: {x: 0, y: 0, z: 0}
   localRot: {x: 0, y: 0, z: 0, w: 1}

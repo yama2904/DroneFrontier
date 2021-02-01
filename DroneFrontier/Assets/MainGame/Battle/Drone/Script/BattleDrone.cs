@@ -317,7 +317,7 @@ public class BattleDrone : NetworkBehaviour
         {
             Quaternion upAngle = Quaternion.Euler(-90, 0, 0);
             Vector3 upward = upAngle.normalized * Vector3.forward;
-            baseAction.Move(moveSpeed * 4 * Input.mouseScrollDelta.y, upward);
+            baseAction.Move(moveSpeed * 1.5f * Input.mouseScrollDelta.y, upward);
         }
         if (Input.GetKey(KeyCode.R))
         {
@@ -406,8 +406,8 @@ public class BattleDrone : NetworkBehaviour
         Action<float> ModifySpeeds = (x) =>
         {
             moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, x);
-            rotateSpeed *= x;
-            lockOnTrackingSpeed *= x;
+            //rotateSpeed *= x;
+            //lockOnTrackingSpeed *= x;
         };
 
         //メイン武器攻撃

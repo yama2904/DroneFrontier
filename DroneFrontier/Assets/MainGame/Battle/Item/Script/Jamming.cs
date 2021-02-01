@@ -91,7 +91,7 @@ public class Jamming : NetworkBehaviour
 
     void DestroyMe()
     {
-        NetworkServer.Destroy(gameObject);
+        NetworkServer.Destroy(createBot);
     }
 
     void OnDestroy()
