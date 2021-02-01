@@ -70,6 +70,7 @@ public class Bullet : NetworkBehaviour
         if (other.CompareTag(TagNameManager.BULLET)) return;
         if (other.CompareTag(TagNameManager.ITEM)) return;
         if (other.CompareTag(TagNameManager.GIMMICK)) return;
+        if (other.CompareTag(TagNameManager.JAMMING)) return;
 
         //プレイヤーの当たり判定
         if (other.CompareTag(TagNameManager.PLAYER))

@@ -113,6 +113,7 @@ public class LaserBullet : NetworkBehaviour
         return hits.Where(h => !h.transform.CompareTag(TagNameManager.ITEM))    //アイテム除外
                    .Where(h => !h.transform.CompareTag(TagNameManager.BULLET))  //弾丸除外
                    .Where(h => !h.transform.CompareTag(TagNameManager.GIMMICK)) //ギミック除外
+                   .Where(h => !h.transform.CompareTag(TagNameManager.JAMMING))
                    .Where(h =>  //撃ったプレイヤーは当たり判定から除外
                    {
                        return !ReferenceEquals(h.transform.gameObject, shooter);
@@ -343,7 +344,7 @@ public class LaserBullet : NetworkBehaviour
 
 
             //カメラの角度からtrackingSpeed(0～1)の速度でロックオンしたオブジェクトの角度に向く
-            lineTransform.rotation = Quaternion.Slerp(lineTransform.rotation, rotation, 0.3f);
+            lineTransform.rotation = Quaternion.Slerp(lineTransform.rotation, rotation, 0.2f);
         }
         else
         {

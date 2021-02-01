@@ -47,6 +47,7 @@ public class MissileBullet : Bullet
         if (other.CompareTag(TagNameManager.BULLET)) return;
         if (other.CompareTag(TagNameManager.ITEM)) return;
         if (other.CompareTag(TagNameManager.GIMMICK)) return;
+        if (other.CompareTag(TagNameManager.JAMMING)) return;
 
         if (other.CompareTag(TagNameManager.PLAYER))
         {
