@@ -40,9 +40,9 @@ namespace Mirror.Discovery
             if (serverId == -1) return;
             if (isStartClient) return;
 
-            Debug.Log("Update");
-            Connect(discoveredServers[serverId]);
-            networkDiscovery.StopDiscovery();
+            MainGameManager.IsMulti = true;  //マルチモードに設定
+            Connect(discoveredServers[serverId]);  //ヒットしたサーバに接続
+            networkDiscovery.StopDiscovery();   //サーバ検索を停止
             isStartClient = true;
         }
 

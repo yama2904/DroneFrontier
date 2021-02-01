@@ -336,6 +336,7 @@ public class SoundManager : MonoBehaviour
         }
         AudioSourceData asd = audioSourceDatas[(int)Audio.BGM]; //名前省略
 
+        asd.audioSource.Stop();
         asd.gameVolume = volume;
         asd.isFree = false;
         asd.audioSource.volume = AddVolumeBGM(volume);

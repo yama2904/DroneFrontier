@@ -22,6 +22,9 @@ public class NonGameManager : MonoBehaviour
             ConfigManager.InitConfig();
             MainGameManager.IsMulti = false;
         }
+        MainGameManager.Init();
+        BattleManager.Init();
+        RaceManager.Init();
         isStarted = true;
         playerDatas.Clear();
 

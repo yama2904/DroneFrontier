@@ -46,15 +46,10 @@ public class RaceDrone : NetworkBehaviour
     AudioSource[] audios;
 
 
-    //ゴールしたらtrue
-    bool isGoal = false;
-    public bool IsGoal { get { return isGoal; } }
-
-
     public override void OnStartClient()
     {
         base.OnStartClient();
-        RaceManager.AddPlayerData(this);
+        RaceManager.AddPlayerData(this, connectionToClient);
 
         //AudioSourceの初期化
         audios = GetComponents<AudioSource>();
@@ -157,7 +152,7 @@ public class RaceDrone : NetworkBehaviour
         {
             Quaternion upAngle = Quaternion.Euler(-90, 0, 0);
             Vector3 upward = upAngle.normalized * Vector3.forward;
-            baseAction.Move(moveSpeed * 2 * Input.mouseScrollDelta.y, upward);
+            baseAction.Move(moveSpeed * 1.7f * Input.mouseScrollDelta.y, upward);
         }
         if (Input.GetKey(KeyCode.R))
         {
@@ -289,13 +284,6 @@ public class RaceDrone : NetworkBehaviour
     [ServerCallback]
     private void OnTriggerEnter(Collider other)
     {
-        if (isGoal) return;
-
-        if (other.CompareTag(TagNameManager.GOAL))
-        {
-            isGoal = true;
-
-            Debug.Log(name + ": Goal");
-        }
+        RaceManager.Singleton.SetGoalDrone(netId);
     }
 }

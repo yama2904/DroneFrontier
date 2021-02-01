@@ -160,7 +160,7 @@ public class BattleDrone : NetworkBehaviour
     public override void OnStartClient()
     {
         base.OnStartClient();
-        BattleManager.AddPlayerData(this, isLocalPlayer);
+        BattleManager.AddPlayerData(this, isLocalPlayer, connectionToClient);
 
         //コンポーネントの初期化
         cacheTransform = transform;
@@ -921,6 +921,11 @@ public class BattleDrone : NetworkBehaviour
     public void SetCameraDepth(int depth)
     {
         baseAction._Camera.depth = depth;
+    }
+
+    public void SetAudioListener(bool flag)
+    {
+        baseAction.Listener.enabled = flag;
     }
 
 

@@ -38,15 +38,6 @@ public class MainGameManager : NetworkBehaviour
     }
     public static GameMode Mode { get; set; } = GameMode.NONE;  //選んでいるゲームモード
 
-    //NonGameSceneからプレイヤー・CPUを追加する用
-    public class PlayerData
-    {
-        public string name;
-        public BaseWeapon.Weapon weapon;
-        public bool isPlayer;
-    }
-    static List<PlayerData> playerDatas = new List<PlayerData>();
-
 
     //ゲーム開始のカウントダウンが鳴ったらtrue
     bool startFlag = false;
@@ -54,20 +45,13 @@ public class MainGameManager : NetworkBehaviour
 
     string[] ranking = new string[MatchingManager.PlayerNum];
 
-    //切断したクライアントの数
-    //ホスト専用変数
-    [HideInInspector] public int disconnectionClientCount = 0;
-
 
     //設定画面移動時のマスク用変数
     [SerializeField] Image screenMaskImageInspector = null;  //画面を暗くする画像を持っているオブジェクト
     static Image screenMaskImage = null;    //screenMaskImageをstaticに移す用
 
     //マスクする色
-    const float MASK_COLOR_RED = 0;     //赤
-    const float MASK_COLOR_GREEN = 0;   //緑
-    const float MASK_COLOR_BLUE = 0;    //青
-    const float MASK_COLOR_ALFA = 0.5f; //アルファ
+    Color maskColor = new Color(0, 0, 0.5f);
 
 
     //デバッグ用
@@ -75,6 +59,16 @@ public class MainGameManager : NetworkBehaviour
     [Header("デバッグ用")]
     [SerializeField] GameMode debugGameMode = GameMode.NONE;
     [SerializeField] bool solo = false;
+
+
+    //未使用
+    //NonGameSceneからプレイヤー・CPUを追加する用
+    public class PlayerData
+    {
+        public string name;
+        public BaseWeapon.Weapon weapon;
+        public bool isPlayer;
+    }
 
 
     public override void OnStartClient()
@@ -144,7 +138,7 @@ public class MainGameManager : NetworkBehaviour
         BaseScreenManager.LoadScreen(BaseScreenManager.Screen.CONFIG);  //メインゲームを始めた時点で設定画面をロードする
 
         //設定画面に移動した際のマスクの暗さと色を設定
-        screenMaskImage.color = new Color(MASK_COLOR_RED, MASK_COLOR_GREEN, MASK_COLOR_BLUE, MASK_COLOR_ALFA);
+        screenMaskImage.color = maskColor;
         screenMaskImage.enabled = false;
 
         //カーソルロック
@@ -205,7 +199,7 @@ public class MainGameManager : NetworkBehaviour
         if (isServer)
         {
             if (solo) return;   //デバッグ用
-            if (disconnectionClientCount >= MatchingManager.PlayerNum - 1)
+            if (MatchingManager.PlayerNum <= 1)
             {
                 NetworkManager.singleton.StopHost();    //ホストを停止
                 MatchingManager.Singleton.Init();
@@ -218,13 +212,14 @@ public class MainGameManager : NetworkBehaviour
     }
 
     //変数の初期化
-    void Init()
+    public static void Init()
     {
         IsMainGaming = false;
         IsMulti = false;
         IsConfig = false;
         Mode = GameMode.NONE;
         Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
 
     void MainGameToConfig()
@@ -260,6 +255,7 @@ public class MainGameManager : NetworkBehaviour
 
     }
 
+    //ゲームの終了処理
     [Server]
     public void FinishGame(string[] ranking)
     {
@@ -311,13 +307,8 @@ public class MainGameManager : NetworkBehaviour
         //サーバだけ実行しない
         if (isServer) return;
 
-        Debug.Log("foreach");
-        foreach (string s in ranking)
-        {
-            Debug.Log(s);
-        }
-
         NetworkManager.singleton.StopClient();  //クライアントを停止
+        MatchingManager.Singleton.Init();  //MatchingManagerの初期化
         Mirror.Discovery.CustomNetworkDiscoveryHUD.Singleton.Init();
         ResultButtonsController.SetRank(ranking);
 

@@ -42,7 +42,7 @@ public class MatchingButtonsController : NetworkBehaviour
         }
         else
         {
-            MatchingManager.Singleton.RpcStartRace();
+            MatchingManager.Singleton.RpcStartGame();
         }
     }
 

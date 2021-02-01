@@ -100,7 +100,7 @@ public class NewNetworkDiscovery : NetworkDiscoveryBase<ServerRequest, ServerRes
         {
             // this is an example reply message,  return your own
             // to include whatever is relevant for your game
-            MatchingManager.playerNames.Add(request.name);
+            //MatchingManager.playerNames.Add(request.name);
             return new ServerResponse
             {
                 serverId = ServerId,
@@ -128,7 +128,6 @@ public class NewNetworkDiscovery : NetworkDiscoveryBase<ServerRequest, ServerRes
     {
         //サーバを検出するためのブロードキャストメッセージ
         ServerRequest request = new ServerRequest();
-        request.name = KuribocchiButtonsController.playerName;
         if (MainGameManager.Mode == MainGameManager.GameMode.BATTLE)
         {
             request.isBattle = true;

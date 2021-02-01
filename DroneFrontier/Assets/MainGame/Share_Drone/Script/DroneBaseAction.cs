@@ -8,6 +8,7 @@ public class DroneBaseAction : NetworkBehaviour
     //コンポーネント用
     Rigidbody _rigidbody = null;
     Transform cacheTransform = null;  //キャッシュ用
+    public AudioListener Listener { get; private set; } = null;
 
     //ドローンのオブジェクトのみ動かす用
     [SerializeField] public Transform droneObject = null;
@@ -25,9 +26,10 @@ public class DroneBaseAction : NetworkBehaviour
     public override void OnStartClient()
     {
         base.OnStartClient();
+        Listener = GetComponent<AudioListener>();
         if (!isLocalPlayer)
         {
-            GetComponent<AudioListener>().enabled = false;
+            Listener.enabled = false;
         }
     }
 

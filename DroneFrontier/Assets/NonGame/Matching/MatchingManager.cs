@@ -10,16 +10,12 @@ public class MatchingManager : NetworkBehaviour
     static MatchingManager singleton;
     public static MatchingManager Singleton { get { return singleton; } }
 
-    public bool IsLocalPlayer { get { return isLocalPlayer; } }
-
     //生成する画像用
     [SerializeField] MatchingButtonsController matchingScreen = null;
     [SerializeField] NetworkWeaponSelectController weaponSelectScreen = null;
-    static GameObject createMatchingScreen = null;
+    static MatchingButtonsController createMatchingScreen = null;
 
-    //ルームに入ったプレイヤーの名前
-    public static List<string> playerNames = new List<string>();
-
+    //接続中のプレイヤー情報
     public class PlayerData
     {
         public string name;
@@ -28,7 +24,7 @@ public class MatchingManager : NetworkBehaviour
         public bool isReady;
     }
     public static List<PlayerData> playerDatas = new List<PlayerData>();
-    
+
     //プレイヤーの数
     public static int PlayerNum { get { return playerDatas.Count; } }
 
@@ -44,37 +40,26 @@ public class MatchingManager : NetworkBehaviour
         BrightnessManager.SetGameAlfa(0);
         MatchingButtonsController mc = Instantiate(matchingScreen);
         mc.Init(isServer);
-        createMatchingScreen = mc.gameObject;
+        createMatchingScreen = mc;
 
-        if (MainGameManager.Mode == MainGameManager.GameMode.RACE)
+        //サーバ以外は最初から準備完了フラグを立てる
+        if (!isServer)
         {
-            if (!isServer)
-            {
-                GetComponent<NetworkRoomPlayer>().CmdChangeReadyState(true);
-            }
+            GetComponent<NetworkRoomPlayer>().CmdChangeReadyState(true);
         }
 
-        CmdAddPlayerData();
-    }
-
-    public override void OnStartClient()
-    {
-        base.OnStartClient();
-
-        if (isServer)
-        {
-            RpcSetPlayerList(playerNames.ToArray());
-        }
+        CmdAddPlayer(KuribocchiButtonsController.playerName);
     }
 
     [ServerCallback]
     void Update()
     {
         if (MainGameManager.IsMainGaming) return;
+        if (!isLocalPlayer) return;
 
         //準備完了フラグのセット
         int readyCount = 0;
-        foreach(PlayerData pd in playerDatas)
+        foreach (PlayerData pd in playerDatas)
         {
             if (pd.isReady)
             {
@@ -83,45 +68,42 @@ public class MatchingManager : NetworkBehaviour
         }
 
         //すべてのクライアントの準備が完了したらBGMを止めてシーン移動
-        if(readyCount == PlayerNum)
+        if (readyCount == PlayerNum)
         {
-            RpcSetReadyAllClient();
+            RpcStartGame();
         }
     }
 
     [ClientRpc]
-    void RpcSetReadyAllClient()
+    void RpcStopBGM()
     {
         SoundManager.StopBGM();
-        GetComponent<NetworkRoomPlayer>().CmdChangeReadyState(true);
     }
 
 
-    //playerDatasリストの更新
+    //新規接続してきたプレイヤーの情報を受信
     [Command]
-    void CmdAddPlayerData()
+    public void CmdAddPlayer(string name)
     {
         playerDatas.Add(new PlayerData
         {
-            name = playerNames[playerDatas.Count],
-            conn = connectionToClient,
-            weapon = BaseWeapon.Weapon.NONE,
-            isReady = false
+            name = name,
+            conn = connectionToClient
         });
+
+        //更新したプレイヤー情報をリストに表示
+        RpcSetPlayerList(playerDatas.Select(pd => pd.name).ToArray());
     }
 
-    //各クライアントのマッチングリストを更新する
     [ClientRpc]
     void RpcSetPlayerList(string[] names)
     {
-        playerNames.Clear();
-        playerNames = names.ToList();
-        createMatchingScreen.GetComponent<MatchingButtonsController>().SetPlayerList(names);
+        if (createMatchingScreen == null) return;
+        createMatchingScreen.SetPlayerList(names);
     }
 
     public void Init()
     {
-        playerNames.Clear();
         playerDatas.Clear();
     }
 
@@ -134,17 +116,9 @@ public class MatchingManager : NetworkBehaviour
         NonGameManager.LoadNonGameScene(BaseScreenManager.Screen.KURIBOCCHI);
     }
 
-    //切断したプレイヤーをリストから削除
-    [ServerCallback]
-    public void RemovePlayer(int index)
-    {
-        playerNames.RemoveAt(index);
-        playerDatas.RemoveAt(index);
-        RpcSetPlayerList(playerNames.ToArray());
-    }
-
 
     //武器選択画面の生成
+    [Server]
     public void CreateWeaponSelectScreen()
     {
         RpcDesroyMatchingScreen();
@@ -157,7 +131,7 @@ public class MatchingManager : NetworkBehaviour
     [ClientRpc]
     void RpcDesroyMatchingScreen()
     {
-        Destroy(createMatchingScreen);
+        Destroy(createMatchingScreen.gameObject);
     }
 
     //自分が装備する武器を設定
@@ -169,22 +143,35 @@ public class MatchingManager : NetworkBehaviour
         if (weapon < 0) return;
 
         int index = playerDatas.FindIndex(pd => ReferenceEquals(pd.conn, connectionToClient));
-        if(index >= 0)
+        if (index >= 0)
         {
             playerDatas[index].weapon = (BaseWeapon.Weapon)weapon;
             playerDatas[index].isReady = true;
         }
     }
 
-    //レースモード用
-    //すべてのクライアントの準備を完了させてゲームを開始する
+    //BGMを止めてゲームを開始する
     [ClientRpc]
-    public void RpcStartRace()
+    public void RpcStartGame()
     {
         SoundManager.StopBGM();
         if (isServer)
         {
             GetComponent<NetworkRoomPlayer>().CmdChangeReadyState(true);
+        }
+    }
+
+    //接続が切れた時呼ぶ
+    [Server]
+    public void DisconnectPlayer(NetworkConnection conn)
+    {
+        int index = playerDatas.FindIndex(pd => ReferenceEquals(pd.conn, conn));
+        if (index < 0) return;
+
+        playerDatas.RemoveAt(index);
+        if (!MainGameManager.IsMainGaming)
+        {
+            RpcSetPlayerList(playerDatas.Select(pd => pd.name).ToArray()); ;
         }
     }
 }

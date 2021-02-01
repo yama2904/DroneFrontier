@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using Mirror;
 
 /*
@@ -26,24 +27,18 @@ public class NewNetworkRoomManager : NetworkRoomManager
     //クライアントが切断したときにサーバで呼ぶ
     public override void OnServerDisconnect(NetworkConnection conn)
     {
+        MatchingManager.Singleton.DisconnectPlayer(conn);
         if (MainGameManager.IsMainGaming)
         {
-            MainGameManager.Singleton.disconnectionClientCount++;
-            int index = MatchingManager.playerDatas.FindIndex(pd => ReferenceEquals(pd.conn, conn));
-            if(index != -1)
+            if (MainGameManager.Mode == MainGameManager.GameMode.BATTLE)
             {
-                MatchingManager.playerDatas.RemoveAt(index);
+                BattleManager.DisconnectPlayer(conn);
+            }
+            else if(MainGameManager.Mode == MainGameManager.GameMode.RACE)
+            {
+                RaceManager.DisconnectPlayer(conn);
             }
         }
-        else
-        {
-            int index = MatchingManager.playerDatas.FindIndex(pd => ReferenceEquals(pd.conn, conn));
-            if (index >= 0)
-            {
-                MatchingManager.Singleton.RemovePlayer(index);
-            }
-        }
-
         base.OnServerDisconnect(conn);
     }
 

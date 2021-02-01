@@ -57,12 +57,8 @@ public class KuribocchiButtonsController : MonoBehaviour
             //SE再生
             SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
 
+            MainGameManager.IsMulti = true;  //マルチモードに設定
             playerName = inputField.text;
-            inputNameObject.SetActive(false);    //名前入力の非表示
-            screenMask.SetActive(false);         //後ろのボタンを押せるようにする
-            BrightnessManager.SetGameAlfa(0);    //明るさを元に戻す
-            MainGameManager.IsMulti = true;      //マルチモードに設定
-            MatchingManager.playerNames.Add(playerName);
 
             CustomNetworkDiscoveryHUD.Singleton.StartHost();
         }

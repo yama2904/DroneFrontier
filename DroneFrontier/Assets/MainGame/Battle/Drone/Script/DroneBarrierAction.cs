@@ -270,7 +270,7 @@ public class DroneBarrierAction : NetworkBehaviour
     [ClientRpc]
     void RpcPlaySE(SoundManager.SE se)
     {
-        drone.PlayOneShotSE(se, SoundManager.BaseSEVolume);
+        drone.PlayOneShotSE(se, SoundManager.BaseSEVolume * 0.8f);
     }
 
     [ClientRpc]

@@ -49,43 +49,40 @@ public class NetworkWeaponSelectController : NetworkBehaviour
     public void SelectShotgun()
     {
         BaseWeapon.Weapon w = BaseWeapon.Weapon.SHOTGUN;  //名前省略
-        if (weapon != w)
-        {
-            //SE再生
-            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+        if (weapon == w) return;
 
-            messageWindowText.text = SHOTGUN_TEXT;
-            SetWeaponButtonsColor(w);
-            weapon = w;
-        }
+        //SE再生
+        SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+
+        messageWindowText.text = SHOTGUN_TEXT;
+        SetWeaponButtonsColor(w);
+        weapon = w;
     }
 
     public void SelectMissile()
     {
         BaseWeapon.Weapon w = BaseWeapon.Weapon.MISSILE;  //名前省略
-        if (weapon != w)
-        {
-            //SE再生
-            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+        if (weapon == w) return;
 
-            messageWindowText.text = MISSILE_TEXT;
-            SetWeaponButtonsColor(w);
-            weapon = w;
-        }
+        //SE再生
+        SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+
+        messageWindowText.text = MISSILE_TEXT;
+        SetWeaponButtonsColor(w);
+        weapon = w;
     }
 
     public void SelectLaser()
     {
         BaseWeapon.Weapon w = BaseWeapon.Weapon.LASER;  //名前省略
-        if (weapon != w)
-        {
-            //SE再生
-            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+        if (weapon == w) return;
 
-            messageWindowText.text = LASER_TEXT;
-            SetWeaponButtonsColor(w);
-            weapon = w;
-        }
+        //SE再生
+        SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+
+        messageWindowText.text = LASER_TEXT;
+        SetWeaponButtonsColor(w);
+        weapon = w;
     }
 
     void SetWeaponButtonsColor(BaseWeapon.Weapon selectWeapon)
@@ -112,7 +109,7 @@ public class NetworkWeaponSelectController : NetworkBehaviour
     public void SelectDecision()
     {
         //バグ防止
-        if (weapon == BaseWeapon.Weapon.NONE) return;  
+        if (weapon == BaseWeapon.Weapon.NONE) return;
 
         //SE再生
         SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);

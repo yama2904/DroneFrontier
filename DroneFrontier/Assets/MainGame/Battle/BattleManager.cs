@@ -13,6 +13,7 @@ public class BattleManager : NetworkBehaviour
     //プレイヤー情報
     public class PlayerData
     {
+        public NetworkConnection conn;
         public BattleDrone drone = null;
         public int ranking = 1;
         public bool isDestroy = false;
@@ -32,7 +33,6 @@ public class BattleManager : NetworkBehaviour
     [SerializeField] Text timeText = null;
     [SerializeField, Tooltip("制限時間(分)")] int maxTime = 5;
     Coroutine countCoroutine = null;
-    float countTime = 0;
 
 
     public override void OnStartClient()
@@ -65,6 +65,7 @@ public class BattleManager : NetworkBehaviour
             GameObject manager = Instantiate(itemSpawnManager).gameObject;
             NetworkServer.Spawn(manager, connectionToClient);
         }
+        PlayerData.droneNum = MatchingManager.PlayerNum;
         countCoroutine = StartCoroutine(CountTime());
     }
 
@@ -80,6 +81,7 @@ public class BattleManager : NetworkBehaviour
                 //次のプレイヤーのカメラに切り替える
                 int initIndex = useIndex;
                 playerDatas[useIndex].drone.SetCameraDepth(0);
+                playerDatas[useIndex].drone.SetAudioListener(false);
                 do
                 {
                     useIndex++;
@@ -90,13 +92,14 @@ public class BattleManager : NetworkBehaviour
 
                     //破壊されていたらスキップ
                     PlayerData pd = playerDatas[useIndex];
-                    if (pd.isDestroy)
+                    if (pd.isDestroy || pd.drone == null)
                     {
                         useIndex++;
                     }
                     else
                     {
                         pd.drone.SetCameraDepth(5);
+                        pd.drone.SetAudioListener(true);
                         break;
                     }
                 } while (useIndex != initIndex);
@@ -111,11 +114,6 @@ public class BattleManager : NetworkBehaviour
                 FinishGame();
             }
         }
-    }
-
-    [ServerCallback]
-    private void FixedUpdate()
-    {
     }
 
     IEnumerator CountTime()
@@ -171,6 +169,7 @@ public class BattleManager : NetworkBehaviour
         timeText.enabled = flag;
     }
 
+    //ゲームの終了処理
     [Server]
     void FinishGame()
     {
@@ -188,7 +187,15 @@ public class BattleManager : NetworkBehaviour
         }
     }
 
-    public static void AddPlayerData(BattleDrone drone, bool isLocalPlayer)
+    public static void Init()
+    {
+        playerDatas.Clear();
+        PlayerData.droneNum = 0;
+        localDrone = null;
+    }
+
+    //プレイヤーの情報を登録する
+    public static void AddPlayerData(BattleDrone drone, bool isLocalPlayer, NetworkConnection conn)
     {
         //既にリストにあったら処理しない
         if (playerDatas.FindIndex(pd => pd.drone.netId == drone.netId) >= 0) return;
@@ -200,10 +207,38 @@ public class BattleManager : NetworkBehaviour
 
         playerDatas.Add(new PlayerData
         {
+            conn = conn,
             drone = drone
         });
     }
 
+    //切断されたプレイヤーの処理
+    public static void DisconnectPlayer(NetworkConnection conn)
+    {
+        int index = playerDatas.FindIndex(pd => ReferenceEquals(pd.conn, conn));
+        if (index < 0) return;
+
+        //ランキングを修正
+        int rank = playerDatas[index].ranking;
+        foreach (PlayerData pd in playerDatas)
+        {
+            if (pd.ranking > rank)
+            {
+                pd.ranking--;
+            }
+        }
+
+        //残りドローン数の修正
+        if (!playerDatas[index].isDestroy)
+        {
+            PlayerData.droneNum--;
+        }
+
+        //切断されたプレイヤーをリストから削除
+        playerDatas.RemoveAt(index);
+    }
+
+    //ゲームオーバーになったプレイヤーを登録
     public void SetDestroyedDrone(uint netId)
     {
         int index = playerDatas.FindIndex(playerData => playerData.drone.netId == netId);
