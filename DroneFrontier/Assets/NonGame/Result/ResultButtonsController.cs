@@ -53,14 +53,6 @@ public class ResultButtonsController : MonoBehaviour
 
     void Update() { }
 
-    public void SelectOnemore()
-    {
-        //SE再生
-        SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
-
-
-    }
-
     public void SelectEnd()
     {
         //SE再生
