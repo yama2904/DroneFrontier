@@ -13,6 +13,7 @@ public class MainGameManager : NetworkBehaviour
 
     [SerializeField] BattleManager battleManager = null;
     [SerializeField] RaceManager raceManager = null;
+    [SerializeField] Animator finishAnimator = null;
 
     public static List<GameObject> players = new List<GameObject>();
 
@@ -288,11 +289,18 @@ public class MainGameManager : NetworkBehaviour
 
     IEnumerator FinishGameCoroutine(string[] ranking)
     {
-        yield return new WaitForSeconds(1.0f);
+        SetAnimatorPlay();
+        yield return new WaitForSeconds(2.0f);
         RpcPlayFinishSE();
 
         yield return new WaitForSeconds(3.0f);
         RpcMoveResultScreen(ranking);
+    }
+
+    [ClientRpc]
+    void SetAnimatorPlay()
+    {
+        finishAnimator.SetBool("SetFinish", true);
     }
 
     [ClientRpc]

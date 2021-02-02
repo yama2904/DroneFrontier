@@ -1068,7 +1068,7 @@ MonoBehaviour:
     type: 3}
   stockIcon: {fileID: 1217157634}
   stockText: {fileID: 1772989712}
-  syncStock: 1
+  syncStock: 0
   fallTime: 5
   nonDamageTime: 4
 --- !u!114 &-1535939887124464326
