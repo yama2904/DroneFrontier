@@ -68,6 +68,7 @@ public class BattleDrone : NetworkBehaviour
     public BaseWeapon.Weapon SetSubWeapon { get; set; } = BaseWeapon.Weapon.SHOTGUN;
     bool[] usingWeapons = new bool[(int)Weapon.NONE];    //使用中の武器
     [SerializeField, Tooltip("攻撃中の移動速度の低下率")] float atackingDownSpeed = 0.5f;   //攻撃中の移動速度の低下率
+    bool isWeaponInit = false;
 
     //死亡処理用
     [SerializeField] GameObject explosion = null;
@@ -128,9 +129,6 @@ public class BattleDrone : NetworkBehaviour
         NetworkServer.Spawn(weapon.gameObject, connectionToClient);
         syncMainWeapon = weapon.gameObject;
 
-        //初期化
-        RpcInitMainWeapon(weapon.gameObject);
-
         Debug.Log("CreateMainWeapon");
     }
 
@@ -143,34 +141,8 @@ public class BattleDrone : NetworkBehaviour
         NetworkServer.Spawn(weapon.gameObject, connectionToClient);
         syncSubWeapon = weapon.gameObject;
 
-        //初期化
-        RpcInitSubWeapon(weapon.gameObject);
-
         Debug.Log("CreateSubWeapon");
     }
-
-    [ClientRpc]
-    void RpcInitMainWeapon(GameObject weapon)
-    {
-        //childObject.SetChild(weapon.transform, DroneChildObject.Child.MAIN_WEAPON);
-
-        if (isLocalPlayer)
-        {
-            weapon.GetComponent<BaseWeapon>().Init();
-        }
-    }
-
-    [ClientRpc]
-    void RpcInitSubWeapon(GameObject weapon)
-    {
-        //childObject.SetChild(weapon.transform, DroneChildObject.Child.SUB_WEAPON);
-
-        if (isLocalPlayer)
-        {
-            weapon.GetComponent<BaseWeapon>().Init();
-        }
-    }
-
 
     public override void OnStartClient()
     {
@@ -265,6 +237,11 @@ public class BattleDrone : NetworkBehaviour
         //サブウェポンのUpdate
         if (syncSubWeapon != null)
         {
+            if (!isWeaponInit)
+            {
+                syncSubWeapon.GetComponent<BaseWeapon>().Init();
+                isWeaponInit = true;
+            }
             syncSubWeapon.GetComponent<BaseWeapon>().UpdateMe();
         }
 

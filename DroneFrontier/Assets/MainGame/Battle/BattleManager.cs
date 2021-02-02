@@ -82,7 +82,7 @@ public class BattleManager : NetworkBehaviour
                 int initIndex = useIndex;
                 playerDatas[useIndex].drone.SetCameraDepth(0);
                 playerDatas[useIndex].drone.SetAudioListener(false);
-                do
+                while(true)
                 {
                     useIndex++;
                     if (useIndex >= playerDatas.Count || useIndex < 0)
@@ -102,7 +102,12 @@ public class BattleManager : NetworkBehaviour
                         pd.drone.SetAudioListener(true);
                         break;
                     }
-                } while (useIndex != initIndex);
+
+                    if(useIndex == initIndex)
+                    {
+                        break;
+                    }
+                }
             }
         }
 
