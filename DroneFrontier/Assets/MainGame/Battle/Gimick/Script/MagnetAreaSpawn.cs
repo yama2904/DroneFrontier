@@ -32,6 +32,7 @@ public class MagnetAreaSpawn : NetworkBehaviour
         cacheTransform = transform;
         magnetArea = GetComponent<MagnetArea>();
         magnetArea.SetArea(false);
+        activeNum = 0;
     }
 
     [ServerCallback]

@@ -105,6 +105,7 @@ public class MatchingManager : NetworkBehaviour
     public void Init()
     {
         playerDatas.Clear();
+        createMatchingScreen = null;
     }
 
     //クライアントの退出

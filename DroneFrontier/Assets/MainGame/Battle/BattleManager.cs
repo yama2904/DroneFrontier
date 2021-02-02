@@ -131,83 +131,14 @@ public class BattleManager : NetworkBehaviour
         }
     }
 
-    IEnumerator CountTime()
-    {
-        //スタートフラグが立つまで停止
-        while (!MainGameManager.Singleton.StartFlag) yield return null;
-
-        if (maxTime > 1)
-        {
-            yield return new WaitForSeconds(60f);
-        }
-
-        for (int i = maxTime - 1; i > 1; i--)
-        {
-            RpcSetTextEnabled(true);
-            RpcSetText("残 り " + i + " 分");
-
-            yield return new WaitForSeconds(4f);
-            RpcSetTextEnabled(false);
-            yield return new WaitForSeconds(56f);
-        }
-
-        RpcSetTextEnabled(true);
-        RpcSetText("残 り " + 1 + " 分");
-        yield return new WaitForSeconds(1f);
-
-        for (int i = 59; i >= 0; i--)
-        {
-            RpcSetText(i + " 秒");
-            yield return new WaitForSeconds(1f);
-        }
-
-        int rank = 1;
-        foreach (PlayerData pd in playerDatas)
-        {
-            if (pd.isDestroy) continue;
-            pd.ranking = rank;
-            rank++;
-        }
-
-        FinishGame();
-    }
-
-    [ClientRpc]
-    void RpcSetText(string text)
-    {
-        timeText.text = text;
-    }
-
-    [ClientRpc]
-    void RpcSetTextEnabled(bool flag)
-    {
-        timeText.enabled = flag;
-    }
-
-    //ゲームの終了処理
-    [Server]
-    void FinishGame()
-    {
-        if (!isFinished)
-        {
-            string[] ranking = new string[playerDatas.Count];
-            foreach (PlayerData pd in playerDatas)
-            {
-                ranking[pd.ranking - 1] = pd.drone.name;
-            }
-            MainGameManager.Singleton.FinishGame(ranking);
-            isFinished = true;
-
-            StopCoroutine(countCoroutine);
-        }
-    }
-
-    public static void Init()
+    //変数の初期化
+    private void OnDestroy()
     {
         playerDatas.Clear();
         PlayerData.droneNum = 0;
         localDrone = null;
     }
+
 
     //プレイヤーの情報を登録する
     public static void AddPlayerData(BattleDrone drone, bool isLocalPlayer, NetworkConnection conn)
@@ -226,6 +157,32 @@ public class BattleManager : NetworkBehaviour
             drone = drone
         });
     }
+
+    //ゲームオーバーになったプレイヤーを登録
+    public void SetDestroyedDrone(uint netId)
+    {
+        int index = playerDatas.FindIndex(playerData => playerData.drone.netId == netId);
+        if (index == -1) return;  //対応するドローンがなかったら処理しない
+
+        PlayerData pd = playerDatas[index];  //名前省略
+        if (pd.isDestroy) return;  //既に死亡処理を行っていたら処理しない
+
+        //リスト情報の変更
+        pd.ranking = PlayerData.droneNum;   //ランキングの記録
+        pd.isDestroy = true;
+        PlayerData.droneNum--;  //残りドローンを減らす
+
+        //カメラ切り替え
+        pd.drone.SetCameraDepth(-1);
+
+        //オーディオリスナーを担当していたドローンなら一時的に自分のリスナーをオンにする
+        if (ReferenceEquals(localDrone, pd.drone) ||
+            (localDrone.IsGameOver && index == useIndex))
+        {
+            listener.enabled = true;
+        }
+    }
+
 
     //切断されたプレイヤーの処理
     public static void DisconnectPlayer(NetworkConnection conn)
@@ -253,28 +210,78 @@ public class BattleManager : NetworkBehaviour
         playerDatas.RemoveAt(index);
     }
 
-    //ゲームオーバーになったプレイヤーを登録
-    public void SetDestroyedDrone(uint netId)
+
+    //時間制限処理
+    IEnumerator CountTime()
     {
-        int index = playerDatas.FindIndex(playerData => playerData.drone.netId == netId);
-        if (index == -1) return;  //対応するドローンがなかったら処理しない
+        //スタートフラグが立つまで停止
+        while (!MainGameManager.Singleton.StartFlag) yield return null;
 
-        PlayerData pd = playerDatas[index];  //名前省略
-        if (pd.isDestroy) return;  //既に死亡処理を行っていたら処理しない
-
-        //リスト情報の変更
-        pd.ranking = PlayerData.droneNum;   //ランキングの記録
-        pd.isDestroy = true;
-        PlayerData.droneNum--;  //残りドローンを減らす
-
-        //カメラ切り替え
-        pd.drone.SetCameraDepth(-1);
-
-        //オーディオリスナーを担当していたドローンなら一時的に自分のリスナーをオンにする
-        if(ReferenceEquals(localDrone, pd.drone) || 
-            (localDrone.IsGameOver && index == useIndex))
+        if (maxTime > 1)
         {
-            listener.enabled = true;
+            yield return new WaitForSeconds(60f);
+        }
+
+        for (int i = maxTime - 1; i > 1; i--)
+        {
+            RpcSetTextEnabled(true);
+            RpcSetTimeText("残 り " + i + " 分");
+
+            yield return new WaitForSeconds(4f);
+            RpcSetTextEnabled(false);
+            yield return new WaitForSeconds(56f);
+        }
+
+        RpcSetTextEnabled(true);
+        RpcSetTimeText("残 り " + 1 + " 分");
+        yield return new WaitForSeconds(1f);
+
+        for (int i = 59; i >= 0; i--)
+        {
+            RpcSetTimeText(i + " 秒");
+            yield return new WaitForSeconds(1f);
+        }
+
+        int rank = 1;
+        foreach (PlayerData pd in playerDatas)
+        {
+            if (pd.isDestroy) continue;
+            pd.ranking = rank;
+            rank++;
+        }
+
+        FinishGame();
+    }
+
+    //残り時間のテキスト変更
+    [ClientRpc]
+    void RpcSetTimeText(string text)
+    {
+        timeText.text = text;
+    }
+
+    //残り時間のテキスト表示
+    [ClientRpc]
+    void RpcSetTextEnabled(bool flag)
+    {
+        timeText.enabled = flag;
+    }
+
+    //ゲームの終了処理
+    [Server]
+    void FinishGame()
+    {
+        if (!isFinished)
+        {
+            string[] ranking = new string[playerDatas.Count];
+            foreach (PlayerData pd in playerDatas)
+            {
+                ranking[pd.ranking - 1] = pd.drone.name;
+            }
+            MainGameManager.Singleton.FinishGame(ranking);
+            isFinished = true;
+
+            StopCoroutine(countCoroutine);
         }
     }
 }

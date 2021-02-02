@@ -59,7 +59,7 @@ public class RaceManager : NetworkBehaviour
         }
     }
 
-    public static void Init()
+    private void OnDestroy()
     {
         playerDatas.Clear();
         PlayerData.droneNum = 0;
@@ -77,6 +77,21 @@ public class RaceManager : NetworkBehaviour
             drone = drone
         });
     }
+
+    //ゴールしたプレイヤーを登録
+    public void SetGoalDrone(uint netId)
+    {
+        int index = playerDatas.FindIndex(playerData => playerData.drone.netId == netId);
+        if (index == -1) return;  //対応するドローンがなかったら処理しない
+
+        PlayerData pd = playerDatas[index];  //名前省略
+        if (pd.isGoal) return;  //既にゴール処理を行っていたら処理しない
+
+        pd.ranking = PlayerData.droneNum;
+        pd.isGoal = true;
+        PlayerData.droneNum--;
+    }
+
 
     //切断されたプレイヤーの処理
     public static void DisconnectPlayer(NetworkConnection conn)
@@ -102,19 +117,5 @@ public class RaceManager : NetworkBehaviour
 
         //切断されたプレイヤーをリストから削除
         playerDatas.RemoveAt(index);
-    }
-
-    //ゴールしたプレイヤーを登録
-    public void SetGoalDrone(uint netId)
-    {
-        int index = playerDatas.FindIndex(playerData => playerData.drone.netId == netId);
-        if (index == -1) return;  //対応するドローンがなかったら処理しない
-
-        PlayerData pd = playerDatas[index];  //名前省略
-        if (pd.isGoal) return;  //既にゴール処理を行っていたら処理しない
-
-        pd.ranking = PlayerData.droneNum;
-        pd.isGoal = true;
-        PlayerData.droneNum--;
     }
 }

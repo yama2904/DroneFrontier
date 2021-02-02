@@ -562,7 +562,7 @@ public class BattleDrone : NetworkBehaviour
         }
     }
 
-    private void FixedUpdate()
+    void FixedUpdate()
     {
         if (!isLocalPlayer) return;
         if (deathFlags[(int)DeathFlag.FALL])

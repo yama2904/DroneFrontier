@@ -85,6 +85,8 @@ public class NewNetworkDiscovery : NetworkDiscoveryBase<ServerRequest, ServerRes
         // in there,  This way the client can ask for
         // specific game mode or something
 
+        UnityEngine.Debug.Log(MainGameManager.Mode);
+
         //選択しているゲームモードが違ったら接続しない
         MainGameManager.GameMode mode = MainGameManager.GameMode.BATTLE;
         if (!request.isBattle)
@@ -136,6 +138,7 @@ public class NewNetworkDiscovery : NetworkDiscoveryBase<ServerRequest, ServerRes
         {
             request.isBattle = false;
         }
+        UnityEngine.Debug.Log(MainGameManager.Mode);
         return request;
     }
 

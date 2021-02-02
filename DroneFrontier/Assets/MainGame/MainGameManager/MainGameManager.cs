@@ -14,9 +14,7 @@ public class MainGameManager : NetworkBehaviour
     [SerializeField] BattleManager battleManager = null;
     [SerializeField] RaceManager raceManager = null;
     [SerializeField] Animator finishAnimator = null;
-
-    public static List<GameObject> players = new List<GameObject>();
-
+    
     //マルチモードか
     public static bool IsMulti { get; set; } = false;
 
@@ -147,19 +145,6 @@ public class MainGameManager : NetworkBehaviour
         Cursor.visible = false;
     }
 
-    [ClientRpc]
-    void RpcPlayStartSE()
-    {
-        SoundManager.Play(SoundManager.SE.START_COUNT_DOWN_D, SoundManager.BaseSEVolume);
-        Invoke(nameof(SetStartFlagTrue), 4.5f);
-    }
-
-    void SetStartFlagTrue()
-    {
-        startFlag = true;
-        SoundManager.Play(SoundManager.BGM.LOOP, SoundManager.BaseBGMVolume * 0.4f);
-    }
-
     void Update()
     {
         //デバッグ用
@@ -213,47 +198,13 @@ public class MainGameManager : NetworkBehaviour
     }
 
     //変数の初期化
-    public static void Init()
+    private void OnDestroy()
     {
         IsMainGaming = false;
         IsMulti = false;
         IsConfig = false;
-        Mode = GameMode.NONE;
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
-    }
-
-    void MainGameToConfig()
-    {
-        screenMaskImage.enabled = true;     //設定画面の背景にマスクをつける
-        BaseScreenManager.SetScreen(BaseScreenManager.Screen.CONFIG);
-
-        Cursor.lockState = CursorLockMode.None;
-        IsConfig = true;
-    }
-
-
-    //設定画面からメインゲームに移動する
-    public static void ConfigToMainGame()
-    {
-        screenMaskImage.enabled = false;
-        BaseScreenManager.HideScreen();
-
-        if (IsCursorLock)
-        {
-            Cursor.lockState = CursorLockMode.Locked;
-        }
-        else
-        {
-            Cursor.lockState = CursorLockMode.None;
-        }
-        IsConfig = false;
-    }
-
-    //プレイヤー又はCPUを追加する
-    public static void SetPlayer(string name, BaseWeapon.Weapon weapon, bool isPlayer)
-    {
-
     }
 
     //ゲームの終了処理
@@ -281,12 +232,6 @@ public class MainGameManager : NetworkBehaviour
         StartCoroutine(FinishGameCoroutine(this.ranking));
     }
 
-    [ClientRpc]
-    void RpcStopBGM()
-    {
-        SoundManager.StopBGM();
-    }
-
     IEnumerator FinishGameCoroutine(string[] ranking)
     {
         SetAnimatorPlay();
@@ -295,18 +240,6 @@ public class MainGameManager : NetworkBehaviour
 
         yield return new WaitForSeconds(3.0f);
         RpcMoveResultScreen(ranking);
-    }
-
-    [ClientRpc]
-    void SetAnimatorPlay()
-    {
-        finishAnimator.SetBool("SetFinish", true);
-    }
-
-    [ClientRpc]
-    void RpcPlayFinishSE()
-    {
-        SoundManager.Play(SoundManager.SE.FINISH, SoundManager.BaseSEVolume);
     }
 
     [ClientRpc]
@@ -322,5 +255,73 @@ public class MainGameManager : NetworkBehaviour
 
         //リザルト画面に移動
         NonGameManager.LoadNonGameScene(BaseScreenManager.Screen.RESULT);
+    }
+
+
+    //スタートフラグを立てる
+    void SetStartFlagTrue()
+    {
+        startFlag = true;
+        SoundManager.Play(SoundManager.BGM.LOOP, SoundManager.BaseBGMVolume * 0.4f);
+    }
+
+    [ClientRpc]
+    void RpcStopBGM()
+    {
+        SoundManager.StopBGM();
+    }
+
+    [ClientRpc]
+    void RpcPlayStartSE()
+    {
+        SoundManager.Play(SoundManager.SE.START_COUNT_DOWN_D, SoundManager.BaseSEVolume);
+        Invoke(nameof(SetStartFlagTrue), 4.5f);
+    }
+
+    [ClientRpc]
+    void RpcPlayFinishSE()
+    {
+        SoundManager.Play(SoundManager.SE.FINISH, SoundManager.BaseSEVolume);
+    }
+
+    //アニメーターの再生
+    [ClientRpc]
+    void SetAnimatorPlay()
+    {
+        finishAnimator.SetBool("SetFinish", true);
+    }
+
+
+    //設定画面からメインゲームに移動する
+    public static void ConfigToMainGame()
+    {
+        screenMaskImage.enabled = false;
+        BaseScreenManager.HideScreen();
+
+        if (IsCursorLock)
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+        }
+        else
+        {
+            Cursor.lockState = CursorLockMode.None;
+        }
+        IsConfig = false;
+    }
+
+    void MainGameToConfig()
+    {
+        screenMaskImage.enabled = true;     //設定画面の背景にマスクをつける
+        BaseScreenManager.SetScreen(BaseScreenManager.Screen.CONFIG);
+
+        Cursor.lockState = CursorLockMode.None;
+        IsConfig = true;
+    }
+    
+
+
+    //未使用
+    public static void SetPlayer(string name, BaseWeapon.Weapon weapon, bool isPlayer)
+    {
     }
 }
