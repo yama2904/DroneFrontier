@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 2097225009}
   - component: {fileID: 2097225008}
   m_Layer: 5
-  m_Name: MatchingButton (1)
+  m_Name: ClientButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -299,7 +299,7 @@ GameObject:
   - component: {fileID: 3525208544264773250}
   - component: {fileID: 6124607059406281099}
   m_Layer: 5
-  m_Name: MatchingButton
+  m_Name: HostButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1064,7 +1064,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "\u30DB\u30B9\u30C8"
+  m_Text: "\u52DF\u96C6"
 --- !u!1 &7748469321861509660
 GameObject:
   m_ObjectHideFlags: 0
@@ -1349,7 +1349,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "\u30AF\u30E9\u30A4\u30A2\u30F3\u30C8"
+  m_Text: "\u53C2\u52A0"
 --- !u!1 &8743304152839754174
 GameObject:
   m_ObjectHideFlags: 0

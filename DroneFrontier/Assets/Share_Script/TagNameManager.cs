@@ -11,7 +11,6 @@ public class TagNameManager : MonoBehaviour
     public const string BULLET = "Bullet";
     public const string GIMMICK = "Gimmick";
     public const string JAMMING = "Jamming";
-    public const string WORLD_WALL = "WorldWall";
     public const string GOAL = "Goal";
     public const string ITEM_SPAWN = "ItemSpawn";
     public const string TOWER = "Tower";

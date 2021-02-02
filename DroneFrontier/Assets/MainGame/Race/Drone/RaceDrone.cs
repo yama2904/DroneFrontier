@@ -101,11 +101,11 @@ public class RaceDrone : NetworkBehaviour
         if (Input.GetKey(KeyCode.W))
         {
             baseAction.Move(moveSpeed, cacheTransform.forward);
-            baseAction.CmdRotateDroneObject(frontMoveRotate, moveRotateSpeed);
+            baseAction.RotateDroneObject(frontMoveRotate, moveRotateSpeed);
         }
         else
         {
-            baseAction.CmdRotateDroneObject(Quaternion.identity, moveRotateSpeed);
+            baseAction.RotateDroneObject(Quaternion.identity, moveRotateSpeed);
         }
 
         //左移動
@@ -114,11 +114,11 @@ public class RaceDrone : NetworkBehaviour
             Quaternion leftAngle = Quaternion.Euler(0, -90, 0);
             Vector3 left = leftAngle.normalized * cacheTransform.forward;
             baseAction.Move(moveSpeed, left);
-            baseAction.CmdRotateDroneObject(leftMoveRotate, moveRotateSpeed);
+            baseAction.RotateDroneObject(leftMoveRotate, moveRotateSpeed);
         }
         else
         {
-            baseAction.CmdRotateDroneObject(Quaternion.identity, moveRotateSpeed);
+            baseAction.RotateDroneObject(Quaternion.identity, moveRotateSpeed);
         }
 
         //後退
@@ -127,11 +127,11 @@ public class RaceDrone : NetworkBehaviour
             Quaternion backwardAngle = Quaternion.Euler(0, 180, 0);
             Vector3 backward = backwardAngle.normalized * cacheTransform.forward;
             baseAction.Move(moveSpeed, backward);
-            baseAction.CmdRotateDroneObject(backMoveRotate, moveRotateSpeed);
+            baseAction.RotateDroneObject(backMoveRotate, moveRotateSpeed);
         }
         else
         {
-            baseAction.CmdRotateDroneObject(Quaternion.identity, moveRotateSpeed);
+            baseAction.RotateDroneObject(Quaternion.identity, moveRotateSpeed);
         }
 
         //右移動
@@ -140,11 +140,11 @@ public class RaceDrone : NetworkBehaviour
             Quaternion rightAngle = Quaternion.Euler(0, 90, 0);
             Vector3 right = rightAngle.normalized * cacheTransform.forward;
             baseAction.Move(moveSpeed, right);
-            baseAction.CmdRotateDroneObject(rightMoveRotate, moveRotateSpeed);
+            baseAction.RotateDroneObject(rightMoveRotate, moveRotateSpeed);
         }
         else
         {
-            baseAction.CmdRotateDroneObject(Quaternion.identity, moveRotateSpeed);
+            baseAction.RotateDroneObject(Quaternion.identity, moveRotateSpeed);
         }
 
         //上下移動

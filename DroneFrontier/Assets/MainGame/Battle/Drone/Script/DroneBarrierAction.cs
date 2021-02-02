@@ -6,6 +6,7 @@ using Mirror;
 public class DroneBarrierAction : NetworkBehaviour
 {
     [SerializeField] GameObject barrierObject = null;
+    public GameObject BarrierObject { get { return barrierObject; } }
     BattleDrone drone = null;
 
     const float MAX_HP = 100;
@@ -37,10 +38,12 @@ public class DroneBarrierAction : NetworkBehaviour
     }
     void Start() { }
 
+
     public override void OnStartClient()
     {
         base.OnStartClient();
 
+        GetComponent<DroneChildObject>().SetChild(barrierObject.transform, DroneChildObject.Child.BARRIER);
         drone = GetComponent<BattleDrone>();
         material = barrierObject.GetComponent<Renderer>().material;
         CmdInit();
@@ -155,11 +158,11 @@ public class DroneBarrierAction : NetworkBehaviour
         {
             syncHP = 0;
             RpcSetActiveBarrier(false);
-            RpcPlaySE(SoundManager.SE.DESTROY_BARRIER);
+           drone.RpcPlayOneShotSEAllClient(SoundManager.SE.DESTROY_BARRIER, SoundManager.BaseSEVolume);
         }
         syncRegeneCountTime = 0;
         syncIsRegene = false;
-        RpcPlaySE(SoundManager.SE.BARRIER_DAMAGE);
+        drone.RpcPlayOneShotSEAllClient(SoundManager.SE.BARRIER_DAMAGE, SoundManager.BaseSEVolume * 0.7f);
 
         //バリアの色変え
         float value = syncHP / MAX_HP;
@@ -267,11 +270,6 @@ public class DroneBarrierAction : NetworkBehaviour
 
     #endregion
 
-    [ClientRpc]
-    void RpcPlaySE(SoundManager.SE se)
-    {
-        drone.PlayOneShotSE(se, SoundManager.BaseSEVolume * 0.8f);
-    }
 
     [ClientRpc]
     void RpcSetBarrierColor(float value, bool isStrength)

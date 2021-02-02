@@ -132,7 +132,7 @@ public class BattleManager : NetworkBehaviour
             RpcSetText("残 り " + i + " 分");
 
             yield return new WaitForSeconds(4f);
-            RpcSetTextEnabled(true);
+            RpcSetTextEnabled(false);
             yield return new WaitForSeconds(56f);
         }
 
