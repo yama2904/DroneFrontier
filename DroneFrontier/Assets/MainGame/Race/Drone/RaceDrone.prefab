@@ -404,8 +404,11 @@ GameObject:
   - component: {fileID: 3215491144051122297}
   - component: {fileID: -6467332169874135032}
   - component: {fileID: 1357172807644066273}
+  - component: {fileID: -4949538461584215672}
   - component: {fileID: 3234087213211125625}
   - component: {fileID: 1828611781194625704}
+  - component: {fileID: 1101251787613211932}
+  - component: {fileID: 2557942350133253164}
   - component: {fileID: 7976131494666380338}
   - component: {fileID: 4430738496959679518}
   - component: {fileID: 5594314106793444536}
@@ -499,9 +502,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0
-  droneObject: {fileID: 8468956971570744406}
   limitCameraTiltX: 40
   _camera: {fileID: 4395704207437532612}
+--- !u!114 &-4949538461584215672
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3215491144051122303}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6473e0ea557894348ae9fd27c87512df, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  droneObject: {fileID: 8468956971570744406}
+  barrier: {fileID: 8468956971570744406}
 --- !u!114 &3234087213211125625
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -536,6 +554,44 @@ MonoBehaviour:
   localPositionSensitivity: 0.01
   localRotationSensitivity: 0.01
   localScaleSensitivity: 0.01
+--- !u!114 &1101251787613211932
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3215491144051122303}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 734b48bea0b204338958ee3d885e11f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  clientAuthority: 1
+  localPositionSensitivity: 0.01
+  localRotationSensitivity: 0.01
+  localScaleSensitivity: 0.01
+  target: {fileID: 8468956971570744406}
+--- !u!114 &2557942350133253164
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3215491144051122303}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 734b48bea0b204338958ee3d885e11f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  clientAuthority: 1
+  localPositionSensitivity: 0.01
+  localRotationSensitivity: 0.01
+  localScaleSensitivity: 0.01
+  target: {fileID: 8468956971570744406}
 --- !u!95 &7976131494666380338
 Animator:
   serializedVersion: 3
