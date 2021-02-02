@@ -251,21 +251,7 @@ public class BattleManager : NetworkBehaviour
         }
 
         FinishGame();
-    }
-
-    //残り時間のテキスト変更
-    [ClientRpc]
-    void RpcSetTimeText(string text)
-    {
-        timeText.text = text;
-    }
-
-    //残り時間のテキスト表示
-    [ClientRpc]
-    void RpcSetTextEnabled(bool flag)
-    {
-        timeText.enabled = flag;
-    }
+    }   
 
     //ゲームの終了処理
     [Server]
@@ -283,5 +269,20 @@ public class BattleManager : NetworkBehaviour
 
             StopCoroutine(countCoroutine);
         }
+    }
+
+
+    //残り時間のテキスト変更
+    [ClientRpc]
+    void RpcSetTimeText(string text)
+    {
+        timeText.text = text;
+    }
+
+    //残り時間のテキスト表示
+    [ClientRpc]
+    void RpcSetTextEnabled(bool flag)
+    {
+        timeText.enabled = flag;
     }
 }

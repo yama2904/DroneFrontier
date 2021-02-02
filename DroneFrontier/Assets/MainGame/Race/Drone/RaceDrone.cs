@@ -286,4 +286,11 @@ public class RaceDrone : NetworkBehaviour
     {
         RaceManager.Singleton.SetGoalDrone(netId);
     }
+
+    //ラグでTriggerEnterが反応されなかったとき用
+    [ServerCallback]
+    private void OnTriggerExit(Collider other)
+    {
+        RaceManager.Singleton.SetGoalDrone(netId);
+    }
 }

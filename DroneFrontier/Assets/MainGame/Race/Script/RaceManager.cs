@@ -13,9 +13,9 @@ public class RaceManager : NetworkBehaviour
     {
         public NetworkConnection conn;
         public RaceDrone drone = null;
-        public int ranking = 1;
+        public int ranking = MatchingManager.PlayerNum;
         public bool isGoal = false;
-        public static int droneNum = MatchingManager.PlayerNum;
+        public static int goalNum = 0;
     }
     static List<PlayerData> playerDatas = new List<PlayerData>();
 
@@ -32,7 +32,7 @@ public class RaceManager : NetworkBehaviour
     public override void OnStartClient()
     {
         base.OnStartClient();
-        PlayerData.droneNum = MatchingManager.PlayerNum;
+        PlayerData.goalNum = 0;
     }
 
     void Update()
@@ -43,7 +43,7 @@ public class RaceManager : NetworkBehaviour
         if (isServer)
         {
             //ゴールしていないプレイヤーが1人になったら終了処理
-            if (PlayerData.droneNum <= 1)
+            if (PlayerData.goalNum >= MatchingManager.PlayerNum - 1)
             {
                 if (!isFinished)
                 {
@@ -62,7 +62,7 @@ public class RaceManager : NetworkBehaviour
     private void OnDestroy()
     {
         playerDatas.Clear();
-        PlayerData.droneNum = 0;
+        PlayerData.goalNum = 0;
     }
 
     //プレイヤー情報の登録
@@ -87,9 +87,10 @@ public class RaceManager : NetworkBehaviour
         PlayerData pd = playerDatas[index];  //名前省略
         if (pd.isGoal) return;  //既にゴール処理を行っていたら処理しない
 
-        pd.ranking = PlayerData.droneNum;
+        //リスト情報の変更
+        pd.ranking = PlayerData.goalNum + 1;
         pd.isGoal = true;
-        PlayerData.droneNum--;
+        PlayerData.goalNum++;
     }
 
 
@@ -112,7 +113,7 @@ public class RaceManager : NetworkBehaviour
         //残りプレイヤーの修正
         if (!playerDatas[index].isGoal)
         {
-            PlayerData.droneNum--;
+            PlayerData.goalNum--;
         }
 
         //切断されたプレイヤーをリストから削除
