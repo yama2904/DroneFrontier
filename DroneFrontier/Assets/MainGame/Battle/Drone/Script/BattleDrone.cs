@@ -892,8 +892,6 @@ public class BattleDrone : NetworkBehaviour
         childObject.GetChild(DroneChildObject.Child.DRONE_OBJECT).localRotation = Quaternion.identity;
         syncMainWeapon.transform.localRotation = Quaternion.identity;
         syncSubWeapon.transform.localRotation = Quaternion.identity;
-        //childObject.GetChild(DroneChildObject.Child.MAIN_WEAPON).localRotation = Quaternion.identity;
-        //childObject.GetChild(DroneChildObject.Child.SUB_WEAPON).localRotation = Quaternion.identity;
 
         //リスポーンSE再生
         RpcPlayOneShotSEAllClient(SoundManager.SE.RESPAWN, SoundManager.BaseSEVolume);
