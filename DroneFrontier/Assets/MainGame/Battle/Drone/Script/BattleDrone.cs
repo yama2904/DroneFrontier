@@ -79,19 +79,27 @@ public class BattleDrone : NetworkBehaviour
     Quaternion deathRotate = Quaternion.Euler(28, -28, -28);
     float deathRotateSpeed = 2f;
     float gravityAccele = 1f;  //落下加速用
-    [SyncVar] bool syncIsDestroy = false;    //ドローンが破壊されたときtrue
-    public bool IsDestroy { get { return syncIsDestroy; } }
+
+    //フラグ
+    enum DeathFlag
+    {
+        FALL,       //破壊されて落下中
+        DESTROY,    //破壊されたとき
+        RESPAWN,    //リスポーン中
+        NON_DAMAGE, //無敵中
+        GAME_OVER,  //ストックが尽きて破壊された状態
+
+        NONE
+    }
+    SyncList<bool> deathFlags = new SyncList<bool>();
+    public bool IsDestroy { get { return deathFlags[(int)DeathFlag.DESTROY]; } }
+    public bool IsGameOver { get { return deathFlags[(int)DeathFlag.GAME_OVER]; } }
 
     //リスポーン用
     [SerializeField, Tooltip("死亡後の落下時間")] float fallTime = 5.0f;
     Vector3 startPos;
     Quaternion startRotate;
-    [SyncVar] bool syncIsRespawning = false;
-    [SyncVar] bool syncNonDamage = false; //無敵
     [SerializeField, Tooltip("リスポーン後の無敵時間")] float nonDamageTime = 4f;
-
-    //ゲームオーバーになったらtrue
-    public bool IsGameOver { get; private set; } = false;
 
 
     //アイテム枠
@@ -171,6 +179,13 @@ public class BattleDrone : NetworkBehaviour
         {
             usingWeapons[i] = false;
         }
+        if (isServer)
+        {
+            for (int i = 0; i < (int)DeathFlag.NONE; i++)
+            {
+                deathFlags.Add(false);
+            }
+        }
 
         //AudioSourceの初期化
         audios = GetComponents<AudioSource>();
@@ -225,7 +240,13 @@ public class BattleDrone : NetworkBehaviour
     {
         if (!isLocalPlayer) return;
         if (!MainGameManager.Singleton.StartFlag) return;  //ゲーム開始フラグが立っていなかったら処理しない
-        if (IsGameOver || syncIsRespawning || syncIsDestroy) return;  //死亡・リスポーン処理中は操作不可
+
+        //死亡・リスポーン処理中は操作不可
+        if (deathFlags[(int)DeathFlag.GAME_OVER] ||
+            deathFlags[(int)DeathFlag.FALL] ||
+            deathFlags[(int)DeathFlag.DESTROY] ||
+            deathFlags[(int)DeathFlag.RESPAWN]) return;
+
 
         //サブウェポンのUpdate
         if (syncSubWeapon != null)
@@ -544,7 +565,7 @@ public class BattleDrone : NetworkBehaviour
     private void FixedUpdate()
     {
         if (!isLocalPlayer) return;
-        if (syncIsDestroy)
+        if (deathFlags[(int)DeathFlag.FALL])
         {
             //加速しながら落ちる
             _rigidbody.AddForce(new Vector3(0, -10 * gravityAccele, 0), ForceMode.Acceleration);
@@ -570,8 +591,12 @@ public class BattleDrone : NetworkBehaviour
     [Command(ignoreAuthority = true)]
     public void CmdDamage(float power)
     {
-        if (IsGameOver || syncIsRespawning || syncIsDestroy) return;
-        if (syncNonDamage) return;  //無敵中はダメージ処理をしない
+        //死亡・リスポーン処理・無敵中はダメージ処理を行わない
+        if (deathFlags[(int)DeathFlag.GAME_OVER] ||
+            deathFlags[(int)DeathFlag.FALL] ||
+            deathFlags[(int)DeathFlag.DESTROY] ||
+            deathFlags[(int)DeathFlag.RESPAWN] ||
+            deathFlags[(int)DeathFlag.NON_DAMAGE]) return;
 
         //小数点第2以下切り捨て
         float p = Useful.DecimalPointTruncation(power, 1);
@@ -739,7 +764,9 @@ public class BattleDrone : NetworkBehaviour
     IEnumerator DestroyMe()
     {
         gravityAccele = 1f;
-        syncIsDestroy = true;
+        deathFlags[(int)DeathFlag.FALL] = true;
+        deathFlags[(int)DeathFlag.DESTROY] = true;
+        deathFlags[(int)DeathFlag.RESPAWN] = true;
 
         //全クライアントで死亡SE再生
         RpcPlayOneShotSEAllClient(SoundManager.SE.DEATH, SoundManager.BaseSEVolume);
@@ -752,15 +779,16 @@ public class BattleDrone : NetworkBehaviour
         childObject.RpcSetActive(false, DroneChildObject.Child.BARRIER);
         RpcSetActive(syncMainWeapon, false);
         RpcSetActive(syncSubWeapon, false);
+        RpcSetClliderEnabled(false);  //ついでに当たり判定も消す
         GameObject o = Instantiate(explosion, cacheTransform.position, Quaternion.identity);
         NetworkServer.Spawn(o, connectionToClient);
         spawnedExplosion = o;
-        syncIsDestroy = false;
+        deathFlags[(int)DeathFlag.FALL] = false;
 
         if (syncStock <= 0)
         {
             //ドローンを完全に非表示にして終了処理
-            Invoke(nameof(Death), fallTime);
+            Invoke(nameof(GameOver), fallTime);
         }
         else
         {
@@ -769,8 +797,14 @@ public class BattleDrone : NetworkBehaviour
         }
     }
 
+    [ClientRpc]
+    void RpcSetClliderEnabled(bool flag)
+    {
+        GetComponent<Collider>().enabled = flag;
+    }
+
     [TargetRpc]
-    void TargetDestroyMe(NetworkConnection target)
+    void TargetStopLockOnAndRadar(NetworkConnection target)
     {
         //死んだのでロックオン・レーダー解除
         lockOn.StopLockOn();
@@ -778,16 +812,16 @@ public class BattleDrone : NetworkBehaviour
     }
 
     [Server]
-    void Death()
+    void GameOver()
     {
-        RpcDeath();
+        RpcGameOver();
         RpcSetActive(gameObject, false);
+        deathFlags[(int)DeathFlag.GAME_OVER] = true;
     }
 
     [ClientRpc]
-    void RpcDeath()
-    {
-        IsGameOver = true;
+    void RpcGameOver()
+    {        
         BattleManager.Singleton.SetDestroyedDrone(netId);
     }
 
@@ -805,17 +839,25 @@ public class BattleDrone : NetworkBehaviour
         RpcSetActive(syncMainWeapon, true);
         RpcSetActive(syncSubWeapon, true);
 
+        //当たり判定も戻す
+        RpcSetClliderEnabled(true);
+
+        //ローカルプレイヤー用処理
         TargetRespawn(connectionToClient);
 
         //HP初期化
         syncHP = MAX_HP;
 
         //一時的に無敵
-        syncNonDamage = true;
+        deathFlags[(int)DeathFlag.NON_DAMAGE] = true;
         Invoke(nameof(SetNonDamageFalse), nonDamageTime);
 
         //生成した爆破を削除
         NetworkServer.Destroy(spawnedExplosion);
+
+        //操作可能にする
+        deathFlags[(int)DeathFlag.DESTROY] = false;
+        deathFlags[(int)DeathFlag.RESPAWN] = false;
     }
 
     [TargetRpc]
@@ -870,7 +912,7 @@ public class BattleDrone : NetworkBehaviour
     //無敵解除
     void SetNonDamageFalse()
     {
-        syncNonDamage = false;
+        deathFlags[(int)DeathFlag.NON_DAMAGE] = false;
     }
 
     #endregion
@@ -927,7 +969,13 @@ public class BattleDrone : NetworkBehaviour
     {
         if (!isLocalPlayer) return;
         if (!MainGameManager.Singleton.StartFlag) return;  //ゲーム開始フラグが立っていなかったら処理しない
-        if (IsGameOver || syncIsRespawning || syncIsDestroy) return;  //死亡・リスポーン処理中は操作不可
+
+        //死亡・リスポーン処理中は操作不可
+        if (deathFlags[(int)DeathFlag.GAME_OVER] ||
+            deathFlags[(int)DeathFlag.FALL] ||
+            deathFlags[(int)DeathFlag.DESTROY] ||
+            deathFlags[(int)DeathFlag.RESPAWN]) return;
+
 
         //Eキーでアイテム取得
         if (Input.GetKey(KeyCode.E))
