@@ -4766,6 +4766,7 @@ GameObject:
   - component: {fileID: 7073714418969793329}
   - component: {fileID: 2064083458852287002}
   - component: {fileID: 6924256354499990051}
+  - component: {fileID: 6972290755704006134}
   - component: {fileID: 3815653563818425779}
   m_Layer: 0
   m_Name: LaserBullet
@@ -4852,6 +4853,25 @@ MonoBehaviour:
   localPositionSensitivity: 0.01
   localRotationSensitivity: 0.01
   localScaleSensitivity: 0.01
+--- !u!114 &6972290755704006134
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2437432638473288414}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 734b48bea0b204338958ee3d885e11f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.02
+  clientAuthority: 1
+  localPositionSensitivity: 0.01
+  localRotationSensitivity: 0.01
+  localScaleSensitivity: 0.01
+  target: {fileID: 2409823900477879251}
 --- !u!82 &3815653563818425779
 AudioSource:
   m_ObjectHideFlags: 0

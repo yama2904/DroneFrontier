@@ -145,9 +145,7 @@ public class LaserBullet : NetworkBehaviour
         }
     }
 
-
-    #region ModifyLaserLength
-
+    
     void ModifyLaserLength(float length)
     {
         //Lineオブジェクト
@@ -163,19 +161,18 @@ public class LaserBullet : NetworkBehaviour
         lineTransform.localScale = new Vector3(length, localScaleY, 1.0f);
     }
 
-    [Command(ignoreAuthority = true)]
+    [Command]
     void CmdCallModifyLaserLength(float length)
     {
-        RpcCallModifyLaserLength(length);
+        RpcModifyLaserLength(length);
     }
 
     [ClientRpc]
-    void RpcCallModifyLaserLength(float length)
+    void RpcModifyLaserLength(float length)
     {
         ModifyLaserLength(length);
     }
-
-    #endregion
+    
 
     #region StopShot
 
@@ -315,14 +312,14 @@ public class LaserBullet : NetworkBehaviour
                 lineLength = hit.distance;
 
                 //ヒットした場所にEndオブジェクトを移動させる
-                CmdCallRpcSetEndObjectTransform(hit.point);
+                endObjectTransform.position = hit.point;
 
                 shotCountTime = 0;  //発射間隔のカウントをリセット
             }
             else
             {
                 //レーザーの末端にEndオブジェクトを移動
-                CmdCallRpcSetEndObjectTransform(lineTransform.position + (lineTransform.forward * lineRange));
+                endObjectTransform.position = lineTransform.position + (lineTransform.forward * lineRange);
             }
             //レーザーの長さに応じてオブジェクトの座標やサイズを変える
             CmdCallModifyLaserLength(lineLength);
@@ -431,22 +428,6 @@ public class LaserBullet : NetworkBehaviour
         audioSource.volume = SoundManager.BaseSEVolume * 0.05f;
         audioSource.loop = true;
         audioSource.Play();
-    }
-
-    #endregion
-
-    #region SetEndObjectTransform
-
-    [Command(ignoreAuthority = true)]
-    void CmdCallRpcSetEndObjectTransform(Vector3 pos)
-    {
-        RpcSetEndObjectTransform(pos);
-    }
-
-    [ClientRpc]
-    void RpcSetEndObjectTransform(Vector3 pos)
-    {
-        endObjectTransform.position = pos;
     }
 
     #endregion
