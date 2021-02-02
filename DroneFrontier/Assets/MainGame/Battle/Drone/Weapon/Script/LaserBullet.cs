@@ -199,6 +199,9 @@ public class LaserBullet : NetworkBehaviour
     [ClientRpc]
     void RpcStopAllParticle()
     {
+        //角度を戻す
+        lineTransform.localRotation = Quaternion.identity;
+
         charge.Stop();  //Chargeを止める
 
         //Chargeのパーティクルの発生量の初期化

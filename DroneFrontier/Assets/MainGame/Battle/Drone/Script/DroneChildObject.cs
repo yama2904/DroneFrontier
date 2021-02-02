@@ -9,33 +9,37 @@ public class DroneChildObject : NetworkBehaviour
     {
         DRONE_OBJECT,
         BARRIER,
-        MAIN_WEAPON,
-        SUB_WEAPON,
 
         NONE
     }
+    [SerializeField] Transform droneObject = null;
+    [SerializeField] Transform barrier = null;
+
     NetworkTransformChild[] childs = new NetworkTransformChild[(int)Child.NONE];
-    SyncList<GameObject> syncObjects = new SyncList<GameObject>();
 
 
-    void Awake()
+    public override void OnStartClient()
     {
         base.OnStartClient();
-        childs = GetComponents<NetworkTransformChild>();
 
-        for(int i = 0; i < (int)Child.NONE; i++)
-        {
-            syncObjects.Add(childs[i].gameObject);
-        }
+        childs = GetComponents<NetworkTransformChild>();
+        childs[(int)Child.DRONE_OBJECT].target = droneObject;
+        childs[(int)Child.BARRIER].target = barrier;
     }
 
     public void SetChild(Transform target, Child child)
-    {
+    {                
         childs[(int)child].target = target;
     }
 
     public Transform GetChild(Child child)
     {
         return childs[(int)child].target;
+    }
+
+    [ClientRpc]
+    public void RpcSetActive(bool flag, Child child)
+    {
+        childs[(int)child].target.gameObject.SetActive(flag);
     }
 }

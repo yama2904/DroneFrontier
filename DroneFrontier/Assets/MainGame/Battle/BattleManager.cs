@@ -48,6 +48,18 @@ public class BattleManager : NetworkBehaviour
                 Destroy(item);
             }
         }
+        PlayerData.droneNum = MatchingManager.PlayerNum;
+
+        if (isServer)
+        {
+            if (MainGameManager.IsItemSpawn)
+            {
+                GameObject manager = Instantiate(itemSpawnManager).gameObject;
+                NetworkServer.Spawn(manager, connectionToClient);
+            }
+            countCoroutine = StartCoroutine(CountTime());
+        }
+
         timeText.enabled = false;
     }
 
@@ -55,18 +67,6 @@ public class BattleManager : NetworkBehaviour
     {
         //シングルトンの作成
         singleton = this;
-    }
-
-    [ServerCallback]
-    void Start()
-    {
-        if (MainGameManager.IsItemSpawn)
-        {
-            GameObject manager = Instantiate(itemSpawnManager).gameObject;
-            NetworkServer.Spawn(manager, connectionToClient);
-        }
-        PlayerData.droneNum = MatchingManager.PlayerNum;
-        countCoroutine = StartCoroutine(CountTime());
     }
 
     void Update()

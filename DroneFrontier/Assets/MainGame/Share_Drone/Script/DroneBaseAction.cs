@@ -8,10 +8,8 @@ public class DroneBaseAction : NetworkBehaviour
     //コンポーネント用
     Rigidbody _rigidbody = null;
     Transform cacheTransform = null;  //キャッシュ用
+    DroneChildObject childObject = null;
     public AudioListener Listener { get; private set; } = null;
-
-    //ドローンのオブジェクトのみ動かす用
-    [SerializeField] Transform droneObject = null;
 
     //回転用
     [SerializeField, Tooltip("上下の回転制限角度")] float limitCameraTiltX = 40f;
@@ -33,7 +31,6 @@ public class DroneBaseAction : NetworkBehaviour
         {
             Listener.enabled = false;
         }
-        GetComponent<DroneChildObject>().SetChild(droneObject, DroneChildObject.Child.DRONE_OBJECT);
     }
 
     public override void OnStartLocalPlayer()
@@ -47,6 +44,7 @@ public class DroneBaseAction : NetworkBehaviour
         cacheTransform = transform; //キャッシュ用
         _rigidbody = GetComponent<Rigidbody>();
         cacheTransform = transform;
+        childObject = GetComponent<DroneChildObject>();
     }
 
     void Start() { }
@@ -60,10 +58,10 @@ public class DroneBaseAction : NetworkBehaviour
         _rigidbody.AddForce(direction * speed + (direction * speed - _rigidbody.velocity), ForceMode.Force);
     }
 
-
+    //ドローンを徐々に回転させる
     public void RotateDroneObject(Quaternion rotate, float speed)
     {
-        droneObject.localRotation = Quaternion.Slerp(droneObject.localRotation, rotate, speed);
+       childObject.GetChild(DroneChildObject.Child.DRONE_OBJECT).localRotation = Quaternion.Slerp(childObject.GetChild(DroneChildObject.Child.DRONE_OBJECT).localRotation, rotate, speed);
     }
 
     //回転処理

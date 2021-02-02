@@ -76,7 +76,6 @@ public class Bullet : NetworkBehaviour
         if (other.CompareTag(TagNameManager.PLAYER))
         {
             other.GetComponent<BattleDrone>().CmdDamage(Power);
-            DestroyMe();
         }
         else if (other.CompareTag(TagNameManager.JAMMING_BOT))
         {
@@ -86,7 +85,7 @@ public class Bullet : NetworkBehaviour
                 return;
             }
             jb.CmdDamage(Power);
-            DestroyMe();
         }
+        DestroyMe();
     }
 }

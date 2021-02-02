@@ -4,12 +4,6 @@ using UnityEngine;
 
 public class CPUController : DroneBaseAction
 {
-    //デバッグ用
-    [SerializeField] float speed = 0.1f;
-    [SerializeField] bool isAtack = true;
-    [SerializeField] bool isMove = true;
-    float deltaTime = 1;
-
     //protected override void Start()
     //{
     //    HP = 30;

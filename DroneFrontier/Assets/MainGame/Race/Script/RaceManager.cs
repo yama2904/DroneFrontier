@@ -29,9 +29,9 @@ public class RaceManager : NetworkBehaviour
         singleton = this;
     }
 
-    [ServerCallback]
-    void Start()
+    public override void OnStartClient()
     {
+        base.OnStartClient();
         PlayerData.droneNum = MatchingManager.PlayerNum;
     }
 

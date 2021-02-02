@@ -32,18 +32,17 @@ public class DroneBarrierAction : NetworkBehaviour
     [SyncVar] float syncDamagePercent;    //ダメージ倍率
     [SyncVar, HideInInspector] public uint syncParentNetId = 0;
 
+
     void Awake()
     {
         drone = GetComponent<BattleDrone>();
     }
     void Start() { }
 
-
     public override void OnStartClient()
     {
         base.OnStartClient();
 
-        GetComponent<DroneChildObject>().SetChild(barrierObject.transform, DroneChildObject.Child.BARRIER);
         drone = GetComponent<BattleDrone>();
         material = barrierObject.GetComponent<Renderer>().material;
         CmdInit();

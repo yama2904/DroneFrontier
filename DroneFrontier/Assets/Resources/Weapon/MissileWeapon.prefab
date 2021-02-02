@@ -189,7 +189,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   syncMode: 0
-  syncInterval: 0.1
+  syncInterval: 0.02
   weaponLocalPos: {fileID: 2032177690770584973}
   shotPos: {fileID: 3853599449480899470}
   parentNetId: 0
@@ -200,7 +200,7 @@ MonoBehaviour:
   shotPerSecond: 0.2
   _recast: 10
   _maxBullets: 3
-  _power: 50
+  _power: 40
   UIParentCanvas: {fileID: 6189665354112945132}
   bulletUIBack: {fileID: 804041731371029093, guid: c3b934424d7f24d4fb8095d99bdf9988,
     type: 3}
@@ -235,7 +235,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   syncMode: 0
-  syncInterval: 0.1
+  syncInterval: 0.02
   clientAuthority: 1
   localPositionSensitivity: 0.01
   localRotationSensitivity: 0.01
