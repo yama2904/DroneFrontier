@@ -34,6 +34,9 @@ public class BattleManager : NetworkBehaviour
     [SerializeField, Tooltip("制限時間(分)")] int maxTime = 5;
     Coroutine countCoroutine = null;
 
+    //キャッシュ用
+    AudioListener listener = null;
+
 
     public override void OnStartClient()
     {
@@ -60,6 +63,8 @@ public class BattleManager : NetworkBehaviour
             countCoroutine = StartCoroutine(CountTime());
         }
 
+        listener = GetComponent<AudioListener>();
+        listener.enabled = false;
         timeText.enabled = false;
     }
 
@@ -78,13 +83,22 @@ public class BattleManager : NetworkBehaviour
         {
             if (localDrone.IsGameOver)
             {
-                //次のプレイヤーのカメラに切り替える
+                //次のプレイヤーのカメラとリスナーに切り替える
                 int initIndex = useIndex;
                 playerDatas[useIndex].drone.SetCameraDepth(0);
                 playerDatas[useIndex].drone.SetAudioListener(false);
-                while(true)
+                listener.enabled = false;
+                while (true)
                 {
                     useIndex++;
+
+                    //無限ループ防止
+                    if (useIndex == initIndex)
+                    {
+                        break;
+                    }
+
+                    //配列の範囲外なら修正
                     if (useIndex >= playerDatas.Count || useIndex < 0)
                     {
                         useIndex = 0;
@@ -92,19 +106,15 @@ public class BattleManager : NetworkBehaviour
 
                     //破壊されていたらスキップ
                     PlayerData pd = playerDatas[useIndex];
+                    Debug.Log("useIndex: " + useIndex);
                     if (pd.isDestroy || pd.drone == null)
                     {
-                        useIndex++;
+                        continue;
                     }
                     else
                     {
                         pd.drone.SetCameraDepth(5);
                         pd.drone.SetAudioListener(true);
-                        break;
-                    }
-
-                    if(useIndex == initIndex)
-                    {
                         break;
                     }
                 }
@@ -259,5 +269,12 @@ public class BattleManager : NetworkBehaviour
 
         //カメラ切り替え
         pd.drone.SetCameraDepth(-1);
+
+        //オーディオリスナーを担当していたドローンなら一時的に自分のリスナーをオンにする
+        if(ReferenceEquals(localDrone, pd.drone) || 
+            (localDrone.IsGameOver && index == useIndex))
+        {
+            listener.enabled = true;
+        }
     }
 }

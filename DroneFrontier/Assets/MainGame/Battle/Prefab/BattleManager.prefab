@@ -92,6 +92,7 @@ GameObject:
   - component: {fileID: 458785504828815647}
   - component: {fileID: 5826206719070923701}
   - component: {fileID: 142472775378172193}
+  - component: {fileID: 460967181558711686}
   m_Layer: 0
   m_Name: BattleManager
   m_TagString: Untagged
@@ -148,6 +149,14 @@ MonoBehaviour:
   serverOnly: 0
   m_AssetId: 
   hasSpawned: 0
+--- !u!81 &460967181558711686
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6358352569728279144}
+  m_Enabled: 0
 --- !u!1 &6409850247325765560
 GameObject:
   m_ObjectHideFlags: 0
