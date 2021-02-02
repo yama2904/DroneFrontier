@@ -96,6 +96,10 @@ public class DownBill : MonoBehaviour
             //沈下停止ラインの判定
             if (billObject.localPosition.y < firstDownPos)
             {
+                if(downNum == DownNum.ONE)
+                {
+                    Destroy(gameObject);
+                }
                 isFirst = false;
                 if (!isSecond)
                 {
@@ -131,6 +135,10 @@ public class DownBill : MonoBehaviour
             //沈下停止ラインの判定
             if (billObject.localPosition.y < secondDownPos)
             {
+                if (downNum == DownNum.TWO)
+                {
+                    Destroy(gameObject);
+                }
                 isSecond = false;
                 if (!isThird)
                 {

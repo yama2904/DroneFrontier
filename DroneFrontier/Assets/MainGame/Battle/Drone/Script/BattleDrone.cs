@@ -227,13 +227,6 @@ public class BattleDrone : NetworkBehaviour
         if (!MainGameManager.Singleton.StartFlag) return;  //ゲーム開始フラグが立っていなかったら処理しない
         if (IsGameOver || syncIsRespawning || syncIsDestroy) return;  //死亡・リスポーン処理中は操作不可
 
-        //デバッグ用
-        if (Input.GetKeyDown(KeyCode.Y))
-        {
-            CmdDamage(10000);
-            CmdDamage(100);
-        }
-
         //サブウェポンのUpdate
         if (syncSubWeapon != null)
         {
@@ -304,7 +297,7 @@ public class BattleDrone : NetworkBehaviour
         {
             Quaternion upAngle = Quaternion.Euler(-90, 0, 0);
             Vector3 upward = upAngle.normalized * Vector3.forward;
-            baseAction.Move(moveSpeed * 1.2f * Input.mouseScrollDelta.y, upward);
+            baseAction.Move(moveSpeed * Input.mouseScrollDelta.y, upward);
         }
         if (Input.GetKey(KeyCode.R))
         {
