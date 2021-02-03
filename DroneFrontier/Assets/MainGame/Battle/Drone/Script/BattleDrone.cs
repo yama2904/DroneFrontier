@@ -8,7 +8,7 @@ using Mirror;
 public class BattleDrone : NetworkBehaviour
 {
     const float MAX_HP = 30;
-    [SyncVar, SerializeField] float syncHP = MAX_HP;
+    [SyncVar] float syncHP = MAX_HP;
 
     //コンポーネント用
     Transform cacheTransform = null;
@@ -21,14 +21,13 @@ public class BattleDrone : NetworkBehaviour
     DroneStatusAction statusAction = null;
 
     //移動用
-    [SerializeField, Tooltip("移動速度")] float moveSpeed = 100f;      //移動速度
-    float initSpeed = 0;  //移動速度の初期値
-    [HideInInspector] float maxSpeed = 100;  //最高速度
-    [HideInInspector] float minSpeed = 100;  //最低速度
+    [SerializeField, Tooltip("移動速度")] float moveSpeed = 800f;  //移動速度
+    float initSpeed = 0; //移動速度の初期値
+    float maxSpeed = 0;  //最高速度
+    float minSpeed = 0;  //最低速度
 
     //回転用
     [SerializeField, Tooltip("回転速度")] public float rotateSpeed = 5.0f;
-    float initRotateSpeed = 0;
 
     //ドローンが移動した際にオブジェクトが傾く処理用
     float moveRotateSpeed = 2f;
@@ -39,8 +38,7 @@ public class BattleDrone : NetworkBehaviour
 
     //ロックオン
     [SerializeField] LockOn lockOn = null;
-    [SerializeField, Tooltip("ロックオンした際に敵に向く速度")] float lockOnTrackingSpeed = 0.1f;
-    float initLockOnTrackingSpeed = 0;
+    [SerializeField, Tooltip("ロックオンした際に敵に向く速度")] float lockOnTrackingSpeed = 0.2f;
 
     //レーダー
     [SerializeField] Radar radar = null;
@@ -49,9 +47,9 @@ public class BattleDrone : NetworkBehaviour
     const float BOOST_POSSIBLE_MIN = 0.2f;  //ブースト可能な最低ゲージ量
     [SerializeField] Image boostGaugeImage = null;   //ブーストのゲージ画像
     [SerializeField] Image boostGaugeFrameImage = null; //ゲージ枠
-    [SerializeField, Tooltip("ブーストの加速度")] float boostAccele = 3.0f;  //ブーストの加速度
-    [SerializeField, Tooltip("ブースト時間")] float maxBoostTime = 5.0f;     //ブーストできる最大の時間
-    [SerializeField, Tooltip("ブーストのリキャスト時間")] float boostRecastTime = 6.0f;  //ブーストのリキャスト時間
+    [SerializeField, Tooltip("ブーストの加速度")] float boostAccele = 2.1f;  //ブーストの加速度
+    [SerializeField, Tooltip("ブースト時間")] float maxBoostTime = 6.0f;     //ブーストできる最大の時間
+    [SerializeField, Tooltip("ブーストのリキャスト時間")] float boostRecastTime = 8.0f;  //ブーストのリキャスト時間
     bool isBoost = false;
 
 
@@ -75,7 +73,7 @@ public class BattleDrone : NetworkBehaviour
     GameObject spawnedExplosion = null;
     [SerializeField] Image stockIcon = null;
     [SerializeField] Text stockText = null;
-    [SyncVar, SerializeField] int syncStock = 2;
+    [SyncVar, SerializeField] int syncStock = 1;
     Quaternion deathRotate = Quaternion.Euler(28, -28, -28);
     float deathRotateSpeed = 2f;
     float gravityAccele = 1f;  //落下加速用
@@ -96,10 +94,10 @@ public class BattleDrone : NetworkBehaviour
     public bool IsGameOver { get { return deathFlags[(int)DeathFlag.GAME_OVER]; } }
 
     //リスポーン用
-    [SerializeField, Tooltip("死亡後の落下時間")] float fallTime = 5.0f;
-    Vector3 startPos;
-    Quaternion startRotate;
-    [SerializeField, Tooltip("リスポーン後の無敵時間")] float nonDamageTime = 4f;
+    Vector3 startPos;  //初期座標
+    Quaternion startRotate;  //初期角度
+    float fallTime = 5.0f;  //死亡後の落下時間
+    float nonDamageTime = 4f;  //リスポーン後の無敵時間
 
 
     //アイテム枠
@@ -171,8 +169,6 @@ public class BattleDrone : NetworkBehaviour
         initSpeed = moveSpeed;
         maxSpeed = moveSpeed * 3;
         minSpeed = moveSpeed * 0.2f;
-        initRotateSpeed = rotateSpeed;
-        initLockOnTrackingSpeed = lockOnTrackingSpeed;
 
         //配列初期化
         for (int i = 0; i < (int)Weapon.NONE; i++)
@@ -556,8 +552,6 @@ public class BattleDrone : NetworkBehaviour
             if (!statusAction.GetIsStatus(DroneStatusAction.Status.SPEED_DOWN) && !isBoost)
             {
                 moveSpeed = initSpeed;
-                rotateSpeed = initRotateSpeed;
-                lockOnTrackingSpeed = initLockOnTrackingSpeed;
             }
         }
     }
