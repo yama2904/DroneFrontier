@@ -3,82 +3,85 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 
-public class Item : NetworkBehaviour
+namespace Online
 {
-    //アイテムの種類
-    public enum ItemType
+    public class Item : NetworkBehaviour
     {
-        BARRIER_STRENGTH,
-        JAMMING,
-        STUN_GRENADE,
-
-        NONE
-    }
-    [SyncVar] int type = (int)ItemType.NONE;
-    [SyncVar, HideInInspector] public uint parentNetId = 0;
-    public ItemType Type
-    {
-        get { return (ItemType)type; }
-        set
+        //アイテムの種類
+        public enum ItemType
         {
-            int v = (int)value;
-            if (v < 0)
+            BARRIER_STRENGTH,
+            JAMMING,
+            STUN_GRENADE,
+
+            NONE
+        }
+        [SyncVar] int type = (int)ItemType.NONE;
+        [SyncVar, HideInInspector] public uint parentNetId = 0;
+        public ItemType Type
+        {
+            get { return (ItemType)type; }
+            set
             {
-                v = 0;
+                int v = (int)value;
+                if (v < 0)
+                {
+                    v = 0;
+                }
+                if (v > (int)ItemType.NONE)
+                {
+                    v = (int)ItemType.NONE - 1;
+                }
+                type = v;
             }
-            if (v > (int)ItemType.NONE)
+        }
+
+        [SerializeField] GameObject barrierObecjt = null;
+        [SerializeField] GameObject jammingObject = null;
+        [SerializeField] GameObject stunGrenadeObject = null;
+
+
+        public override void OnStartClient()
+        {
+            base.OnStartClient();
+
+            //親オブジェクトの設定
+            GameObject parent = NetworkIdentity.spawned[parentNetId].gameObject;
+            transform.SetParent(parent.transform);
+            transform.localPosition = new Vector3(0, 0, 0);
+            transform.localRotation = Quaternion.identity;
+
+            if (type == (int)ItemType.NONE) return;
+
+            GameObject o = null;
+            if (type == (int)ItemType.BARRIER_STRENGTH)
             {
-                v = (int)ItemType.NONE - 1;
+                o = Instantiate(barrierObecjt);
             }
-            type = v;
+            else if (type == (int)ItemType.JAMMING)
+            {
+                o = Instantiate(jammingObject);
+            }
+            else if (type == (int)ItemType.STUN_GRENADE)
+            {
+                o = Instantiate(stunGrenadeObject);
+            }
+
+            Transform t = o.transform;
+            t.SetParent(transform);
+            t.localPosition = new Vector3(0, 0, 0);
         }
-    }
 
-    [SerializeField] GameObject barrierObecjt = null;
-    [SerializeField] GameObject jammingObject = null;
-    [SerializeField] GameObject stunGrenadeObject = null;
-
-
-    public override void OnStartClient()
-    {
-        base.OnStartClient();
-
-        //親オブジェクトの設定
-        GameObject parent = NetworkIdentity.spawned[parentNetId].gameObject;
-        transform.SetParent(parent.transform);
-        transform.localPosition = new Vector3(0, 0, 0);
-        transform.localRotation = Quaternion.identity;
-
-        if (type == (int)ItemType.NONE) return;
-
-        GameObject o = null;
-        if (type == (int)ItemType.BARRIER_STRENGTH)
+        [Server]
+        public void SetRandomItemType()
         {
-            o = Instantiate(barrierObecjt);
+            type = Random.Range(0, (int)ItemType.NONE);
         }
-        else if (type == (int)ItemType.JAMMING)
+
+        [ServerCallback]
+        private void OnDestroy()
         {
-            o = Instantiate(jammingObject);
+            ItemSpawnManager.Singleton.NewItemSpawn();
         }
-        else if (type == (int)ItemType.STUN_GRENADE)
-        {
-            o = Instantiate(stunGrenadeObject);
-        }
-
-        Transform t = o.transform;
-        t.SetParent(transform);
-        t.localPosition = new Vector3(0, 0, 0);
-    }
-
-    [Server]
-    public void SetRandomItemType()
-    {
-        type = Random.Range(0, (int)ItemType.NONE);
-    }
-
-    [ServerCallback]
-    private void OnDestroy()
-    {
-        ItemSpawnManager.Singleton.NewItemSpawn();
     }
 }

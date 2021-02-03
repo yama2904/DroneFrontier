@@ -4,13 +4,24 @@ using UnityEngine;
 
 public class GameModeSelectManager : MonoBehaviour
 {
+    //ゲームモード
+    public enum GameMode
+    {
+        BATTLE,   //バトルモード
+        RACE,     //レースモード
+
+        NONE
+    }
+    public static GameMode Mode { get; set; } = GameMode.NONE;  //選んだゲームモード
+
+
     //バトルモード
     public void SelectBattle()
     {
         //SE再生
         SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
 
-        MainGameManager.Mode = MainGameManager.GameMode.BATTLE;
+        Mode = GameMode.BATTLE;
         BaseScreenManager.SetScreen(BaseScreenManager.Screen.KURIBOCCHI);
     }
 
@@ -20,7 +31,7 @@ public class GameModeSelectManager : MonoBehaviour
         //SE再生
         SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
 
-        MainGameManager.Mode = MainGameManager.GameMode.RACE;
+        Mode = GameMode.RACE;
         BaseScreenManager.SetScreen(BaseScreenManager.Screen.KURIBOCCHI);
     }
 

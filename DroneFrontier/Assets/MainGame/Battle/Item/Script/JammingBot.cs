@@ -3,54 +3,57 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 
-public class JammingBot : NetworkBehaviour
+namespace Online
 {
-    [SyncVar] float HP = 30.0f;
-    [SyncVar, HideInInspector] public GameObject creater = null;
-
-
-    public override void OnStartClient()
+    public class JammingBot : NetworkBehaviour
     {
-        base.OnStartClient();
-        Transform t = transform;  //キャッシュ
+        [SyncVar] float HP = 30.0f;
+        [SyncVar, HideInInspector] public GameObject creater = null;
 
-        //ボットの向きを変える
-        Vector3 angle = t.localEulerAngles;
-        angle.y += creater.transform.localEulerAngles.y;
-        t.localEulerAngles = angle;
 
-        //生成した自分のジャミングボットをプレイヤーがロックオン・照射しないように設定
-        if (creater.CompareTag(TagNameManager.PLAYER))
+        public override void OnStartClient()
         {
-            creater.GetComponent<BattleDrone>().SetNotLockOnObject(gameObject);
-            creater.GetComponent<BattleDrone>().SetNotRadarObject(gameObject);
+            base.OnStartClient();
+            Transform t = transform;  //キャッシュ
+
+            //ボットの向きを変える
+            Vector3 angle = t.localEulerAngles;
+            angle.y += creater.transform.localEulerAngles.y;
+            t.localEulerAngles = angle;
+
+            //生成した自分のジャミングボットをプレイヤーがロックオン・照射しないように設定
+            if (creater.CompareTag(TagNameManager.PLAYER))
+            {
+                creater.GetComponent<BattleDrone>().SetNotLockOnObject(gameObject);
+                creater.GetComponent<BattleDrone>().SetNotRadarObject(gameObject);
+            }
         }
-    }
 
-    private void OnDestroy()
-    {
-        if (creater == null) return; 
-
-        //SetNotLockOnObject、SetNotRadarObjectを解除
-        if (creater.CompareTag(TagNameManager.PLAYER))
+        private void OnDestroy()
         {
-            creater.GetComponent<BattleDrone>().UnSetNotLockOnObject(gameObject);
-            creater.GetComponent<BattleDrone>().UnSetNotRadarObject(gameObject);
+            if (creater == null) return;
+
+            //SetNotLockOnObject、SetNotRadarObjectを解除
+            if (creater.CompareTag(TagNameManager.PLAYER))
+            {
+                creater.GetComponent<BattleDrone>().UnSetNotLockOnObject(gameObject);
+                creater.GetComponent<BattleDrone>().UnSetNotRadarObject(gameObject);
+            }
+
+            //デバッグ用
+            Debug.Log("ジャミングボット破壊");
         }
-        
-        //デバッグ用
-        Debug.Log("ジャミングボット破壊");
-    }
 
-    [Command(ignoreAuthority = true)]
-    public void CmdDamage(float power)
-    {
-        float p = Useful.DecimalPointTruncation(power, 1);   //小数点第2以下切り捨て
-        HP -= p;
-        if (HP < 0)
+        [Command(ignoreAuthority = true)]
+        public void CmdDamage(float power)
         {
-            HP = 0;
-            NetworkServer.Destroy(gameObject);
+            float p = Useful.DecimalPointTruncation(power, 1);   //小数点第2以下切り捨て
+            HP -= p;
+            if (HP < 0)
+            {
+                HP = 0;
+                NetworkServer.Destroy(gameObject);
+            }
         }
     }
 }

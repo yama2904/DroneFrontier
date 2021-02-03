@@ -3,77 +3,80 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 
-public class MagnetAreaSpawn : NetworkBehaviour
+namespace Online
 {
-    //コンポーネント群
-    Transform cacheTransform = null;
-    MagnetArea magnetArea = null;
-    [SerializeField] ParticleSystem particle1 = null;
-    [SerializeField] ParticleSystem particle2 = null;
-
-    [Header("パラメータ調整")]
-    [SerializeField, Tooltip("スポーン確率(0～1)")] float spawnPercent = 0.5f;
-    [SerializeField, Tooltip("スポーン判定を行う間隔")] float interval = 30f;
-    [SerializeField, Tooltip("発生し続ける時間")] float activeTime = 20f;
-    [SerializeField, Tooltip("スポーンする最小サイズ")] float minSize = 1f;
-    [SerializeField, Tooltip("スポーンする最大サイズ")] float maxSize = 3f;
-
-    //同時に発生する上限
-    const int MAX_ACTIVE = 3;
-    static int activeNum = 0;
-
-    float deltaTime = 0;
-    bool isActive = false;
-
-
-    public override void OnStartClient()
+    public class MagnetAreaSpawn : NetworkBehaviour
     {
-        base.OnStartClient();
-        cacheTransform = transform;
-        magnetArea = GetComponent<MagnetArea>();
-        magnetArea.SetArea(false);
-        activeNum = 0;
-    }
+        //コンポーネント群
+        Transform cacheTransform = null;
+        MagnetArea magnetArea = null;
+        [SerializeField] ParticleSystem particle1 = null;
+        [SerializeField] ParticleSystem particle2 = null;
 
-    [ServerCallback]
-    void Update()
-    {
-        if (!isActive)
+        [Header("パラメータ調整")]
+        [SerializeField, Tooltip("スポーン確率(0～1)")] float spawnPercent = 0.5f;
+        [SerializeField, Tooltip("スポーン判定を行う間隔")] float interval = 30f;
+        [SerializeField, Tooltip("発生し続ける時間")] float activeTime = 20f;
+        [SerializeField, Tooltip("スポーンする最小サイズ")] float minSize = 1f;
+        [SerializeField, Tooltip("スポーンする最大サイズ")] float maxSize = 3f;
+
+        //同時に発生する上限
+        const int MAX_ACTIVE = 3;
+        static int activeNum = 0;
+
+        float deltaTime = 0;
+        bool isActive = false;
+
+
+        public override void OnStartClient()
         {
-            //最大数発生していたら発生処理を行わない
-            if (activeNum >= MAX_ACTIVE) return;
+            base.OnStartClient();
+            cacheTransform = transform;
+            magnetArea = GetComponent<MagnetArea>();
+            magnetArea.SetArea(false);
+            activeNum = 0;
+        }
 
-            if (deltaTime >= interval)
+        [ServerCallback]
+        void Update()
+        {
+            if (!isActive)
             {
-                if (Random.Range(0, 1.0f) <= spawnPercent)
+                //最大数発生していたら発生処理を行わない
+                if (activeNum >= MAX_ACTIVE) return;
+
+                if (deltaTime >= interval)
                 {
-                    magnetArea.RpcSetArea(true);
-                    float size = Random.Range(minSize, maxSize);
-                    RpcSetSize(size);
-                    activeNum++;
-                    isActive = true;
+                    if (Random.Range(0, 1.0f) <= spawnPercent)
+                    {
+                        magnetArea.RpcSetArea(true);
+                        float size = Random.Range(minSize, maxSize);
+                        RpcSetSize(size);
+                        activeNum++;
+                        isActive = true;
+                    }
+                    deltaTime = 0;
                 }
-                deltaTime = 0;
             }
-        }
-        else
-        {
-            if (deltaTime >= activeTime)
+            else
             {
-                magnetArea.RpcSetArea(false);
-                activeNum--;
-                isActive = false;
-                deltaTime = 0;
+                if (deltaTime >= activeTime)
+                {
+                    magnetArea.RpcSetArea(false);
+                    activeNum--;
+                    isActive = false;
+                    deltaTime = 0;
+                }
             }
+            deltaTime += Time.deltaTime;
         }
-        deltaTime += Time.deltaTime;
-    }
 
-    [ClientRpc]
-    void RpcSetSize(float size)
-    {
-        cacheTransform.localScale = new Vector3(size, size, size);
-        particle1.transform.localScale = new Vector3(size * 5, size * 5, size * 5);
-        particle2.transform.localScale = new Vector3(size * 5, size * 5, size * 5);
+        [ClientRpc]
+        void RpcSetSize(float size)
+        {
+            cacheTransform.localScale = new Vector3(size, size, size);
+            particle1.transform.localScale = new Vector3(size * 5, size * 5, size * 5);
+            particle2.transform.localScale = new Vector3(size * 5, size * 5, size * 5);
+        }
     }
 }

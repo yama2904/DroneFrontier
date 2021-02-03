@@ -3,48 +3,51 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 
-public class StunImpact : NetworkBehaviour
+namespace Online
 {
-    [SyncVar, HideInInspector] public GameObject thrower = null;
-    [SerializeField, Tooltip("スタン状態の時間")] float stunTime = 9.0f;
-    float destroyTime = 0.5f;
-
-    public override void OnStartClient()
+    public class StunImpact : NetworkBehaviour
     {
-        base.OnStartClient();
-        //爆発した直後に当たり判定を消す
-        Invoke(nameof(FalseEnabledCollider), 0.05f);
-    }
+        [SyncVar, HideInInspector] public GameObject thrower = null;
+        [SerializeField, Tooltip("スタン状態の時間")] float stunTime = 9.0f;
+        float destroyTime = 0.5f;
 
-    [ServerCallback]
-    void Start()
-    {
-        Invoke(nameof(DestroyMe), destroyTime);
-    }
+        public override void OnStartClient()
+        {
+            base.OnStartClient();
+            //爆発した直後に当たり判定を消す
+            Invoke(nameof(FalseEnabledCollider), 0.05f);
+        }
 
-    void FalseEnabledCollider()
-    {
-        GetComponent<SphereCollider>().enabled = false;
-    }
+        [ServerCallback]
+        void Start()
+        {
+            Invoke(nameof(DestroyMe), destroyTime);
+        }
 
-    void DestroyMe()
-    {
-        NetworkServer.Destroy(gameObject);
-    }
+        void FalseEnabledCollider()
+        {
+            GetComponent<SphereCollider>().enabled = false;
+        }
 
-    private void OnTriggerEnter(Collider other)
-    {
-        //投げたプレイヤーなら当たり判定から除外
-        if (ReferenceEquals(other.gameObject, thrower)) return;
-        if (!other.CompareTag(TagNameManager.PLAYER)) return;   //プレイヤーのみ対象
+        void DestroyMe()
+        {
+            NetworkServer.Destroy(gameObject);
+        }
 
-        BattleDrone p = other.GetComponent<BattleDrone>();
-        if (!p.isLocalPlayer) return;   //ローカルプレイヤーのみ処理
-        p.SetStun(stunTime);
+        private void OnTriggerEnter(Collider other)
+        {
+            //投げたプレイヤーなら当たり判定から除外
+            if (ReferenceEquals(other.gameObject, thrower)) return;
+            if (!other.CompareTag(TagNameManager.PLAYER)) return;   //プレイヤーのみ対象
 
-        //必要なら距離によるスタンの時間を変える処理をいつか加える
-        //
-        //
+            BattleDrone p = other.GetComponent<BattleDrone>();
+            if (!p.isLocalPlayer) return;   //ローカルプレイヤーのみ処理
+            p.SetStun(stunTime);
 
+            //必要なら距離によるスタンの時間を変える処理をいつか加える
+            //
+            //
+
+        }
     }
 }

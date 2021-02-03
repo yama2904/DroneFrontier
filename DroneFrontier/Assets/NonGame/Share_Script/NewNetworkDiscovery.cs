@@ -26,6 +26,7 @@ public class DiscoveryResponse : NetworkMessage
     public long serverId;
 }
 
+
 public class NewNetworkDiscovery : NetworkDiscoveryBase<ServerRequest, ServerResponse>
 {
     //シングルトン
@@ -85,15 +86,15 @@ public class NewNetworkDiscovery : NetworkDiscoveryBase<ServerRequest, ServerRes
         // in there,  This way the client can ask for
         // specific game mode or something
 
-        UnityEngine.Debug.Log(MainGameManager.Mode);
+        UnityEngine.Debug.Log(GameModeSelectManager.Mode);
 
         //選択しているゲームモードが違ったら接続しない
-        MainGameManager.GameMode mode = MainGameManager.GameMode.BATTLE;
+        GameModeSelectManager.GameMode mode = GameModeSelectManager.GameMode.BATTLE;
         if (!request.isBattle)
         {
-            mode = MainGameManager.GameMode.RACE;
+            mode = GameModeSelectManager.GameMode.RACE;
         }
-        if(mode != MainGameManager.Mode)
+        if (mode != GameModeSelectManager.Mode)
         {
             return new ServerResponse();
         }
@@ -130,7 +131,7 @@ public class NewNetworkDiscovery : NetworkDiscoveryBase<ServerRequest, ServerRes
     {
         //サーバを検出するためのブロードキャストメッセージ
         ServerRequest request = new ServerRequest();
-        if (MainGameManager.Mode == MainGameManager.GameMode.BATTLE)
+        if (GameModeSelectManager.Mode == GameModeSelectManager.GameMode.BATTLE)
         {
             request.isBattle = true;
         }
@@ -138,7 +139,7 @@ public class NewNetworkDiscovery : NetworkDiscoveryBase<ServerRequest, ServerRes
         {
             request.isBattle = false;
         }
-        UnityEngine.Debug.Log(MainGameManager.Mode);
+        UnityEngine.Debug.Log(GameModeSelectManager.Mode);
         return request;
     }
 

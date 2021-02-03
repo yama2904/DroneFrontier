@@ -5,118 +5,121 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using Mirror;
 
-public class MatchingButtonsController : NetworkBehaviour
+namespace Online
 {
-    [SerializeField] Text Text1PName = null;
-    [SerializeField] Text Text2PName = null;
-    [SerializeField] Text Text3PName = null;
-    [SerializeField] Text Text4PName = null;
-    [SerializeField] GameObject decisinButton = null;
-
-    Color playerTextColor = new Color(0.2f, 0.2f, 0.2f, 1f);
-    Color nonPlayerTextColor = new Color(0.32f, 0.41f, 0.72f, 1f);
-    string nonPlayerText = "参加者受付中...";
-    bool IsServer = false;
-
-    void Start() { }
-    void Update() { }
-
-    public void Init(bool isServer)
+    public class MatchingButtonsController : NetworkBehaviour
     {
-        IsServer = isServer;
-        if (isServer)
-        {
-            decisinButton.SetActive(true);
-        }
-    }
+        [SerializeField] Text Text1PName = null;
+        [SerializeField] Text Text2PName = null;
+        [SerializeField] Text Text3PName = null;
+        [SerializeField] Text Text4PName = null;
+        [SerializeField] GameObject decisinButton = null;
 
-    public void SelectDecision()
-    {
-        //SE再生
-        SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+        Color playerTextColor = new Color(0.2f, 0.2f, 0.2f, 1f);
+        Color nonPlayerTextColor = new Color(0.32f, 0.41f, 0.72f, 1f);
+        string nonPlayerText = "参加者受付中...";
+        bool IsServer = false;
 
-        NewNetworkDiscovery.Singleton.StopDiscovery();  //ブロードキャストを止める
-        if (MainGameManager.Mode == MainGameManager.GameMode.BATTLE)
-        {
-            MatchingManager.Singleton.CreateWeaponSelectScreen();
-        }
-        else
-        {
-            MatchingManager.Singleton.RpcStartGame();
-        }
-    }
+        void Start() { }
+        void Update() { }
 
-    public void SelectBack()
-    {
-        //SE再生
-        SoundManager.Play(SoundManager.SE.CANCEL, SoundManager.BaseSEVolume);
-
-        if (IsServer)
+        public void Init(bool isServer)
         {
-            NetworkManager.singleton.StopHost();    //ホストを停止
-            NewNetworkDiscovery.Singleton.StopDiscovery();  //ブロードキャストを止める
-            MatchingManager.Singleton.Init();
-            NonGameManager.LoadNonGameScene(BaseScreenManager.Screen.KURIBOCCHI);
-        }
-        else
-        {
-            MatchingManager.Singleton.ExitClient();
-        }
-    }
-
-    public void SetPlayerList(string[] names)
-    {
-        int index = 0;
-        for (; index < names.Length; index++)
-        {
-            switch (index)
+            IsServer = isServer;
+            if (isServer)
             {
-                case 0:
-                    Text1PName.text = names[index];
-                    Text1PName.color = playerTextColor;
-                    break;
-
-                case 1:
-                    Text2PName.text = names[index];
-                    Text2PName.color = playerTextColor;
-                    break;
-
-                case 2:
-                    Text3PName.text = names[index];
-                    Text3PName.color = playerTextColor;
-                    break;
-
-                case 3:
-                    Text4PName.text = names[index];
-                    Text4PName.color = playerTextColor;
-                    break;
+                decisinButton.SetActive(true);
             }
         }
 
-        //プレイヤーの名前がない欄は募集中にテキストを変える
-        for (; index < 4; index++)
+        public void SelectDecision()
         {
-            switch (index)
+            //SE再生
+            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+
+            NewNetworkDiscovery.Singleton.StopDiscovery();  //ブロードキャストを止める
+            if (GameModeSelectManager.Mode == GameModeSelectManager.GameMode.BATTLE)
             {
-                case 0:
-                    Text1PName.text = nonPlayerText;
-                    Text1PName.color = nonPlayerTextColor;
-                    break;
+                MatchingManager.Singleton.CreateWeaponSelectScreen();
+            }
+            else
+            {
+                MatchingManager.Singleton.RpcStartGame();
+            }
+        }
 
-                case 1:
-                    Text2PName.text = nonPlayerText;
-                    Text2PName.color = nonPlayerTextColor;
-                    break;
+        public void SelectBack()
+        {
+            //SE再生
+            SoundManager.Play(SoundManager.SE.CANCEL, SoundManager.BaseSEVolume);
 
-                case 2:
-                    Text3PName.text = nonPlayerText;
-                    Text3PName.color = nonPlayerTextColor;
-                    break;
+            if (IsServer)
+            {
+                NetworkManager.singleton.StopHost();    //ホストを停止
+                NewNetworkDiscovery.Singleton.StopDiscovery();  //ブロードキャストを止める
+                MatchingManager.Singleton.Init();
+                NonGameManager.LoadNonGameScene(BaseScreenManager.Screen.KURIBOCCHI);
+            }
+            else
+            {
+                MatchingManager.Singleton.ExitClient();
+            }
+        }
 
-                case 3:
-                    Text4PName.text = nonPlayerText;
-                    Text4PName.color = nonPlayerTextColor;
-                    break;
+        public void SetPlayerList(string[] names)
+        {
+            int index = 0;
+            for (; index < names.Length; index++)
+            {
+                switch (index)
+                {
+                    case 0:
+                        Text1PName.text = names[index];
+                        Text1PName.color = playerTextColor;
+                        break;
+
+                    case 1:
+                        Text2PName.text = names[index];
+                        Text2PName.color = playerTextColor;
+                        break;
+
+                    case 2:
+                        Text3PName.text = names[index];
+                        Text3PName.color = playerTextColor;
+                        break;
+
+                    case 3:
+                        Text4PName.text = names[index];
+                        Text4PName.color = playerTextColor;
+                        break;
+                }
+            }
+
+            //プレイヤーの名前がない欄は募集中にテキストを変える
+            for (; index < 4; index++)
+            {
+                switch (index)
+                {
+                    case 0:
+                        Text1PName.text = nonPlayerText;
+                        Text1PName.color = nonPlayerTextColor;
+                        break;
+
+                    case 1:
+                        Text2PName.text = nonPlayerText;
+                        Text2PName.color = nonPlayerTextColor;
+                        break;
+
+                    case 2:
+                        Text3PName.text = nonPlayerText;
+                        Text3PName.color = nonPlayerTextColor;
+                        break;
+
+                    case 3:
+                        Text4PName.text = nonPlayerText;
+                        Text4PName.color = nonPlayerTextColor;
+                        break;
+                }
             }
         }
     }
