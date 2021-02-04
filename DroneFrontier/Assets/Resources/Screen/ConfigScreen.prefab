@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2480745006125000259}
+  - component: {fileID: 6983158067203767758}
   m_Layer: 0
   m_Name: ConfigScreen
   m_TagString: Untagged
@@ -27,12 +28,30 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 2480745007404402640}
-  - {fileID: 2480745007208763766}
   - {fileID: 2480745007639906229}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6983158067203767758
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2480745006125000258}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 99c5cd6565a61024f948167a3782d1d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  BGMSlider: {fileID: 2480745007968092340}
+  SESlider: {fileID: 2480745006716460448}
+  BrightnessSlider: {fileID: 2480745007966714321}
+  CameraSlider: {fileID: 2480745007008914065}
+  BGMValueText: {fileID: 2480745007952465368}
+  SEValueText: {fileID: 2480745006469506547}
+  BrightnessValueText: {fileID: 2480745007944471980}
+  CameraValueText: {fileID: 2480745007485979720}
 --- !u!1 &2480745006125120145
 GameObject:
   m_ObjectHideFlags: 0
@@ -572,7 +591,7 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2480745007208763767}
+      - m_Target: {fileID: 6983158067203767758}
         m_MethodName: MoveSliderSE
         m_Mode: 1
         m_Arguments:
@@ -1075,7 +1094,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2480745007208763767}
+      - m_Target: {fileID: 6983158067203767758}
         m_MethodName: SelectBack
         m_Mode: 1
         m_Arguments:
@@ -1175,7 +1194,7 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2480745007208763767}
+      - m_Target: {fileID: 6983158067203767758}
         m_MethodName: MoveSliderCamera
         m_Mode: 1
         m_Arguments:
@@ -1406,57 +1425,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!1 &2480745007208763761
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2480745007208763766}
-  - component: {fileID: 2480745007208763767}
-  m_Layer: 0
-  m_Name: ConfigButtonsController
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &2480745007208763766
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2480745007208763761}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 2480745006125000259}
-  m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2480745007208763767
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2480745007208763761}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 99c5cd6565a61024f948167a3782d1d8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  BGMSlider: {fileID: 2480745007968092340}
-  SESlider: {fileID: 2480745006716460448}
-  BrightnessSlider: {fileID: 2480745007966714321}
-  CameraSlider: {fileID: 2480745007008914065}
-  BGMValueText: {fileID: 2480745007952465368}
-  SEValueText: {fileID: 2480745006469506547}
-  BrightnessValueText: {fileID: 2480745007944471980}
-  CameraValueText: {fileID: 2480745007485979720}
 --- !u!1 &2480745007232444495
 GameObject:
   m_ObjectHideFlags: 0
@@ -1792,49 +1760,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!1 &2480745007404402643
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2480745007404402640}
-  - component: {fileID: 2480745007404402641}
-  m_Layer: 0
-  m_Name: ConfigManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &2480745007404402640
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2480745007404402643}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 2480745006125000259}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2480745007404402641
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2480745007404402643}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8c5e8b348f9dd164fa99e3b329a83686, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &2480745007485979722
 GameObject:
   m_ObjectHideFlags: 0
@@ -2136,7 +2061,7 @@ RectTransform:
   - {fileID: 2480745007558146392}
   - {fileID: 2480745007699718755}
   m_Father: {fileID: 2480745006125000259}
-  m_RootOrder: 2
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -2549,7 +2474,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2480745007208763767}
+      - m_Target: {fileID: 6983158067203767758}
         m_MethodName: InitSetting
         m_Mode: 1
         m_Arguments:
@@ -3035,7 +2960,7 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2480745007208763767}
+      - m_Target: {fileID: 6983158067203767758}
         m_MethodName: MoveSliderBrightness
         m_Mode: 1
         m_Arguments:
@@ -3135,7 +3060,7 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2480745007208763767}
+      - m_Target: {fileID: 6983158067203767758}
         m_MethodName: MoveSliderBGM
         m_Mode: 1
         m_Arguments:

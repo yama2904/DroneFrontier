@@ -89,7 +89,7 @@ MonoBehaviour:
   roomPlayerPrefab: {fileID: -4659048564045045932, guid: aedbe4351cfd0d54bb38896070012749,
     type: 3}
   RoomScene: Assets/NonGame/Matching/MatchingScene.unity
-  GameplayScene: Assets/MainGame/Battle/BattleModeScene.unity
+  GameplayScene: Assets/MainGame/Battle/BattleMode_Online.unity
   _allPlayersReady: 0
   roomSlots: []
   clientIndex: 0

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CPUController : DroneBaseAction
+public class CPUController : MonoBehaviour
 {
     //protected override void Start()
     //{

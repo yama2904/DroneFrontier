@@ -51,7 +51,7 @@ MonoBehaviour:
   autoStartServerBuild: 1
   showDebugMessages: 0
   serverTickRate: 30
-  offlineScene: Assets/MainGame/Battle/BattleModeScene.unity
+  offlineScene: Assets/MainGame/Battle/BattleMode_Online.unity
   onlineScene: Assets/MainGame/Race/RaceModeScene.unity
   transport: {fileID: 8335875255951916166}
   networkAddress: localhost

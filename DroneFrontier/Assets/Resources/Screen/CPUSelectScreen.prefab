@@ -119,7 +119,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1976513590197799739}
+      - m_Target: {fileID: 2111383883640732688}
         m_MethodName: SelectCPU2Laser
         m_Mode: 1
         m_Arguments:
@@ -558,7 +558,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1976513590197799739}
+      - m_Target: {fileID: 2111383883640732688}
         m_MethodName: SelectCPU3Missile
         m_Mode: 1
         m_Arguments:
@@ -732,6 +732,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1976513588766212355}
+  - component: {fileID: 2111383883640732688}
   m_Layer: 0
   m_Name: CPUSelectScreen
   m_TagString: Untagged
@@ -750,11 +751,24 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 1976513590197799738}
   - {fileID: 1976513589030901498}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2111383883640732688
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1976513588766212356}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42e6a5b9f4e5f6e48b77279f53cd0772, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CPUNumText: {fileID: 1976513589710317012}
+  CPUList: {fileID: 1976513588693189998}
 --- !u!1 &1976513588903941771
 GameObject:
   m_ObjectHideFlags: 0
@@ -946,7 +960,7 @@ RectTransform:
   - {fileID: 1976513589435406679}
   - {fileID: 1976513589156604209}
   m_Father: {fileID: 1976513588766212355}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -1209,7 +1223,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1976513590197799739}
+      - m_Target: {fileID: 2111383883640732688}
         m_MethodName: SelectBack
         m_Mode: 1
         m_Arguments:
@@ -1378,7 +1392,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1976513590197799739}
+      - m_Target: {fileID: 2111383883640732688}
         m_MethodName: SelectCPU3Laser
         m_Mode: 1
         m_Arguments:
@@ -1664,7 +1678,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1976513590197799739}
+      - m_Target: {fileID: 2111383883640732688}
         m_MethodName: SelectCPU2Missile
         m_Mode: 1
         m_Arguments:
@@ -1794,7 +1808,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1976513590197799739}
+      - m_Target: {fileID: 2111383883640732688}
         m_MethodName: SelectDecision
         m_Mode: 1
         m_Arguments:
@@ -2000,7 +2014,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1976513590197799739}
+      - m_Target: {fileID: 2111383883640732688}
         m_MethodName: SelectNumUp
         m_Mode: 1
         m_Arguments:
@@ -2130,7 +2144,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1976513590197799739}
+      - m_Target: {fileID: 2111383883640732688}
         m_MethodName: SelectCPU2Shotgun
         m_Mode: 1
         m_Arguments:
@@ -2338,7 +2352,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1976513590197799739}
+      - m_Target: {fileID: 2111383883640732688}
         m_MethodName: SelectCPU3Shotgun
         m_Mode: 1
         m_Arguments:
@@ -2699,7 +2713,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1976513590197799739}
+      - m_Target: {fileID: 2111383883640732688}
         m_MethodName: SelectCPU1Laser
         m_Mode: 1
         m_Arguments:
@@ -3063,7 +3077,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1976513590197799739}
+      - m_Target: {fileID: 2111383883640732688}
         m_MethodName: SelectCPU1Shotgun
         m_Mode: 1
         m_Arguments:
@@ -3149,51 +3163,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!1 &1976513590197799740
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1976513590197799738}
-  - component: {fileID: 1976513590197799739}
-  m_Layer: 0
-  m_Name: CPUSelectButtonsController
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1976513590197799738
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1976513590197799740}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 1976513588766212355}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1976513590197799739
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1976513590197799740}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 42e6a5b9f4e5f6e48b77279f53cd0772, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  CPUNumText: {fileID: 1976513589710317012}
-  CPUList: {fileID: 1976513588693189998}
 --- !u!1 &1976513590206923034
 GameObject:
   m_ObjectHideFlags: 0
@@ -3312,8 +3281,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1976513590197799739}
-        m_MethodName: SelectNumDonw
+      - m_Target: {fileID: 2111383883640732688}
+        m_MethodName: SelectNumDown
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3442,7 +3411,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1976513590197799739}
+      - m_Target: {fileID: 2111383883640732688}
         m_MethodName: SelectCPU1Missile
         m_Mode: 1
         m_Arguments:

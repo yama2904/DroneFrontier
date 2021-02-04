@@ -13,9 +13,9 @@ namespace Online
         public static MatchingManager Singleton { get { return singleton; } }
 
         //生成する画像用
-        [SerializeField] MatchingButtonsController matchingScreen = null;
-        [SerializeField] NetworkWeaponSelectController weaponSelectScreen = null;
-        static MatchingButtonsController createMatchingScreen = null;
+        [SerializeField] MatchingScreenManager matchingScreen = null;
+        [SerializeField] WeaponSelectScreenManager weaponSelectScreen = null;
+        static MatchingScreenManager createMatchingScreen = null;
 
         //接続中のプレイヤー情報
         public class PlayerData
@@ -40,7 +40,7 @@ namespace Online
 
             //明るさの調整と画面の生成
             BrightnessManager.SetGameAlfa(0);
-            MatchingButtonsController mc = Instantiate(matchingScreen);
+            MatchingScreenManager mc = Instantiate(matchingScreen);
             mc.Init(isServer);
             createMatchingScreen = mc;
 
@@ -50,7 +50,7 @@ namespace Online
                 GetComponent<NetworkRoomPlayer>().CmdChangeReadyState(true);
             }
 
-            CmdAddPlayer(KuribocchiButtonsController.playerName);
+            CmdAddPlayer(KuribocchiScreenManager.playerName);
         }
 
         [ServerCallback]
@@ -125,7 +125,7 @@ namespace Online
         public void CreateWeaponSelectScreen()
         {
             RpcDesroyMatchingScreen();
-            NetworkWeaponSelectController ws = Instantiate(weaponSelectScreen);
+            WeaponSelectScreenManager ws = Instantiate(weaponSelectScreen);
             NetworkServer.Spawn(ws.gameObject, connectionToClient);
             ws.DisplayItemSelect();
         }

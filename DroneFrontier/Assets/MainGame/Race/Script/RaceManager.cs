@@ -7,6 +7,9 @@ namespace Online
 {
     public class RaceManager : MainGameManager
     {
+        static RaceManager singleton;
+        public new static RaceManager Singleton { get { return singleton; } }
+
         class PlayerData
         {
             public NetworkConnection conn;

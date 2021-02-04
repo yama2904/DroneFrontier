@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
+using Online;
 
 /*
 	Documentation: https://mirror-networking.com/docs/Components/NetworkRoomManager.html
@@ -30,11 +31,11 @@ public class NewNetworkRoomManager : NetworkRoomManager
         MatchingManager.Singleton.DisconnectPlayer(conn);
         if (MainGameManager.IsMainGaming)
         {
-            if (MainGameManager.Mode == MainGameManager.GameMode.BATTLE)
+            if (GameModeSelectScreenManager.Mode == GameModeSelectScreenManager.GameMode.BATTLE)
             {
                 BattleManager.DisconnectPlayer(conn);
             }
-            else if(MainGameManager.Mode == MainGameManager.GameMode.RACE)
+            else if(GameModeSelectScreenManager.Mode == GameModeSelectScreenManager.GameMode.RACE)
             {
                 RaceManager.DisconnectPlayer(conn);
             }
@@ -103,7 +104,7 @@ public class NewNetworkRoomManager : NetworkRoomManager
         GameObject createDrone = playerPrefab;
 
         //レースモードならドローンを変える
-        if (MainGameManager.Mode == MainGameManager.GameMode.RACE)
+        if (GameModeSelectScreenManager.Mode == GameModeSelectScreenManager.GameMode.RACE)
         {
             createDrone = raceDrone;
         }
@@ -116,7 +117,7 @@ public class NewNetworkRoomManager : NetworkRoomManager
             player.name = MatchingManager.playerDatas[index].name;
 
             //バトルモードなら武器も設定
-            if (MainGameManager.Mode == MainGameManager.GameMode.BATTLE)
+            if (GameModeSelectScreenManager.Mode == GameModeSelectScreenManager.GameMode.BATTLE)
             {
                 player.GetComponent<BattleDrone>().SetSubWeapon = MatchingManager.playerDatas[index].weapon;
             }
@@ -155,7 +156,7 @@ public class NewNetworkRoomManager : NetworkRoomManager
     public override void OnRoomServerPlayersReady()
     {
         //レースモードならシーン先切り替え
-        if (MainGameManager.Mode == MainGameManager.GameMode.RACE)
+        if (GameModeSelectScreenManager.Mode == GameModeSelectScreenManager.GameMode.RACE)
         {
             GameplayScene = raceScene;
         }

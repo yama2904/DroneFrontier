@@ -119,7 +119,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 8743304153216557902}
+      - m_Target: {fileID: 1114219085156434267}
         m_MethodName: SelectClient
         m_Mode: 1
         m_Arguments:
@@ -405,7 +405,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 8743304153216557902}
+      - m_Target: {fileID: 1114219085156434267}
         m_MethodName: SelectHost
         m_Mode: 1
         m_Arguments:
@@ -607,7 +607,7 @@ RectTransform:
   - {fileID: 1188761288791732377}
   - {fileID: 2097225007}
   m_Father: {fileID: 8743304154295578229}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -920,7 +920,7 @@ RectTransform:
   m_Children:
   - {fileID: 6346385975740867155}
   m_Father: {fileID: 8743304154295578229}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -1183,7 +1183,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 8743304153216557902}
+      - m_Target: {fileID: 1114219085156434267}
         m_MethodName: SelectBack_InputName
         m_Mode: 1
         m_Arguments:
@@ -1468,7 +1468,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 8743304153216557902}
+      - m_Target: {fileID: 1114219085156434267}
         m_MethodName: SelectBack
         m_Mode: 1
         m_Arguments:
@@ -1557,52 +1557,6 @@ MonoBehaviour:
     m_VerticalOverflow: 1
     m_LineSpacing: 1
   m_Text: "\u30E2\u30FC\u30C9"
---- !u!1 &8743304153216557232
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 8743304153216557903}
-  - component: {fileID: 8743304153216557902}
-  m_Layer: 0
-  m_Name: KuribocchiButtonsController
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &8743304153216557903
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8743304153216557232}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 8743304154295578229}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8743304153216557902
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8743304153216557232}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4ed5dd4074489ff4ea62198d0507fcbd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  inputNameObject: {fileID: 1457879336352348770}
-  screenMask: {fileID: 5685379462830170794}
-  inputField: {fileID: 3669581835888513616}
 --- !u!1 &8743304153572176765
 GameObject:
   m_ObjectHideFlags: 0
@@ -1723,7 +1677,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 8743304153216557902}
+      - m_Target: {fileID: 1114219085156434267}
         m_MethodName: SelectBocchi
         m_Mode: 1
         m_Arguments:
@@ -1743,6 +1697,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8743304154295578229}
+  - component: {fileID: 1114219085156434267}
   m_Layer: 0
   m_Name: KuribocchiScreen
   m_TagString: Untagged
@@ -1761,13 +1716,27 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 8743304153216557903}
   - {fileID: 8743304154635787764}
   - {fileID: 5202887827912339758}
   - {fileID: 2483802526005876161}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1114219085156434267
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8743304154295578230}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ed5dd4074489ff4ea62198d0507fcbd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inputNameObject: {fileID: 1457879336352348770}
+  screenMask: {fileID: 5685379462830170794}
+  inputField: {fileID: 3669581835888513616}
 --- !u!1 &8743304154478648229
 GameObject:
   m_ObjectHideFlags: 0
@@ -1888,7 +1857,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 8743304153216557902}
+      - m_Target: {fileID: 1114219085156434267}
         m_MethodName: SelectRiajuu
         m_Mode: 1
         m_Arguments:
@@ -1933,7 +1902,7 @@ RectTransform:
   - {fileID: 8743304154478648228}
   - {fileID: 8743304152839754173}
   m_Father: {fileID: 8743304154295578229}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
