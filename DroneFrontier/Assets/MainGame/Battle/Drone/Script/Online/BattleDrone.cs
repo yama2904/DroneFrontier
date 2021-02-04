@@ -615,31 +615,6 @@ namespace Online
             }
         }
 
-        //ロックオンしない対象を設定
-        public void SetNotLockOnObject(GameObject o)
-        {
-            lockOnAction.SetNotLockOnObject(o);
-        }
-
-        //SetNotLockOnObjectで設定したオブジェクトを解除
-        public void UnSetNotLockOnObject(GameObject o)
-        {
-            lockOnAction.UnSetNotLockOnObject(o);
-        }
-
-
-        //レーダーに照射しない対象を設定
-        public void SetNotRadarObject(GameObject o)
-        {
-            radarAction.SetNotRadarObject(o);
-        }
-
-        //SetNotRadarObjectで設定したオブジェクトを解除
-        public void UnSetNotRadarObject(GameObject o)
-        {
-            radarAction.UnSetNotRadarObject(o);
-        }
-
 
         #region Sound
 

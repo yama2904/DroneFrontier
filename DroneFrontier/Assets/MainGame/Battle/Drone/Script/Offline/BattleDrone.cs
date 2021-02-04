@@ -93,7 +93,7 @@ namespace Offline
         //リスポーン用
         Vector3 startPos;  //初期座標
         Quaternion startRotate;  //初期角度
-        float fallTime = 5.0f;  //死亡後の落下時間
+        float fallTime = 5.0f;   //死亡後の落下時間
         float nonDamageTime = 4f;  //リスポーン後の無敵時間
 
 
@@ -166,7 +166,7 @@ namespace Offline
             subWeapon.SetParent(transform);
 
             //プロペラは延々流す
-            PlayLoopSE((int)SE.PROPELLER, SoundManager.BaseSEVolume);
+            PlayLoopSE(SE.PROPELLER, SoundManager.BaseSEVolume);
 
             //ブースト初期化
             boostGaugeImage.enabled = true;
@@ -405,7 +405,7 @@ namespace Offline
                 {
                     moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, boostAccele);
                     isBoost = true;
-                    PlayLoopSE((int)SE.BOOST, SoundManager.BaseSEVolume * 0.15f);    //加速音の再生
+                    PlayLoopSE(SE.BOOST, SoundManager.BaseSEVolume * 0.15f);    //加速音の再生
 
 
                     //デバッグ用
@@ -427,7 +427,7 @@ namespace Offline
 
                         moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, 1 / boostAccele);
                         isBoost = false;
-                        StopSE((int)SE.BOOST);
+                        StopSE(SE.BOOST);
 
 
                         //デバッグ用
@@ -439,7 +439,7 @@ namespace Offline
                 {
                     moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, 1 / boostAccele);
                     isBoost = false;
-                    StopSE((int)SE.BOOST);
+                    StopSE(SE.BOOST);
 
 
                     //デバッグ用
@@ -549,53 +549,28 @@ namespace Offline
             }
         }
 
-        //ロックオンしない対象を設定
-        public void SetNotLockOnObject(GameObject o)
-        {
-            lockOnAction.SetNotLockOnObject(o);
-        }
-
-        //SetNotLockOnObjectで設定したオブジェクトを解除
-        public void UnSetNotLockOnObject(GameObject o)
-        {
-            lockOnAction.UnSetNotLockOnObject(o);
-        }
-
-
-        //レーダーに照射しない対象を設定
-        public void SetNotRadarObject(GameObject o)
-        {
-            radarAction.SetNotRadarObject(o);
-        }
-
-        //SetNotRadarObjectで設定したオブジェクトを解除
-        public void UnSetNotRadarObject(GameObject o)
-        {
-            radarAction.UnSetNotRadarObject(o);
-        }
-
 
         #region Sound
 
         //ループSE再生
-        void PlayLoopSE(int index, float volume)
+        void PlayLoopSE(SE se, float volume)
         {
-            if (index >= (int)SE.NONE) return;
+            if (se >= SE.NONE) return;
             if (volume > 1.0f)
             {
                 volume = 1.0f;
             }
 
-            audios[index].volume = volume;
-            audios[index].loop = true;
-            audios[index].Play();
+            audios[(int)se].volume = volume;
+            audios[(int)se].loop = true;
+            audios[(int)se].Play();
         }
 
         //SE停止
-        void StopSE(int index)
+        void StopSE(SE se)
         {
-            if (index >= (int)SE.NONE) return;
-            audios[index].Stop();
+            if (se >= SE.NONE) return;
+            audios[(int)se].Stop();
         }
 
         //1回のみ発生する再生のSE
@@ -635,14 +610,14 @@ namespace Offline
         public void SetJamming()
         {
             statusAction.SetJamming();
-            PlayLoopSE((int)SE.JAMMING, SoundManager.BaseSEVolume);
+            PlayLoopSE(SE.JAMMING, SoundManager.BaseSEVolume);
         }
 
         //ジャミング解除
         public void UnSetJamming()
         {
             statusAction.UnSetJamming();
-            StopSE((int)SE.JAMMING);
+            StopSE(SE.JAMMING);
         }
 
         //スタン
@@ -654,7 +629,7 @@ namespace Offline
         //スピードダウン
         public int SetSpeedDown(float downPercent)
         {
-            PlayLoopSE((int)SE.MAGNETIC_AREA, SoundManager.BaseSEVolume);
+            PlayLoopSE(SE.MAGNETIC_AREA, SoundManager.BaseSEVolume);
             return statusAction.SetSpeedDown(ref moveSpeed, downPercent);
         }
 
@@ -662,7 +637,7 @@ namespace Offline
         public void UnSetSpeedDown(int id)
         {
             statusAction.UnSetSpeedDown(ref moveSpeed, id);
-            StopSE((int)SE.MAGNETIC_AREA);
+            StopSE(SE.MAGNETIC_AREA);
         }
 
         #endregion
@@ -779,8 +754,8 @@ namespace Offline
             animator.speed = 1f;
 
             //SEストップ
-            StopSE((int)SE.MAGNETIC_AREA);
-            StopSE((int)SE.JAMMING);
+            StopSE(SE.MAGNETIC_AREA);
+            StopSE(SE.JAMMING);
 
             //角度の初期化
             cacheTransform.rotation = startRotate;

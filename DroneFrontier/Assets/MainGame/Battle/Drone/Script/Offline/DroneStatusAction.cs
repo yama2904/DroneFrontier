@@ -164,6 +164,9 @@ namespace Offline
             radar.StopRadar();
             isStatus[(int)Status.JAMMING] = true;
 
+            //SE再生
+            SoundManager.Play((int)SE.JAMMING, SoundManager.BaseSEVolume);
+
             //アイコン表示
             jammingIcon.enabled = true;
         }

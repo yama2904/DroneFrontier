@@ -22,8 +22,8 @@ namespace Offline
             //生成した自分のジャミングボットをプレイヤーがロックオン・照射しないように設定
             if (creater.CompareTag(TagNameManager.PLAYER))
             {
-                creater.GetComponent<BattleDrone>().SetNotLockOnObject(gameObject);
-                creater.GetComponent<BattleDrone>().SetNotRadarObject(gameObject);
+                creater.GetComponent<DroneLockOnAction>().SetNotLockOnObject(gameObject);
+                creater.GetComponent<DroneRadarAction>().SetNotRadarObject(gameObject);
             }
         }
 
@@ -34,8 +34,8 @@ namespace Offline
             //SetNotLockOnObject、SetNotRadarObjectを解除
             if (creater.CompareTag(TagNameManager.PLAYER))
             {
-                creater.GetComponent<BattleDrone>().UnSetNotLockOnObject(gameObject);
-                creater.GetComponent<BattleDrone>().UnSetNotRadarObject(gameObject);
+                creater.GetComponent<DroneLockOnAction>().UnSetNotLockOnObject(gameObject);
+                creater.GetComponent<DroneRadarAction>().UnSetNotRadarObject(gameObject);
             }
 
             //デバッグ用
