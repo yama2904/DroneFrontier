@@ -44,7 +44,7 @@ namespace Offline
         //スタングレネードを爆破させる
         void CreateImpact()
         {
-            StunImpact s = Instantiate(stunImpact, transform.position, Quaternion.identity).GetComponent<StunImpact>();
+            StunImpact s = Instantiate(stunImpact, transform.position, Quaternion.identity);
             s.thrower = thrower;
 
             Destroy(gameObject);

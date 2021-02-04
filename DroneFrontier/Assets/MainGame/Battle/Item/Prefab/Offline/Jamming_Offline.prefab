@@ -4796,7 +4796,7 @@ GameObject:
   - component: {fileID: 7401578939098724861}
   - component: {fileID: 4629807058533697132}
   m_Layer: 2
-  m_Name: Jamming
+  m_Name: Jamming_Offline
   m_TagString: Jamming
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4844,5 +4844,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   destroyTime: 60
-  jammingBot: {fileID: 0}
+  jammingBot: {fileID: 8495789516920243579, guid: 4f64592b87bb18f46bf6a7fbc2a981e8,
+    type: 3}
   jammingBotPosition: {fileID: 7260446413059921860}

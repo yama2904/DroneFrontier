@@ -255,6 +255,7 @@ MonoBehaviour:
   boostAccele: 2.1
   maxBoostTime: 6
   boostRecastTime: 8
+  setSubWeapon: 0
   atackingDownSpeed: 0.5
   explosion: {fileID: 2212005194167726933, guid: 8dc076f9b5243664fa747acf0168fb56,
     type: 3}
@@ -1409,7 +1410,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3818805006876734887}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 

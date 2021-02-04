@@ -27,7 +27,7 @@ Transform:
   m_GameObject: {fileID: 1132926237376548127}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 15, y: 15, z: 15}
   m_Children: []
   m_Father: {fileID: 1130954130503758937}
   m_RootOrder: 0
@@ -4839,7 +4839,7 @@ Transform:
   m_GameObject: {fileID: 1133549130155941941}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 15, y: 15, z: 15}
   m_Children: []
   m_Father: {fileID: 1130954130503758937}
   m_RootOrder: 2
@@ -9651,7 +9651,7 @@ Transform:
   m_GameObject: {fileID: 1133574572157567675}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 15, y: 15, z: 15}
   m_Children: []
   m_Father: {fileID: 1130954130503758937}
   m_RootOrder: 1
@@ -14450,7 +14450,7 @@ GameObject:
   - component: {fileID: 3422052658085530785}
   - component: {fileID: -8302013618530608726}
   m_Layer: 0
-  m_Name: StunImpact
+  m_Name: StunImpact_Online
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

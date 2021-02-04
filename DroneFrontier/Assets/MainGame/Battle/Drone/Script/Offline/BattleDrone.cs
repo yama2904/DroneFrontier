@@ -60,7 +60,7 @@ namespace Offline
         }
         BaseWeapon mainWeapon = null;
         BaseWeapon subWeapon = null;
-        public BaseWeapon.Weapon SetSubWeapon { get; set; } = BaseWeapon.Weapon.SHOTGUN;
+        public BaseWeapon.Weapon setSubWeapon = BaseWeapon.Weapon.SHOTGUN;
         bool[] usingWeapons = new bool[(int)Weapon.NONE];    //使用中の武器
         [SerializeField, Tooltip("攻撃中の移動速度の低下率")] float atackingDownSpeed = 0.5f;   //攻撃中の移動速度の低下率
 
@@ -162,7 +162,7 @@ namespace Offline
             //武器初期化
             mainWeapon = BaseWeapon.CreateWeapon(gameObject, BaseWeapon.Weapon.GATLING);
             mainWeapon.SetParent(transform);
-            subWeapon = BaseWeapon.CreateWeapon(gameObject, SetSubWeapon);
+            subWeapon = BaseWeapon.CreateWeapon(gameObject, setSubWeapon);
             subWeapon.SetParent(transform);
 
             //プロペラは延々流す

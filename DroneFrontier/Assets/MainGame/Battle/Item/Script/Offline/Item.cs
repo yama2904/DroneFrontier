@@ -52,7 +52,7 @@ namespace Offline
 
         void OnDestroy()
         {
-            //ItemSpawnManager.Singleton.NewItemSpawn();
+            ItemCreateManager.Singleton.NewItemSpawn();
         }
     }
 }

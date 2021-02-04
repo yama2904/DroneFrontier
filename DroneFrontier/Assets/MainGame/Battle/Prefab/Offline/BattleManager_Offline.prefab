@@ -378,6 +378,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   finishAnimator: {fileID: 2294585405438622710}
   screenMaskImage: {fileID: 330934702991479413}
+  isSolo: 0
+  itemCreateManager: {fileID: 4984927521908068212, guid: 116d90a3c54b19e44a241e14964ba32c,
+    type: 3}
   timeText: {fileID: 9105199947316618618}
   maxTime: 5
 --- !u!81 &4473354061959015600

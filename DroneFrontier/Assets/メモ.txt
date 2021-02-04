@@ -1,5 +1,3 @@
 ミサイルがたまに破棄後アクセス
 DroneWeaponActionの追加とスタングレネードに自分の武器に当たり判定を行わない処理の追加
 スタングレネードをボタンを押した長さに応じて投てき距離を変えるかもしれない
-MainGameManagerプレハブをBattleとRaceManagerに統合
-LockOnとRadarスクリプトをDroneAction系に変更

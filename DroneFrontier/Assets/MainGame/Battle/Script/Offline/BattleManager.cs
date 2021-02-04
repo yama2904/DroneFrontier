@@ -30,7 +30,7 @@ namespace Offline
         bool isFinished = false;
 
         //ゲーム開始時に生成
-        //[SerializeField] ItemSpawnManager itemSpawnManager = null;
+        [SerializeField] ItemCreateManager itemCreateManager = null;
 
         //残り時間
         [SerializeField] Text timeText = null;
@@ -64,7 +64,7 @@ namespace Offline
             //アイテムスポーン処理
             if (IsItemSpawn)
             {
-                //itemSpawnManager = Instantiate(itemSpawnManager).gameObject;
+                itemCreateManager = Instantiate(itemCreateManager);
             }
             countCoroutine = StartCoroutine(CountTime());
 

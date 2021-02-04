@@ -140,13 +140,15 @@ namespace Offline
             //ジャミング
             else if (type == Item.ItemType.JAMMING)
             {
-                CreateJamming(gameObject);
+                Jamming j = Instantiate(jamming);
+                j.CreateBot(gameObject);
             }
 
             //スタングレネード
             else if (type == Item.ItemType.STUN_GRENADE)
             {
-                CreateStunGrenade(gameObject);
+                StunGrenade s = Instantiate(stunGrenade);
+                s.ThrowGrenade(gameObject);
             }
 
             //デバッグ用
@@ -154,18 +156,6 @@ namespace Offline
 
 
             return true;
-        }
-        
-        void CreateJamming(GameObject player)
-        {
-            Jamming j = Instantiate(jamming);
-            j.CreateBot(player);
-        }
-        
-        void CreateStunGrenade(GameObject player)
-        {
-            StunGrenade s = Instantiate(stunGrenade);
-            s.ThrowGrenade(player);
         }
     }
 }

@@ -59,6 +59,7 @@ namespace Online
                 .Where(h => !h.transform.CompareTag(TagNameManager.GIMMICK))
                 .ToArray();
 
+            Vector3 pos = jammingBotPosition.position;
             if (hits.Length > 0)
             {
                 //一番近いオブジェクトの手前に避ける
@@ -74,14 +75,13 @@ namespace Online
                     }
                 }
 
-                createBot.transform.position = new Vector3(
+                pos = new Vector3(
                     jammingBotPosition.position.x, hit.point.y - 8f, jammingBotPosition.position.z);
             }
-            else
-            {
-                createBot.transform.position = jammingBotPosition.position;
-            }
 
+            //生成したボットと自分も移動
+            createBot.transform.position = pos;
+            transform.position = pos;
 
             //一定時間後にボットを削除
             Invoke(nameof(DestroyMe), destroyTime);

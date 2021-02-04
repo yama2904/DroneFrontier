@@ -48307,7 +48307,7 @@ GameObject:
   - component: {fileID: 2206559462273315105}
   - component: {fileID: 2478398685738740350}
   m_Layer: 0
-  m_Name: Explosion
+  m_Name: Explosion_Offline
   m_TagString: Bullet
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -48360,7 +48360,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Shooter: {fileID: 0}
-  size: 20
+  size: 250
   power: 20
   powerDownRate: 0.2
   notPowerDownRange: 0.25
