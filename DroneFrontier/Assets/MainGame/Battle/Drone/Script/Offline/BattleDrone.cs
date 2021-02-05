@@ -8,28 +8,23 @@ namespace Offline
 {
     public class BattleDrone : MonoBehaviour
     {
-        const float MAX_HP = 30;
-        float HP = MAX_HP;
+        public uint PlayerID { get; private set; } = 0;
+        static uint playerCount = 0;
+
+        public float StartTime { get; private set; } = 0;
 
         //コンポーネント用
         Transform cacheTransform = null;
         Rigidbody _rigidbody = null;
         Animator animator = null;
         DroneBaseAction baseAction = null;
+        DroneDamageAction damageAction = null;
+        DroneSoundAction soundAction = null;
         DroneLockOnAction lockOnAction = null;
         DroneRadarAction radarAction = null;
         DroneBarrierAction barrierAction = null;
         DroneItemAction itemAction = null;
         DroneStatusAction statusAction = null;
-
-        //移動用
-        [SerializeField, Tooltip("移動速度")] float moveSpeed = 800f;  //移動速度
-        float initSpeed = 0; //移動速度の初期値
-        float maxSpeed = 0;  //最高速度
-        float minSpeed = 0;  //最低速度
-
-        //回転用
-        [SerializeField, Tooltip("回転速度")] public float rotateSpeed = 5.0f;
 
         //ドローンが移動した際にオブジェクトが傾く処理用
         float moveRotateSpeed = 2f;
@@ -47,6 +42,7 @@ namespace Offline
         [SerializeField, Tooltip("ブーストの加速度")] float boostAccele = 2.1f;  //ブーストの加速度
         [SerializeField, Tooltip("ブースト時間")] float maxBoostTime = 6.0f;     //ブーストできる最大の時間
         [SerializeField, Tooltip("ブーストのリキャスト時間")] float boostRecastTime = 8.0f;  //ブーストのリキャスト時間
+        int boostSoundId = -1;
         bool isBoost = false;
 
 
@@ -67,34 +63,14 @@ namespace Offline
         //死亡処理用
         [SerializeField] GameObject explosion = null;
         [SerializeField] Transform droneObject = null;
-        GameObject createdExplosion = null;
         [SerializeField] Image stockIcon = null;
         [SerializeField] Text stockText = null;
         [SerializeField] int stock = 1;
         Quaternion deathRotate = Quaternion.Euler(28, -28, -28);
         float deathRotateSpeed = 2f;
         float gravityAccele = 1f;  //落下加速用
-
-        //フラグ
-        enum DeathFlag
-        {
-            FALL,       //破壊されて落下中
-            DESTROY,    //破壊されたとき
-            RESPAWN,    //リスポーン中
-            NON_DAMAGE, //無敵中
-            GAME_OVER,  //ストックが尽きて破壊された状態
-
-            NONE
-        }
-        bool[] deathFlags = new bool[(int)DeathFlag.NONE];
-        public bool IsDestroy { get { return deathFlags[(int)DeathFlag.DESTROY]; } }
-        public bool IsGameOver { get { return deathFlags[(int)DeathFlag.GAME_OVER]; } }
-
-        //リスポーン用
-        Vector3 startPos;  //初期座標
-        Quaternion startRotate;  //初期角度
         float fallTime = 5.0f;   //死亡後の落下時間
-        float nonDamageTime = 4f;  //リスポーン後の無敵時間
+        bool isDestroyFall = false;
 
 
         //アイテム枠
@@ -107,20 +83,6 @@ namespace Offline
         }
 
 
-        //サウンド
-        enum SE
-        {
-            ONE_SHOT,       //ループしない1回きりのSE再生用
-            BOOST,          //ブースト
-            PROPELLER,      //プロペラ
-            JAMMING,        //ジャミング
-            MAGNETIC_AREA,  //磁場エリア内
-
-            NONE
-        }
-        AudioSource[] audios;
-
-
         //public override void OnStartClient()
         //{
         //    base.OnStartClient();
@@ -128,46 +90,35 @@ namespace Offline
         //}
 
 
-        void Start()
+        void Awake()
         {
             //コンポーネントの取得
             cacheTransform = transform;
             _rigidbody = GetComponent<Rigidbody>();
             animator = GetComponent<Animator>();
             baseAction = GetComponent<DroneBaseAction>();
+            damageAction = GetComponent<DroneDamageAction>();
+            soundAction = GetComponent<DroneSoundAction>();
             lockOnAction = GetComponent<DroneLockOnAction>();
             radarAction = GetComponent<DroneRadarAction>();
             barrierAction = GetComponent<DroneBarrierAction>();
             itemAction = GetComponent<DroneItemAction>();
             statusAction = GetComponent<DroneStatusAction>();
-            audios = GetComponents<AudioSource>();
+        }
 
+        void Start()
+        {
             //コンポーネントの初期化
             lockOnAction.Init();
             itemAction.Init((int)ItemNum.NONE);
-            statusAction.Init(minSpeed, maxSpeed);
 
-            //AudioSourceの初期化
-            audios[(int)SE.BOOST].clip = SoundManager.GetAudioClip(SoundManager.SE.BOOST);
-            audios[(int)SE.PROPELLER].clip = SoundManager.GetAudioClip(SoundManager.SE.PROPELLER);
-            audios[(int)SE.JAMMING].clip = SoundManager.GetAudioClip(SoundManager.SE.JAMMING_NOISE);
-            audios[(int)SE.MAGNETIC_AREA].clip = SoundManager.GetAudioClip(SoundManager.SE.MAGNETIC_AREA);
-
-
-            //パラメータ初期化
-            initSpeed = moveSpeed;
-            maxSpeed = moveSpeed * 3;
-            minSpeed = moveSpeed * 0.2f;
 
             //武器初期化
-            mainWeapon = BaseWeapon.CreateWeapon(gameObject, BaseWeapon.Weapon.GATLING);
+            mainWeapon = BaseWeapon.CreateWeapon(this, BaseWeapon.Weapon.GATLING);
             mainWeapon.SetParent(transform);
-            subWeapon = BaseWeapon.CreateWeapon(gameObject, setSubWeapon);
+            subWeapon = BaseWeapon.CreateWeapon(this, setSubWeapon);
             subWeapon.SetParent(transform);
-
-            //プロペラは延々流す
-            PlayLoopSE(SE.PROPELLER, SoundManager.BaseSEVolume);
-
+            
             //ブースト初期化
             boostGaugeImage.enabled = true;
             boostGaugeImage.fillAmount = 1;
@@ -177,20 +128,25 @@ namespace Offline
             stockText.enabled = true;
             stockText.text = stock.ToString();
 
-            //初期値保存
-            startPos = transform.position;
-            startRotate = transform.rotation;
+            //開始時間
+            StartTime = Time.time;
+
+
+            //プロペラは最初から流す
+            soundAction.PlayLoopSE(SoundManager.SE.PROPELLER, SoundManager.BaseSEVolume);
         }
 
         void Update()
         {
             if (!MainGameManager.Singleton.StartFlag) return;  //ゲーム開始フラグが立っていなかったら処理しない
 
-            //死亡・リスポーン処理中は操作不可
-            if (deathFlags[(int)DeathFlag.GAME_OVER] ||
-                deathFlags[(int)DeathFlag.FALL] ||
-                deathFlags[(int)DeathFlag.DESTROY] ||
-                deathFlags[(int)DeathFlag.RESPAWN]) return;
+            //死亡処理中は操作不可
+            if (isDestroyFall) return;
+
+            if(damageAction.HP <= 0)
+            {
+                DestroyMe();
+            }
 
             #region Move
 
@@ -198,7 +154,7 @@ namespace Offline
             //前進
             if (Input.GetKey(KeyCode.W))
             {
-                baseAction.Move(moveSpeed, cacheTransform.forward);
+                baseAction.Move(cacheTransform.forward);
                 baseAction.RotateDroneObject(frontMoveRotate, moveRotateSpeed * Time.deltaTime);
             }
             else
@@ -211,7 +167,7 @@ namespace Offline
             {
                 Quaternion leftAngle = Quaternion.Euler(0, -90, 0);
                 Vector3 left = leftAngle.normalized * cacheTransform.forward;
-                baseAction.Move(moveSpeed, left);
+                baseAction.Move(left);
                 baseAction.RotateDroneObject(leftMoveRotate, moveRotateSpeed * Time.deltaTime);
             }
             else
@@ -224,7 +180,7 @@ namespace Offline
             {
                 Quaternion backwardAngle = Quaternion.Euler(0, 180, 0);
                 Vector3 backward = backwardAngle.normalized * cacheTransform.forward;
-                baseAction.Move(moveSpeed, backward);
+                baseAction.Move(backward);
                 baseAction.RotateDroneObject(backMoveRotate, moveRotateSpeed * Time.deltaTime);
             }
             else
@@ -237,7 +193,7 @@ namespace Offline
             {
                 Quaternion rightAngle = Quaternion.Euler(0, 90, 0);
                 Vector3 right = rightAngle.normalized * cacheTransform.forward;
-                baseAction.Move(moveSpeed, right);
+                baseAction.Move(right);
                 baseAction.RotateDroneObject(rightMoveRotate, moveRotateSpeed * Time.deltaTime);
             }
             else
@@ -250,19 +206,19 @@ namespace Offline
             {
                 Quaternion upAngle = Quaternion.Euler(-90, 0, 0);
                 Vector3 upward = upAngle.normalized * Vector3.forward;
-                baseAction.Move(moveSpeed * Input.mouseScrollDelta.y, upward);
+                baseAction.Move(upward * Input.mouseScrollDelta.y);
             }
             if (Input.GetKey(KeyCode.R))
             {
                 Quaternion upAngle = Quaternion.Euler(-90, 0, 0);
                 Vector3 upward = upAngle.normalized * Vector3.forward;
-                baseAction.Move(moveSpeed, upward);
+                baseAction.Move(upward);
             }
             if (Input.GetKey(KeyCode.F))
             {
                 Quaternion downAngle = Quaternion.Euler(90, 0, 0);
                 Vector3 down = downAngle.normalized * Vector3.forward;
-                baseAction.Move(moveSpeed, down);
+                baseAction.Move(down);
             }
 
             #endregion
@@ -304,7 +260,7 @@ namespace Offline
                 //レーダー音の再生
                 if (Input.GetKeyDown(KeyCode.Q))
                 {
-                    PlayOneShotSE(SoundManager.SE.RADAR, SoundManager.BaseSEVolume);
+                    soundAction.PlayOneShot(SoundManager.SE.RADAR, SoundManager.BaseSEVolume);
                 }
                 //レーダー使用
                 if (Input.GetKey(KeyCode.Q))
@@ -327,9 +283,10 @@ namespace Offline
             //回転処理
             if (MainGameManager.IsCursorLock)
             {
-                float x = Input.GetAxis("Mouse X");
-                float y = Input.GetAxis("Mouse Y");
-                baseAction.Rotate(x, y, rotateSpeed * CameraManager.CameraSpeed);
+                Vector3 angle = Vector3.zero;
+                angle.x = Input.GetAxis("Mouse X");
+                angle.y = Input.GetAxis("Mouse Y");
+                baseAction.Rotate(angle * CameraManager.CameraSpeed);
             }
 
 
@@ -343,7 +300,7 @@ namespace Offline
                 if (!usingWeapons[(int)Weapon.SUB] && !usingWeapons[(int)Weapon.MAIN])
                 {
                     //攻撃中は速度低下
-                    moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, atackingDownSpeed);
+                    baseAction.ModifySpeed(atackingDownSpeed);
                     usingWeapons[(int)Weapon.MAIN] = true;
                 }
             }
@@ -359,7 +316,7 @@ namespace Offline
                 //攻撃を止めたら速度を戻す
                 if (usingWeapons[(int)Weapon.MAIN])
                 {
-                    moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, 1 / atackingDownSpeed);
+                    baseAction.ModifySpeed(1 / atackingDownSpeed);
                     usingWeapons[(int)Weapon.MAIN] = false;
                 }
             }
@@ -372,7 +329,7 @@ namespace Offline
                 if (!usingWeapons[(int)Weapon.MAIN] && !usingWeapons[(int)Weapon.SUB])
                 {
                     //攻撃中は速度低下
-                    moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, atackingDownSpeed);
+                    baseAction.ModifySpeed(atackingDownSpeed);
                     usingWeapons[(int)Weapon.SUB] = true;
                 }
             }
@@ -388,7 +345,7 @@ namespace Offline
                 //攻撃を止めたら速度を戻す
                 if (usingWeapons[(int)Weapon.SUB])
                 {
-                    moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, 1 / atackingDownSpeed);
+                    baseAction.ModifySpeed(1 / atackingDownSpeed);
                     usingWeapons[(int)Weapon.SUB] = false;
                 }
             }
@@ -403,11 +360,12 @@ namespace Offline
                 //ブーストが使用可能なゲージ量ならブースト使用
                 if (boostGaugeImage.fillAmount >= BOOST_POSSIBLE_MIN)
                 {
-                    moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, boostAccele);
+                    baseAction.ModifySpeed(boostAccele);
                     isBoost = true;
-                    PlayLoopSE(SE.BOOST, SoundManager.BaseSEVolume * 0.15f);    //加速音の再生
 
-
+                    //加速音の再生
+                    boostSoundId = soundAction.PlayLoopSE(SoundManager.SE.BOOST, SoundManager.BaseSEVolume * 0.15f);   
+                    
                     //デバッグ用
                     Debug.Log("ブースト使用");
                 }
@@ -425,9 +383,9 @@ namespace Offline
                     {
                         boostGaugeImage.fillAmount = 0;
 
-                        moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, 1 / boostAccele);
+                        baseAction.ModifySpeed(1 / boostAccele);
                         isBoost = false;
-                        StopSE(SE.BOOST);
+                        soundAction.StopLoopSE(boostSoundId);
 
 
                         //デバッグ用
@@ -437,9 +395,9 @@ namespace Offline
                 //キーを離したらブースト停止
                 if (Input.GetKeyUp(KeyCode.Space))
                 {
-                    moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, 1 / boostAccele);
+                    baseAction.ModifySpeed(1 / boostAccele);
                     isBoost = false;
-                    StopSE(SE.BOOST);
+                    soundAction.StopLoopSE(boostSoundId);
 
 
                     //デバッグ用
@@ -473,28 +431,28 @@ namespace Offline
                 UseItem(ItemNum.ITEM_2);
             }
 
-            //スピードのバグが起きたときに無理やり戻す
-            bool useWeapon = false;
-            foreach (bool use in usingWeapons)
-            {
-                if (use)
-                {
-                    useWeapon = true;
-                    break;
-                }
-            }
-            if (!useWeapon)
-            {
-                if (!statusAction.GetIsStatus(DroneStatusAction.Status.SPEED_DOWN) && !isBoost)
-                {
-                    moveSpeed = initSpeed;
-                }
-            }
+            ////スピードのバグが起きたときに無理やり戻す
+            //bool useWeapon = false;
+            //foreach (bool use in usingWeapons)
+            //{
+            //    if (use)
+            //    {
+            //        useWeapon = true;
+            //        break;
+            //    }
+            //}
+            //if (!useWeapon)
+            //{
+            //    if (!statusAction.GetIsStatus(DroneStatusAction.Status.SPEED_DOWN) && !isBoost)
+            //    {
+            //        moveSpeed = initSpeed;
+            //    }
+            //}
         }
 
         void FixedUpdate()
         {
-            if (deathFlags[(int)DeathFlag.FALL])
+            if (isDestroyFall)
             {
                 //加速しながら落ちる
                 _rigidbody.AddForce(new Vector3(0, -10 * gravityAccele, 0), ForceMode.Acceleration);
@@ -516,131 +474,10 @@ namespace Offline
             }
         }
 
-        //プレイヤーにダメージを与える
-        public void Damage(float power)
+        private void OnDestroy()
         {
-            //死亡・リスポーン処理・無敵中はダメージ処理を行わない
-            if (deathFlags[(int)DeathFlag.GAME_OVER] ||
-                deathFlags[(int)DeathFlag.FALL] ||
-                deathFlags[(int)DeathFlag.DESTROY] ||
-                deathFlags[(int)DeathFlag.RESPAWN] ||
-                deathFlags[(int)DeathFlag.NON_DAMAGE]) return;
-
-            //小数点第2以下切り捨て
-            float p = Useful.DecimalPointTruncation(power, 1);
-
-            //バリアが破壊されていなかったらバリアにダメージを肩代わりさせる
-            if (barrierAction.HP > 0)
-            {
-                barrierAction.Damage(p);
-            }
-            //バリアが破壊されていたらドローンが直接ダメージを受ける
-            else
-            {
-                HP -= power;
-                if (HP < 0)
-                {
-                    HP = 0;
-                    StartCoroutine(DestroyMe());
-                }
-
-                //デバッグ用
-                Debug.Log(name + "に" + power + "のダメージ\n残りHP: " + HP);
-            }
+            
         }
-
-
-        #region Sound
-
-        //ループSE再生
-        void PlayLoopSE(SE se, float volume)
-        {
-            if (se >= SE.NONE) return;
-            if (volume > 1.0f)
-            {
-                volume = 1.0f;
-            }
-
-            audios[(int)se].volume = volume;
-            audios[(int)se].loop = true;
-            audios[(int)se].Play();
-        }
-
-        //SE停止
-        void StopSE(SE se)
-        {
-            if (se >= SE.NONE) return;
-            audios[(int)se].Stop();
-        }
-
-        //1回のみ発生する再生のSE
-        public void PlayOneShotSE(SoundManager.SE se, float volume)
-        {
-            if (se == SoundManager.SE.NONE) return;
-
-            AudioSource audio = audios[(int)SE.ONE_SHOT];
-            audio.volume = volume;
-            audio.PlayOneShot(SoundManager.GetAudioClip(se));
-        }
-
-        #endregion
-
-
-        #region 状態系処理
-
-        //バリア強化
-        public bool SetBarrierStrength(float strengthPercent, float time)
-        {
-            return statusAction.SetBarrierStrength(strengthPercent, time);
-        }
-
-        //バリア弱体化
-        public void SetBarrierWeak()
-        {
-            statusAction.SetBarrierWeak();
-        }
-
-        //バリア弱体化解除
-        public void UnSetBarrierWeak()
-        {
-            statusAction.UnSetBarrierWeak();
-        }
-
-        //ジャミング
-        public void SetJamming()
-        {
-            statusAction.SetJamming();
-            PlayLoopSE(SE.JAMMING, SoundManager.BaseSEVolume);
-        }
-
-        //ジャミング解除
-        public void UnSetJamming()
-        {
-            statusAction.UnSetJamming();
-            StopSE(SE.JAMMING);
-        }
-
-        //スタン
-        public void SetStun(float time)
-        {
-            statusAction.SetStun(time);
-        }
-
-        //スピードダウン
-        public int SetSpeedDown(float downPercent)
-        {
-            PlayLoopSE(SE.MAGNETIC_AREA, SoundManager.BaseSEVolume);
-            return statusAction.SetSpeedDown(ref moveSpeed, downPercent);
-        }
-
-        //スピードダウン解除
-        public void UnSetSpeedDown(int id)
-        {
-            statusAction.UnSetSpeedDown(ref moveSpeed, id);
-            StopSE(SE.MAGNETIC_AREA);
-        }
-
-        #endregion
 
         //カメラの深度を変更する
         public void SetCameraDepth(int depth)
@@ -656,136 +493,108 @@ namespace Offline
 
         #region Death
 
-        IEnumerator DestroyMe()
+        public void DestroyMe()
         {
             gravityAccele = 1f;
-            deathFlags[(int)DeathFlag.FALL] = true;
-            deathFlags[(int)DeathFlag.DESTROY] = true;
-            deathFlags[(int)DeathFlag.RESPAWN] = true;
+            isDestroyFall = true;
 
             //死んだのでロックオン・レーダー解除
             lockOnAction.StopLockOn();
             radarAction.StopRadar();
 
             //死亡SE再生
-            PlayOneShotSE(SoundManager.SE.DEATH, SoundManager.BaseSEVolume);
+            soundAction.PlayOneShot(SoundManager.SE.DEATH, SoundManager.BaseSEVolume);
 
             //死亡後爆破
-            yield return new WaitForSeconds(2.5f);
+            Invoke(nameof(CreateExplosion), 2.5f);
+        }
 
-            //ドローンを非表示にして爆破
+        //ドローンを非表示にして爆破
+        void CreateExplosion()
+        {
+            //ドローンの非表示
             droneObject.gameObject.SetActive(false);
             barrierAction.BarrierObject.SetActive(false);
             mainWeapon.gameObject.SetActive(false);
             subWeapon.gameObject.SetActive(false);
-            GetComponent<Collider>().enabled = false;  //ついでに当たり判定も消す
-            createdExplosion = Instantiate(explosion, cacheTransform.position, Quaternion.identity);
-            deathFlags[(int)DeathFlag.FALL] = false;
 
-            if (stock <= 0)
-            {
-                //ドローンを完全に非表示にして終了処理
-                Invoke(nameof(GameOver), fallTime);
-            }
-            else
-            {
-                stock--;
-                Invoke(nameof(Respawn), fallTime);
-            }
-        }
+            //当たり判定も消す
+            GetComponent<Collider>().enabled = false;  
 
-        void GameOver()
-        {
-            deathFlags[(int)DeathFlag.GAME_OVER] = true;
-            BattleManager.Singleton.SetDestroyedDrone(this);
-            gameObject.SetActive(false);
+            //爆破生成
+            Instantiate(explosion, cacheTransform);
+
+            //落下停止
+            isDestroyFall = false;
+
+            //爆破後一定時間で消去
+            Destroy(gameObject, fallTime);
         }
 
         #endregion
 
-        #region Respawn
+        //#region Respawn
 
-        //リスポーン処理
-        void Respawn()
-        {
-            //ドローン表示
-            droneObject.gameObject.SetActive(true);
-            barrierAction.BarrierObject.SetActive(true);
-            mainWeapon.gameObject.SetActive(true);
-            subWeapon.gameObject.SetActive(true);
+        ////リスポーン処理
+        //void Respawn()
+        //{
+        //    //ドローン表示
+        //    droneObject.gameObject.SetActive(true);
+        //    barrierAction.BarrierObject.SetActive(true);
+        //    mainWeapon.gameObject.SetActive(true);
+        //    subWeapon.gameObject.SetActive(true);
 
-            //当たり判定も戻す
-            GetComponent<Collider>().enabled = true;
+        //    //当たり判定も戻す
+        //    GetComponent<Collider>().enabled = true;
 
+        //    //移動の初期化
+        //    _rigidbody.velocity = new Vector3(0, 0, 0);
+        //    baseAction.ResetParameters();
 
-            //HP初期化
-            HP = MAX_HP;
+        //    //開始時間更新
+        //    StartTime = Time.time;
 
-            //移動の初期化
-            _rigidbody.velocity = new Vector3(0, 0, 0);
-            moveSpeed = initSpeed;
+        //    //重力補正初期化
+        //    gravityAccele = 1f;
 
-            //初期位置に移動
-            cacheTransform.position = startPos;
+        //    //所持アイテム初期化
+        //    itemAction.ResetItem();
 
-            //重力補正初期化
-            gravityAccele = 1f;
+        //    //状態異常初期化
+        //    statusAction.ResetStatus();
 
-            //所持アイテム初期化
-            itemAction.ResetItem();
+        //    //ブーストゲージ回復
+        //    boostGaugeImage.fillAmount = 1f;
+        //    isBoost = false;
 
-            //状態異常初期化
-            statusAction.ResetStatus();
+        //    //残機を表記に適用
+        //    stockText.text = stock.ToString();
 
-            //ブーストゲージ回復
-            boostGaugeImage.fillAmount = 1f;
-            isBoost = false;
+        //    //サブ武器初期化
+        //    subWeapon.GetComponent<BaseWeapon>().ResetWeapon();
 
-            //残機を表記に適用
-            stockText.text = stock.ToString();
+        //    //バリア復活
+        //    barrierAction.Init();
 
-            //サブ武器初期化
-            subWeapon.GetComponent<BaseWeapon>().ResetWeapon();
+        //    //プロペラ再生
+        //    animator.speed = 1f;
 
-            //バリア復活
-            barrierAction.Init();
+        //    //角度の初期化
+        //    droneObject.localRotation = Quaternion.identity;
+        //    mainWeapon.transform.localRotation = Quaternion.identity;
+        //    subWeapon.transform.localRotation = Quaternion.identity;
 
-            //プロペラ再生
-            animator.speed = 1f;
+        //    //リスポーンSE再生
+        //    soundAction.PlayOneShot(SoundManager.SE.RESPAWN, SoundManager.BaseSEVolume);
 
-            //SEストップ
-            StopSE(SE.MAGNETIC_AREA);
-            StopSE(SE.JAMMING);
+        //    //生成した爆破を削除
+        //    Destroy(createdExplosion);
 
-            //角度の初期化
-            cacheTransform.rotation = startRotate;
-            droneObject.localRotation = Quaternion.identity;
-            mainWeapon.transform.localRotation = Quaternion.identity;
-            subWeapon.transform.localRotation = Quaternion.identity;
+        //    //操作可能にする
+        //    deathFlags[(int)DeathFlag.DESTROY] = false;
+        //}
 
-            //リスポーンSE再生
-            PlayOneShotSE(SoundManager.SE.RESPAWN, SoundManager.BaseSEVolume);
-
-            //一時的に無敵
-            deathFlags[(int)DeathFlag.NON_DAMAGE] = true;
-            Invoke(nameof(SetNonDamageFalse), nonDamageTime);
-
-            //生成した爆破を削除
-            Destroy(createdExplosion);
-
-            //操作可能にする
-            deathFlags[(int)DeathFlag.DESTROY] = false;
-            deathFlags[(int)DeathFlag.RESPAWN] = false;
-        }
-
-
-        //無敵解除
-        void SetNonDamageFalse()
-        {
-            deathFlags[(int)DeathFlag.NON_DAMAGE] = false;
-        }
-
-        #endregion
+        //#endregion
 
 
         //攻撃処理
@@ -816,7 +625,7 @@ namespace Offline
             //アイテム枠にアイテムを持っていたら使用
             if (itemAction.UseItem((int)item))
             {
-                PlayOneShotSE(SoundManager.SE.USE_ITEM, SoundManager.BaseSEVolume);
+                soundAction.PlayOneShot(SoundManager.SE.USE_ITEM, SoundManager.BaseSEVolume);
             }
         }
 
@@ -825,11 +634,8 @@ namespace Offline
         {
             if (!MainGameManager.Singleton.StartFlag) return;  //ゲーム開始フラグが立っていなかったら処理しない
 
-            //死亡・リスポーン処理中は操作不可
-            if (deathFlags[(int)DeathFlag.GAME_OVER] ||
-                deathFlags[(int)DeathFlag.FALL] ||
-                deathFlags[(int)DeathFlag.DESTROY] ||
-                deathFlags[(int)DeathFlag.RESPAWN]) return;
+            //死亡処理中は操作不可
+            if (isDestroyFall) return;
 
 
             //Eキーでアイテム取得
@@ -841,8 +647,7 @@ namespace Offline
                     if (itemAction.SetItem(item.Type))
                     {
                         Destroy(item.gameObject);
-
-
+                        
                         //デバッグ用
                         Debug.Log("アイテム取得");
                     }

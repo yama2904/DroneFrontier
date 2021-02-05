@@ -131,7 +131,7 @@ namespace Offline
             if (type == Item.ItemType.BARRIER_STRENGTH)
             {
                 //強化できなかったらアイテムを消去しない
-                if (!BarrierStrength.Strength(GetComponent<BattleDrone>()))
+                if (!BarrierStrength.Strength(GetComponent<DroneStatusAction>()))
                 {
                     return false;
                 }
@@ -141,7 +141,7 @@ namespace Offline
             else if (type == Item.ItemType.JAMMING)
             {
                 Jamming j = Instantiate(jamming);
-                j.CreateBot(gameObject);
+                j.CreateBot(GetComponent<BattleDrone>());
             }
 
             //スタングレネード

@@ -5,19 +5,23 @@ using System.Linq;
 
 namespace Offline
 {
-    public class LaserBullet : MonoBehaviour
+    public class LaserBullet : MonoBehaviour,IBullet
     {
+        public uint PlayerID { get; private set; } = 0;
+        public float Power { get; private set; }
+
         //パラメータ
-        [SerializeField, Tooltip("レーザのサイズ(Scaleの代わり")] float scale = 10f;
-        [HideInInspector] public float ShotInterval = 0;
+        const float LINE_RADIUS = 0.2f;
+        float chargeTime = 2.0f;
+        float lineRange = 175f;
+        float hitPerSecond = 6.0f;
+        float shotInterval = 0;
         float shotCountTime = 0;
-        [SerializeField, Tooltip("チャージ時間")] float chargeTime = 2.0f;
-        [SerializeField, Tooltip("レーザーの当たり判定の半径")] float lineRadius = 0.2f;
-        [SerializeField, Tooltip("レーザーの射程")] float lineRange = 175f;
+        bool isLocal = false;
+
         public bool IsShotBeam { get; private set; } = false;
         bool isStartCharge = false;
         AudioSource audioSource = null;
-        [HideInInspector] public bool isLocal = false;
 
 
         //Charge用変数
@@ -41,16 +45,46 @@ namespace Offline
         List<ParticleSystem> endChilds = new List<ParticleSystem>();
 
 
+        void Awake()
+        {
+            Transform cacheTransform = transform;   //処理の軽量化用キャッシュ
+        }
+
         void Start()
         {
-            //長さをスケールに合わせる
-            lineRange *= scale;
+            
+        }
 
-            Transform cacheTransform = transform;   //処理の軽量化用キャッシュ
+        void Update()
+        {
+            //発射間隔の管理
+            shotCountTime += Time.deltaTime;
+            if (shotCountTime > shotInterval)
+            {
+                shotCountTime = shotInterval;
+            }
+        }
+
+
+        public void Init(uint playerID, float power, float size, float chargeTime, float lineRange, float hitPerSecond, bool isLocal)
+        {
+            PlayerID = playerID;
+            Power = power;
+            this.chargeTime = chargeTime;
+            this.lineRange = lineRange;
+            this.hitPerSecond = hitPerSecond;
+            this.isLocal = isLocal;
+
+
+            //長さをスケールに合わせる
+            this.lineRange *= size;
+
+            shotInterval = 1f / hitPerSecond;
+            shotCountTime = shotInterval;
 
             //Charge用処理//
             Vector3 cLocalScale = charge.transform.localScale;
-            charge.transform.localScale = new Vector3(scale * cLocalScale.x, scale * cLocalScale.y, scale * cLocalScale.z);
+            charge.transform.localScale = new Vector3(size * cLocalScale.x, size * cLocalScale.y, size * cLocalScale.z);
             chargeEmission = charge.emission;
             chargeMinmaxcurve = chargeEmission.rateOverTime;
             rateovertimeAddAmout = MAX_RATE_OVER_TIME / chargeTime;  //1秒間で増加するRateOverTime量
@@ -65,7 +99,7 @@ namespace Offline
             {
                 startChilds[i] = startObjcectTransform.GetChild(i).GetComponent<ParticleSystem>();
                 Vector3 sLocalScale = startChilds[i].transform.localScale;
-                startChilds[i].transform.localScale = new Vector3(scale * sLocalScale.x, scale * sLocalScale.y, scale * sLocalScale.z);
+                startChilds[i].transform.localScale = new Vector3(size * sLocalScale.x, size * sLocalScale.y, size * sLocalScale.z);
             }
             startObjcectTransform.localRotation = lineTransform.localRotation;  //Midwayと同じ向き
 
@@ -75,44 +109,121 @@ namespace Offline
             {
                 ParticleSystem ps = endObjectTransform.GetChild(i).GetComponent<ParticleSystem>();
                 Vector3 eLocalScale = ps.transform.localScale;
-                ps.transform.localScale = new Vector3(scale * eLocalScale.x, scale * eLocalScale.y, scale * eLocalScale.z);
+                ps.transform.localScale = new Vector3(size * eLocalScale.x, size * eLocalScale.y, size * eLocalScale.z);
                 endChilds.Add(ps);
             }
             //初期座標の保存
             endObjectTransform.localRotation = lineTransform.localRotation;   //Midwayと同じ向き
 
             audioSource = GetComponent<AudioSource>();
-            ModifyLaserLength(lineRange);
+            ModifyLaserLength(this.lineRange);
             StopShot();
         }
 
-        void Update()
+        public void Shot(GameObject target)
         {
-            //発射間隔の管理
-            shotCountTime += Time.deltaTime;
-            if (shotCountTime > ShotInterval)
+            #region Charge
+
+            //チャージ処理
+            if (!isCharged)
             {
-                shotCountTime = ShotInterval;
+                //攻撃開始時
+                if (!isStartCharge)
+                {
+                    ChargePlay(true);
+                    isStartCharge = true;
+                }
+
+                //徐々にチャージのエフェクトを増す
+                chargeMinmaxcurve.constant += rateovertimeAddAmout * Time.deltaTime;
+                chargeEmission.rateOverTime = chargeMinmaxcurve;
+
+                //MAX_RATE_OVER_TIME経ったら発射
+                if (chargeEmission.rateOverTime.constant > MAX_RATE_OVER_TIME)
+                {
+                    //チャージを止める
+                    ChargePlay(false);
+
+                    //レーザーの発射
+                    LaserPlay();
+
+                    isCharged = true;
+                }
             }
+
+            #endregion
+
+            #region Laser
+
+            else
+            {
+                IsShotBeam = true;
+
+                //前回ヒットして発射間隔分の時間が経過していなかったら当たり判定を行わない
+                if (shotCountTime < shotInterval) return;
+
+                //Y軸の誘導
+                RotateBullet(target);
+
+
+                //レーザーの射線上にヒットした全てのオブジェクトを調べる
+                var hits = Physics.SphereCastAll(
+                            lineTransform.position,    //レーザーの発射座標
+                            LINE_RADIUS,                //レーザーの半径
+                            lineTransform.forward,     //レーザーの正面
+                            lineRange)                 //射程
+                            .ToList();  //リスト化  
+
+                hits = FilterTargetRaycast(hits);
+                float lineLength = lineRange;   //レーザーの長さ
+
+                //ヒット処理
+                if (hits.Count > 0)
+                {
+                    GetNearestObject(out RaycastHit hit, hits);
+                    GameObject o = hit.transform.gameObject;    //名前省略
+
+                    //ヒットしたオブジェクトの距離とレーザーの長さを合わせる
+                    lineLength = hit.distance;
+
+                    //ヒットした場所にEndオブジェクトを移動させる
+                    endObjectTransform.position = hit.point;
+
+                    shotCountTime = 0;  //発射間隔のカウントをリセット
+                }
+                else
+                {
+                    //レーザーの末端にEndオブジェクトを移動
+                    endObjectTransform.position = lineTransform.position + (lineTransform.forward * lineRange);
+                }
+                //レーザーの長さに応じてオブジェクトの座標やサイズを変える
+                ModifyLaserLength(lineLength);
+            }
+
+            #endregion
         }
 
+
         //リストから必要な要素だけ抜き取る
-        List<RaycastHit> FilterTargetRaycast(List<RaycastHit> hits, GameObject shooter)
+        List<RaycastHit> FilterTargetRaycast(List<RaycastHit> hits)
         {
             //不要な要素を除外する
             return hits.Where(h => !h.transform.CompareTag(TagNameManager.ITEM))    //アイテム除外
                        .Where(h => !h.transform.CompareTag(TagNameManager.BULLET))  //弾丸除外
                        .Where(h => !h.transform.CompareTag(TagNameManager.GIMMICK)) //ギミック除外
-                       .Where(h => !h.transform.CompareTag(TagNameManager.JAMMING))
-                       .Where(h =>  //撃ったプレイヤーは当たり判定から除外
+                       .Where(h => !h.transform.CompareTag(TagNameManager.JAMMING)) //ジャミングエリア除外
+                       .Where(h =>  
                        {
-                           return !ReferenceEquals(h.transform.gameObject, shooter);
-                       })
-                       .Where(h =>  //ジャミングボットを生成したプレイヤーと打ったプレイヤーが同じなら除外
-                       {
+                           //撃ったプレイヤーは当たり判定から除外
+                           if (h.transform.CompareTag(TagNameManager.PLAYER))
+                           {
+                               return !(h.transform.GetComponent<BattleDrone>().PlayerID == PlayerID);
+                           }
+
+                           //ジャミングボットを生成したプレイヤーと撃ったプレイヤーが同じなら除外
                            if (h.transform.CompareTag(TagNameManager.JAMMING_BOT))
                            {
-                               return !ReferenceEquals(h.transform.GetComponent<JammingBot>().creater, shooter);
+                               return !(h.transform.GetComponent<JammingBot>().creater.PlayerID == PlayerID);
                            }
                            return true;
                        })
@@ -198,99 +309,6 @@ namespace Offline
         }
 
         #endregion
-
-
-        public void Shot(GameObject shooter, float power, GameObject target)
-        {
-            #region Charge
-
-            //チャージ処理
-            if (!isCharged)
-            {
-                //攻撃開始時
-                if (!isStartCharge)
-                {
-                    ChargePlay(true);
-                    isStartCharge = true;
-                }
-
-                //徐々にチャージのエフェクトを増す
-                chargeMinmaxcurve.constant += rateovertimeAddAmout * Time.deltaTime;
-                chargeEmission.rateOverTime = chargeMinmaxcurve;
-
-                //MAX_RATE_OVER_TIME経ったら発射
-                if (chargeEmission.rateOverTime.constant > MAX_RATE_OVER_TIME)
-                {
-                    //チャージを止める
-                    ChargePlay(false);
-
-                    //レーザーの発射
-                    LaserPlay();
-
-                    isCharged = true;
-                }
-            }
-
-            #endregion
-
-            #region Laser
-
-            else
-            {
-                IsShotBeam = true;
-
-                //前回ヒットして発射間隔分の時間が経過していなかったら当たり判定を行わない
-                if (shotCountTime < ShotInterval) return;
-                
-                //Y軸の誘導
-                RotateBullet(target);
-
-
-                //レーザーの射線上にヒットした全てのオブジェクトを調べる
-                var hits = Physics.SphereCastAll(
-                            lineTransform.position,    //レーザーの発射座標
-                            lineRadius,                //レーザーの半径
-                            lineTransform.forward,     //レーザーの正面
-                            lineRange)                 //射程
-                            .ToList();  //リスト化  
-
-                hits = FilterTargetRaycast(hits, shooter);
-                float lineLength = lineRange;   //レーザーの長さ
-
-                //ヒット処理
-                if (hits.Count > 0)
-                {
-                    GetNearestObject(out RaycastHit hit, hits);
-                    GameObject o = hit.transform.gameObject;    //名前省略
-
-                    if (o.CompareTag(TagNameManager.PLAYER))
-                    {
-                        o.GetComponent<BattleDrone>().Damage(power);
-                    }
-                    else if (o.CompareTag(TagNameManager.JAMMING_BOT))
-                    {
-                        o.GetComponent<JammingBot>().Damage(power);
-                    }
-
-                    //ヒットしたオブジェクトの距離とレーザーの長さを合わせる
-                    lineLength = hit.distance;
-
-                    //ヒットした場所にEndオブジェクトを移動させる
-                    endObjectTransform.position = hit.point;
-
-                    shotCountTime = 0;  //発射間隔のカウントをリセット
-                }
-                else
-                {
-                    //レーザーの末端にEndオブジェクトを移動
-                    endObjectTransform.position = lineTransform.position + (lineTransform.forward * lineRange);
-                }
-                //レーザーの長さに応じてオブジェクトの座標やサイズを変える
-                ModifyLaserLength(lineLength);
-            }
-
-            #endregion
-        }
 
         void RotateBullet(GameObject target)
         {

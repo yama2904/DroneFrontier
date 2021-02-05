@@ -36,7 +36,10 @@ public class DroneLockOnAction : MonoBehaviour
     
     public void Init()
     {
-        lockOnImage.enabled = true;
+        if (CompareTag(TagNameManager.PLAYER))
+        {
+            lockOnImage.enabled = true;
+        }
         lockOnImage.color = notLockOnColor;
 
         //自分をロックオンしない対象に入れる

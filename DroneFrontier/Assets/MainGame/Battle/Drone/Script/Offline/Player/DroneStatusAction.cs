@@ -25,6 +25,8 @@ namespace Offline
         [SerializeField] Image jammingIcon = null;
         [SerializeField] Image speedDownIcon = null;
 
+        //サウンド
+        DroneSoundAction soundAction = null;
 
         //バリア用
         DroneBarrierAction barrier = null;
@@ -36,23 +38,20 @@ namespace Offline
         //ジャミング用
         DroneLockOnAction lockOn = null;
         DroneRadarAction radar = null;
+        int jammingSoundId = -1;
 
         //スピードダウン用
-        const int NOT_USE_VALUE = 0;
-        List<float> speedDownList = new List<float>();
-        float maxSpeed = 0;
-        float minSpeed = 0;
+        DroneBaseAction baseAction = null;
+        int speedDownSoundId = 0;
 
 
-        void Start() { }
-
-        public void Init(float minSpeed, float maxSpeed)
+        void Start()
         {
+            baseAction = GetComponent<DroneBaseAction>();
+            soundAction = GetComponent<DroneSoundAction>();
             barrier = GetComponent<DroneBarrierAction>();
             lockOn = GetComponent<DroneLockOnAction>();
             radar = GetComponent<DroneRadarAction>();
-            this.minSpeed = minSpeed;
-            this.maxSpeed = maxSpeed;
             createdStunScreenMask = Instantiate(stunScreenMask);
         }
 
@@ -68,22 +67,6 @@ namespace Offline
             {
                 isStatus[(int)Status.STUN] = createdStunScreenMask.IsStun;
             }
-
-            //リストを使っていなかったらクリア
-            bool useList = false;
-            foreach (float value in speedDownList)
-            {
-                if (value != NOT_USE_VALUE)
-                {
-                    useList = true;
-                    break;
-                }
-            }
-            if (!useList)
-            {
-                speedDownList.Clear();
-                isStatus[(int)Status.SPEED_DOWN] = false;
-            }
         }
 
         public void ResetStatus()
@@ -96,7 +79,10 @@ namespace Offline
             jammingIcon.enabled = false;
             speedDownIcon.enabled = false;
             createdStunScreenMask.UnSetStun();
-            speedDownList.Clear();
+
+            //SE停止  
+            soundAction.StopLoopSE(jammingSoundId);
+            soundAction.StopLoopSE(speedDownSoundId);
         }
 
         public bool GetIsStatus(Status status)
@@ -165,7 +151,7 @@ namespace Offline
             isStatus[(int)Status.JAMMING] = true;
 
             //SE再生
-            SoundManager.Play((int)SE.JAMMING, SoundManager.BaseSEVolume);
+            jammingSoundId = soundAction.PlayLoopSE(SoundManager.SE.JAMMING_NOISE, SoundManager.BaseSEVolume);
 
             //アイコン表示
             jammingIcon.enabled = true;
@@ -176,46 +162,36 @@ namespace Offline
         {
             isStatus[(int)Status.JAMMING] = false;
 
+            //SE停止
+            soundAction.StopLoopSE(jammingSoundId);
+
             //アイコン非表示
             jammingIcon.enabled = false;
         }
 
 
         //スピードダウン
-        public int SetSpeedDown(ref float speed, float downPercent)
+        public void SetSpeedDown(float downPercent)
         {
-            float speedPercent = 1 - downPercent;
-            float tempSpeed = speed;
-            speed *= speedPercent;
+            baseAction.ModifySpeed(1 - downPercent);
 
-            if (speed > maxSpeed)
-            {
-                speed = maxSpeed;
-                speedPercent = maxSpeed / tempSpeed;
-            }
-            if (speed < minSpeed)
-            {
-                speed = minSpeed;
-                speedPercent = minSpeed / tempSpeed;
-            }
-
-            speedDownList.Add(speedPercent);
             isStatus[(int)Status.SPEED_DOWN] = true;
 
             //アイコン表示
             speedDownIcon.enabled = true;
 
-            return speedDownList.Count - 1;
+            //SE再生
+            speedDownSoundId = soundAction.PlayLoopSE(SoundManager.SE.MAGNETIC_AREA, SoundManager.BaseSEVolume);
         }
 
         //スピードダウン解除
-        public void UnSetSpeedDown(ref float speed, int id)
+        public void UnSetSpeedDown(ref float speed)
         {
-            speed /= speedDownList[id];
-            speedDownList[id] = NOT_USE_VALUE;
-
             //アイコン非表示
             speedDownIcon.enabled = false;
+
+            //SE停止
+            soundAction.StopLoopSE(speedDownSoundId);
         }
     }
 }

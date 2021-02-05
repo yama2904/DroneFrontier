@@ -13,14 +13,17 @@ namespace Offline
         bool setMissile = false;
 
         //弾丸のパラメータ
-        [SerializeField, Tooltip("1秒間に進む距離")] float speedPerSecond = 500f;
+        [SerializeField, Tooltip("威力")] protected float power = 40f;
+        [SerializeField, Tooltip("リキャスト時間")] protected float recast = 10f;
+        [SerializeField, Tooltip("1秒間に発射する弾数")] protected float shotPerSecond = 0.2f;
+        [SerializeField, Tooltip("1秒間に進む距離")] float speed = 500f;
         [SerializeField, Tooltip("射程")] float destroyTime = 2.0f;
         [SerializeField, Tooltip("誘導力")] float trackingPower = 2.5f;
-        [SerializeField, Tooltip("1秒間に発射する弾数")] float shotPerSecond = 0.2f;
-
-        [SerializeField, Tooltip("リキャスト時間")] float _recast = 10f;
-        [SerializeField, Tooltip("ストック可能な弾数")] int _maxBullets = 3;
-        [SerializeField, Tooltip("威力")] float _power = 40f;
+        [SerializeField, Tooltip("ストック可能な弾数")] int maxBulletNum = 3;
+        float shotInterval = 0;
+        float shotCountTime = 0;
+        float recastCountTime = 0;
+        int haveBulletNum = 0;
 
 
         //所持弾数のUI用
@@ -35,20 +38,17 @@ namespace Offline
         void Start()
         {
             //パラメータの初期化
-            Recast = _recast;
-            ShotInterval = 1.0f / shotPerSecond;
-            ShotCountTime = ShotInterval;
-            MaxBullets = _maxBullets;
-            BulletsRemain = MaxBullets;
-            BulletPower = _power;
+            shotInterval = 1f / shotPerSecond;
+            shotCountTime = shotInterval;
+            haveBulletNum = maxBulletNum;
 
             //弾丸生成
             CreateMissile();
             setMissile = true;
 
             //所持弾数のUI作成
-            UIs = new Image[_maxBullets];
-            for (int i = 0; i < _maxBullets; i++)
+            UIs = new Image[maxBulletNum];
+            for (int i = 0; i < maxBulletNum; i++)
             {
                 //bulletUIBackの生成
                 RectTransform back = Instantiate(bulletUIBack).GetComponent<RectTransform>();
@@ -66,23 +66,20 @@ namespace Offline
             }
         }
 
-        protected override void Update()
+        void Update()
         {
-            base.Update();
-
             //発射間隔のカウント
             if (!setMissile)
             {
-                ShotCountTime += Time.deltaTime;
-                if (ShotCountTime > ShotInterval)
+                shotCountTime += Time.deltaTime;
+                if (shotCountTime > shotInterval)
                 {
-                    ShotCountTime = ShotInterval;
-                    if (BulletsRemain > 0)  //弾丸が残っていない場合は処理しない
+                    shotCountTime = shotInterval;
+                    if (haveBulletNum > 0)  //弾丸が残っていない場合は処理しない
                     {
                         CreateMissile();
                         setMissile = true;
-
-
+                        
                         //デバッグ用
                         Debug.Log("ミサイル発射可能");
                     }
@@ -90,14 +87,14 @@ namespace Offline
             }
 
             //リキャスト時間経過したら弾数を1個補充
-            if (BulletsRemain < MaxBullets)     //最大弾数持っていたら処理しない
+            if (haveBulletNum < maxBulletNum)     //最大弾数持っていたら処理しない
             {
-                RecastCountTime += Time.deltaTime;
-                if (RecastCountTime >= Recast)
+                recastCountTime += Time.deltaTime;
+                if (recastCountTime >= recast)
                 {
-                    UIs[BulletsRemain].fillAmount = 1f;
-                    BulletsRemain++;        //弾数を回復
-                    RecastCountTime = 0;    //リキャストのカウントをリセット
+                    UIs[haveBulletNum].fillAmount = 1f;
+                    haveBulletNum++;        //弾数を回復
+                    recastCountTime = 0;    //リキャストのカウントをリセット
 
 
                     //デバッグ用
@@ -105,43 +102,16 @@ namespace Offline
                 }
                 else
                 {
-                    UIs[BulletsRemain].fillAmount = RecastCountTime / Recast;
+                    UIs[haveBulletNum].fillAmount = recastCountTime / recast;
                 }
             }
         }
 
-        public override void ResetWeapon()
-        {
-            RecastCountTime = 0;
-            ShotCountTime = ShotInterval;
-            BulletsRemain = MaxBullets;
-
-            //弾数UIのリセット
-            for (int i = 0; i < UIs.Length; i++)
-            {
-                UIs[i].fillAmount = 1f;
-            }
-
-            //既にある弾丸の削除と新しい弾丸の生成
-            if (setMissile)
-            {
-                Destroy(settingBullets[USE_INDEX]);
-            }
-            CreateMissile();
-            
-        }
-
         MissileBullet CreateMissile()
         {
-            MissileBullet m = Instantiate(missile, transform);    //ミサイルの複製
+            //ミサイルの生成
+            MissileBullet m = Instantiate(missile, transform);
 
-            //弾丸のパラメータ設定
-            m.Shooter = shooter;    //撃ったプレイヤーを登録
-            m.SpeedPerSecond = speedPerSecond;  //スピード
-            m.DestroyTime = destroyTime;        //射程
-            m.TrackingPower = trackingPower;    //誘導力
-            m.Power = BulletPower;              //威力
-            
             //リストに追加
             settingBullets.Add(m);
             setMissile = true;
@@ -152,39 +122,40 @@ namespace Offline
         public override void Shot(GameObject target = null)
         {
             //前回発射して発射間隔分の時間が経過していなかったら撃たない
-            if (ShotCountTime < ShotInterval) return;
+            if (shotCountTime < shotInterval) return;
 
             //バグ防止
             if (!setMissile) return;
             if (settingBullets.Count <= 0) return;
 
             //残り弾数が0だったら撃たない
-            if (BulletsRemain <= 0) return;
+            if (haveBulletNum <= 0) return;
 
 
             //ミサイル発射
+            settingBullets[USE_INDEX].Init(shooter.PlayerID, power, trackingPower, speed, destroyTime, target);
             settingBullets[USE_INDEX].Shot(target);
             settingBullets.RemoveAt(USE_INDEX);
             setMissile = false;
 
 
             //所持弾丸のUIを灰色に変える
-            for (int i = BulletsRemain - 1; i < MaxBullets; i++)
+            for (int i = haveBulletNum - 1; i < maxBulletNum; i++)
             {
                 UIs[i].fillAmount = 0;
             }
 
             //弾数を減らしてリキャスト開始
-            if (BulletsRemain == MaxBullets)
+            if (haveBulletNum == maxBulletNum)
             {
-                RecastCountTime = 0;
+                recastCountTime = 0;
             }
-            BulletsRemain--;    //残り弾数を減らす
-            ShotCountTime = 0;  //発射間隔のカウントをリセット
+            haveBulletNum--;    //残り弾数を減らす
+            shotCountTime = 0;  //発射間隔のカウントをリセット
 
 
             //デバッグ用
-            Debug.Log("ミサイル発射 残り弾数: " + BulletsRemain);
+            Debug.Log("ミサイル発射 残り弾数: " + haveBulletNum);
         }
     }
 }

@@ -23779,9 +23779,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7225798336519985533}
+  - component: {fileID: 3779350247338034436}
   m_Layer: 0
   m_Name: End
-  m_TagString: Untagged
+  m_TagString: LaserBullet
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -23803,6 +23804,19 @@ Transform:
   m_Father: {fileID: 7764554142658295910}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!135 &3779350247338034436
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4117860665432087451}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.3
+  m_Center: {x: 0, y: 0, z: -0.2}
 --- !u!1 &6640675302444477181
 GameObject:
   m_ObjectHideFlags: 0
@@ -28569,7 +28583,7 @@ GameObject:
   - component: {fileID: 7270458303023386737}
   - component: {fileID: 8198160935777638173}
   m_Layer: 0
-  m_Name: LaserBullet
+  m_Name: LaserBullet_Offline
   m_TagString: Bullet
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -11,16 +11,19 @@ namespace Offline
         [SerializeField] Bullet bullet = null;
         [SerializeField, Tooltip("拡散力")] float angle = 4.2f;
         [SerializeField, Tooltip("拡散力のランダム値")] float angleDiff = 2.8f;
-        AudioSource audioSource = null;
 
         //弾丸のパラメータ
-        [SerializeField, Tooltip("1秒間に進む距離")] float speedPerSecond = 800f;
-        [SerializeField, Tooltip("射程")] float destroyTime = 0.6f;
+        [SerializeField, Tooltip("威力")] float power = 5.5f;
         [SerializeField, Tooltip("1秒間に発射する弾数")] float shotPerSecond = 2f;
+        [SerializeField, Tooltip("1秒間に進む距離")] float speed = 800f;
+        [SerializeField, Tooltip("射程")] float destroyTime = 0.6f;
+        [SerializeField, Tooltip("リキャスト時間")] float recast = 2f;
+        [SerializeField, Tooltip("ストック可能な弾数")] int maxBulletNum = 5;
+        float shotInterval = 0;
+        float shotCountTime = 0;
+        float recastCountTime = 0;
+        int haveBulletNum = 0;
 
-        [SerializeField, Tooltip("リキャスト時間")] float _recast = 2f;
-        [SerializeField, Tooltip("ストック可能な弾数")] int _maxBullets = 5;
-        [SerializeField, Tooltip("威力")] float _power = 5.5f;
 
         //所持弾数のUI用
         const float UI_POS_DIFF_X = 1.2f;
@@ -30,16 +33,16 @@ namespace Offline
         [SerializeField] Image bulletUIFront = null;
         Image[] UIs;
 
+        //キャッシュ用
+        AudioSource audioSource = null;
+
 
         void Start()
         {
             //パラメータ初期化
-            Recast = _recast;
-            ShotInterval = 1.0f / shotPerSecond;
-            ShotCountTime = ShotInterval;
-            MaxBullets = _maxBullets;
-            BulletsRemain = MaxBullets;
-            BulletPower = _power;
+            shotInterval = 1.0f / shotPerSecond;
+            shotCountTime = shotInterval;
+            haveBulletNum = maxBulletNum;
 
             //オーディオの初期化
             audioSource = GetComponent<AudioSource>();
@@ -48,8 +51,8 @@ namespace Offline
 
 
             //所持弾数のUI作成
-            UIs = new Image[_maxBullets];
-            for (int i = 0; i < _maxBullets; i++)
+            UIs = new Image[maxBulletNum];
+            for (int i = 0; i < maxBulletNum; i++)
             {
                 //bulletUIBackの生成
                 RectTransform back = Instantiate(bulletUIBack).GetComponent<RectTransform>();
@@ -67,21 +70,31 @@ namespace Offline
             }
         }
 
-        protected override void Update()
+        void Update()
         {
             //リキャストと発射間隔のカウント
-            base.Update();
+            recastCountTime += Time.deltaTime;
+            if (recastCountTime > recast)
+            {
+                recastCountTime = recast;
+            }
 
+            shotCountTime += Time.deltaTime;
+            if (shotCountTime > shotInterval)
+            {
+                shotCountTime = shotInterval;
+            }
 
             //最大弾数持っているなら処理しない
-            if (BulletsRemain >= MaxBullets) return;
+            if (haveBulletNum >= maxBulletNum) return;
+
 
             //リキャスト時間経過したら弾数を1個補充
-            if (RecastCountTime >= Recast)
+            if (recastCountTime >= recast)
             {
-                UIs[BulletsRemain].fillAmount = 1f;
-                BulletsRemain++;        //弾数を回復
-                RecastCountTime = 0;    //リキャストのカウントをリセット
+                UIs[haveBulletNum].fillAmount = 1f;
+                haveBulletNum++;        //弾数を回復
+                recastCountTime = 0;    //リキャストのカウントをリセット
 
 
                 //デバッグ用
@@ -89,30 +102,17 @@ namespace Offline
             }
             else
             {
-                UIs[BulletsRemain].fillAmount = RecastCountTime / Recast;
-            }
-        }
-
-        public override void ResetWeapon()
-        {
-            RecastCountTime = 0;
-            ShotCountTime = ShotInterval;
-            BulletsRemain = MaxBullets;
-
-            //弾数UIのリセット
-            for (int i = 0; i < UIs.Length; i++)
-            {
-                UIs[i].fillAmount = 1f;
+                UIs[haveBulletNum].fillAmount = recastCountTime / recast;
             }
         }
 
         public override void Shot(GameObject target = null)
         {
             //前回発射して発射間隔分の時間が経過していなかったら撃たない
-            if (ShotCountTime < ShotInterval) return;
+            if (shotCountTime < shotInterval) return;
 
             //残り弾数が0だったら撃たない
-            if (BulletsRemain <= 0) return;
+            if (haveBulletNum <= 0) return;
 
             //弾を散らす
             for (int i = -1; i <= 1; i++)
@@ -125,23 +125,23 @@ namespace Offline
             audioSource.Play();
 
             //所持弾丸のUIを灰色に変える
-            for (int i = BulletsRemain - 1; i < MaxBullets; i++)
+            for (int i = haveBulletNum - 1; i < maxBulletNum; i++)
             {
                 UIs[i].fillAmount = 0;
             }
 
             //残り弾丸がMAXで撃つと一瞬で弾丸が1個回復するので
             //残り弾丸がMAXで撃った場合のみリキャストを0にする
-            if (BulletsRemain == MaxBullets)
+            if (haveBulletNum == maxBulletNum)
             {
-                RecastCountTime = 0;
+                recastCountTime = 0;
             }
-            BulletsRemain--;    //残り弾数を減らす
-            ShotCountTime = 0;  //発射間隔のカウントをリセット
+            haveBulletNum--;    //残り弾数を減らす
+            shotCountTime = 0;  //発射間隔のカウントをリセット
 
 
             //デバッグ用
-            Debug.Log("残り弾数: " + BulletsRemain);
+            Debug.Log("残り弾数: " + haveBulletNum);
         }
 
         Bullet CreateBullet(Vector3 pos, Quaternion rotation, float angleX, float angleY, GameObject target)
@@ -149,12 +149,7 @@ namespace Offline
             Bullet b = Instantiate(bullet, pos, rotation);    //弾丸の複製
 
             //弾丸のパラメータ設定
-            b.Shooter = shooter;    //撃ったプレイヤーを登録
-            b.Target = target;      //ロックオン中の敵
-            b.SpeedPerSecond = speedPerSecond;  //スピード
-            b.DestroyTime = destroyTime;        //射程
-            b.TrackingPower = 0;    //誘導力
-            b.Power = BulletPower;              //威力
+            b.Init(shooter.PlayerID, power, 0, speed, destroyTime, target);
 
             //弾丸の進む方向を変えて散らす処理
             Transform t = b.transform;  //キャッシュ

@@ -8,7 +8,7 @@ namespace Offline
     {
         [SerializeField] GameObject barrierObject = null;
         public GameObject BarrierObject { get { return barrierObject; } }
-        BattleDrone drone = null;
+        DroneDamageAction drone = null;
 
         const float MAX_HP = 100;
         public float HP { get; private set; } = MAX_HP;
@@ -29,10 +29,14 @@ namespace Offline
 
         float damagePercent;    //ダメージ倍率
 
+        //サウンド
+        DroneSoundAction soundAction = null;
+
 
         void Start()
         {
-            drone = GetComponent<BattleDrone>();
+            drone = GetComponent<DroneDamageAction>();
+            soundAction = GetComponent<DroneSoundAction>();
             material = barrierObject.GetComponent<Renderer>().material;
             Init();
         }
@@ -43,7 +47,7 @@ namespace Offline
             if (IsWeak) return;
 
             //ドローンが破壊されていたら回復処理を行わない
-            if (drone.IsDestroy) return;
+            if (drone.HP <= 0) return;
 
             //バリアが破壊されていたら修復処理
             if (HP <= 0)
@@ -141,11 +145,11 @@ namespace Offline
             {
                 HP = 0;
                 barrierObject.SetActive(false);
-                drone.PlayOneShotSE(SoundManager.SE.DESTROY_BARRIER, SoundManager.BaseSEVolume);
+                soundAction.PlayOneShot(SoundManager.SE.DESTROY_BARRIER, SoundManager.BaseSEVolume);
             }
             regeneCountTime = 0;
             isRegene = false;
-            drone.PlayOneShotSE(SoundManager.SE.BARRIER_DAMAGE, SoundManager.BaseSEVolume * 0.7f);
+            soundAction.PlayOneShot(SoundManager.SE.BARRIER_DAMAGE, SoundManager.BaseSEVolume * 0.7f);
 
             //バリアの色変え
             float value = HP / MAX_HP;

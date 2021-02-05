@@ -4,39 +4,41 @@ using UnityEngine;
 
 namespace Offline
 {
-    public class Bullet : MonoBehaviour
+    public class Bullet : MonoBehaviour, IBullet
     {
-        [HideInInspector] public GameObject Shooter = null;  //撃ったプレイヤー
-        [HideInInspector] public GameObject Target = null;   //誘導する対象
-        [HideInInspector] public float TrackingPower = 0;    //追従力
-        [HideInInspector] public float Power = 0;            //威力
-        [HideInInspector] public float SpeedPerSecond = 0;   //1秒間に進む量
-        [HideInInspector] public float DestroyTime = 0;      //発射してから消えるまでの時間(射程)
+        public uint PlayerID { get; protected set; }
+        public float Power { get; protected set; } = 0;  //威力
 
-        protected Transform cacheTransform = null;
+        protected GameObject target = null;   //誘導する対象
+        protected float trackingPower = 0;    //追従力
+        protected float speed = 0;            //1秒間に進む量
+        protected float destroyTime = 0;      //発射してから消えるまでの時間(射程)
+
+        //キャッシュ用
+        Transform cacheTransform = null;
 
 
         void Start()
         {
             cacheTransform = GetComponent<Rigidbody>().transform;
-            Destroy(gameObject, DestroyTime);
+            Destroy(gameObject, destroyTime);
         }
 
         protected virtual void FixedUpdate()
         {
-            if (Target != null)
+            if (target != null)
             {
-                Vector3 diff = Target.transform.position - cacheTransform.position;  //座標の差
+                Vector3 diff = target.transform.position - cacheTransform.position;  //座標の差
 
                 //視野内に敵がいる場合
                 if (Vector3.Dot(cacheTransform.forward, diff) > 0)
                 {
                     //自分の方向から見た敵の位置の角度
                     float angle = Vector3.Angle(cacheTransform.forward, diff);
-                    if (angle > TrackingPower)
+                    if (angle > trackingPower)
                     {
                         //誘導力以上の角度がある場合は修正
-                        angle = TrackingPower;
+                        angle = trackingPower;
                     }
 
                     //+値と-値のどちらに回転するか上下と左右ごとに判断する
@@ -51,33 +53,17 @@ namespace Offline
                 }
             }
             //移動
-            cacheTransform.position += cacheTransform.forward * SpeedPerSecond * Time.deltaTime;
+            cacheTransform.position += cacheTransform.forward * speed * Time.deltaTime;
         }
 
-        protected virtual void OnTriggerEnter(Collider other)
+        public virtual void Init(uint id, float power, float trackingPower, float speed, float destroyTime, GameObject target = null)
         {
-            //当たり判定を行わないオブジェクトは処理しない
-            if (ReferenceEquals(other.gameObject, Shooter)) return;
-            if (other.CompareTag(TagNameManager.BULLET)) return;
-            if (other.CompareTag(TagNameManager.ITEM)) return;
-            if (other.CompareTag(TagNameManager.GIMMICK)) return;
-            if (other.CompareTag(TagNameManager.JAMMING)) return;
-
-            //プレイヤーの当たり判定
-            if (other.CompareTag(TagNameManager.PLAYER))
-            {
-                other.GetComponent<BattleDrone>().Damage(Power);
-            }
-            else if (other.CompareTag(TagNameManager.JAMMING_BOT))
-            {
-                JammingBot jb = other.GetComponent<JammingBot>();
-                if (ReferenceEquals(jb.creater, Shooter))
-                {
-                    return;
-                }
-                jb.Damage(Power);
-            }
-            Destroy(gameObject);
+            PlayerID = id;
+            Power = power;
+            this.trackingPower = trackingPower;
+            this.speed = speed;
+            this.destroyTime = destroyTime;
+            this.target = target;
         }
     }
 }

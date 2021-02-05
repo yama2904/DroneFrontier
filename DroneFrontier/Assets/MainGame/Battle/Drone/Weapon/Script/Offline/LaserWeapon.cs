@@ -11,7 +11,12 @@ namespace Offline
         const float SHOT_POSSIBLE_MIN = 0.2f;  //発射可能な最低ゲージ量
         [SerializeField] LaserBullet laserBullet = null;
         LaserBullet createdBullet = null;
+        [SerializeField, Tooltip("威力")] protected float power = 5f;
+        [SerializeField, Tooltip("リキャスト時間")] float recast = 8f;
         [SerializeField, Tooltip("何秒発射できるか")] float maxShotTime = 10;
+        [SerializeField, Tooltip("レーザーのサイズ(Scaleの代わり")] float size = 10f;
+        [SerializeField, Tooltip("チャージ時間")] float chargeTime = 2.0f;
+        [SerializeField, Tooltip("レーザーの射程")] float lineRange = 175f;
         [SerializeField, Tooltip("1秒間にヒットする回数")] float hitPerSecond = 6.0f;
 
         [SerializeField] Image laserGaugeImage = null;
@@ -27,18 +32,9 @@ namespace Offline
         }
         bool[] isShots = new bool[(int)ShotFlag.NONE];
 
-        [SerializeField, Tooltip("リキャスト時間")] float _recast = 8f;
-        [SerializeField, Tooltip("威力")] float _power = 5f;
-
 
         void Start()
-        {
-            //パラメータの初期化
-            Recast = _recast;
-            ShotInterval = 1.0f / hitPerSecond;
-            ShotCountTime = ShotInterval;
-            BulletPower = _power;
-            
+        {            
             //ゲージの初期化
             laserGaugeImage.enabled = true;
             laserGaugeFrameImage.enabled = true;
@@ -48,10 +44,12 @@ namespace Offline
             createdBullet = Instantiate(laserBullet, transform);
             createdBullet.transform.localPosition = shotPos.localPosition;
             createdBullet.transform.localRotation = shotPos.localRotation;
+            createdBullet.Init(shooter.PlayerID, power, size, chargeTime, lineRange, hitPerSecond,
+                               shooter.CompareTag(TagNameManager.PLAYER));
         }
 
 
-        protected override void Update()
+        void Update()
         {
             //撃っていない間はリキャストの管理
             if (!isShots[(int)ShotFlag.SHOT_START])
@@ -60,7 +58,7 @@ namespace Offline
                 if (laserGaugeImage.fillAmount < 1.0f)
                 {
                     //ゲージを回復
-                    laserGaugeImage.fillAmount += 1.0f / Recast * Time.deltaTime;
+                    laserGaugeImage.fillAmount += 1.0f / recast * Time.deltaTime;
                     if (laserGaugeImage.fillAmount > 1.0f)
                     {
                         laserGaugeImage.fillAmount = 1.0f;
@@ -94,17 +92,6 @@ namespace Offline
             }
         }
 
-        public override void ResetWeapon()
-        {
-            ShotCountTime = ShotInterval;
-            laserGaugeImage.fillAmount = 1.0f;
-
-            //フラグ初期化
-            isShots[(int)ShotFlag.SHOT_START] = false;
-            isShots[(int)ShotFlag.SHOT_SHOTING] = false;
-        }
-
-
         public override void Shot(GameObject target = null)
         {
             //発射に必要な最低限のゲージがないと発射しない
@@ -118,7 +105,7 @@ namespace Offline
             }
 
             LaserBullet lb = createdBullet.GetComponent<LaserBullet>();
-            lb.Shot(shooter, BulletPower, target);
+            lb.Shot(target);
             isShots[(int)ShotFlag.SHOT_SHOTING] = true;
 
             //撃っている間はゲージを減らす

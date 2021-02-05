@@ -10,8 +10,16 @@ namespace Offline
         Rigidbody _rigidbody = null;
         Transform cacheTransform = null;  //キャッシュ用
 
+        //移動用
+        [SerializeField, Tooltip("移動速度")] float moveSpeed = 800;
+        public float MoveSpeed { get { return moveSpeed; } }
+        float initSpeed = 0;
+
         //回転用
         [SerializeField] Transform droneObject = null;
+        [SerializeField, Tooltip("回転速度")] public float rotateSpeed = 5.0f;
+        public float RotateSpeed { get { return rotateSpeed; } }
+        float initRotateSpeed = 0;
         [SerializeField, Tooltip("上下の回転制限角度")] float limitCameraTiltX = 40f;
 
         //カメラ
@@ -19,24 +27,28 @@ namespace Offline
         public Camera _Camera { get { return _camera; } }
 
 
-        #region Init
-
         void Awake()
         {
             cacheTransform = transform; //キャッシュ用
             _rigidbody = GetComponent<Rigidbody>();
             cacheTransform = transform;
+
+            initSpeed = moveSpeed;
+            initRotateSpeed = rotateSpeed;
         }
 
         void Start() { }
-
-        #endregion
-
+        
+        public void ResetParameters()
+        {
+            moveSpeed = initSpeed;
+            rotateSpeed = initRotateSpeed;
+        }
 
         //移動処理
-        public void Move(float speed, Vector3 direction)
+        public void Move(Vector3 vec)
         {
-            _rigidbody.AddForce(direction * speed + (direction * speed - _rigidbody.velocity), ForceMode.Force);
+            _rigidbody.AddForce(vec * moveSpeed + (vec * moveSpeed - _rigidbody.velocity), ForceMode.Force);
         }
 
         //ドローンを徐々に回転させる
@@ -46,11 +58,12 @@ namespace Offline
         }
 
         //回転処理
-        public void Rotate(float valueX, float valueY, float speed)
+        public void Rotate(Vector3 angle)
         {
             if (MainGameManager.IsCursorLock)
             {
-                Vector3 angle = new Vector3(valueX * speed * CameraManager.ReverseX, valueY * speed * CameraManager.ReverseY, 0);
+                angle.x *= rotateSpeed * CameraManager.ReverseX;
+                angle.y *= rotateSpeed * CameraManager.ReverseY;
 
                 //カメラの左右回転
                 cacheTransform.RotateAround(cacheTransform.position, Vector3.up, angle.x);
@@ -71,18 +84,9 @@ namespace Offline
         }
 
         //スピードを変更する
-        public float ModifySpeed(float speed, float min, float max, float speedMgnf)
+        public void ModifySpeed(float speedMgnf)
         {
-            speed *= speedMgnf;
-            if (speed > max)
-            {
-                speed = max;
-            }
-            if (speed < min)
-            {
-                speed = min;
-            }
-            return speed;
+            moveSpeed *= speedMgnf;
         }
     }
 }

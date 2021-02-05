@@ -7,18 +7,24 @@ namespace Offline
 {
     public class BattleManager : MainGameManager
     {
+        [SerializeField] GameObject player = null;
+        [SerializeField] GameObject cpu = null;
+
         //シングルトン
-        static BattleManager singleton;
-        public new static BattleManager Singleton { get { return singleton; } }
+        public new static BattleManager Singleton { get; private set; }
 
         //アイテムを出現させるか
         public static bool IsItemSpawn { get; set; } = true;
+
+        //ストック数
+        [SerializeField] int droneStock = 1;
 
         //プレイヤー情報
         public class PlayerData
         {
             public BattleDrone drone = null;
-            public int ranking = 1;
+            public string name = "";
+            public int stock = 0;
             public bool isDestroy = false;
             public static int droneNum = 0;  //残っているドローンの数
         }
@@ -40,16 +46,18 @@ namespace Offline
         //キャッシュ用
         AudioListener listener = null;
 
+
         protected override void Awake()
         {
             base.Awake();
+            Singleton = this;
         }
 
         protected override void Start()
         {
             base.Start();
 
-            PlayerData.droneNum = MainGameManager.playerNum;
+            PlayerData.droneNum = playerNum;
 
             //フィールド上のアイテム処理
             if (!IsItemSpawn)
@@ -83,6 +91,25 @@ namespace Offline
 
             //カウントダウンが終わったら処理
             if (!StartFlag) return;
+
+            foreach(PlayerData pd in playerDatas)
+            {
+                if (pd.isDestroy) continue;
+                if (pd.drone == null)
+                {
+                    if (pd.stock == 0)
+                    {
+                        pd.isDestroy = true;
+                        ranking[PlayerData.droneNum - 1] = pd.name;
+                        PlayerData.droneNum--;
+                    }
+                    else
+                    {
+                        pd.stock--;
+                        CreateDrone();
+                    }
+                }
+            }
 
             ////ゲームオーバーになったら他のプレイヤーのカメラにスペースキーで切り替える
             //if (Input.GetKeyDown(KeyCode.Space))
@@ -163,31 +190,11 @@ namespace Offline
             });
         }
 
-        //ゲームオーバーになったプレイヤーを登録
-        public void SetDestroyedDrone(BattleDrone drone)
+        void CreateDrone()
         {
-            int index = playerDatas.FindIndex(playerData => ReferenceEquals(playerData.drone, drone));
-            if (index == -1) return;  //対応するドローンがなかったら処理しない
-
-            PlayerData pd = playerDatas[index];  //名前省略
-            if (pd.isDestroy) return;  //既に死亡処理を行っていたら処理しない
-
-            //リスト情報の変更
-            pd.ranking = PlayerData.droneNum;   //ランキングの記録
-            pd.isDestroy = true;
-            PlayerData.droneNum--;  //残りドローンを減らす
-
-            //カメラ切り替え
-            pd.drone.SetCameraDepth(-1);
-
-            //オーディオリスナーを担当していたドローンなら一時的に自分のリスナーをオンにする
-            if (ReferenceEquals(localDrone, pd.drone) ||
-                (localDrone.IsGameOver && index == useIndex))
-            {
-                listener.enabled = true;
-            }
+            Transform pos = StartPosition.Singleton.GetPos();
+            
         }
-
 
         //時間制限処理
         IEnumerator CountTime()
@@ -220,12 +227,11 @@ namespace Offline
                 yield return new WaitForSeconds(1f);
             }
 
-            int rank = 1;
             foreach (PlayerData pd in playerDatas)
             {
                 if (pd.isDestroy) continue;
-                pd.ranking = rank;
-                rank++;
+                ranking[PlayerData.droneNum - 1] = pd.name;
+                PlayerData.droneNum--;
             }
 
             FinishGame();
@@ -236,11 +242,6 @@ namespace Offline
         {
             if (!isFinished)
             {
-                string[] ranking = new string[playerDatas.Count];
-                foreach (PlayerData pd in playerDatas)
-                {
-                    ranking[pd.ranking - 1] = pd.drone.name;
-                }
                 MainGameManager.Singleton.FinishGame(ranking);
                 isFinished = true;
 

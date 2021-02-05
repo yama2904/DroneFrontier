@@ -7,14 +7,14 @@ namespace Offline
 {
     public class Jamming : MonoBehaviour
     {
-        GameObject creater;
+        BattleDrone creater;
         [SerializeField, Tooltip("ジャミングボットの生存時間")] float destroyTime = 60.0f;
 
         [SerializeField] JammingBot jammingBot = null;
         [SerializeField] Transform jammingBotPosition = null;
         JammingBot createBot = null;
         bool isCreateBot = false;
-        List<BattleDrone> jamingPlayers = new List<BattleDrone>();
+        List<DroneStatusAction> jamingPlayers = new List<DroneStatusAction>();
 
 
         void Start() { }
@@ -29,7 +29,7 @@ namespace Offline
         }
 
         //ジャミングボットを生成する
-        public void CreateBot(GameObject creater)
+        public void CreateBot(BattleDrone creater)
         {
             //キャッシュ
             Transform t = transform;
@@ -88,7 +88,7 @@ namespace Offline
         void OnDestroy()
         {
             //ジャミングを解除する
-            foreach (BattleDrone p in jamingPlayers)
+            foreach (DroneStatusAction p in jamingPlayers)
             {
                 if (p == null) continue;
                 p.UnSetJamming();
@@ -99,7 +99,7 @@ namespace Offline
         {
             if (!other.CompareTag(TagNameManager.PLAYER)) return;   //プレイヤーのみ対象
 
-            BattleDrone p = other.GetComponent<BattleDrone>();
+            DroneStatusAction p = other.GetComponent<DroneStatusAction>();
             if (ReferenceEquals(p.gameObject, creater)) return; //ジャミングを付与しないプレイヤーならスキップ
 
             p.SetJamming(); //ジャミング付与
@@ -110,7 +110,7 @@ namespace Offline
         {
             if (!other.CompareTag(TagNameManager.PLAYER)) return;   //プレイヤーのみ対象
 
-            BattleDrone p = other.GetComponent<BattleDrone>();
+            DroneStatusAction p = other.GetComponent<DroneStatusAction>();
             if (ReferenceEquals(p.gameObject, creater)) return; //ジャミングを付与しないプレイヤーならスキップ
 
             //リストにない場合は処理しない

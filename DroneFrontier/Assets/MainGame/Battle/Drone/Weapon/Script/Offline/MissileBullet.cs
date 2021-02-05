@@ -10,6 +10,14 @@ namespace Offline
         bool isShot = false;
         AudioSource audioSource = null;
 
+        //キャッシュ用
+        Transform cacheTransform = null;
+
+
+        void Awake()
+        {
+            explosion.gameObject.SetActive(false);
+        }
 
         void Start()
         {
@@ -29,49 +37,18 @@ namespace Offline
             base.FixedUpdate();
             cacheTransform.Rotate(new Vector3(90, 0, 0));
         }
-        protected override void OnTriggerEnter(Collider other)
+
+        private void OnDestroy()
         {
-            if (!isShot) return;
-
-            //当たり判定を行わないオブジェクトだったら処理をしない
-            if (ReferenceEquals(other.gameObject, Shooter)) return;
-            if (other.CompareTag(TagNameManager.BULLET)) return;
-            if (other.CompareTag(TagNameManager.ITEM)) return;
-            if (other.CompareTag(TagNameManager.GIMMICK)) return;
-            if (other.CompareTag(TagNameManager.JAMMING)) return;
-
-            if (other.CompareTag(TagNameManager.PLAYER))
-            {
-                other.GetComponent<BattleDrone>().Damage(Power);
-            }
-            else if (other.CompareTag(TagNameManager.JAMMING_BOT))
-            {
-                JammingBot jb = other.GetComponent<JammingBot>();
-                if (jb.creater == Shooter)
-                {
-                    return;
-                }
-                jb.Damage(Power);
-            }
-            DestroyMe();
+            explosion.gameObject.SetActive(true);
+            explosion.PlayerID = PlayerID;
         }
 
-        void DestroyMe()
+
+        public override void Init(uint id, float power, float trackingPower, float speed, float destroyTime, GameObject target = null)
         {
-            CreateExplosion();
-            Destroy(gameObject);
+            base.Init(id, power, trackingPower, speed, destroyTime, target);
         }
-
-        #region CreateExplosion
-
-        private Explosion CreateExplosion()
-        {
-            Explosion e = Instantiate(explosion, cacheTransform.position, Quaternion.identity);
-            e.Shooter = Shooter;
-            return e;
-        }
-
-        #endregion
 
         public void Shot(GameObject target)
         {
@@ -82,8 +59,8 @@ namespace Offline
             audioSource.volume = SoundManager.BaseSEVolume;
             audioSource.Play();
 
-            Invoke(nameof(DestroyMe), DestroyTime);
-            Target = target;
+            Destroy(gameObject, destroyTime);
+            this.target = target;
             isShot = true;
         }
     }

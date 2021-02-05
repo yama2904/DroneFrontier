@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(AudioSource))]
 public class DroneSoundAction : MonoBehaviour
 {
     //ループ専用
     struct LoopAudioData
     {
         public AudioSource audioSource;
-        public bool isFree;
+        public bool isFree;  //使用可能か
     }
     LoopAudioData[] loopAudioDatas;
 
@@ -20,12 +21,6 @@ public class DroneSoundAction : MonoBehaviour
     {
         AudioSource[] audios = GetComponents<AudioSource>();
         loopAudioDatas = new LoopAudioData[audios.Length];
-
-        //エラー
-        if (audios.Length == 0)
-        {
-            Application.Quit();
-        }
 
         //初期化
         oneShotAudio = audios[0];
@@ -68,11 +63,26 @@ public class DroneSoundAction : MonoBehaviour
 
             lpd.audioSource.clip = SoundManager.GetAudioClip(se);
             lpd.audioSource.volume = volume;
+            lpd.audioSource.Play();
             lpd.isFree = false;
             return i;
         }
 
         //再生できなかった
         return -1;
+    }
+
+    public bool StopLoopSE(int id)
+    {
+        if (id == -1) return false;
+        if (loopAudioDatas.Length >= id) return false;
+
+        LoopAudioData lpd = loopAudioDatas[id];  //名前省略
+        if (lpd.isFree) return false;
+
+        lpd.audioSource.Stop();
+        lpd.isFree = true;
+
+        return true;
     }
 }

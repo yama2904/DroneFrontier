@@ -7,11 +7,9 @@ namespace Offline
 {
     public class MainGameManager : MonoBehaviour
     {
-        //シングルトン
-        static MainGameManager singleton;
-        public static MainGameManager Singleton { get { return singleton; } }
+        public static MainGameManager Singleton { get; private set; }
 
-        
+
         //メインゲーム中か
         public static bool IsMainGaming { get; private set; } = false;
 
@@ -50,7 +48,7 @@ namespace Offline
         protected virtual void Awake()
         {
             //シングルトンの作成
-            singleton = this;
+            Singleton = this;
 
             //ランキング配列の初期化
             ranking = new string[playerNum];
