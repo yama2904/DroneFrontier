@@ -6,13 +6,8 @@ using System;
 
 namespace Offline
 {
-    public class BattleDrone : MonoBehaviour
+    public class BattleDrone : BaseDrone
     {
-        public uint PlayerID { get; private set; } = 0;
-        static uint playerCount = 0;
-
-        public float StartTime { get; private set; } = 0;
-
         //コンポーネント用
         Transform cacheTransform = null;
         Rigidbody _rigidbody = null;
@@ -71,8 +66,7 @@ namespace Offline
         float gravityAccele = 1f;  //落下加速用
         float fallTime = 5.0f;   //死亡後の落下時間
         bool isDestroyFall = false;
-
-
+        
         //アイテム枠
         enum ItemNum
         {
@@ -83,15 +77,10 @@ namespace Offline
         }
 
 
-        //public override void OnStartClient()
-        //{
-        //    base.OnStartClient();
-        //    BattleManager.AddPlayerData(this, isLocalPlayer, connectionToClient);            
-        //}
-
-
-        void Awake()
+        protected override void Awake()
         {
+            base.Awake();
+
             //コンポーネントの取得
             cacheTransform = transform;
             _rigidbody = GetComponent<Rigidbody>();
@@ -106,19 +95,21 @@ namespace Offline
             statusAction = GetComponent<DroneStatusAction>();
         }
 
-        void Start()
+        protected override void Start()
         {
+            base.Start();
+
             //コンポーネントの初期化
             lockOnAction.Init();
             itemAction.Init((int)ItemNum.NONE);
 
 
             //武器初期化
-            mainWeapon = BaseWeapon.CreateWeapon(this, BaseWeapon.Weapon.GATLING);
+            mainWeapon = BaseWeapon.CreateWeapon(this, BaseWeapon.Weapon.GATLING, true);
             mainWeapon.SetParent(transform);
-            subWeapon = BaseWeapon.CreateWeapon(this, setSubWeapon);
+            subWeapon = BaseWeapon.CreateWeapon(this, setSubWeapon, true);
             subWeapon.SetParent(transform);
-            
+
             //ブースト初期化
             boostGaugeImage.enabled = true;
             boostGaugeImage.fillAmount = 1;
@@ -127,9 +118,6 @@ namespace Offline
             stockIcon.enabled = true;
             stockText.enabled = true;
             stockText.text = stock.ToString();
-
-            //開始時間
-            StartTime = Time.time;
 
 
             //プロペラは最初から流す
@@ -143,7 +131,7 @@ namespace Offline
             //死亡処理中は操作不可
             if (isDestroyFall) return;
 
-            if(damageAction.HP <= 0)
+            if (damageAction.HP <= 0)
             {
                 DestroyMe();
             }
@@ -265,10 +253,7 @@ namespace Offline
                 //レーダー使用
                 if (Input.GetKey(KeyCode.Q))
                 {
-                    if (!statusAction.GetIsStatus(DroneStatusAction.Status.JAMMING))
-                    {
-                        radarAction.UseRadar();
-                    }
+                    radarAction.UseRadar();
                 }
             }
             //レーダー終了
@@ -364,8 +349,8 @@ namespace Offline
                     isBoost = true;
 
                     //加速音の再生
-                    boostSoundId = soundAction.PlayLoopSE(SoundManager.SE.BOOST, SoundManager.BaseSEVolume * 0.15f);   
-                    
+                    boostSoundId = soundAction.PlayLoopSE(SoundManager.SE.BOOST, SoundManager.BaseSEVolume * 0.15f);
+
                     //デバッグ用
                     Debug.Log("ブースト使用");
                 }
@@ -476,7 +461,7 @@ namespace Offline
 
         private void OnDestroy()
         {
-            
+
         }
 
         //カメラの深度を変更する
@@ -519,7 +504,7 @@ namespace Offline
             subWeapon.gameObject.SetActive(false);
 
             //当たり判定も消す
-            GetComponent<Collider>().enabled = false;  
+            GetComponent<Collider>().enabled = false;
 
             //爆破生成
             Instantiate(explosion, cacheTransform);
@@ -647,7 +632,7 @@ namespace Offline
                     if (itemAction.SetItem(item.Type))
                     {
                         Destroy(item.gameObject);
-                        
+
                         //デバッグ用
                         Debug.Log("アイテム取得");
                     }

@@ -7,7 +7,7 @@ namespace Offline
     public class JammingBot : MonoBehaviour
     {
         float HP = 30.0f;
-        [HideInInspector] public BattleDrone creater = null;
+        [HideInInspector] public BaseDrone creater = null;
 
 
         private void Start()
@@ -48,38 +48,21 @@ namespace Offline
                 HP = 0;
                 Destroy(gameObject);
             }
+
+            //デバッグ用
+            Debug.Log(name + "に" + p + "のダメージ\n残りHP: " + HP);
         }
 
         private void OnCollisionEnter(Collision collision)
         {
-            bool isDamage = false;  //ダメージ処理を行う場合はtrue
-            float power = 0;
             GameObject o = collision.gameObject;  //名前省略
             if (o.CompareTag(TagNameManager.BULLET))
             {
-                power = o.GetComponent<Bullet>().Power;
+                IBullet b = o.GetComponent<IBullet>();
+                if (b.PlayerID == creater.PlayerID) return;  //自分の弾なら当たり判定を行わない
+
                 Destroy(o);
-                isDamage = true;
-            }
-            if (o.CompareTag(TagNameManager.LASE_BULLET))
-            {
-                power = o.GetComponent<LaserBullet>().Power;
-                isDamage = true;
-            }
-
-            if (isDamage)
-            {
-                //小数点第2以下切り捨て
-                float p = Useful.DecimalPointTruncation(power, 1);
-
-                HP -= p;
-                if (HP <= 0)
-                {
-                    HP = 0;
-                }
-
-                //デバッグ用
-                Debug.Log(name + "に" + power + "のダメージ\n残りHP: " + HP);
+                Damage(b.Power);
             }
         }
     }

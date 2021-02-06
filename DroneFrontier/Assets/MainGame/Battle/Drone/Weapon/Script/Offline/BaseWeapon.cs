@@ -6,7 +6,7 @@ namespace Offline
 {
     public abstract class BaseWeapon : MonoBehaviour
     {
-        protected BattleDrone shooter = null;  //武器の所持者
+        protected BaseDrone shooter = null;  //武器の所持者
         [SerializeField] protected Transform weaponLocalPos = null;
         [SerializeField] protected Transform shotPos = null;
 
@@ -31,14 +31,20 @@ namespace Offline
             NONE
         }
 
-        public static BaseWeapon CreateWeapon(BattleDrone shooter, Weapon weapon)
+        public static BaseWeapon CreateWeapon(BaseDrone shooter, Weapon weapon, bool isPlayer)
         {
             const string FOLDER_PATH = "Weapon/Offline/";
+            string ADD_PATH = "Player/";
+            if (!isPlayer)
+            {
+                ADD_PATH = "CPU/";
+            }
+
             GameObject o = null;
             if (weapon == Weapon.SHOTGUN)
             {
                 //ResourcesフォルダからShotgunオブジェクトを複製してロード
-                o = Instantiate(Resources.Load(FOLDER_PATH + "Shotgun_Offline")) as GameObject;
+                o = Instantiate(Resources.Load(FOLDER_PATH + ADD_PATH + "Shotgun_Offline")) as GameObject;
             }
             else if (weapon == Weapon.GATLING)
             {
@@ -48,12 +54,12 @@ namespace Offline
             else if (weapon == Weapon.MISSILE)
             {
                 //ResourcesフォルダからMissileShotオブジェクトを複製してロード
-                o = Instantiate(Resources.Load(FOLDER_PATH + "MissileWeapon_Offline")) as GameObject;
+                o = Instantiate(Resources.Load(FOLDER_PATH + ADD_PATH + "MissileWeapon_Offline")) as GameObject;
             }
             else if (weapon == Weapon.LASER)
             {
                 //ResourcesフォルダからLaserオブジェクトを複製してロード
-                o = Instantiate(Resources.Load(FOLDER_PATH + "LaserWeapon_Offline")) as GameObject;
+                o = Instantiate(Resources.Load(FOLDER_PATH + ADD_PATH + "LaserWeapon_Offline")) as GameObject;
             }
             else
             {

@@ -7,8 +7,7 @@ namespace Online
 {
     public class RaceManager : MainGameManager
     {
-        static RaceManager singleton;
-        public new static RaceManager Singleton { get { return singleton; } }
+        public new static RaceManager Singleton { get; }
 
         class PlayerData
         {
@@ -55,7 +54,7 @@ namespace Online
                         {
                             ranking[pd.ranking - 1] = pd.drone.name;
                         }
-                        MainGameManager.Singleton.FinishGame(ranking);
+                        FinishGame(ranking);
                         isFinished = true;
                     }
                 }

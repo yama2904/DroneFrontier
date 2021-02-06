@@ -507,7 +507,7 @@ GameObject:
   - component: {fileID: 6560250238552900048}
   - component: {fileID: 6560250238552900051}
   m_Layer: 5
-  m_Name: ShotgunSelect
+  m_Name: ShotgunSelectButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -715,7 +715,7 @@ GameObject:
   - component: {fileID: 6560250238732425731}
   - component: {fileID: 6560250238732425730}
   m_Layer: 5
-  m_Name: LaserSelect
+  m_Name: LaserSelectButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -963,7 +963,7 @@ RectTransform:
   m_Children:
   - {fileID: 6560250239895247132}
   m_Father: {fileID: 6560250239566362826}
-  m_RootOrder: 4
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -1313,8 +1313,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a75899f61c64d0e4291615a81e51c76f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemOnButton: {fileID: 680999854761924893}
+  shotgunSelectButton: {fileID: 6560250238552900051}
+  missileSelectButton: {fileID: 6560250240033890641}
+  laserSelectButton: {fileID: 6560250238732425730}
   messageWindowText: {fileID: 6560250238722707553}
+  itemOnButton: {fileID: 680999854761924893}
+  itemOffButton: {fileID: 2722654501946487691}
+  decisionButton: {fileID: 6560250238976319354}
 --- !u!1 &6560250239534494434
 GameObject:
   m_ObjectHideFlags: 0
@@ -1427,8 +1432,8 @@ RectTransform:
   - {fileID: 6560250240033890640}
   - {fileID: 6560250238732425741}
   - {fileID: 6560250239107825176}
-  - {fileID: 6560250238976319301}
   - {fileID: 1610307060060078004}
+  - {fileID: 6560250238976319301}
   m_Father: {fileID: 6560250239415204015}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1588,7 +1593,7 @@ GameObject:
   - component: {fileID: 6560250240033890646}
   - component: {fileID: 6560250240033890641}
   m_Layer: 5
-  m_Name: MissileSelect
+  m_Name: MissileSelectButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1813,7 +1818,7 @@ RectTransform:
   - {fileID: 2280957616300680992}
   - {fileID: 97170034419033247}
   m_Father: {fileID: 6560250239566362826}
-  m_RootOrder: 5
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}

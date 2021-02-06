@@ -48,6 +48,7 @@ namespace Online
             SelectItemOn(); //デフォルトでアイテムONボタンが押されているようにする
         }
 
+
         public void SelectShotgun()
         {
             BaseWeapon.Weapon w = BaseWeapon.Weapon.SHOTGUN;  //名前省略
@@ -85,26 +86,6 @@ namespace Online
             messageWindowText.text = LASER_TEXT;
             SetWeaponButtonsColor(w);
             weapon = w;
-        }
-
-        void SetWeaponButtonsColor(BaseWeapon.Weapon selectWeapon)
-        {
-            shotgunSelectButton.image.color = notSelectButtonColor;
-            missileSelectButton.image.color = notSelectButtonColor;
-            laserSelectButton.image.color = notSelectButtonColor;
-
-            if (selectWeapon == BaseWeapon.Weapon.SHOTGUN)
-            {
-                shotgunSelectButton.image.color = selectWeaponButtonColor;
-            }
-            if (selectWeapon == BaseWeapon.Weapon.MISSILE)
-            {
-                missileSelectButton.image.color = selectWeaponButtonColor;
-            }
-            if (selectWeapon == BaseWeapon.Weapon.LASER)
-            {
-                laserSelectButton.image.color = selectWeaponButtonColor;
-            }
         }
 
         //決定
@@ -161,6 +142,28 @@ namespace Online
                 itemOffButton.image.color = selectItemButtonColor;
 
                 isItemOnButton = false;
+            }
+        }
+
+
+        //武器のボタンを押した時のボタンの色変え
+        void SetWeaponButtonsColor(BaseWeapon.Weapon selectWeapon)
+        {
+            shotgunSelectButton.image.color = notSelectButtonColor;
+            missileSelectButton.image.color = notSelectButtonColor;
+            laserSelectButton.image.color = notSelectButtonColor;
+
+            if (selectWeapon == BaseWeapon.Weapon.SHOTGUN)
+            {
+                shotgunSelectButton.image.color = selectWeaponButtonColor;
+            }
+            if (selectWeapon == BaseWeapon.Weapon.MISSILE)
+            {
+                missileSelectButton.image.color = selectWeaponButtonColor;
+            }
+            if (selectWeapon == BaseWeapon.Weapon.LASER)
+            {
+                laserSelectButton.image.color = selectWeaponButtonColor;
             }
         }
     }

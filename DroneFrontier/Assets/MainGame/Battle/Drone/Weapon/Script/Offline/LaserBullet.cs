@@ -5,16 +5,16 @@ using System.Linq;
 
 namespace Offline
 {
-    public class LaserBullet : MonoBehaviour,IBullet
+    public class LaserBullet : MonoBehaviour
     {
         public uint PlayerID { get; private set; } = 0;
-        public float Power { get; private set; }
 
         //パラメータ
         const float LINE_RADIUS = 0.2f;
-        float chargeTime = 2.0f;
-        float lineRange = 175f;
-        float hitPerSecond = 6.0f;
+        float chargeTime = 0;
+        float power = 0;
+        float lineRange = 0;
+        float hitPerSecond = 0;
         float shotInterval = 0;
         float shotCountTime = 0;
         bool isLocal = false;
@@ -38,7 +38,7 @@ namespace Offline
 
         //Line用変数
         [SerializeField] ParticleSystem lineParticle = null;
-        Transform lineTransform;
+        Transform lineTransform = null;
 
         //End用変数
         [SerializeField] Transform endObjectTransform = null;
@@ -47,15 +47,17 @@ namespace Offline
 
         void Awake()
         {
-            Transform cacheTransform = transform;   //処理の軽量化用キャッシュ
+            //処理の軽量化用キャッシュ
+            Transform cacheTransform = transform;
+            lineTransform = lineParticle.transform;
         }
 
         void Start()
         {
-            
+
         }
 
-        void Update()
+        void FixedUpdate()
         {
             //発射間隔の管理
             shotCountTime += Time.deltaTime;
@@ -68,9 +70,8 @@ namespace Offline
 
         public void Init(uint playerID, float power, float size, float chargeTime, float lineRange, float hitPerSecond, bool isLocal)
         {
-            PlayerID = playerID;
-            Power = power;
             this.chargeTime = chargeTime;
+            this.power = power;
             this.lineRange = lineRange;
             this.hitPerSecond = hitPerSecond;
             this.isLocal = isLocal;
@@ -88,10 +89,6 @@ namespace Offline
             chargeEmission = charge.emission;
             chargeMinmaxcurve = chargeEmission.rateOverTime;
             rateovertimeAddAmout = MAX_RATE_OVER_TIME / chargeTime;  //1秒間で増加するRateOverTime量
-
-            //Lineオブジェクト
-            lineTransform = lineParticle.transform;
-
 
             //Start用処理//
             startChilds = new ParticleSystem[startObjcectTransform.childCount];
@@ -165,11 +162,10 @@ namespace Offline
                 //Y軸の誘導
                 RotateBullet(target);
 
-
                 //レーザーの射線上にヒットした全てのオブジェクトを調べる
                 var hits = Physics.SphereCastAll(
                             lineTransform.position,    //レーザーの発射座標
-                            LINE_RADIUS,                //レーザーの半径
+                            LINE_RADIUS,               //レーザーの半径
                             lineTransform.forward,     //レーザーの正面
                             lineRange)                 //射程
                             .ToList();  //リスト化  
@@ -181,7 +177,6 @@ namespace Offline
                 if (hits.Count > 0)
                 {
                     GetNearestObject(out RaycastHit hit, hits);
-                    GameObject o = hit.transform.gameObject;    //名前省略
 
                     //ヒットしたオブジェクトの距離とレーザーの長さを合わせる
                     lineLength = hit.distance;
@@ -189,7 +184,21 @@ namespace Offline
                     //ヒットした場所にEndオブジェクトを移動させる
                     endObjectTransform.position = hit.point;
 
-                    shotCountTime = 0;  //発射間隔のカウントをリセット
+                    if (hit.transform.CompareTag(TagNameManager.PLAYER) ||
+                        hit.transform.CompareTag(TagNameManager.CPU))
+                    {
+                        hit.transform.GetComponent<DroneDamageAction>().Damage(power);
+
+                        //発射間隔のカウントをリセット
+                        shotCountTime = 0;
+                    }
+                    else if (hit.transform.CompareTag(TagNameManager.JAMMING_BOT))
+                    {
+                        hit.transform.GetComponent<JammingBot>().Damage(power);
+
+                        //発射間隔のカウントをリセット
+                        shotCountTime = 0;
+                    }
                 }
                 else
                 {
@@ -212,18 +221,18 @@ namespace Offline
                        .Where(h => !h.transform.CompareTag(TagNameManager.BULLET))  //弾丸除外
                        .Where(h => !h.transform.CompareTag(TagNameManager.GIMMICK)) //ギミック除外
                        .Where(h => !h.transform.CompareTag(TagNameManager.JAMMING)) //ジャミングエリア除外
-                       .Where(h =>  
+                       .Where(h =>
                        {
                            //撃ったプレイヤーは当たり判定から除外
                            if (h.transform.CompareTag(TagNameManager.PLAYER))
                            {
-                               return !(h.transform.GetComponent<BattleDrone>().PlayerID == PlayerID);
+                               return h.transform.GetComponent<BaseDrone>().PlayerID != PlayerID;
                            }
 
                            //ジャミングボットを生成したプレイヤーと撃ったプレイヤーが同じなら除外
                            if (h.transform.CompareTag(TagNameManager.JAMMING_BOT))
                            {
-                               return !(h.transform.GetComponent<JammingBot>().creater.PlayerID == PlayerID);
+                               return h.transform.GetComponent<JammingBot>().creater.PlayerID != PlayerID;
                            }
                            return true;
                        })

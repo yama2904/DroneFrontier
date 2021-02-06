@@ -7,85 +7,150 @@ namespace Offline
 {
     public class WeaponSelectScreenManager : MonoBehaviour
     {
+        //選択した武器
+        public static BaseWeapon.Weapon weapon { get; private set; } = BaseWeapon.Weapon.NONE;
+
+        //説明文に表示するテキスト
         const string SHOTGUN_TEXT = "射程が非常に短いが\n威力が高く、リキャストが短い。";
         const string MISSILE_TEXT = "誘導力とスピードが高く、発射後に爆発を起こす。\nリキャストが長い";
         const string LASER_TEXT = "極めて高威力だが、発動時にチャージが必要。\nまた、リキャストが最も長い。";
 
-        //ボタン処理用
+        //武器選択ボタン用
+        [SerializeField] Button shotgunSelectButton = null;
+        [SerializeField] Button missileSelectButton = null;
+        [SerializeField] Button laserSelectButton = null;
+        [SerializeField] Text messageWindowText = null;  //武器の説明
+        Color selectWeaponButtonColor = new Color(0.784f, 0.784f, 0.784f, 1f);  //武器を選択するボタンを押したときの色
+
+        //アイテムボタン処理用
         [SerializeField] Button itemOnButton = null;
-        const string SELECT_BUTTON_COLOR = "#4C76FF";     //ボタンを押したときの色の16進数
-        const string NOT_SELECT_BUTTON_COLOR = "#FFFFFF";    //他のボタンが押されている時の色の16進数
-        Color selectButtonColor;  //16進数をColorに変換したやつ
-        Color notSelectButtonColor;
+        [SerializeField] Button itemOffButton = null;
+        Color selectItemButtonColor = new Color(0.3f, 0.46f, 1f, 1f);  //アイテムボタンを選択したときの色
+        Color notSelectButtonColor = new Color(1f, 1f, 1f, 1f);  //ボタンを押してないときの色
+        bool isItemOnButton = false; //アイテムオンか
 
-        //武器の説明
-        [SerializeField] Text messageWindowText = null;
-
-        //選択した武器
-        BaseWeapon.Weapon weapon = BaseWeapon.Weapon.NONE;
 
         void Start()
         {
-            //Color型に変換
-            ColorUtility.TryParseHtmlString(SELECT_BUTTON_COLOR, out selectButtonColor);
-            ColorUtility.TryParseHtmlString(NOT_SELECT_BUTTON_COLOR, out notSelectButtonColor);
-            itemOnButton.image.color = selectButtonColor; //デフォルトでアイテムONボタンが押されているようにする
-
+            weapon = BaseWeapon.Weapon.NONE;
             messageWindowText.text = "武器を選択してください。";
         }
 
         public void SelectShotgun()
         {
+            BaseWeapon.Weapon w = BaseWeapon.Weapon.SHOTGUN;  //名前省略
+            if (weapon == w) return;
+
+            //SE再生
+            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+
             messageWindowText.text = SHOTGUN_TEXT;
-            weapon = BaseWeapon.Weapon.SHOTGUN;
+            SetWeaponButtonsColor(w);
+            weapon = w;
         }
 
         public void SelectMissile()
         {
+            BaseWeapon.Weapon w = BaseWeapon.Weapon.MISSILE;  //名前省略
+            if (weapon == w) return;
+
+            //SE再生
+            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+
             messageWindowText.text = MISSILE_TEXT;
-            weapon = BaseWeapon.Weapon.MISSILE;
+            SetWeaponButtonsColor(w);
+            weapon = w;
         }
 
         public void SelectLaser()
         {
+            BaseWeapon.Weapon w = BaseWeapon.Weapon.LASER;  //名前省略
+            if (weapon == w) return;
+
+            //SE再生
+            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+
             messageWindowText.text = LASER_TEXT;
-            weapon = BaseWeapon.Weapon.LASER;
+            SetWeaponButtonsColor(w);
+            weapon = w;
         }
 
         //決定
         public void SelectDecision()
         {
-            if (weapon == BaseWeapon.Weapon.NONE)
-            {
-                return;
-            }
+            //バグ防止
+            if (weapon == BaseWeapon.Weapon.NONE) return;
 
-                NonGameManager.LoadMainGameScene();
-            }
+            //SE再生
+            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+
+            //メインゲームに移動
+            NonGameManager.LoadMainGameScene();
+        }
 
 
         public void SelectItemOn()
         {
-            //MainGameManager.IsItemSpawn = true;
+            //色変更
+            if (!isItemOnButton)
+            {
+                //SE再生
+                SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
 
-            //ボタンを押したらインスペクターで設定している色と被るので
-            //どちらかボタンが押されたらデフォルトの色を解除
-            itemOnButton.image.color = notSelectButtonColor;
+                BattleManager.IsItemSpawn = true;
+                itemOnButton.image.color = selectItemButtonColor;
+                itemOffButton.image.color = notSelectButtonColor;
+
+                isItemOnButton = true;
+            }
         }
 
         public void SelectItemOff()
         {
-            //MainGameManager.IsItemSpawn = false;
+            //色変更
+            if (isItemOnButton)
+            {
+                //SE再生
+                SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
 
-            //ボタンを押したらインスペクターで設定している色と被るので
-            //どちらかボタンが押されたらデフォルトの色を解除
-            itemOnButton.image.color = notSelectButtonColor;
+                BattleManager.IsItemSpawn = false;
+                itemOnButton.image.color = notSelectButtonColor;
+                itemOffButton.image.color = selectItemButtonColor;
+
+                isItemOnButton = false;
+            }
         }
 
 
         public void SelectBack()
         {
+            //SE再生
+            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+
+            //CPU選択画面に戻る
             BaseScreenManager.SetScreen(BaseScreenManager.Screen.CPU_SELECT);
+        }
+
+
+        //選択した武器のボタンの色変え
+        void SetWeaponButtonsColor(BaseWeapon.Weapon selectWeapon)
+        {
+            shotgunSelectButton.image.color = notSelectButtonColor;
+            missileSelectButton.image.color = notSelectButtonColor;
+            laserSelectButton.image.color = notSelectButtonColor;
+
+            if (selectWeapon == BaseWeapon.Weapon.SHOTGUN)
+            {
+                shotgunSelectButton.image.color = selectWeaponButtonColor;
+            }
+            if (selectWeapon == BaseWeapon.Weapon.MISSILE)
+            {
+                missileSelectButton.image.color = selectWeaponButtonColor;
+            }
+            if (selectWeapon == BaseWeapon.Weapon.LASER)
+            {
+                laserSelectButton.image.color = selectWeaponButtonColor;
+            }
         }
     }
 }

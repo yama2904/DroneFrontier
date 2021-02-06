@@ -7,7 +7,7 @@ namespace Offline
 {
     public class Jamming : MonoBehaviour
     {
-        BattleDrone creater;
+        BaseDrone creater;
         [SerializeField, Tooltip("ジャミングボットの生存時間")] float destroyTime = 60.0f;
 
         [SerializeField] JammingBot jammingBot = null;
@@ -29,7 +29,7 @@ namespace Offline
         }
 
         //ジャミングボットを生成する
-        public void CreateBot(BattleDrone creater)
+        public void CreateBot(BaseDrone creater)
         {
             //キャッシュ
             Transform t = transform;
@@ -47,7 +47,7 @@ namespace Offline
             //破壊不可になるのでオブジェクトがある場合は避ける
             var hits = Physics.SphereCastAll(
                 t.position, jammingBot.transform.localScale.x, t.up, jammingBotPosition.localPosition.y)
-                .Where(h => !ReferenceEquals(creater, h.transform.gameObject))
+                .Where(h => !ReferenceEquals(creater.gameObject, h.transform.gameObject))
                 .Where(h => !h.transform.CompareTag(TagNameManager.JAMMING))
                 .Where(h => !h.transform.CompareTag(TagNameManager.ITEM))
                 .Where(h => !h.transform.CompareTag(TagNameManager.BULLET))

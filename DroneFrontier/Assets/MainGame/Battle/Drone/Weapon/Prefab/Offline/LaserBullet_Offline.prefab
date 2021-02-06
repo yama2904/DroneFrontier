@@ -23779,10 +23779,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7225798336519985533}
-  - component: {fileID: 3779350247338034436}
   m_Layer: 0
   m_Name: End
-  m_TagString: LaserBullet
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -23804,19 +23803,6 @@ Transform:
   m_Father: {fileID: 7764554142658295910}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!135 &3779350247338034436
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4117860665432087451}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.3
-  m_Center: {x: 0, y: 0, z: -0.2}
 --- !u!1 &6640675302444477181
 GameObject:
   m_ObjectHideFlags: 0
@@ -28584,7 +28570,7 @@ GameObject:
   - component: {fileID: 8198160935777638173}
   m_Layer: 0
   m_Name: LaserBullet_Offline
-  m_TagString: Bullet
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -28619,12 +28605,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 51084aed53e3c3b46b6e7cff5694873a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  scale: 10
-  ShotInterval: 0
-  chargeTime: 2
-  lineRadius: 0.2
-  lineRange: 175
-  isLocal: 0
   charge: {fileID: 8544411310819382506}
   startObjcectTransform: {fileID: 2268787233823458654}
   lineParticle: {fileID: 4865538844566885093}

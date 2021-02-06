@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 1976513588513669613}
   - component: {fileID: 1976513588513669614}
   m_Layer: 5
-  m_Name: SelectLaser
+  m_Name: SelectLaserButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -452,7 +452,7 @@ GameObject:
   - component: {fileID: 1976513588657666840}
   - component: {fileID: 1976513588657666841}
   m_Layer: 5
-  m_Name: SelectMissile
+  m_Name: SelectMissileButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -768,7 +768,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CPUNumText: {fileID: 1976513589710317012}
-  CPUList: {fileID: 1976513588693189998}
+  screenCPUList: {fileID: 1976513588693189998}
 --- !u!1 &1976513588903941771
 GameObject:
   m_ObjectHideFlags: 0
@@ -1286,7 +1286,7 @@ GameObject:
   - component: {fileID: 1976513589302031125}
   - component: {fileID: 1976513589302031126}
   m_Layer: 5
-  m_Name: SelectLaser
+  m_Name: SelectLaserButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1572,7 +1572,7 @@ GameObject:
   - component: {fileID: 1976513589379914655}
   - component: {fileID: 1976513589379914640}
   m_Layer: 5
-  m_Name: SelectMissile
+  m_Name: SelectMissileButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2038,7 +2038,7 @@ GameObject:
   - component: {fileID: 1976513589556141960}
   - component: {fileID: 1976513589556141961}
   m_Layer: 5
-  m_Name: SelectShotgun
+  m_Name: SelectShotgunButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2246,7 +2246,7 @@ GameObject:
   - component: {fileID: 1976513589614155812}
   - component: {fileID: 1976513589614155813}
   m_Layer: 5
-  m_Name: SelectShotgun
+  m_Name: SelectShotgunButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2607,7 +2607,7 @@ GameObject:
   - component: {fileID: 1976513589803579559}
   - component: {fileID: 1976513589803579576}
   m_Layer: 5
-  m_Name: SelectLaser
+  m_Name: SelectLaserButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2971,7 +2971,7 @@ GameObject:
   - component: {fileID: 1976513590180535743}
   - component: {fileID: 1976513590180535728}
   m_Layer: 5
-  m_Name: SelectShotgun
+  m_Name: SelectShotgunButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3305,7 +3305,7 @@ GameObject:
   - component: {fileID: 1976513590261357358}
   - component: {fileID: 1976513590261357359}
   m_Layer: 5
-  m_Name: SelectMissile
+  m_Name: SelectMissileButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

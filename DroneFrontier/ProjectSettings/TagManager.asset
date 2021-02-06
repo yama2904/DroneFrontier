@@ -13,7 +13,6 @@ TagManager:
   - Goal
   - ItemSpawn
   - Tower
-  - LaserBullet
   layers:
   - Default
   - TransparentFX

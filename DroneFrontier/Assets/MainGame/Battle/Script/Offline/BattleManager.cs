@@ -7,8 +7,8 @@ namespace Offline
 {
     public class BattleManager : MainGameManager
     {
-        [SerializeField] GameObject player = null;
-        [SerializeField] GameObject cpu = null;
+        [SerializeField] GameObject playerPrefab = null;
+        [SerializeField] GameObject cpuPrefab = null;
 
         //シングルトン
         public new static BattleManager Singleton { get; private set; }
@@ -22,14 +22,16 @@ namespace Offline
         //プレイヤー情報
         public class PlayerData
         {
-            public BattleDrone drone = null;
+            public GameObject drone = null;
+            public BaseWeapon.Weapon weapon = BaseWeapon.Weapon.NONE;
             public string name = "";
             public int stock = 0;
             public bool isDestroy = false;
+            public bool isPlayer = false;
             public static int droneNum = 0;  //残っているドローンの数
         }
-        static List<PlayerData> playerDatas = new List<PlayerData>();
-        static BattleDrone localDrone = null;
+        List<PlayerData> playerDatas = new List<PlayerData>();
+        BattleDrone localDrone = null;
         int useIndex = 0;
 
         //ゲーム終了処理を行ったらtrue
@@ -56,6 +58,29 @@ namespace Offline
         protected override void Start()
         {
             base.Start();
+
+            if (!isSolo)
+            {
+                //ドローンの生成
+                foreach (CPUSelectScreenManager.CPUData cd in CPUSelectScreenManager.CPUDatas)
+                {
+                    //CPUの生成
+                    playerDatas.Add(new PlayerData
+                    {
+                        drone = CreateDrone(cd.weapon, false),
+                        weapon = cd.weapon,
+                        name = cd.name,
+                        stock = droneStock
+                    });
+                }
+                //プレイヤーの生成
+                playerDatas.Add(new PlayerData
+                {
+                    drone = CreateDrone(WeaponSelectScreenManager.weapon, true),
+                    name = "Player",
+                    stock = droneStock
+                });
+            }
 
             PlayerData.droneNum = playerNum;
 
@@ -92,21 +117,24 @@ namespace Offline
             //カウントダウンが終わったら処理
             if (!StartFlag) return;
 
-            foreach(PlayerData pd in playerDatas)
+            //破壊されたドローンを調べる
+            foreach (PlayerData pd in playerDatas)
             {
                 if (pd.isDestroy) continue;
                 if (pd.drone == null)
                 {
-                    if (pd.stock == 0)
+                    //ストックが残っていたら復活
+                    if (pd.stock > 0)
+                    {
+                        pd.stock--;
+                        pd.drone = CreateDrone(pd.weapon, pd.isPlayer);
+                    }
+                    //ストックが残っていなかったらランキングに記録
+                    else
                     {
                         pd.isDestroy = true;
                         ranking[PlayerData.droneNum - 1] = pd.name;
                         PlayerData.droneNum--;
-                    }
-                    else
-                    {
-                        pd.stock--;
-                        CreateDrone();
                     }
                 }
             }
@@ -173,27 +201,22 @@ namespace Offline
         }
 
 
-        //プレイヤーの情報を登録する
-        public static void AddPlayerData(BattleDrone drone, bool isLocalPlayer)
-        {
-            //既にリストにあったら処理しない
-            if (playerDatas.FindIndex(pd => ReferenceEquals(pd.drone, drone)) >= 0) return;
-
-            if (isLocalPlayer)
-            {
-                localDrone = drone;
-            }
-
-            playerDatas.Add(new PlayerData
-            {
-                drone = drone
-            });
-        }
-
-        void CreateDrone()
+        GameObject CreateDrone(BaseWeapon.Weapon weapon, bool isPlayer)
         {
             Transform pos = StartPosition.Singleton.GetPos();
-            
+            GameObject o = null;
+
+            //プレイヤーの生成
+            if (isPlayer)
+            {
+                o = Instantiate(playerPrefab, pos.position, pos.rotation);
+                o.GetComponent<BattleDrone>().setSubWeapon = weapon;
+                return o;
+            }
+            //CPUの生成
+            o = Instantiate(cpuPrefab, pos.position, pos.rotation);
+            o.GetComponent<CPU.BattleDrone>().setSubWeapon = weapon;
+            return o;
         }
 
         //時間制限処理

@@ -28,7 +28,7 @@ namespace Offline
 
 
         //ランキング用配列
-        protected string[] ranking = new string[playerNum];
+        protected string[] ranking;
 
 
         //ゲーム終了アニメーター
@@ -49,6 +49,9 @@ namespace Offline
         {
             //シングルトンの作成
             Singleton = this;
+
+            //プレイ人数の初期化
+            playerNum = CPUSelectScreenManager.CPUNum;
 
             //ランキング配列の初期化
             ranking = new string[playerNum];

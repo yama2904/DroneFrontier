@@ -7,11 +7,31 @@ namespace Offline
 {
     public class CPUSelectScreenManager : MonoBehaviour
     {
-        const short MAX_CPU_NUM = 3;
-        const short MIN_CPU_NUM = 1;
+        //選択したCPU情報
+        public struct CPUData
+        {
+            public string name;
+            public BaseWeapon.Weapon weapon;
+        }
+        static CPUData[] cpuDatas = new CPUData[(int)List.NONE];
 
-        [SerializeField] Text CPUNumText = null;
-        short cpuNum;
+        //CPU情報
+        public static CPUData[] CPUDatas
+        {
+            get
+            {
+                CPUData[] cpus = new CPUData[CPUNum];
+                for(int i = 0; i < CPUNum; i++)
+                {
+                    cpus[i] = cpuDatas[i];
+                }
+                return cpus;
+            }
+        }
+
+        //CPU数
+        public static short CPUNum { get; private set; } 
+
 
         //CPUリスト用
         enum List
@@ -22,7 +42,7 @@ namespace Offline
 
             NONE
         }
-
+        //選択できる武器
         enum Weapon
         {
             SHOTGUN,
@@ -32,26 +52,29 @@ namespace Offline
             NONE
         }
 
-        [SerializeField] GameObject CPUList = null;
-        GameObject[] CPULists = new GameObject[(int)List.NONE];  //CPUリスト
-        Weapon[] CPUsWeapon = new Weapon[(int)List.NONE];    //各CPUの武器
-        Button[] buttons = new Button[(int)List.NONE * (int)Weapon.NONE];  //CPUの武器を選択するボタン(2次元配列を1次元にまとめる)
+        //CPU数
+        [SerializeField] Text CPUNumText = null;
+        const short MAX_CPU_NUM = 3;
+        const short MIN_CPU_NUM = 1;
+
+        //CPU名
+        const string CPU_NAME = "CPU";
+
+        //画面情報
+        [SerializeField] GameObject screenCPUList = null;
+        GameObject[] screenCPULists = new GameObject[(int)List.NONE];  //CPUリスト
+        Button[] screenButtons = new Button[(int)List.NONE * (int)Weapon.NONE];  //CPUの武器を選択するボタン(2次元配列を1次元にまとめる)
 
         //色用変数
-        const string SELECT_BUTTON_COLOR = "#A2A2A2";       //ボタンを押したときの色の16進数
-        const string NOT_SELECT_BUTTON_COLOR = "#FFFFFF";   //他のボタンが押されている時の色の16進数
-        Color selectButtonColor;  //16進数をColorに変換したやつ
-        Color notSelectButtonColor;
+        Color selectButtonColor = new Color(0.635f, 0.635f, 0.635f, 1f);  //16進数をColorに変換したやつ
+        Color notSelectButtonColor = new Color(1f, 1f, 1f, 1f);
 
 
         void Start()
         {
-            cpuNum = MIN_CPU_NUM;
-            CPUNumText.text = cpuNum.ToString();
-
-            //Color型に変換
-            ColorUtility.TryParseHtmlString(SELECT_BUTTON_COLOR, out selectButtonColor);
-            ColorUtility.TryParseHtmlString(NOT_SELECT_BUTTON_COLOR, out notSelectButtonColor);
+            //CPU数の初期化
+            CPUNum = MIN_CPU_NUM;
+            CPUNumText.text = CPUNum.ToString();
 
             //オブジェクト名
             string[] listName = new string[(int)List.NONE];
@@ -67,102 +90,162 @@ namespace Offline
 
 
             //CPUListsとbuttonsの要素の初期化
+            Weapon defaultWeapon = Weapon.SHOTGUN;
             for (int i = 0; i < (int)List.NONE; i++)
             {
-                CPULists[i] = CPUList.transform.Find(listName[i]).gameObject;
+                screenCPULists[i] = screenCPUList.transform.Find(listName[i]).gameObject;
 
                 //CPUの武器を選択するボタンを全て取得
                 for (int j = 0; j < (int)Weapon.NONE; j++)
                 {
                     int index = (i * (int)List.NONE) + j;
-                    buttons[index] = CPULists[i].transform.Find(buttonName[j]).GetComponent<Button>();
+                    screenButtons[index] = screenCPULists[i].transform.Find(buttonName[j]).GetComponent<Button>();
                 }
                 //一旦CPUリストを非表示
-                CPULists[i].SetActive(false);
+                screenCPULists[i].SetActive(false);
+                
+                //CPUデータの更新
+                cpuDatas[i].name = CPU_NAME + i;
+                cpuDatas[i].weapon = ConverWeaponToBaseWepon(defaultWeapon);   //デフォルトはショットガン
 
-                //デフォルトはショットガン
-                CPUsWeapon[i] = Weapon.SHOTGUN;
-                SetButtonColor((List)i, Weapon.SHOTGUN);
+                //ボタンの色変更
+                SetButtonColor((List)i, defaultWeapon);
             }
 
             //選択しているCPU人数の分だけリストを表示
-            for (int i = 0; i < cpuNum; i++)
+            for (int i = 0; i < CPUNum; i++)
             {
-                CPULists[i].SetActive(true);
+                screenCPULists[i].SetActive(true);
             }
         }
 
         //CPUの数を増やす
         public void SelectNumUp()
         {
-            if (cpuNum < MAX_CPU_NUM)
+            if (CPUNum < MAX_CPU_NUM)
             {
-                cpuNum++;
-                CPUNumText.text = cpuNum.ToString();
+                //CPU数のテキストを変更
+                CPUNum++;
+                CPUNumText.text = CPUNum.ToString();
 
-                CPULists[cpuNum - 1].SetActive(true);
+                //表示するCPUの武器選択リストの数を変更
+                screenCPULists[CPUNum - 1].SetActive(true);
             }
         }
 
         //CPUの数を減らす
         public void SelectNumDown()
         {
-            if (cpuNum > MIN_CPU_NUM)
+            if (CPUNum > MIN_CPU_NUM)
             {
-                cpuNum--;
-                CPUNumText.text = cpuNum.ToString();
+                CPUNum--;
+                CPUNumText.text = CPUNum.ToString();
 
-                CPULists[cpuNum].SetActive(false);
+                screenCPULists[CPUNum].SetActive(false);
             }
         }
 
 
         public void SelectCPU1Shotgun()
         {
-            CPUsWeapon[(int)List.LIST_1] = Weapon.SHOTGUN;
-            SetButtonColor(List.LIST_1, Weapon.SHOTGUN);
+            CPUData cd = cpuDatas[(int)List.LIST_1];  //名前省略
+            if (cd.weapon == BaseWeapon.Weapon.SHOTGUN) return;
+
+            //SE再生
+            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+
+            cd.weapon = BaseWeapon.Weapon.SHOTGUN;  //武器情報の更新
+            SetButtonColor(List.LIST_1, Weapon.SHOTGUN);  //ボタンの色変え
         }
         public void SelectCPU1Missile()
         {
-            CPUsWeapon[(int)List.LIST_1] = Weapon.MISSILE;
-            SetButtonColor(List.LIST_1, Weapon.MISSILE);
+            CPUData cd = cpuDatas[(int)List.LIST_1];  //名前省略
+            if (cd.weapon == BaseWeapon.Weapon.MISSILE) return;
+
+            //SE再生
+            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+
+            cd.weapon = BaseWeapon.Weapon.MISSILE;  //武器情報の更新
+            SetButtonColor(List.LIST_1, Weapon.MISSILE);  //ボタンの色変え
         }
         public void SelectCPU1Laser()
         {
-            CPUsWeapon[(int)List.LIST_1] = Weapon.LASER;
-            SetButtonColor(List.LIST_1, Weapon.LASER);
+            CPUData cd = cpuDatas[(int)List.LIST_1];  //名前省略
+            if (cd.weapon == BaseWeapon.Weapon.LASER) return;
+
+            //SE再生
+            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+
+            cd.weapon = BaseWeapon.Weapon.LASER;  //武器情報の更新
+            SetButtonColor(List.LIST_1, Weapon.LASER);  //ボタンの色変え
         }
 
         public void SelectCPU2Shotgun()
         {
-            CPUsWeapon[(int)List.LIST_2] = Weapon.SHOTGUN;
-            SetButtonColor(List.LIST_2, Weapon.SHOTGUN);
+            CPUData cd = cpuDatas[(int)List.LIST_2];  //名前省略
+            if (cd.weapon == BaseWeapon.Weapon.SHOTGUN) return;
+
+            //SE再生
+            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+
+            cd.weapon = BaseWeapon.Weapon.SHOTGUN;  //武器情報の更新
+            SetButtonColor(List.LIST_2, Weapon.SHOTGUN);  //ボタンの色変え
         }
         public void SelectCPU2Missile()
         {
-            CPUsWeapon[(int)List.LIST_2] = Weapon.MISSILE;
-            SetButtonColor(List.LIST_2, Weapon.MISSILE);
+            CPUData cd = cpuDatas[(int)List.LIST_2];  //名前省略
+            if (cd.weapon == BaseWeapon.Weapon.MISSILE) return;
+
+            //SE再生
+            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+
+            cd.weapon = BaseWeapon.Weapon.MISSILE;  //武器情報の更新
+            SetButtonColor(List.LIST_2, Weapon.MISSILE);  //ボタンの色変え
         }
         public void SelectCPU2Laser()
         {
-            CPUsWeapon[(int)List.LIST_2] = Weapon.LASER;
-            SetButtonColor(List.LIST_2, Weapon.LASER);
+            CPUData cd = cpuDatas[(int)List.LIST_2];  //名前省略
+            if (cd.weapon == BaseWeapon.Weapon.LASER) return;
+
+            //SE再生
+            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+
+            cd.weapon = BaseWeapon.Weapon.LASER;  //武器情報の更新
+            SetButtonColor(List.LIST_2, Weapon.LASER);  //ボタンの色変え
         }
 
         public void SelectCPU3Shotgun()
         {
-            CPUsWeapon[(int)List.LIST_3] = Weapon.SHOTGUN;
-            SetButtonColor(List.LIST_3, Weapon.SHOTGUN);
+            CPUData cd = cpuDatas[(int)List.LIST_3];  //名前省略
+            if (cd.weapon == BaseWeapon.Weapon.SHOTGUN) return;
+
+            //SE再生
+            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+
+            cd.weapon = BaseWeapon.Weapon.SHOTGUN;  //武器情報の更新
+            SetButtonColor(List.LIST_3, Weapon.SHOTGUN);  //ボタンの色変え
         }
         public void SelectCPU3Missile()
         {
-            CPUsWeapon[(int)List.LIST_3] = Weapon.MISSILE;
-            SetButtonColor(List.LIST_3, Weapon.MISSILE);
+            CPUData cd = cpuDatas[(int)List.LIST_3];  //名前省略
+            if (cd.weapon == BaseWeapon.Weapon.MISSILE) return;
+
+            //SE再生
+            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+
+            cd.weapon = BaseWeapon.Weapon.MISSILE;  //武器情報の更新
+            SetButtonColor(List.LIST_3, Weapon.MISSILE);  //ボタンの色変え
         }
         public void SelectCPU3Laser()
         {
-            CPUsWeapon[(int)List.LIST_3] = Weapon.LASER;
-            SetButtonColor(List.LIST_3, Weapon.LASER);
+            CPUData cd = cpuDatas[(int)List.LIST_3];  //名前省略
+            if (cd.weapon == BaseWeapon.Weapon.LASER) return;
+
+            //SE再生
+            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+
+            cd.weapon = BaseWeapon.Weapon.LASER;  //武器情報の更新
+            SetButtonColor(List.LIST_3, Weapon.LASER);  //ボタンの色変え
         }
 
         //決定
@@ -171,12 +254,7 @@ namespace Offline
             //SE再生
             SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
 
-            for (int i = 0; i < cpuNum; i++)
-            {
-                string cpuName = "CPU" + (i + 1);
-                BaseWeapon.Weapon cpuWeapon = ConverWeaponToBaseWepon(CPUsWeapon[i]);
-                //NonGameManager.SetPlayer(cpuName, cpuWeapon, false);
-            }
+            //武器選択画面に移動
             BaseScreenManager.SetScreen(BaseScreenManager.Screen.WEAPON_SELECT);
         }
 
@@ -185,7 +263,7 @@ namespace Offline
             //SE再生
             SoundManager.Play(SoundManager.SE.CANCEL, SoundManager.BaseSEVolume);
 
-            //NonGameManager.ClearSetedPlayers();
+            //ソロマルチ選択画面に戻る
             BaseScreenManager.SetScreen(BaseScreenManager.Screen.KURIBOCCHI);
         }
 
@@ -197,18 +275,13 @@ namespace Offline
                 int index = ((int)list * (int)List.NONE) + i;
                 if (i == (int)weapon)
                 {
-                    buttons[index].image.color = selectButtonColor;
+                    screenButtons[index].image.color = selectButtonColor;
                 }
                 else
                 {
-                    buttons[index].image.color = notSelectButtonColor;
+                    screenButtons[index].image.color = notSelectButtonColor;
                 }
             }
-        }
-
-        int GetIndex(List l, Weapon w)
-        {
-            return ((int)l * (int)List.NONE) + (int)w;
         }
 
         BaseWeapon.Weapon ConverWeaponToBaseWepon(Weapon weapon)
