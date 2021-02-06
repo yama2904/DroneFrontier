@@ -41,7 +41,7 @@ namespace Offline
         protected Color maskColor = new Color(0, 0, 0.5f);
 
 
-        [Header("デバッグ用")]
+        //デバッグ用
         [SerializeField] protected bool isSolo = false;
         
 

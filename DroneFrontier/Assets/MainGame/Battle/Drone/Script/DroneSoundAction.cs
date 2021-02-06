@@ -34,12 +34,10 @@ public class DroneSoundAction : MonoBehaviour
 
     void Start()
     {
-        
     }
-    
+
     void Update()
     {
-        
     }
 
     public void PlayOneShot(SoundManager.SE se, float volume)
@@ -56,7 +54,7 @@ public class DroneSoundAction : MonoBehaviour
         if (se == SoundManager.SE.NONE) return -1;
 
         //再生可能なAudioSourceを調べる
-        for(int i = 0; i < loopAudioDatas.Length; i++)
+        for (int i = 0; i < loopAudioDatas.Length; i++)
         {
             LoopAudioData lpd = loopAudioDatas[i];  //名前省略
             if (!lpd.isFree) continue;

@@ -43,6 +43,7 @@ namespace Offline
         //スピードダウン用
         DroneBaseAction baseAction = null;
         int speedDownSoundId = 0;
+        int speedDownCount = 0;
 
 
         void Start()
@@ -67,22 +68,6 @@ namespace Offline
             {
                 isStatus[(int)Status.STUN] = createdStunScreenMask.IsStun;
             }
-        }
-
-        public void ResetStatus()
-        {
-            for (int i = 0; i < (int)Status.NONE; i++)
-            {
-                isStatus[i] = false;
-            }
-            barrierWeakIcon.enabled = false;
-            jammingIcon.enabled = false;
-            speedDownIcon.enabled = false;
-            createdStunScreenMask.UnSetStun();
-
-            //SE停止  
-            soundAction.StopLoopSE(jammingSoundId);
-            soundAction.StopLoopSE(speedDownSoundId);
         }
 
         public bool GetIsStatus(Status status)
@@ -176,6 +161,7 @@ namespace Offline
             baseAction.ModifySpeed(1 - downPercent);
 
             isStatus[(int)Status.SPEED_DOWN] = true;
+            speedDownCount++;
 
             //アイコン表示
             speedDownIcon.enabled = true;
@@ -189,6 +175,13 @@ namespace Offline
         {
             //アイコン非表示
             speedDownIcon.enabled = false;
+
+            //スピードダウンがすべて解除されたらフラグも解除
+            if(--speedDownCount <= 0)
+            {
+                isStatus[(int)Status.SPEED_DOWN] = false;
+            }
+
 
             //SE停止
             soundAction.StopLoopSE(speedDownSoundId);

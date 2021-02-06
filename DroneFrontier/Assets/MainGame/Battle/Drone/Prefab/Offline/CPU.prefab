@@ -504,7 +504,7 @@ GameObject:
   - component: {fileID: 1671068120823626417}
   - component: {fileID: 2702255915945675599}
   - component: {fileID: 5933443804462490304}
-  - component: {fileID: 1493122400660267457}
+  - component: {fileID: 3144627419471916392}
   - component: {fileID: 993888715167761601}
   - component: {fileID: 3448523090443018778}
   - component: {fileID: 6775327954476149997}
@@ -514,7 +514,7 @@ GameObject:
   - component: {fileID: 177006347382385839}
   - component: {fileID: 7411870763528545565}
   m_Layer: 0
-  m_Name: BattleDrone_CPU
+  m_Name: CPU
   m_TagString: CPU
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -578,11 +578,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d27047d3b3407144f8e1b9ef2e877d24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  setSubWeapon: 0
+  setSubWeapon: 4
   atackingDownSpeed: 0.5
-  explosion: {fileID: 0}
-  droneObject: {fileID: 0}
-  isAtack: 0
+  explosion: {fileID: 2212005194167726933, guid: 8dc076f9b5243664fa747acf0168fb56,
+    type: 3}
+  droneObject: {fileID: 1656250088969202853}
+  isAtack: 1
 --- !u!114 &2268401430616989749
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -679,7 +680,7 @@ MonoBehaviour:
   barrierIconImage: {fileID: 0}
   jammingIconImage: {fileID: 0}
   stunGrenadeIconImage: {fileID: 0}
---- !u!114 &1493122400660267457
+--- !u!114 &3144627419471916392
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -688,14 +689,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 5756816350272667788}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 232d62e5cb606f949ac863af7e06a1dd, type: 3}
+  m_Script: {fileID: 11500000, guid: 097bcd7eeec2d6c44be596f9d6817627, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  barrierWeakIcon: {fileID: 0}
-  jammingIcon: {fileID: 0}
-  speedDownIcon: {fileID: 0}
-  stunScreenMask: {fileID: 3969662621950321302, guid: 8c2ea1de19e199245af77ca42744e83f,
-    type: 3}
 --- !u!95 &993888715167761601
 Animator:
   serializedVersion: 3

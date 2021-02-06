@@ -8,7 +8,7 @@ namespace Offline
     public class CPUSelectScreenManager : MonoBehaviour
     {
         //選択したCPU情報
-        public struct CPUData
+        public class CPUData
         {
             public string name;
             public BaseWeapon.Weapon weapon;
@@ -21,7 +21,7 @@ namespace Offline
             get
             {
                 CPUData[] cpus = new CPUData[CPUNum];
-                for(int i = 0; i < CPUNum; i++)
+                for (int i = 0; i < CPUNum; i++)
                 {
                     cpus[i] = cpuDatas[i];
                 }
@@ -30,7 +30,7 @@ namespace Offline
         }
 
         //CPU数
-        public static short CPUNum { get; private set; } 
+        public static short CPUNum { get; private set; }
 
 
         //CPUリスト用
@@ -84,9 +84,9 @@ namespace Offline
 
             //オブジェクト名
             string[] buttonName = new string[(int)Weapon.NONE];
-            buttonName[(int)Weapon.SHOTGUN] = "SelectShotgun";
-            buttonName[(int)Weapon.MISSILE] = "SelectMissile";
-            buttonName[(int)Weapon.LASER] = "SelectLaser";
+            buttonName[(int)Weapon.SHOTGUN] = "SelectShotgunButton";
+            buttonName[(int)Weapon.MISSILE] = "SelectMissileButton";
+            buttonName[(int)Weapon.LASER] = "SelectLaserButton";
 
 
             //CPUListsとbuttonsの要素の初期化
@@ -103,10 +103,13 @@ namespace Offline
                 }
                 //一旦CPUリストを非表示
                 screenCPULists[i].SetActive(false);
-                
+
                 //CPUデータの更新
-                cpuDatas[i].name = CPU_NAME + i;
-                cpuDatas[i].weapon = ConverWeaponToBaseWepon(defaultWeapon);   //デフォルトはショットガン
+                cpuDatas[i] = new CPUData
+                {
+                    name = CPU_NAME + i,
+                    weapon = ConverWeaponToBaseWepon(defaultWeapon)  //デフォルトはショットガン
+                };
 
                 //ボタンの色変更
                 SetButtonColor((List)i, defaultWeapon);

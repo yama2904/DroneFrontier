@@ -82,6 +82,7 @@ namespace Offline
             regeneCountTime += Time.deltaTime;
         }
 
+
         public void Init()
         {
             HP = MAX_HP;
@@ -93,46 +94,6 @@ namespace Offline
             barrierObject.SetActive(true);
             SetBarrierColor(1, false);
         }
-
-        //HPを回復する
-        void Regene(float regeneValue)
-        {
-            HP += regeneValue;
-            if (HP >= MAX_HP)
-            {
-                HP = MAX_HP;
-                Debug.Log("バリアHPMAX: " + HP);
-            }
-            //デバッグ用
-            else
-            {
-                Debug.Log("リジェネ後バリアHP: " + HP);
-            }
-
-            //バリアの色変え
-            float value = HP / MAX_HP;
-            SetBarrierColor(value, IsStrength);
-        }
-
-        //バリアを復活させる
-        void ResurrectBarrier(float resurrectHP)
-        {
-            if (HP > 0) return;
-
-            //修復したら回復処理に移る
-            HP = resurrectHP;
-            isRegene = true;
-
-            //バリア復活
-            barrierObject.SetActive(true);
-            float value = HP / MAX_HP;
-            SetBarrierColor(value, IsStrength);
-
-            //デバッグ用
-            Debug.Log("バリア修復");
-        }
-
-        #region Damage
 
         //バリアに引数分のダメージを与える
         public void Damage(float power)
@@ -157,8 +118,6 @@ namespace Offline
 
             Debug.Log("バリアに" + p + "のダメージ\n残りHP: " + HP);
         }
-
-        #endregion
 
         #region BarrierStrength
 
@@ -253,6 +212,45 @@ namespace Offline
         }
 
         #endregion
+
+
+        //HPを回復する
+        void Regene(float regeneValue)
+        {
+            HP += regeneValue;
+            if (HP >= MAX_HP)
+            {
+                HP = MAX_HP;
+                Debug.Log("バリアHPMAX: " + HP);
+            }
+            //デバッグ用
+            else
+            {
+                Debug.Log("リジェネ後バリアHP: " + HP);
+            }
+
+            //バリアの色変え
+            float value = HP / MAX_HP;
+            SetBarrierColor(value, IsStrength);
+        }
+
+        //バリアを復活させる
+        void ResurrectBarrier(float resurrectHP)
+        {
+            if (HP > 0) return;
+
+            //修復したら回復処理に移る
+            HP = resurrectHP;
+            isRegene = true;
+
+            //バリア復活
+            barrierObject.SetActive(true);
+            float value = HP / MAX_HP;
+            SetBarrierColor(value, IsStrength);
+
+            //デバッグ用
+            Debug.Log("バリア修復");
+        }
 
         void SetBarrierColor(float value, bool isStrength)
         {

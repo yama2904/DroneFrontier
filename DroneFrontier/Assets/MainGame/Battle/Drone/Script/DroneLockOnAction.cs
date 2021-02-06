@@ -33,13 +33,10 @@ public class DroneLockOnAction : MonoBehaviour
         playerTransform = transform;
         cameraTransform = _camera.transform;
     }
-    
+
     public void Init()
     {
-        if (CompareTag(TagNameManager.PLAYER))
-        {
-            lockOnImage.enabled = true;
-        }
+        lockOnImage.enabled = true;
         lockOnImage.color = notLockOnColor;
 
         //自分をロックオンしない対象に入れる
@@ -79,7 +76,7 @@ public class DroneLockOnAction : MonoBehaviour
             cameraTransform.position,
             searchRadius,
             cameraTransform.forward,
-            maxDistance).Select(h=> h.transform.gameObject).ToList();
+            maxDistance).Select(h => h.transform.gameObject).ToList();
 
         hits = FilterTargetObject(hits);
         if (hits.Count > 0)
@@ -118,7 +115,7 @@ public class DroneLockOnAction : MonoBehaviour
             else
             {
                 //Raycast内にロックオン中だったオブジェクトがない場合はロックオン解除
-                if(hits.FindIndex(h => ReferenceEquals(h, Target)) == -1)
+                if (hits.FindIndex(h => ReferenceEquals(h, Target)) == -1)
                 {
                     StopLockOn();
                     return;

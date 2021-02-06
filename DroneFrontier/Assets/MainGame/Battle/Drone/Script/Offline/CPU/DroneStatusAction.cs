@@ -22,39 +22,22 @@ namespace Offline
             }
             bool[] isStatus = new bool[(int)Status.NONE];   //状態異常が付与されているか
 
-            //アイコン
-            [SerializeField] Image barrierWeakIcon = null;
-            [SerializeField] Image jammingIcon = null;
-            [SerializeField] Image speedDownIcon = null;
-
-            //サウンド
-            DroneSoundAction soundAction = null;
-
             //バリア用
             DroneBarrierAction barrier = null;
 
-            //スタン用
-            [SerializeField] StunScreenMask stunScreenMask = null;
-            StunScreenMask createdStunScreenMask = null;
-
             //ジャミング用
             DroneLockOnAction lockOn = null;
-            DroneRadarAction radar = null;
-            int jammingSoundId = -1;
 
             //スピードダウン用
             DroneBaseAction baseAction = null;
-            int speedDownSoundId = 0;
+            int speedDownCount = 0;
 
 
             void Start()
             {
                 baseAction = GetComponent<DroneBaseAction>();
-                soundAction = GetComponent<DroneSoundAction>();
                 barrier = GetComponent<DroneBarrierAction>();
                 lockOn = GetComponent<DroneLockOnAction>();
-                radar = GetComponent<DroneRadarAction>();
-                createdStunScreenMask = Instantiate(stunScreenMask);
             }
 
             void Update()
@@ -65,10 +48,6 @@ namespace Offline
                     isStatus[(int)Status.BARRIER_STRENGTH] = barrier.IsStrength;
                     isStatus[(int)Status.BARRIER_WEAK] = barrier.IsWeak;
                 }
-                if (createdStunScreenMask != null)
-                {
-                    isStatus[(int)Status.STUN] = createdStunScreenMask.IsStun;
-                }
             }
 
             public void ResetStatus()
@@ -77,14 +56,6 @@ namespace Offline
                 {
                     isStatus[i] = false;
                 }
-                barrierWeakIcon.enabled = false;
-                jammingIcon.enabled = false;
-                speedDownIcon.enabled = false;
-                createdStunScreenMask.UnSetStun();
-
-                //SE停止  
-                soundAction.StopLoopSE(jammingSoundId);
-                soundAction.StopLoopSE(speedDownSoundId);
             }
 
             public bool GetIsStatus(Status status)
@@ -116,9 +87,6 @@ namespace Offline
 
                 barrier.BarrierWeak();
                 isStatus[(int)Status.BARRIER_WEAK] = true;
-
-                //アイコン表示
-                barrierWeakIcon.enabled = true;
             }
 
             //バリア弱体化解除
@@ -128,17 +96,12 @@ namespace Offline
 
                 barrier.StopBarrierWeak();
                 isStatus[(int)Status.BARRIER_WEAK] = false;
-
-                //アイコン非表示
-                barrierWeakIcon.enabled = false;
             }
 
 
             //スタン
             public void SetStun(float time)
             {
-                if (createdStunScreenMask == null) return;
-                createdStunScreenMask.SetStun(time);
             }
 
 
@@ -146,29 +109,15 @@ namespace Offline
             public void SetJamming()
             {
                 if (lockOn == null) return;
-                if (radar == null) return;
 
                 lockOn.StopLockOn();
-                radar.StopRadar();
                 isStatus[(int)Status.JAMMING] = true;
-
-                //SE再生
-                jammingSoundId = soundAction.PlayLoopSE(SoundManager.SE.JAMMING_NOISE, SoundManager.BaseSEVolume);
-
-                //アイコン表示
-                jammingIcon.enabled = true;
             }
 
             //ジャミング解除
             public void UnSetJamming()
             {
                 isStatus[(int)Status.JAMMING] = false;
-
-                //SE停止
-                soundAction.StopLoopSE(jammingSoundId);
-
-                //アイコン非表示
-                jammingIcon.enabled = false;
             }
 
 
@@ -178,22 +127,17 @@ namespace Offline
                 baseAction.ModifySpeed(1 - downPercent);
 
                 isStatus[(int)Status.SPEED_DOWN] = true;
-
-                //アイコン表示
-                speedDownIcon.enabled = true;
-
-                //SE再生
-                speedDownSoundId = soundAction.PlayLoopSE(SoundManager.SE.MAGNETIC_AREA, SoundManager.BaseSEVolume);
-            }
+                speedDownCount++;
+           }
 
             //スピードダウン解除
             public void UnSetSpeedDown(ref float speed)
             {
-                //アイコン非表示
-                speedDownIcon.enabled = false;
-
-                //SE停止
-                soundAction.StopLoopSE(speedDownSoundId);
+                //スピードダウンがすべて解除されたらフラグも解除
+                if (--speedDownCount <= 0)
+                {
+                    isStatus[(int)Status.SPEED_DOWN] = false;
+                }
             }
         }
     }

@@ -532,9 +532,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   finishAnimator: {fileID: 2294585405438622710}
   screenMaskImage: {fileID: 330934702991479413}
-  isSolo: 1
-  playerPrefab: {fileID: 0}
-  cpuPrefab: {fileID: 0}
+  isSolo: 0
+  playerPrefab: {fileID: 985328476376835486, guid: 2af327453245f4f40b532c4b235f9506,
+    type: 3}
+  cpuPrefab: {fileID: 5756816350272667788, guid: e0086ec4cddbc7742b3f2f12ff4c5821,
+    type: 3}
   droneStock: 1
   stockIcon: {fileID: 823268644}
   stockText: {fileID: 1377416039}

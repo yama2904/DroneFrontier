@@ -255,7 +255,7 @@ MonoBehaviour:
   boostAccele: 2.1
   maxBoostTime: 6
   boostRecastTime: 8
-  setSubWeapon: 3
+  setSubWeapon: 4
   atackingDownSpeed: 0.5
   explosion: {fileID: 2212005194167726933, guid: 8dc076f9b5243664fa747acf0168fb56,
     type: 3}

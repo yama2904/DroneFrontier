@@ -41,7 +41,8 @@ public class NonGameManager : MonoBehaviour
 
     public static void LoadMainGameScene()
     {
-        SceneManager.LoadScene("MainGameScene");
+        SoundManager.StopBGM();
+        SceneManager.LoadScene("BattleMode_Offline");
     }
 
     public static void LoadNonGameScene(BaseScreenManager.Screen startScreen)
