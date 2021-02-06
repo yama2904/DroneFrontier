@@ -18,9 +18,13 @@ namespace Offline
         Transform cacheTransform = null;
 
 
-        void Start()
+        protected virtual void Awake()
         {
             cacheTransform = GetComponent<Rigidbody>().transform;
+        }
+
+        void Start()
+        {
             Destroy(gameObject, destroyTime);
         }
 
@@ -64,6 +68,38 @@ namespace Offline
             this.speed = speed;
             this.destroyTime = destroyTime;
             this.target = target;
+        }
+
+
+        void OnTriggerEnter(Collider other)
+        {
+            //当たり判定を行わないオブジェクトは処理しない
+            if (other.CompareTag(TagNameManager.BULLET)) return;
+            if (other.CompareTag(TagNameManager.ITEM)) return;
+            if (other.CompareTag(TagNameManager.GIMMICK)) return;
+            if (other.CompareTag(TagNameManager.JAMMING)) return;
+
+            //プレイヤーの当たり判定
+            if (other.CompareTag(TagNameManager.PLAYER) || other.CompareTag(TagNameManager.CPU))
+            {
+                //撃った本人なら処理しない
+                if (ReferenceEquals(other.GetComponent<BaseDrone>().PlayerID, PlayerID)) return;
+
+                //ダメージ処理
+                other.GetComponent<DroneDamageAction>().Damage(Power);
+            }
+            else if (other.CompareTag(TagNameManager.JAMMING_BOT))
+            {
+                //名前省略
+                JammingBot jb = other.GetComponent<JammingBot>();
+
+                //撃った人が放ったジャミングボットなら処理しない
+                if (jb.creater.PlayerID == PlayerID) return;
+
+                //ダメージ処理
+                jb.Damage(Power);
+            }
+            Destroy(gameObject);
         }
     }
 }

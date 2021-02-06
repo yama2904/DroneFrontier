@@ -58,14 +58,12 @@ namespace Offline
         //死亡処理用
         [SerializeField] GameObject explosion = null;
         [SerializeField] Transform droneObject = null;
-        [SerializeField] Image stockIcon = null;
-        [SerializeField] Text stockText = null;
-        [SerializeField] int stock = 1;
         Quaternion deathRotate = Quaternion.Euler(28, -28, -28);
         float deathRotateSpeed = 2f;
         float gravityAccele = 1f;  //落下加速用
         float fallTime = 5.0f;   //死亡後の落下時間
         bool isDestroyFall = false;
+        bool isDestroy = false;
         
         //アイテム枠
         enum ItemNum
@@ -114,11 +112,6 @@ namespace Offline
             boostGaugeImage.enabled = true;
             boostGaugeImage.fillAmount = 1;
 
-            //残機UIの初期化
-            stockIcon.enabled = true;
-            stockText.enabled = true;
-            stockText.text = stock.ToString();
-
 
             //プロペラは最初から流す
             soundAction.PlayLoopSE(SoundManager.SE.PROPELLER, SoundManager.BaseSEVolume);
@@ -129,7 +122,7 @@ namespace Offline
             if (!MainGameManager.Singleton.StartFlag) return;  //ゲーム開始フラグが立っていなかったら処理しない
 
             //死亡処理中は操作不可
-            if (isDestroyFall) return;
+            if (isDestroyFall || isDestroy) return;
 
             if (damageAction.HP <= 0)
             {
@@ -415,24 +408,6 @@ namespace Offline
             {
                 UseItem(ItemNum.ITEM_2);
             }
-
-            ////スピードのバグが起きたときに無理やり戻す
-            //bool useWeapon = false;
-            //foreach (bool use in usingWeapons)
-            //{
-            //    if (use)
-            //    {
-            //        useWeapon = true;
-            //        break;
-            //    }
-            //}
-            //if (!useWeapon)
-            //{
-            //    if (!statusAction.GetIsStatus(DroneStatusAction.Status.SPEED_DOWN) && !isBoost)
-            //    {
-            //        moveSpeed = initSpeed;
-            //    }
-            //}
         }
 
         void FixedUpdate()
@@ -476,12 +451,12 @@ namespace Offline
             //baseAction.Listener.enabled = flag;
         }
 
-        #region Death
 
-        public void DestroyMe()
+        void DestroyMe()
         {
             gravityAccele = 1f;
             isDestroyFall = true;
+            isDestroy = true;
 
             //死んだのでロックオン・レーダー解除
             lockOnAction.StopLockOn();
@@ -515,8 +490,6 @@ namespace Offline
             //爆破後一定時間で消去
             Destroy(gameObject, fallTime);
         }
-
-        #endregion
 
         //#region Respawn
 

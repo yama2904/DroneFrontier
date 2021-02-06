@@ -52,18 +52,5 @@ namespace Offline
             //デバッグ用
             Debug.Log(name + "に" + p + "のダメージ\n残りHP: " + HP);
         }
-
-        private void OnCollisionEnter(Collision collision)
-        {
-            GameObject o = collision.gameObject;  //名前省略
-            if (o.CompareTag(TagNameManager.BULLET))
-            {
-                IBullet b = o.GetComponent<IBullet>();
-                if (b.PlayerID == creater.PlayerID) return;  //自分の弾なら当たり判定を行わない
-
-                Destroy(o);
-                Damage(b.Power);
-            }
-        }
     }
 }

@@ -14,14 +14,14 @@ namespace Offline
         Transform cacheTransform = null;
 
 
-        void Awake()
+        protected override void Awake()
         {
-            explosion.gameObject.SetActive(false);
+            base.Awake();
+            cacheTransform = GetComponent<Rigidbody>().transform;
         }
 
         void Start()
         {
-            cacheTransform = GetComponent<Rigidbody>().transform;
             cacheTransform.localRotation = Quaternion.Euler(90, 0, 0);
 
             audioSource = GetComponent<AudioSource>();
@@ -36,12 +36,6 @@ namespace Offline
             cacheTransform.Rotate(new Vector3(-90, 0, 0));
             base.FixedUpdate();
             cacheTransform.Rotate(new Vector3(90, 0, 0));
-        }
-
-        private void OnDestroy()
-        {
-            explosion.gameObject.SetActive(true);
-            explosion.PlayerID = PlayerID;
         }
 
 
@@ -59,9 +53,51 @@ namespace Offline
             audioSource.volume = SoundManager.BaseSEVolume;
             audioSource.Play();
 
-            Destroy(gameObject, destroyTime);
+            Invoke(nameof(DestroyMe), destroyTime);
             this.target = target;
             isShot = true;
+        }
+
+
+        void DestroyMe()
+        {
+            Explosion e = Instantiate(explosion, cacheTransform.position, Quaternion.identity);
+            e.PlayerID = PlayerID;
+            Destroy(gameObject);
+        }
+
+
+        void OnTriggerEnter(Collider other)
+        {
+            if (!isShot) return;
+
+            //当たり判定を行わないオブジェクトは処理しない
+            if (other.CompareTag(TagNameManager.BULLET)) return;
+            if (other.CompareTag(TagNameManager.ITEM)) return;
+            if (other.CompareTag(TagNameManager.GIMMICK)) return;
+            if (other.CompareTag(TagNameManager.JAMMING)) return;
+
+            //プレイヤーの当たり判定
+            if (other.CompareTag(TagNameManager.PLAYER) || other.CompareTag(TagNameManager.CPU))
+            {
+                //撃った本人なら処理しない
+                if (ReferenceEquals(other.GetComponent<BaseDrone>().PlayerID, PlayerID)) return;
+
+                //ダメージ処理
+                other.GetComponent<DroneDamageAction>().Damage(Power);
+            }
+            else if (other.CompareTag(TagNameManager.JAMMING_BOT))
+            {
+                //名前省略
+                JammingBot jb = other.GetComponent<JammingBot>();
+
+                //撃った人が放ったジャミングボットなら処理しない
+                if (jb.creater.PlayerID == PlayerID) return;
+
+                //ダメージ処理
+                jb.Damage(Power);
+            }
+            DestroyMe();
         }
     }
 }

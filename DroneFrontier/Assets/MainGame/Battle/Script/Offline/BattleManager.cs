@@ -16,8 +16,10 @@ namespace Offline
         //アイテムを出現させるか
         public static bool IsItemSpawn { get; set; } = true;
 
-        //ストック数
+        //ストック
         [SerializeField] int droneStock = 1;
+        [SerializeField] Image stockIcon = null;
+        [SerializeField] Text stockText = null;
 
         //プレイヤー情報
         public class PlayerData
@@ -82,7 +84,14 @@ namespace Offline
                 });
             }
 
+            //残りプレイヤー数の初期化
             PlayerData.droneNum = playerNum;
+
+            //残機UIの表示
+            stockIcon.enabled = true;
+            stockText.enabled = true;
+            stockText.text = droneStock.ToString();
+
 
             //フィールド上のアイテム処理
             if (!IsItemSpawn)
@@ -128,6 +137,12 @@ namespace Offline
                     {
                         pd.stock--;
                         pd.drone = CreateDrone(pd.weapon, pd.isPlayer);
+
+                        //残機UIの変更
+                        if (pd.isPlayer)
+                        {
+                            stockText.text = pd.stock.ToString();
+                        }
                     }
                     //ストックが残っていなかったらランキングに記録
                     else
@@ -135,6 +150,13 @@ namespace Offline
                         pd.isDestroy = true;
                         ranking[PlayerData.droneNum - 1] = pd.name;
                         PlayerData.droneNum--;
+
+                        //残機UIの非表示
+                        if (pd.isPlayer)
+                        {
+                            stockIcon.enabled = false;
+                            stockText.enabled = false;
+                        }
                     }
                 }
             }

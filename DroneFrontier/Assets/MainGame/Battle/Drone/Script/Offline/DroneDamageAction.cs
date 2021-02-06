@@ -13,8 +13,10 @@ namespace Offline
         [SerializeField] float nonDamageTime = 4f;
         bool isNonDamage = false;
 
-        float damageInterval = 1f / 15;
-        float damageCountTime = 0;
+        //1フレームに8ヒットまで
+        int damageCount = 0;
+        const int MAX_COUNT_ONE_FRAME = 8;
+
 
         void Awake()
         {
@@ -24,7 +26,6 @@ namespace Offline
 
         void Start()
         {
-
         }
 
         void Update()
@@ -45,13 +46,9 @@ namespace Offline
             }
         }
 
-        private void FixedUpdate()
+        private void LateUpdate()
         {
-            damageCountTime += Time.deltaTime;
-            if(damageCountTime >= damageInterval)
-            {
-                damageCountTime = damageInterval;
-            }
+            damageCount = 0;
         }
 
 
@@ -59,7 +56,6 @@ namespace Offline
         {
             if (HP <= 0) return;
             if (isNonDamage) return;
-            if (damageCountTime < damageInterval) return;
 
             DamageMe(power);
         }
@@ -72,6 +68,8 @@ namespace Offline
 
         void DamageMe(float power)
         {
+            if (damageCount > MAX_COUNT_ONE_FRAME) return;
+
             //小数点第2以下切り捨て
             float p = Useful.DecimalPointTruncation(power, 1);
 
@@ -91,24 +89,7 @@ namespace Offline
                 Debug.Log(name + "に" + power + "のダメージ\n残りHP: " + HP);
             }
 
-            damageCountTime = 0;
-        }
-
-        private void OnTriggerStay(Collider other)
-        {
-            if (HP <= 0) return;
-            if (isNonDamage) return;
-            if (damageCountTime < damageInterval) return;
-
-            GameObject o = other.gameObject;  //名前省略
-            if (o.CompareTag(TagNameManager.BULLET))
-            {
-                IBullet b = o.GetComponent<IBullet>();  //名前省略
-                if (b.PlayerID == drone.PlayerID) return;  //自分の弾なら当たり判定を行わない
-
-                Destroy(o);
-                DamageMe(b.Power);
-            }
+            damageCount++;
         }
     }
 }

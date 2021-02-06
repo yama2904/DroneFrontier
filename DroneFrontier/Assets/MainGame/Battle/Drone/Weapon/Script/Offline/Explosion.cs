@@ -12,20 +12,25 @@ namespace Offline
 
         [SerializeField, Tooltip("爆発範囲")] float size = 20; //爆発範囲
         [SerializeField, Tooltip("威力")] float power = 20;    //威力
-        //[SerializeField, Tooltip("爆発の中心地からの距離の威力減衰率(0～1)")] float powerDownRate = 0.2f; //中心地からの距離による威力減衰率
-        //[SerializeField, Tooltip("威力が減衰しない範囲")] float notPowerDownRange = 0.25f; //威力が減衰しない範囲
-        //[SerializeField, Tooltip("lengthReference長さごとにpowerDownRate%ダメージが減少する")] float lengthReference = 0.1f;    //威力減衰の基準の長さ
+        [SerializeField, Tooltip("爆発の中心地からの距離の威力減衰率(0～1)")] float powerDownRate = 0.2f; //中心地からの距離による威力減衰率
+        [SerializeField, Tooltip("威力が減衰しない範囲")] float notPowerDownRange = 0.25f; //威力が減衰しない範囲
+        [SerializeField, Tooltip("lengthReference長さごとにpowerDownRate%ダメージが減少する")] float lengthReference = 0.1f;    //威力減衰の基準の長さ
         AudioSource audioSource = null;
 
         List<GameObject> wasHitObjects = new List<GameObject>();    //ダメージを与えたオブジェクトを全て格納する
         const float DESTROY_TIME = 3.0f;   //生存時間
 
 
+        void Awake()
+        {
+            Power = power;
+        }
+
         void Start()
         {
-            ////サイズに応じて変数の値も変える
-            //notPowerDownRange *= size;
-            //lengthReference *= size;
+            //サイズに応じて変数の値も変える
+            notPowerDownRange *= size;
+            lengthReference *= size;
 
             //各オブジェクトのサイズ変更
             foreach (Transform child in transform)
@@ -58,65 +63,70 @@ namespace Offline
         }
 
 
-        ////相手の座標を入れると距離による最終的な威力を返す
-        //float CalcPower(Vector3 pos)
-        //{
-        //    //相手との距離と求める
-        //    float distance = Vector3.Distance(transform.position, pos);
+        //相手の座標を入れると距離による最終的な威力を返す
+        float CalcPower(Vector3 pos)
+        {
+            //相手との距離と求める
+            float distance = Vector3.Distance(transform.position, pos);
 
-        //    //デバッグ用
-        //    Debug.Log("距離: " + distance);
-
-
-        //    //威力が減衰しない範囲内に敵がいたらそのままの威力を返す
-        //    distance -= notPowerDownRange;
-        //    if (distance <= 0)
-        //    {
-        //        return power;
-        //    }
-
-        //    //長さに応じた減衰率を適用する
-        //    return power * Mathf.Pow(1 - powerDownRate, distance / lengthReference);
-        //}
-
-        //private void OnTriggerEnter(Collider other)
-        //{
-        //    //当たり判定を行わないオブジェクトだったら処理をしない
-        //    if (ReferenceEquals(other.gameObject, Shooter)) return;
-        //    if (other.CompareTag(TagNameManager.BULLET)) return;
-        //    if (other.CompareTag(TagNameManager.ITEM)) return;
-        //    if (other.CompareTag(TagNameManager.GIMMICK)) return;
-
-        //    if (other.CompareTag(TagNameManager.PLAYER))
-        //    {
-        //        //既にヒット済のオブジェクトはスルー
-        //        foreach (GameObject o in wasHitObjects)
-        //        {
-        //            if (ReferenceEquals(other, o)) return;
-        //        }
-        //        other.GetComponent<BattleDrone>().Damage(power);
-        //        wasHitObjects.Add(other.gameObject);
-
-        //        //デバッグ用
-        //        Debug.Log(other.name + "にExplosionで" + CalcPower(other.transform.position) + "ダメージ");
-        //    }
-        //    else if (other.CompareTag(TagNameManager.JAMMING_BOT))
-        //    {
-        //        JammingBot jb = other.GetComponent<JammingBot>();
-        //        if (ReferenceEquals(jb.creater, Shooter)) return;
-
-        //        //既にヒット済のオブジェクトはスルー
-        //        foreach (GameObject o in wasHitObjects)
-        //        {
-        //            if (ReferenceEquals(other.gameObject, o)) return;
-        //        }
-        //        other.GetComponent<JammingBot>().Damage(power);
-        //        wasHitObjects.Add(other.gameObject);
+            //デバッグ用
+            Debug.Log("距離: " + distance);
 
 
-        //        //デバッグ用
-        //        Debug.Log(other.name + "にExplosionで" + CalcPower(other.transform.position) + "ダメージ");
-        //    }
-        //}
+            //威力が減衰しない範囲内に敵がいたらそのままの威力を返す
+            distance -= notPowerDownRange;
+            if (distance <= 0)
+            {
+                return power;
+            }
+
+            //長さに応じた減衰率を適用する
+            return power * Mathf.Pow(1 - powerDownRate, distance / lengthReference);
+        }
+
+        private void OnTriggerEnter(Collider other)
+        {
+            //当たり判定を行わないオブジェクトだったら処理をしない
+            if (other.CompareTag(TagNameManager.BULLET)) return;
+            if (other.CompareTag(TagNameManager.ITEM)) return;
+            if (other.CompareTag(TagNameManager.GIMMICK)) return;
+
+            if (other.CompareTag(TagNameManager.PLAYER))
+            {
+                //ミサイルを撃った本人なら処理しない
+                if (other.GetComponent<BaseDrone>().PlayerID == PlayerID) return;
+
+                //既にヒット済のオブジェクトはスルー
+                foreach (GameObject o in wasHitObjects)
+                {
+                    if (ReferenceEquals(other, o)) return;
+                }
+                other.GetComponent<DroneDamageAction>().Damage(power);
+                wasHitObjects.Add(other.gameObject);
+
+                //デバッグ用
+                Debug.Log(other.name + "にExplosionで" + CalcPower(other.transform.position) + "ダメージ");
+            }
+            else if (other.CompareTag(TagNameManager.JAMMING_BOT))
+            {
+                //名前省略
+                JammingBot jb = other.GetComponent<JammingBot>();
+
+                //撃った人が放ったジャミングボットなら処理しない
+                if (jb.creater.PlayerID == PlayerID) return;
+
+                //既にヒット済のオブジェクトはスルー
+                foreach (GameObject o in wasHitObjects)
+                {
+                    if (ReferenceEquals(other.gameObject, o)) return;
+                }
+                other.GetComponent<JammingBot>().Damage(power);
+                wasHitObjects.Add(other.gameObject);
+
+
+                //デバッグ用
+                Debug.Log(other.name + "にExplosionで" + CalcPower(other.transform.position) + "ダメージ");
+            }
+        }
     }
 }
