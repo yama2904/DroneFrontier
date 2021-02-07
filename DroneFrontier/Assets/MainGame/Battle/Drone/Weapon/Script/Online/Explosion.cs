@@ -54,11 +54,19 @@ namespace Online
             sc.radius *= size;
             sc.center = new Vector3(0, 0, 0);
 
+            //爆発した直後に当たり判定を消す
+            Invoke(nameof(FalseEnabledCollider), 0.2f);
+
 
             //一定時間後に消滅
             Invoke(nameof(DestroyMe), DESTROY_TIME);
         }
 
+
+        void FalseEnabledCollider()
+        {
+            GetComponent<SphereCollider>().enabled = false;
+        }
 
         //相手の座標を入れると距離による最終的な威力を返す
         float CalcPower(Vector3 pos)
@@ -95,6 +103,7 @@ namespace Online
             if (ReferenceEquals(other.gameObject, Shooter)) return;
             if (other.CompareTag(TagNameManager.BULLET)) return;
             if (other.CompareTag(TagNameManager.ITEM)) return;
+            if (other.CompareTag(TagNameManager.JAMMING)) return;
             if (other.CompareTag(TagNameManager.GIMMICK)) return;
 
             if (other.CompareTag(TagNameManager.PLAYER))

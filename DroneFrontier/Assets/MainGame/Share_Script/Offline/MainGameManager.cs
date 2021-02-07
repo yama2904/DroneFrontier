@@ -55,6 +55,9 @@ namespace Offline
 
             //ランキング配列の初期化
             ranking = new string[playerNum];
+
+            //乱数のシード値の設定
+            Random.InitState(System.DateTime.Now.Millisecond);
         }
 
         protected virtual void Start()

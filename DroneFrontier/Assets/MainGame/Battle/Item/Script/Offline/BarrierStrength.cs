@@ -14,5 +14,10 @@ namespace Offline
         {
             return player.SetBarrierStrength(strengthRate, strengthTime);
         }
+
+        public static bool Strength(CPU.DroneStatusAction player)
+        {
+            return player.SetBarrierStrength(strengthRate, strengthTime);
+        }
     }
 }

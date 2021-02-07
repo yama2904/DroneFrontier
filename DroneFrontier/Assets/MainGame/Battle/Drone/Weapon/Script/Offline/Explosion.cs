@@ -50,6 +50,9 @@ namespace Offline
             sc.radius *= size;
             sc.center = new Vector3(0, 0, 0);
 
+            //爆発した直後に当たり判定を消す
+            Invoke(nameof(FalseEnabledCollider), 0.2f);
+
             //オーディオの初期化
             audioSource = GetComponent<AudioSource>();
             audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.EXPLOSION_MISSILE);
@@ -59,7 +62,12 @@ namespace Offline
 
 
             //一定時間後に消滅
-           Destroy(gameObject, DESTROY_TIME);
+            Destroy(gameObject, DESTROY_TIME);
+        }
+
+        void FalseEnabledCollider()
+        {
+            GetComponent<SphereCollider>().enabled = false;
         }
 
 
@@ -89,6 +97,7 @@ namespace Offline
             //当たり判定を行わないオブジェクトだったら処理をしない
             if (other.CompareTag(TagNameManager.BULLET)) return;
             if (other.CompareTag(TagNameManager.ITEM)) return;
+            if (other.CompareTag(TagNameManager.JAMMING)) return;
             if (other.CompareTag(TagNameManager.GIMMICK)) return;
 
             if (other.CompareTag(TagNameManager.PLAYER) || other.CompareTag(TagNameManager.CPU))

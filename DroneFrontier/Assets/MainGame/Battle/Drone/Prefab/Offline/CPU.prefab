@@ -501,9 +501,9 @@ GameObject:
   - component: {fileID: 2268401430616989749}
   - component: {fileID: 2690737355441408120}
   - component: {fileID: 5756816350272667790}
-  - component: {fileID: 1671068120823626417}
+  - component: {fileID: 8846344343629425355}
   - component: {fileID: 2702255915945675599}
-  - component: {fileID: 5933443804462490304}
+  - component: {fileID: 5158804489917226534}
   - component: {fileID: 3144627419471916392}
   - component: {fileID: 993888715167761601}
   - component: {fileID: 3448523090443018778}
@@ -578,6 +578,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d27047d3b3407144f8e1b9ef2e877d24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _camera: {fileID: 6808110575809998133}
   setSubWeapon: 4
   atackingDownSpeed: 0.5
   explosion: {fileID: 2212005194167726933, guid: 8dc076f9b5243664fa747acf0168fb56,
@@ -626,7 +627,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   nonDamageTime: 4
---- !u!114 &1671068120823626417
+--- !u!114 &8846344343629425355
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -635,11 +636,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 5756816350272667788}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e594f97b6e1a64a45acecd98f8ec3877, type: 3}
+  m_Script: {fileID: 11500000, guid: d8c51033e67c93f418ce372cfaf8b177, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _camera: {fileID: 6808110575809998135}
-  lockOnImage: {fileID: 0}
   searchRadius: 450
   maxDistance: 450
 --- !u!114 &2702255915945675599
@@ -660,7 +660,7 @@ MonoBehaviour:
   regeneValue: 5
   resurrectBarrierTime: 15
   resurrectBarrierHP: 10
---- !u!114 &5933443804462490304
+--- !u!114 &5158804489917226534
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -669,17 +669,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 5756816350272667788}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f8aa241feb617cd4b8b4bb3c9a5aa909, type: 3}
+  m_Script: {fileID: 11500000, guid: 41f0f6e71698f5a4386582a5b84eaf06, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   jamming: {fileID: 4629807058533697132, guid: f2b903147de9c594fbd08f01478554df, type: 3}
   stunGrenade: {fileID: 4455615085730636014, guid: e9da81246f730184e816fc2d7f4bb1ba,
     type: 3}
-  UIParentCanvas: {fileID: 0}
-  itemFrameImage: {fileID: 0}
-  barrierIconImage: {fileID: 0}
-  jammingIconImage: {fileID: 0}
-  stunGrenadeIconImage: {fileID: 0}
 --- !u!114 &3144627419471916392
 MonoBehaviour:
   m_ObjectHideFlags: 0

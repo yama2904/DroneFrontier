@@ -10,7 +10,7 @@ namespace Offline
     {
         public class LaserWeapon : BaseWeapon
         {
-            const float SHOT_POSSIBLE_MIN = 0.2f;  //発射可能な最低ゲージ量
+            const float SHOT_POSSIBLE_MIN = 0.5f;  //発射可能な最低ゲージ量
             [SerializeField] LaserBullet laserBullet = null;
             LaserBullet createdBullet = null;
             [SerializeField, Tooltip("威力")] protected float power = 5f;

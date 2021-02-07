@@ -86,7 +86,7 @@ namespace Offline
                 }
 
                 //デバッグ用
-                Debug.Log(name + "に" + power + "のダメージ\n残りHP: " + HP);
+                Debug.Log(name + "の残りHP: " + HP);
             }
 
             damageCount++;

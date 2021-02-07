@@ -83,7 +83,7 @@ namespace Offline
             if (other.CompareTag(TagNameManager.PLAYER) || other.CompareTag(TagNameManager.CPU))
             {
                 //撃った本人なら処理しない
-                if (ReferenceEquals(other.GetComponent<BaseDrone>().PlayerID, PlayerID)) return;
+                if (other.GetComponent<BaseDrone>().PlayerID == PlayerID) return;
 
                 //ダメージ処理
                 other.GetComponent<DroneDamageAction>().Damage(Power);
