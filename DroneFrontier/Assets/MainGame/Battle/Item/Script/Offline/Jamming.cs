@@ -7,7 +7,7 @@ namespace Offline
 {
     public class Jamming : MonoBehaviour
     {
-        BaseDrone creater;
+        uint playerID;
         [SerializeField, Tooltip("ジャミングボットの生存時間")] float destroyTime = 60.0f;
 
         [SerializeField] JammingBot jammingBot = null;
@@ -34,7 +34,7 @@ namespace Offline
             //キャッシュ
             Transform t = transform;
 
-            this.creater = creater;
+            playerID = creater.PlayerID;
             t.position = creater.transform.position;
 
             //ボット生成
@@ -97,27 +97,27 @@ namespace Offline
 
         private void OnTriggerEnter(Collider other)
         {
-            if (!other.CompareTag(TagNameManager.PLAYER)) return;   //プレイヤーのみ対象
-
-            DroneStatusAction p = other.GetComponent<DroneStatusAction>();
-            if (ReferenceEquals(p.gameObject, creater)) return; //ジャミングを付与しないプレイヤーならスキップ
-
-            p.SetJamming(); //ジャミング付与
-            jamingPlayers.Add(p);    //リストに追加
+            if (!other.CompareTag(TagNameManager.PLAYER) || !other.CompareTag(TagNameManager.CPU)) return;   //プレイヤーかCPUのみ対象
+            if (other.GetComponent<BaseDrone>().PlayerID == playerID) return; //ジャミングを付与しないプレイヤーならスキップ
+            
+            DroneStatusAction player = other.GetComponent<DroneStatusAction>();  //名前省略
+            player.SetJamming(); //ジャミング付与
+            jamingPlayers.Add(player);    //リストに追加
         }
 
         private void OnTriggerExit(Collider other)
         {
-            if (!other.CompareTag(TagNameManager.PLAYER)) return;   //プレイヤーのみ対象
+            if (!other.CompareTag(TagNameManager.PLAYER) || !other.CompareTag(TagNameManager.CPU)) return;   //プレイヤーかCPUのみ対象
+            if (other.GetComponent<BaseDrone>().PlayerID == playerID) return; //ジャミングを付与しないプレイヤーならスキップ
 
-            DroneStatusAction p = other.GetComponent<DroneStatusAction>();
-            if (ReferenceEquals(p.gameObject, creater)) return; //ジャミングを付与しないプレイヤーならスキップ
-
+            //名前省略
+            DroneStatusAction player = other.GetComponent<DroneStatusAction>(); 
+            
             //リストにない場合は処理しない
-            int index = jamingPlayers.FindIndex(o => ReferenceEquals(p, o));
+            int index = jamingPlayers.FindIndex(o => ReferenceEquals(o, player));
             if (index == -1) return;
 
-            p.UnSetJamming();   //ジャミング解除
+            player.UnSetJamming();   //ジャミング解除
             jamingPlayers.RemoveAt(index);  //解除したプレイヤーをリストから削除
         }
     }

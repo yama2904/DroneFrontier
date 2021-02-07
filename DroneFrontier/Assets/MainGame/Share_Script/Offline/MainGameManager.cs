@@ -51,7 +51,7 @@ namespace Offline
             Singleton = this;
 
             //プレイ人数の初期化
-            playerNum = CPUSelectScreenManager.CPUNum;
+            playerNum = CPUSelectScreenManager.CPUNum + 1;
 
             //ランキング配列の初期化
             ranking = new string[playerNum];

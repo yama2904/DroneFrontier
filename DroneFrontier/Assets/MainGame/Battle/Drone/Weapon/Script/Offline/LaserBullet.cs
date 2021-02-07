@@ -70,6 +70,7 @@ namespace Offline
 
         public void Init(uint playerID, float power, float size, float chargeTime, float lineRange, float hitPerSecond, bool isLocal)
         {
+            PlayerID = playerID;
             this.chargeTime = chargeTime;
             this.power = power;
             this.lineRange = lineRange;
@@ -223,8 +224,8 @@ namespace Offline
                        .Where(h => !h.transform.CompareTag(TagNameManager.JAMMING)) //ジャミングエリア除外
                        .Where(h =>
                        {
-                           //撃ったプレイヤーは当たり判定から除外
-                           if (h.transform.CompareTag(TagNameManager.PLAYER))
+                           //撃った本人は当たり判定から除外
+                           if (h.transform.CompareTag(TagNameManager.PLAYER) || h.transform.CompareTag(TagNameManager.CPU))
                            {
                                return h.transform.GetComponent<BaseDrone>().PlayerID != PlayerID;
                            }

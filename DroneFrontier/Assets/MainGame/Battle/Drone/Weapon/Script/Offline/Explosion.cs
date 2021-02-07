@@ -91,7 +91,7 @@ namespace Offline
             if (other.CompareTag(TagNameManager.ITEM)) return;
             if (other.CompareTag(TagNameManager.GIMMICK)) return;
 
-            if (other.CompareTag(TagNameManager.PLAYER))
+            if (other.CompareTag(TagNameManager.PLAYER) || other.CompareTag(TagNameManager.CPU))
             {
                 //ミサイルを撃った本人なら処理しない
                 if (other.GetComponent<BaseDrone>().PlayerID == PlayerID) return;

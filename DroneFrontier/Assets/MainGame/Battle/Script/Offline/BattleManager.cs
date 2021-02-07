@@ -208,6 +208,12 @@ namespace Offline
             if (PlayerData.droneNum <= 1)
             {
                 if (isSolo) return;
+                foreach (PlayerData pd in playerDatas)
+                {
+                    if (pd.isDestroy) continue;
+                    ranking[PlayerData.droneNum - 1] = pd.name;
+                    break;
+                }
                 FinishGame();
             }
         }

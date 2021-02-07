@@ -42,10 +42,8 @@ namespace Offline
                 createdBullet = Instantiate(laserBullet, transform);
                 createdBullet.transform.localPosition = shotPos.localPosition;
                 createdBullet.transform.localRotation = shotPos.localRotation;
-                createdBullet.Init(shooter.PlayerID, power, size, chargeTime, lineRange, hitPerSecond,
-                                   shooter.CompareTag(TagNameManager.PLAYER));
+                createdBullet.Init(shooter.PlayerID, power, size, chargeTime, lineRange, hitPerSecond, false);
             }
-
 
             void Update()
             {

@@ -107,7 +107,7 @@ namespace Offline
                 //CPUデータの更新
                 cpuDatas[i] = new CPUData
                 {
-                    name = CPU_NAME + i,
+                    name = CPU_NAME + (i + 1),
                     weapon = ConverWeaponToBaseWepon(defaultWeapon)  //デフォルトはショットガン
                 };
 
