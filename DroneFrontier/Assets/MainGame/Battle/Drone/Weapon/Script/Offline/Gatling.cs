@@ -60,7 +60,7 @@ namespace Offline
             Bullet b = Instantiate(bullet, pos, rotation);    //弾丸の複製
 
             //弾丸のパラメータ設定
-            b.Init(shooter.PlayerID, power, trackingPower, speed, destroyTime, target);
+            b.Init(shooter, power, trackingPower, speed, destroyTime, target);
             return b;
         }
     }

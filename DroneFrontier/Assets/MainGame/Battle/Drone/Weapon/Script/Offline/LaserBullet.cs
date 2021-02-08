@@ -7,10 +7,9 @@ namespace Offline
 {
     public class LaserBullet : MonoBehaviour
     {
-        public uint PlayerID { get; private set; } = 0;
-
         //パラメータ
         const float LINE_RADIUS = 0.2f;
+        BaseDrone shooter = null;
         float chargeTime = 0;
         float power = 0;
         float lineRange = 0;
@@ -68,9 +67,9 @@ namespace Offline
         }
 
 
-        public void Init(uint playerID, float power, float size, float chargeTime, float lineRange, float hitPerSecond, bool isLocal)
+        public void Init(BaseDrone drone, float power, float size, float chargeTime, float lineRange, float hitPerSecond, bool isLocal)
         {
-            PlayerID = playerID;
+            shooter = drone;
             this.chargeTime = chargeTime;
             this.power = power;
             this.lineRange = lineRange;
@@ -192,7 +191,7 @@ namespace Offline
 
                         if (hit.transform.CompareTag(TagNameManager.CPU))
                         {
-                            hit.transform.GetComponent<CPU.BattleDrone>().StartRotate(transform);
+                            hit.transform.GetComponent<CPU.BattleDrone>().StartRotate(shooter.transform);
                         }
 
                         //発射間隔のカウントをリセット
@@ -232,13 +231,13 @@ namespace Offline
                            //撃った本人は当たり判定から除外
                            if (h.transform.CompareTag(TagNameManager.PLAYER) || h.transform.CompareTag(TagNameManager.CPU))
                            {
-                               return h.transform.GetComponent<BaseDrone>().PlayerID != PlayerID;
+                               return h.transform.GetComponent<BaseDrone>().PlayerID != shooter.PlayerID;
                            }
 
                            //ジャミングボットを生成したプレイヤーと撃ったプレイヤーが同じなら除外
                            if (h.transform.CompareTag(TagNameManager.JAMMING_BOT))
                            {
-                               return h.transform.GetComponent<JammingBot>().creater.PlayerID != PlayerID;
+                               return h.transform.GetComponent<JammingBot>().creater.PlayerID != shooter.PlayerID;
                            }
                            return true;
                        })

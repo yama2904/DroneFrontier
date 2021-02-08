@@ -39,9 +39,9 @@ namespace Offline
         }
 
 
-        public override void Init(uint id, float power, float trackingPower, float speed, float destroyTime, GameObject target = null)
+        public override void Init(BaseDrone drone, float power, float trackingPower, float speed, float destroyTime, GameObject target = null)
         {
-            base.Init(id, power, trackingPower, speed, destroyTime, target);
+            base.Init(drone, power, trackingPower, speed, destroyTime, target);
         }
 
         public void Shot(GameObject target)
@@ -62,7 +62,7 @@ namespace Offline
         void DestroyMe()
         {
             Explosion e = Instantiate(explosion, cacheTransform.position, Quaternion.identity);
-            e.PlayerID = PlayerID;
+            e.shooter = shooter;
             Destroy(gameObject);
         }
 
@@ -81,14 +81,14 @@ namespace Offline
             if (other.CompareTag(TagNameManager.PLAYER) || other.CompareTag(TagNameManager.CPU))
             {
                 //撃った本人なら処理しない
-                if (other.GetComponent<BaseDrone>().PlayerID == PlayerID) return;
+                if (other.GetComponent<BaseDrone>().PlayerID == shooter.PlayerID) return;
 
                 //ダメージ処理
                 other.GetComponent<DroneDamageAction>().Damage(Power);
 
                 if (other.CompareTag(TagNameManager.CPU))
                 {
-                    other.GetComponent<CPU.BattleDrone>().StartRotate(transform);
+                    other.GetComponent<CPU.BattleDrone>().StartRotate(shooter.transform);
                 }
             }
             else if (other.CompareTag(TagNameManager.JAMMING_BOT))
@@ -97,7 +97,7 @@ namespace Offline
                 JammingBot jb = other.GetComponent<JammingBot>();
 
                 //撃った人が放ったジャミングボットなら処理しない
-                if (jb.creater.PlayerID == PlayerID) return;
+                if (jb.creater.PlayerID == shooter.PlayerID) return;
 
                 //ダメージ処理
                 jb.Damage(Power);

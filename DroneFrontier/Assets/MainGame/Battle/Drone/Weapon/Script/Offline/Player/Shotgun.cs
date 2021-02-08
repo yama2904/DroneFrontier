@@ -149,7 +149,7 @@ namespace Offline
             Bullet b = Instantiate(bullet, pos, rotation);    //弾丸の複製
 
             //弾丸のパラメータ設定
-            b.Init(shooter.PlayerID, power, 0, speed, destroyTime, target);
+            b.Init(shooter, power, 0, speed, destroyTime, target);
 
             //弾丸の進む方向を変えて散らす処理
             Transform t = b.transform;  //キャッシュ

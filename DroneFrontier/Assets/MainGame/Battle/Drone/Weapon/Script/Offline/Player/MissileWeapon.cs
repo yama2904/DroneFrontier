@@ -133,7 +133,7 @@ namespace Offline
 
 
             //ミサイル発射
-            settingBullets[USE_INDEX].Init(shooter.PlayerID, power, trackingPower, speed, destroyTime, target);
+            settingBullets[USE_INDEX].Init(shooter, power, trackingPower, speed, destroyTime, target);
             settingBullets[USE_INDEX].Shot(target);
             settingBullets.RemoveAt(USE_INDEX);
             setMissile = false;
