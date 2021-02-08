@@ -66,12 +66,14 @@ namespace Online
                 //bulletUIBackの生成
                 RectTransform back = Instantiate(bulletUIBack).GetComponent<RectTransform>();
                 back.SetParent(UIParentCanvas.transform);
-                back.anchoredPosition = new Vector2((back.sizeDelta.x * i * UI_POS_DIFF_X) + back.sizeDelta.x, UI_POS_Y);
+                back.anchoredPosition3D = new Vector3((back.sizeDelta.x * i * UI_POS_DIFF_X) + back.sizeDelta.x, UI_POS_Y, 0);
+                back.localRotation = Quaternion.identity;
 
                 //bulletUIFrontの生成
                 RectTransform front = Instantiate(bulletUIFront).GetComponent<RectTransform>();
                 front.SetParent(UIParentCanvas.transform);
-                front.anchoredPosition = new Vector2((front.sizeDelta.x * i * UI_POS_DIFF_X) + front.sizeDelta.x, UI_POS_Y);
+                front.anchoredPosition3D = new Vector3((front.sizeDelta.x * i * UI_POS_DIFF_X) + front.sizeDelta.x, UI_POS_Y, 0);
+                front.localRotation = Quaternion.identity;
 
                 //配列に追加
                 UIs[i] = front.GetComponent<Image>();

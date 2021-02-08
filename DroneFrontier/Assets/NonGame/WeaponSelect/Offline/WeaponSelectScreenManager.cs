@@ -27,7 +27,7 @@ namespace Offline
         [SerializeField] Button itemOffButton = null;
         Color selectItemButtonColor = new Color(0.3f, 0.46f, 1f, 1f);  //アイテムボタンを選択したときの色
         Color notSelectButtonColor = new Color(1f, 1f, 1f, 1f);  //ボタンを押してないときの色
-        bool isItemOnButton = false; //アイテムオンか
+        bool isItemOnButton = true; //アイテムオンか
 
 
         void Start()
