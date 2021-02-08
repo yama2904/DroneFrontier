@@ -37,6 +37,9 @@ namespace Online
             //SE再生
             SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
 
+            //1人しかいない場合は開始しない
+            if (MatchingManager.PlayerNum <= 1) return;
+
             NewNetworkDiscovery.Singleton.StopDiscovery();  //ブロードキャストを止める
             if (GameModeSelectScreenManager.Mode == GameModeSelectScreenManager.GameMode.BATTLE)
             {

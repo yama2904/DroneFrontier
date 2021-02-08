@@ -85,6 +85,11 @@ namespace Offline
 
                 //ダメージ処理
                 other.GetComponent<DroneDamageAction>().Damage(Power);
+
+                if (other.CompareTag(TagNameManager.CPU))
+                {
+                    other.GetComponent<CPU.BattleDrone>().StartRotate(transform);
+                }
             }
             else if (other.CompareTag(TagNameManager.JAMMING_BOT))
             {

@@ -113,6 +113,11 @@ namespace Offline
                 other.GetComponent<DroneDamageAction>().Damage(power);
                 wasHitObjects.Add(other.gameObject);
 
+                if (other.CompareTag(TagNameManager.CPU))
+                {
+                    other.GetComponent<CPU.BattleDrone>().StartRotate(transform);
+                }
+
                 //デバッグ用
                 Debug.Log(other.name + "にExplosionで" + CalcPower(other.transform.position) + "ダメージ");
             }

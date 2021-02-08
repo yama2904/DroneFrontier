@@ -190,6 +190,11 @@ namespace Offline
                     {
                         hit.transform.GetComponent<DroneDamageAction>().Damage(power);
 
+                        if (hit.transform.CompareTag(TagNameManager.CPU))
+                        {
+                            hit.transform.GetComponent<CPU.BattleDrone>().StartRotate(transform);
+                        }
+
                         //発射間隔のカウントをリセット
                         shotCountTime = 0;
                     }

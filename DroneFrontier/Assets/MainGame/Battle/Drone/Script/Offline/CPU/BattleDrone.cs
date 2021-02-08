@@ -19,20 +19,19 @@ namespace Offline
             DroneLockOnAction lockOnAction = null;
             DroneBarrierAction barrierAction = null;
 
-
+            //カメラ
             [SerializeField] Transform _camera = null;
 
+            //移動
+            Vector3 moveDir = Vector3.zero;
+            float moveDirTime = 0;
+            float moveDirCountTime = 0;
+
+            //回転
             const float CHANGE_ROTATE_TIME = 3f;
             Vector3 angle = Vector3.zero;
             float rotateCountTime = CHANGE_ROTATE_TIME;
             bool isRotate = false;
-
-            //ドローンが移動した際にオブジェクトが傾く処理用
-            float moveRotateSpeed = 2f;
-            Quaternion frontMoveRotate = Quaternion.Euler(50, 0, 0);
-            Quaternion leftMoveRotate = Quaternion.Euler(0, 0, 60);
-            Quaternion rightMoveRotate = Quaternion.Euler(0, 0, -60);
-            Quaternion backMoveRotate = Quaternion.Euler(-70, 0, 0);
 
             //武器
             protected enum Weapon
@@ -45,8 +44,12 @@ namespace Offline
             BaseWeapon mainWeapon = null;
             BaseWeapon subWeapon = null;
             public BaseWeapon.Weapon setSubWeapon = BaseWeapon.Weapon.SHOTGUN;
-            bool[] usingWeapons = new bool[(int)Weapon.NONE];    //使用中の武器
-            [SerializeField, Tooltip("攻撃中の移動速度の低下率")] float atackingDownSpeed = 0.5f;   //攻撃中の移動速度の低下率
+
+            //攻撃処理
+            int weaponTime = 0;
+            float weaponCountTime = 0;
+            bool useMainWeapon = false;
+
 
             //死亡処理用
             [SerializeField] GameObject explosion = null;
@@ -58,8 +61,8 @@ namespace Offline
             bool isDestroyFall = false;
             bool isDestroy = false;
 
-            [Header("デバッグ用")]
-            [SerializeField] Weapon isAtack = Weapon.NONE;
+            Transform target = null;
+            bool isDamage = false;
 
 
             protected override void Awake()
@@ -100,36 +103,121 @@ namespace Offline
                     DestroyMe();
                 }
 
-                if (isAtack == Weapon.MAIN)
+                if (!isDamage)
                 {
-                    mainWeapon.Shot();
-                }
-                else if (isAtack == Weapon.SUB)
-                {
-                    subWeapon.Shot();
-                }
+                    //移動
+                    if (lockOnAction.Target == null)
+                    {
+                        baseAction.Move(cacheTransform.forward);
+                    }
+                    else
+                    {
 
-                //移動
-                baseAction.Move(cacheTransform.forward);
+                        Vector3 diff = lockOnAction.Target.transform.position - cacheTransform.position;
+                        float changeDirDistance = 400f;
+                        if (setSubWeapon == BaseWeapon.Weapon.SHOTGUN)
+                        {
+                            changeDirDistance = 75f;
+                        }
 
-                //回転
-                if (isRotate)
-                {
-                    baseAction.Rotate(angle * 0.15f);
+                        //敵との一定の距離内に入ると移動方向切り替え
+                        if (diff.sqrMagnitude <= Mathf.Pow(changeDirDistance, 2))
+                        {
+                            moveDirCountTime += Time.deltaTime;
+                            if (moveDirCountTime >= moveDirTime)
+                            {
+                                if (Random.Range(0, 2) == 0)
+                                {
+                                    Quaternion leftAngle = Quaternion.Euler(0, -90, 0);
+                                    Vector3 left = leftAngle.normalized * cacheTransform.forward;
+                                    moveDir = left;
+                                }
+                                else
+                                {
+                                    Quaternion rightAngle = Quaternion.Euler(0, 90, 0);
+                                    Vector3 right = rightAngle.normalized * cacheTransform.forward;
+                                    moveDir = right;
+                                }
+
+                                moveDirCountTime = 0;
+                                moveDirTime = Random.Range(2, 6);
+                            }
+                            baseAction.Move(moveDir * 2f);
+                        }
+                        else
+                        {
+                            baseAction.Move(cacheTransform.forward);
+                        }
+                    }
+
+                    //回転
+                    if (isRotate && lockOnAction.Target == null)
+                    {
+                        baseAction.Rotate(angle * 0.15f);
+                    }
+                    else
+                    {
+                        rotateCountTime += Time.deltaTime;
+                        if (rotateCountTime > CHANGE_ROTATE_TIME)
+                        {
+                            StartRotate();
+                            rotateCountTime = 0;
+                        }
+                    }
                 }
                 else
                 {
-                    rotateCountTime += Time.deltaTime;
-                    if (rotateCountTime > CHANGE_ROTATE_TIME)
+                    if (lockOnAction.Target == null)
                     {
-                        StartRotate();
-                        rotateCountTime = 0;
+                        if (target != null)
+                        {
+                            Vector3 diff = target.position - _camera.position;    //ターゲットとの距離
+                            Quaternion rotation = Quaternion.LookRotation(diff);  //ロックオンしたオブジェクトの方向
+
+                            //カメラの角度からtrackingSpeed(0～1)の速度でロックオンしたオブジェクトの角度に向く
+                            cacheTransform.rotation = Quaternion.Slerp(cacheTransform.rotation, rotation, 0.1f);
+                        }
                     }
+                    else
+                    {
+                        isDamage = false;
+                    }
+                }
+
+                //常にロックオン処理
+                if (lockOnAction.UseLockOn(0.3f))
+                {
+                    //ロックオン対象があれば攻撃
+                    weaponCountTime += Time.deltaTime;
+                    if (weaponCountTime >= weaponTime)
+                    {
+                        weaponCountTime = 0;
+                        weaponTime = Random.Range(3, 7);
+                        if (setSubWeapon == BaseWeapon.Weapon.LASER)
+                        {
+                            weaponTime = Random.Range(7, 11);
+                        }
+                        useMainWeapon = !useMainWeapon;
+                    }
+
+                    if (useMainWeapon)
+                    {
+                        mainWeapon.Shot(lockOnAction.Target);
+                    }
+                    else
+                    {
+                        subWeapon.Shot(lockOnAction.Target);
+                    }
+                }
+                else
+                {
+                    weaponCountTime = weaponTime;
                 }
             }
 
             void FixedUpdate()
             {
+                //死亡時落下処理
                 if (isDestroyFall)
                 {
                     //加速しながら落ちる
@@ -149,6 +237,16 @@ namespace Offline
                     animator.speed *= 0.993f;
 
                     return;
+                }
+            }
+
+
+            public void StartRotate(Transform target)
+            {
+                if(lockOnAction.Target == null)
+                {
+                    isDamage = true;
+                    this.target = target;
                 }
             }
 
@@ -210,34 +308,44 @@ namespace Offline
             void StopRotate()
             {
                 var hits = Physics.SphereCastAll(
-                            _camera.position,    
-                            10f,              
-                            _camera.forward,    
-                            100f) 
-                            .ToList();  //リスト化  
-                hits = FilterTargetRaycast(hits);
-                if(hits.Count > 0)
-                {
-                    StartRotate();
-                    return;
-                }
-            
-                angle = Vector3.zero;
-                isRotate = false;
-            }
-
-            //リストから必要な要素だけ抜き取る
-            List<RaycastHit> FilterTargetRaycast(List<RaycastHit> hits)
-            {
-                //不要な要素を除外する
-                return hits.Where(h => !h.transform.CompareTag(TagNameManager.ITEM))    //アイテム除外
+                            _camera.position,
+                            20f,
+                            _camera.forward,
+                            100f)
+                           .Where(h => !h.transform.CompareTag(TagNameManager.ITEM))    //アイテム除外
                            .Where(h => !h.transform.CompareTag(TagNameManager.BULLET))  //弾丸除外
                            .Where(h => !h.transform.CompareTag(TagNameManager.GIMMICK)) //ギミック除外
                            .Where(h => !h.transform.CompareTag(TagNameManager.JAMMING)) //ジャミングエリア除外
                            .Where(h => !h.transform.CompareTag(TagNameManager.JAMMING_BOT)) //ジャミングボット除外
                            .Where(h => !h.transform.CompareTag(TagNameManager.PLAYER))  //プレイヤー除外
                            .Where(h => !h.transform.CompareTag(TagNameManager.CPU))     //CPU除外
-                           .ToList();  //リスト化 
+                           .ToList();  //リスト化
+
+                if (hits.Count > 0)
+                {
+                    StartRotate();
+                    return;
+                }
+
+                angle = Vector3.zero;
+                isRotate = false;
+            }
+
+
+            //リスト内で最も距離が近いRaycastHitを返す
+            void GetNearestObject(out RaycastHit hit, List<RaycastHit> hits)
+            {
+                hit = hits[0];
+                float minTargetDistance = float.MaxValue;   //初期化
+                foreach (RaycastHit h in hits)
+                {
+                    //距離が最小だったら更新
+                    if (h.distance < minTargetDistance)
+                    {
+                        minTargetDistance = h.distance;
+                        hit = h;
+                    }
+                }
             }
 
 

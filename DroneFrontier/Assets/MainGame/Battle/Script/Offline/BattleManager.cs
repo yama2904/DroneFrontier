@@ -72,15 +72,18 @@ namespace Offline
                         drone = CreateDrone(cd.weapon, false),
                         weapon = cd.weapon,
                         name = cd.name,
-                        stock = droneStock
+                        stock = droneStock,
+                        isPlayer = false
                     });
                 }
                 //プレイヤーの生成
                 playerDatas.Add(new PlayerData
                 {
                     drone = CreateDrone(WeaponSelectScreenManager.weapon, true),
+                    weapon = WeaponSelectScreenManager.weapon,
                     name = "Player",
-                    stock = droneStock
+                    stock = droneStock,
+                    isPlayer = true
                 });
             }
 
@@ -297,6 +300,8 @@ namespace Offline
                 isFinished = true;
 
                 StopCoroutine(countCoroutine);
+
+                timeText.enabled = false;
             }
         }
     }

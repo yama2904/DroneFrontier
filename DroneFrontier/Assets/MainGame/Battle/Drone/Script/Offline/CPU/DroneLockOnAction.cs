@@ -35,37 +35,15 @@ namespace Offline
                 cameraTransform = _camera.transform;
             }
 
-            public void Init()
+
+            void Start()
             {
                 //自分をロックオンしない対象に入れる
                 notLockOnObjects.Add(gameObject);
             }
 
-            //リストから必要な要素だけ抜き取る
-            List<GameObject> FilterTargetObject(List<GameObject> hits)
-            {
-                return hits.Where(h =>
-                {
-                    //各要素の座標をビューポートに変換(画面左下が0:0、右上が1:1)して条件に合うものだけリストに詰め込む
-                    Vector3 screenPoint = _camera.WorldToViewportPoint(h.transform.position);
-                    return screenPoint.x > 0.25f && screenPoint.x < 0.75f && screenPoint.y > 0.15f && screenPoint.y < 0.85f && screenPoint.z > 0;
-                }).Where(h => h.transform.CompareTag(TagNameManager.PLAYER) ||
-                         h.transform.CompareTag(TagNameManager.CPU) ||
-                         h.transform.CompareTag(TagNameManager.JAMMING_BOT))
-                         .Where(h =>
-                         {
-                             //notLockOnObjects内のオブジェクトがある場合は除外
-                             if (notLockOnObjects.FindIndex(o => ReferenceEquals(o, h.transform.gameObject)) == -1)
-                             {
-                                 return true;
-                             }
-                             return false;
-                         })
-                         .ToList();
-            }
-
             //ロックオンする
-            public void UseLockOn(float speed)
+            public bool UseLockOn(float speed)
             {
                 TrackingSpeed = speed;
 
@@ -113,7 +91,7 @@ namespace Offline
                         if (hits.FindIndex(h => ReferenceEquals(h, Target)) == -1)
                         {
                             StopLockOn();
-                            return;
+                            return false;
                         }
 
                         //ロックオンの対象オブジェクトが消えていないなら継続して追尾
@@ -131,11 +109,14 @@ namespace Offline
                             StopLockOn();
                         }
                     }
+
+                    return true;
                 }
                 else
                 {
                     StopLockOn();
                 }
+                return false;
             }
 
 
@@ -168,6 +149,30 @@ namespace Offline
                 {
                     notLockOnObjects.RemoveAt(index);
                 }
+            }
+
+
+            //リストから必要な要素だけ抜き取る
+            List<GameObject> FilterTargetObject(List<GameObject> hits)
+            {
+                return hits.Where(h =>
+                {
+                    //各要素の座標をビューポートに変換(画面左下が0:0、右上が1:1)して条件に合うものだけリストに詰め込む
+                    Vector3 screenPoint = _camera.WorldToViewportPoint(h.transform.position);
+                    return screenPoint.x > 0.25f && screenPoint.x < 0.75f && screenPoint.y > 0.15f && screenPoint.y < 0.85f && screenPoint.z > 0;
+                }).Where(h => h.transform.CompareTag(TagNameManager.PLAYER) ||
+                         h.transform.CompareTag(TagNameManager.CPU) ||
+                         h.transform.CompareTag(TagNameManager.JAMMING_BOT))
+                         .Where(h =>
+                         {
+                             //notLockOnObjects内のオブジェクトがある場合は除外
+                             if (notLockOnObjects.FindIndex(o => ReferenceEquals(o, h.transform.gameObject)) == -1)
+                             {
+                                 return true;
+                             }
+                             return false;
+                         })
+                         .ToList();
             }
         }
     }
