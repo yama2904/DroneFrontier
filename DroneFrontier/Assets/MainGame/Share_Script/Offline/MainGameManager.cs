@@ -91,21 +91,6 @@ namespace Offline
                     Debug.Log("カメラロック解除");
                 }
             }
-
-            if (!startFlag) return;
-
-            //設定画面を開く
-            if (Input.GetKeyDown(KeyCode.M))
-            {
-                if (IsConfig)
-                {
-                    ConfigToMainGame();
-                }
-                else
-                {
-                    MainGameToConfig();
-                }
-            }
         }
 
         //変数の初期化
@@ -175,33 +160,6 @@ namespace Offline
         protected virtual void SetAnimatorPlay()
         {
             finishAnimator.SetBool("SetFinish", true);
-        }
-
-
-        //設定画面からメインゲームに移動する
-        public virtual void ConfigToMainGame()
-        {
-            screenMaskImage.enabled = false;
-            BaseScreenManager.HideScreen();
-
-            if (IsCursorLock)
-            {
-                Cursor.lockState = CursorLockMode.Locked;
-            }
-            else
-            {
-                Cursor.lockState = CursorLockMode.None;
-            }
-            IsConfig = false;
-        }
-
-        protected virtual void MainGameToConfig()
-        {
-            screenMaskImage.enabled = true;     //設定画面の背景にマスクをつける
-            BaseScreenManager.SetScreen(BaseScreenManager.Screen.CONFIG);
-
-            Cursor.lockState = CursorLockMode.None;
-            IsConfig = true;
         }
     }
 }

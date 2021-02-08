@@ -9,8 +9,7 @@ namespace Online
     public class BattleManager : MainGameManager
     {
         //シングルトン
-        static BattleManager singleton;
-        public new static BattleManager Singleton { get { return singleton; } }
+        public new static BattleManager Singleton { get; private set; }
 
         //アイテムを出現させるか
         public static bool IsItemSpawn { get; set; } = true;
@@ -80,6 +79,9 @@ namespace Online
         protected override void Awake()
         {
             base.Awake();
+
+            //シングルトンの作成
+            Singleton = this;
         }
 
         protected override void Update()
@@ -228,7 +230,7 @@ namespace Online
         IEnumerator CountTime()
         {
             //スタートフラグが立つまで停止
-            while (!MainGameManager.Singleton.StartFlag) yield return null;
+            while (!StartFlag) yield return null;
 
             if (maxTime > 1)
             {
@@ -277,7 +279,7 @@ namespace Online
                 {
                     ranking[pd.ranking - 1] = pd.drone.name;
                 }
-                MainGameManager.Singleton.FinishGame(ranking);
+                FinishGame(ranking);
                 isFinished = true;
 
                 StopCoroutine(countCoroutine);

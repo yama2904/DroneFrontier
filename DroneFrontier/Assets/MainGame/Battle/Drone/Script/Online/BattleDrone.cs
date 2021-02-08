@@ -235,7 +235,7 @@ namespace Online
         void Update()
         {
             if (!isLocalPlayer) return;
-            if (!MainGameManager.Singleton.StartFlag) return;  //ゲーム開始フラグが立っていなかったら処理しない
+            if (!BattleManager.Singleton.StartFlag) return;  //ゲーム開始フラグが立っていなかったら処理しない
 
             //死亡・リスポーン処理中は操作不可
             if (deathFlags[(int)DeathFlag.GAME_OVER] ||
@@ -937,7 +937,7 @@ namespace Online
         private void OnTriggerStay(Collider other)
         {
             if (!isLocalPlayer) return;
-            if (!MainGameManager.Singleton.StartFlag) return;  //ゲーム開始フラグが立っていなかったら処理しない
+            if (!BattleManager.Singleton.StartFlag) return;  //ゲーム開始フラグが立っていなかったら処理しない
 
             //死亡・リスポーン処理中は操作不可
             if (deathFlags[(int)DeathFlag.GAME_OVER] ||

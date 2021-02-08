@@ -7,7 +7,7 @@ namespace Online
 {
     public class RaceManager : MainGameManager
     {
-        public new static RaceManager Singleton { get; }
+        public new static RaceManager Singleton { get; private set; }
 
         class PlayerData
         {
@@ -31,6 +31,7 @@ namespace Online
         public override void OnStartClient()
         {
             base.OnStartClient();
+            Singleton = this;
             PlayerData.goalNum = 0;
         }
 
