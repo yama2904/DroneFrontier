@@ -1737,6 +1737,7 @@ MonoBehaviour:
   inputNameObject: {fileID: 1457879336352348770}
   screenMask: {fileID: 5685379462830170794}
   inputField: {fileID: 3669581835888513616}
+  soloButton: {fileID: 8743304153572176765}
 --- !u!1 &8743304154478648229
 GameObject:
   m_ObjectHideFlags: 0

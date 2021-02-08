@@ -9,6 +9,7 @@ public class KuribocchiScreenManager : MonoBehaviour
     [SerializeField] GameObject inputNameObject = null;
     [SerializeField] GameObject screenMask = null;  //名前入力中に後ろのボタンを押せないようにするため
     [SerializeField] InputField inputField = null;
+    [SerializeField] GameObject soloButton = null;
 
     public static string playerName = "";
 
@@ -17,6 +18,18 @@ public class KuribocchiScreenManager : MonoBehaviour
         inputNameObject.SetActive(false);
         screenMask.SetActive(false);
         inputField.characterLimit = 10;
+    }
+
+    void Update()
+    {
+        if(GameModeSelectScreenManager.Mode == GameModeSelectScreenManager.GameMode.RACE)
+        {
+            soloButton.SetActive(false);
+        }
+        else if (GameModeSelectScreenManager.Mode == GameModeSelectScreenManager.GameMode.BATTLE)
+        {
+            soloButton.SetActive(true);
+        }
     }
 
     //ソロ

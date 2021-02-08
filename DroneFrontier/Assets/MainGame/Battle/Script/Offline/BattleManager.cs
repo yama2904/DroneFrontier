@@ -33,8 +33,6 @@ namespace Offline
             public static int droneNum = 0;  //残っているドローンの数
         }
         List<PlayerData> playerDatas = new List<PlayerData>();
-        BattleDrone localDrone = null;
-        int useIndex = 0;
 
         //ゲーム終了処理を行ったらtrue
         bool isFinished = false;
@@ -228,7 +226,6 @@ namespace Offline
 
             playerDatas.Clear();
             PlayerData.droneNum = 0;
-            localDrone = null;
         }
 
 
