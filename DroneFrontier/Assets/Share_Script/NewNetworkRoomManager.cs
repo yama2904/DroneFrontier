@@ -119,7 +119,7 @@ public class NewNetworkRoomManager : NetworkRoomManager
             //バトルモードなら武器も設定
             if (GameModeSelectScreenManager.Mode == GameModeSelectScreenManager.GameMode.BATTLE)
             {
-                player.GetComponent<BattleDrone>().SetSubWeapon = MatchingManager.playerDatas[index].weapon;
+                player.GetComponent<BattleDrone>().syncSetSubWeapon = (int)MatchingManager.playerDatas[index].weapon;
             }
         }
         return player;

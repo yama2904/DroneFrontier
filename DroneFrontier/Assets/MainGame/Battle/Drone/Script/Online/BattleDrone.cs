@@ -64,7 +64,8 @@ namespace Online
         }
         [SyncVar] GameObject syncMainWeapon = null;
         [SyncVar] GameObject syncSubWeapon = null;
-        public BaseWeapon.Weapon SetSubWeapon { get; set; } = BaseWeapon.Weapon.SHOTGUN;
+        [SyncVar] public int syncSetSubWeapon = 0;
+        BaseWeapon.Weapon setSubWeapon = BaseWeapon.Weapon.SHOTGUN;
         bool[] usingWeapons = new bool[(int)Weapon.NONE];    //使用中の武器
         [SerializeField, Tooltip("攻撃中の移動速度の低下率")] float atackingDownSpeed = 0.5f;   //攻撃中の移動速度の低下率
         bool isWeaponInit = false;
@@ -143,7 +144,7 @@ namespace Online
         [Command]
         void CmdCreateSubWeapon()
         {
-            BaseWeapon weapon = BaseWeapon.CreateWeapon(gameObject, SetSubWeapon);
+            BaseWeapon weapon = BaseWeapon.CreateWeapon(gameObject, setSubWeapon);
             weapon.parentNetId = netId;
             NetworkServer.Spawn(weapon.gameObject, connectionToClient);
             syncSubWeapon = weapon.gameObject;
@@ -210,7 +211,8 @@ namespace Online
             boostGaugeFrameImage.enabled = true;
 
             //ショットガンの場合はブーストを多少強化する
-            if (SetSubWeapon == BaseWeapon.Weapon.SHOTGUN)
+            setSubWeapon = (BaseWeapon.Weapon)syncSetSubWeapon;
+            if (setSubWeapon == BaseWeapon.Weapon.SHOTGUN)
             {
                 boostAccele *= 1.2f;
                 maxBoostTime *= 1.2f;
@@ -423,7 +425,7 @@ namespace Online
             {
                 if (usingWeapons[(int)Weapon.MAIN])
                 {
-                    UseWeapon(Weapon.MAIN);     //メインウェポン攻撃
+                    UseWeapon(Weapon.MAIN);  //メインウェポン攻撃
                 }
             }
             if (Input.GetMouseButtonUp(0))
@@ -443,12 +445,13 @@ namespace Online
                 //バグ防止用にサブ武器フラグも調べる
                 if (!usingWeapons[(int)Weapon.MAIN] && !usingWeapons[(int)Weapon.SUB])
                 {
-                    if (SetSubWeapon == BaseWeapon.Weapon.MISSILE)
+                    Debug.Log(setSubWeapon);
+                    if (setSubWeapon == BaseWeapon.Weapon.MISSILE)
                     {
                         //攻撃中は速度低下
                         moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, atackingDownSpeed);
                     }
-                    if(SetSubWeapon == BaseWeapon.Weapon.LASER)
+                    if(setSubWeapon == BaseWeapon.Weapon.LASER)
                     {
                         moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, atackingDownSpeed * 0.75f);
                     }
@@ -459,7 +462,7 @@ namespace Online
             {
                 if (usingWeapons[(int)Weapon.SUB])
                 {
-                    UseWeapon(Weapon.SUB);      //サブウェポン攻撃
+                    UseWeapon(Weapon.SUB);  //サブウェポン攻撃
                 }
             }
             if (Input.GetMouseButtonUp(1))
@@ -467,12 +470,12 @@ namespace Online
                 //攻撃を止めたら速度を戻す
                 if (usingWeapons[(int)Weapon.SUB])
                 {
-                    if (SetSubWeapon == BaseWeapon.Weapon.MISSILE)
+                    if (setSubWeapon == BaseWeapon.Weapon.MISSILE)
                     {
                         //攻撃中は速度低下
                         moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, 1 / atackingDownSpeed);
                     }
-                    if (SetSubWeapon == BaseWeapon.Weapon.LASER)
+                    if (setSubWeapon == BaseWeapon.Weapon.LASER)
                     {
                         moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, 1 / (atackingDownSpeed * 0.75f));
                     }
@@ -603,6 +606,7 @@ namespace Online
                 return;
             }
         }
+
 
         //プレイヤーにダメージを与える
         [Command(ignoreAuthority = true)]
