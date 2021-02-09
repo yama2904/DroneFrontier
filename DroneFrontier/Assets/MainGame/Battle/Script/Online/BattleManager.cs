@@ -282,6 +282,7 @@ namespace Online
                 FinishGame(ranking);
                 isFinished = true;
 
+                RpcSetTextEnabled(false);
                 StopCoroutine(countCoroutine);
             }
         }
