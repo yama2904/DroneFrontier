@@ -192,7 +192,21 @@ namespace Offline
                     if (weaponCountTime >= weaponTime)
                     {
                         weaponCountTime = 0;
-                        weaponTime = Random.Range(3, 7);
+                        if (setSubWeapon == BaseWeapon.Weapon.SHOTGUN)
+                        {
+                            if (useMainWeapon)
+                            {
+                                weaponTime = Random.Range(8, 11);
+                            }
+                            else
+                            {
+                                weaponTime = 3;
+                            }
+                        }
+                        if (setSubWeapon == BaseWeapon.Weapon.LASER)
+                        {
+                            weaponTime = Random.Range(3, 8);
+                        }
                         if (setSubWeapon == BaseWeapon.Weapon.LASER)
                         {
                             weaponTime = Random.Range(7, 11);
@@ -243,7 +257,7 @@ namespace Offline
 
             public void StartRotate(Transform target)
             {
-                if(lockOnAction.Target == null)
+                if (lockOnAction.Target == null)
                 {
                     isDamage = true;
                     this.target = target;

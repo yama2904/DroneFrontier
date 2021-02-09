@@ -209,6 +209,14 @@ namespace Online
             boostGaugeImage.fillAmount = 1;
             boostGaugeFrameImage.enabled = true;
 
+            //ショットガンの場合はブーストを多少強化する
+            if (SetSubWeapon == BaseWeapon.Weapon.SHOTGUN)
+            {
+                boostAccele *= 1.2f;
+                maxBoostTime *= 1.2f;
+                boostRecastTime *= 0.8f;
+            }
+
             //コンポーネント初期化
             itemAction.Init((int)ItemNum.NONE);
             statusAction.Init(minSpeed, maxSpeed);
@@ -435,8 +443,11 @@ namespace Online
                 //バグ防止用にサブ武器フラグも調べる
                 if (!usingWeapons[(int)Weapon.MAIN] && !usingWeapons[(int)Weapon.SUB])
                 {
-                    //攻撃中は速度低下
-                    moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, atackingDownSpeed);
+                    if (SetSubWeapon != BaseWeapon.Weapon.SHOTGUN)
+                    {
+                        //攻撃中は速度低下
+                        moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, atackingDownSpeed);
+                    }
                     usingWeapons[(int)Weapon.SUB] = true;
                 }
             }
@@ -452,7 +463,10 @@ namespace Online
                 //攻撃を止めたら速度を戻す
                 if (usingWeapons[(int)Weapon.SUB])
                 {
-                    moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, 1 / atackingDownSpeed);
+                    if (SetSubWeapon != BaseWeapon.Weapon.SHOTGUN)
+                    {
+                        moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, 1 / atackingDownSpeed);
+                    }
                     usingWeapons[(int)Weapon.SUB] = false;
                 }
             }

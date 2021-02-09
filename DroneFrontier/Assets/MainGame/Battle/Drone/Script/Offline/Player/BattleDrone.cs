@@ -64,7 +64,7 @@ namespace Offline
         float fallTime = 5.0f;   //死亡後の落下時間
         bool isDestroyFall = false;
         bool isDestroy = false;
-        
+
         //アイテム枠
         enum ItemNum
         {
@@ -111,6 +111,14 @@ namespace Offline
             //ブースト初期化
             boostGaugeImage.enabled = true;
             boostGaugeImage.fillAmount = 1;
+
+            //ショットガンの場合はブーストを多少強化する
+            if(setSubWeapon == BaseWeapon.Weapon.SHOTGUN)
+            {
+                boostAccele *= 1.2f;
+                maxBoostTime *= 1.2f;
+                boostRecastTime *= 0.8f;
+            }
 
 
             //プロペラは最初から流す
@@ -277,8 +285,12 @@ namespace Offline
                 //バグ防止用にメイン武器フラグも調べる
                 if (!usingWeapons[(int)Weapon.SUB] && !usingWeapons[(int)Weapon.MAIN])
                 {
-                    //攻撃中は速度低下
-                    baseAction.ModifySpeed(atackingDownSpeed);
+                    //ショットガンは速度を下げない
+                    if (setSubWeapon != BaseWeapon.Weapon.SHOTGUN)
+                    {
+                        //攻撃中は速度低下
+                        baseAction.ModifySpeed(atackingDownSpeed);
+                    }
                     usingWeapons[(int)Weapon.MAIN] = true;
                 }
             }
@@ -294,7 +306,11 @@ namespace Offline
                 //攻撃を止めたら速度を戻す
                 if (usingWeapons[(int)Weapon.MAIN])
                 {
-                    baseAction.ModifySpeed(1 / atackingDownSpeed);
+                    //ショットガンは速度を下げない
+                    if (setSubWeapon != BaseWeapon.Weapon.SHOTGUN)
+                    {
+                        baseAction.ModifySpeed(1 / atackingDownSpeed);
+                    }
                     usingWeapons[(int)Weapon.MAIN] = false;
                 }
             }
