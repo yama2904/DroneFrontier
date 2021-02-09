@@ -144,7 +144,7 @@ namespace Online
         [Command]
         void CmdCreateSubWeapon()
         {
-            BaseWeapon weapon = BaseWeapon.CreateWeapon(gameObject, setSubWeapon);
+            BaseWeapon weapon = BaseWeapon.CreateWeapon(gameObject, (BaseWeapon.Weapon)syncSetSubWeapon);
             weapon.parentNetId = netId;
             NetworkServer.Spawn(weapon.gameObject, connectionToClient);
             syncSubWeapon = weapon.gameObject;
