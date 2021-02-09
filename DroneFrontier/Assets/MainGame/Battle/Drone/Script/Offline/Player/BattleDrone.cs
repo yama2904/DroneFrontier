@@ -119,6 +119,13 @@ namespace Offline
                 maxBoostTime *= 1.2f;
                 boostRecastTime *= 0.8f;
             }
+            //レーザーの場合はブーストを弱体化する
+            if (setSubWeapon == BaseWeapon.Weapon.LASER)
+            {
+                boostAccele *= 0.8f;
+                maxBoostTime *= 0.8f;
+                boostRecastTime *= 1.2f;
+            }
 
 
             //プロペラは最初から流す

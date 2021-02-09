@@ -216,6 +216,13 @@ namespace Online
                 maxBoostTime *= 1.2f;
                 boostRecastTime *= 0.8f;
             }
+            //レーザーの場合はブーストを弱体化する
+            if (SetSubWeapon == BaseWeapon.Weapon.LASER)
+            {
+                boostAccele *= 0.8f;
+                maxBoostTime *= 0.8f;
+                boostRecastTime *= 1.2f;
+            }
 
             //コンポーネント初期化
             itemAction.Init((int)ItemNum.NONE);

@@ -11,9 +11,9 @@ namespace Offline
         public static BaseWeapon.Weapon weapon { get; private set; } = BaseWeapon.Weapon.NONE;
 
         //説明文に表示するテキスト
-        const string SHOTGUN_TEXT = "射程が非常に短いが威力が高く、リキャストが短い。\n近距離特化型。\nまた、攻撃中の移動速度低下がなく、ブーストが多少強化される";
+        const string SHOTGUN_TEXT = "射程が非常に短いが威力が高く、リキャストが短い。\nまた、攻撃中の移動速度低下がなく、ブーストが多少強化される。\n近距離特化型。";
         const string MISSILE_TEXT = "誘導力とスピードが高く、発射後に爆発を起こす。\nリキャストが長い。\n最も安定している。";
-        const string LASER_TEXT = "極めて高威力だが、発動時にチャージが必要。\nリキャストが最も長い。\n扱いづらく、上級者向け。";
+        const string LASER_TEXT = "極めて高威力だが、発動時にチャージが必要。\nまた、ブーストが多少弱体化される。\n扱いづらく、上級者向け。";
 
         //武器選択ボタン用
         [SerializeField] Button shotgunSelectButton = null;
