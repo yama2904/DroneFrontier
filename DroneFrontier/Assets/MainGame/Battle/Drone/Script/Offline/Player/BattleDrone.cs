@@ -113,19 +113,11 @@ namespace Offline
             boostGaugeImage.fillAmount = 1;
 
             //ショットガンの場合はブーストを多少強化する
-            if(setSubWeapon == BaseWeapon.Weapon.SHOTGUN)
+            if (setSubWeapon == BaseWeapon.Weapon.SHOTGUN)
             {
                 boostAccele *= 1.2f;
                 maxBoostTime *= 1.2f;
                 boostRecastTime *= 0.8f;
-            }
-            //レーザーの場合はブーストを弱体化する
-            if (setSubWeapon == BaseWeapon.Weapon.LASER)
-            {
-                atackingDownSpeed *= 0.8f;
-                //boostAccele *= 0.8f;
-                //maxBoostTime *= 0.8f;
-                //boostRecastTime *= 1.2f;
             }
 
 
@@ -293,12 +285,8 @@ namespace Offline
                 //バグ防止用にメイン武器フラグも調べる
                 if (!usingWeapons[(int)Weapon.SUB] && !usingWeapons[(int)Weapon.MAIN])
                 {
-                    //ショットガンは速度を下げない
-                    if (setSubWeapon != BaseWeapon.Weapon.SHOTGUN)
-                    {
-                        //攻撃中は速度低下
-                        baseAction.ModifySpeed(atackingDownSpeed);
-                    }
+                    //攻撃中は速度低下
+                    baseAction.ModifySpeed(atackingDownSpeed);
                     usingWeapons[(int)Weapon.MAIN] = true;
                 }
             }
@@ -314,11 +302,7 @@ namespace Offline
                 //攻撃を止めたら速度を戻す
                 if (usingWeapons[(int)Weapon.MAIN])
                 {
-                    //ショットガンは速度を下げない
-                    if (setSubWeapon != BaseWeapon.Weapon.SHOTGUN)
-                    {
-                        baseAction.ModifySpeed(1 / atackingDownSpeed);
-                    }
+                    baseAction.ModifySpeed(1 / atackingDownSpeed);
                     usingWeapons[(int)Weapon.MAIN] = false;
                 }
             }
@@ -330,8 +314,16 @@ namespace Offline
                 //バグ防止用にサブ武器フラグも調べる
                 if (!usingWeapons[(int)Weapon.MAIN] && !usingWeapons[(int)Weapon.SUB])
                 {
-                    //攻撃中は速度低下
-                    baseAction.ModifySpeed(atackingDownSpeed);
+                    if (setSubWeapon == BaseWeapon.Weapon.MISSILE)
+                    {
+                        //攻撃中は速度低下
+                        baseAction.ModifySpeed(atackingDownSpeed);
+                    }
+                    //レーザーの場合は低下率増加
+                    if (setSubWeapon == BaseWeapon.Weapon.LASER)
+                    {
+                        baseAction.ModifySpeed(atackingDownSpeed * 0.75f);
+                    }
                     usingWeapons[(int)Weapon.SUB] = true;
                 }
             }
@@ -347,7 +339,16 @@ namespace Offline
                 //攻撃を止めたら速度を戻す
                 if (usingWeapons[(int)Weapon.SUB])
                 {
-                    baseAction.ModifySpeed(1 / atackingDownSpeed);
+                    if (setSubWeapon == BaseWeapon.Weapon.MISSILE)
+                    {
+                        //攻撃中は速度低下
+                        baseAction.ModifySpeed(1 / atackingDownSpeed);
+                    }
+                    //レーザーの場合は低下率増加
+                    if (setSubWeapon == BaseWeapon.Weapon.LASER)
+                    {
+                        baseAction.ModifySpeed(1 / (atackingDownSpeed * 0.75f));
+                    }
                     usingWeapons[(int)Weapon.SUB] = false;
                 }
             }

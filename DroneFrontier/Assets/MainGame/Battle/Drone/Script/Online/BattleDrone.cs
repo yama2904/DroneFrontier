@@ -216,13 +216,6 @@ namespace Online
                 maxBoostTime *= 1.2f;
                 boostRecastTime *= 0.8f;
             }
-            //レーザーの場合はブーストを弱体化する
-            if (SetSubWeapon == BaseWeapon.Weapon.LASER)
-            {
-                boostAccele *= 0.8f;
-                maxBoostTime *= 0.8f;
-                boostRecastTime *= 1.2f;
-            }
 
             //コンポーネント初期化
             itemAction.Init((int)ItemNum.NONE);
@@ -450,10 +443,14 @@ namespace Online
                 //バグ防止用にサブ武器フラグも調べる
                 if (!usingWeapons[(int)Weapon.MAIN] && !usingWeapons[(int)Weapon.SUB])
                 {
-                    if (SetSubWeapon != BaseWeapon.Weapon.SHOTGUN)
+                    if (SetSubWeapon == BaseWeapon.Weapon.MISSILE)
                     {
                         //攻撃中は速度低下
                         moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, atackingDownSpeed);
+                    }
+                    if(SetSubWeapon == BaseWeapon.Weapon.LASER)
+                    {
+                        moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, atackingDownSpeed * 0.75f);
                     }
                     usingWeapons[(int)Weapon.SUB] = true;
                 }
@@ -470,9 +467,14 @@ namespace Online
                 //攻撃を止めたら速度を戻す
                 if (usingWeapons[(int)Weapon.SUB])
                 {
-                    if (SetSubWeapon != BaseWeapon.Weapon.SHOTGUN)
+                    if (SetSubWeapon == BaseWeapon.Weapon.MISSILE)
                     {
+                        //攻撃中は速度低下
                         moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, 1 / atackingDownSpeed);
+                    }
+                    if (SetSubWeapon == BaseWeapon.Weapon.LASER)
+                    {
+                        moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, 1 / (atackingDownSpeed * 0.75f));
                     }
                     usingWeapons[(int)Weapon.SUB] = false;
                 }
