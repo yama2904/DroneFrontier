@@ -40,14 +40,9 @@ namespace Online
             if (ReferenceEquals(other.gameObject, thrower)) return;
             if (!other.CompareTag(TagNameManager.PLAYER)) return;   //プレイヤーのみ対象
 
-            BattleDrone p = other.GetComponent<BattleDrone>();
+            DroneStatusAction p = other.GetComponent<DroneStatusAction>();
             if (!p.isLocalPlayer) return;   //ローカルプレイヤーのみ処理
             p.SetStun(stunTime);
-
-            //必要なら距離によるスタンの時間を変える処理をいつか加える
-            //
-            //
-
         }
     }
 }

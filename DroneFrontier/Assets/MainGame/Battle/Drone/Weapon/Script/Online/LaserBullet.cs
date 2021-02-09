@@ -303,7 +303,7 @@ namespace Online
 
                     if (o.CompareTag(TagNameManager.PLAYER))
                     {
-                        o.GetComponent<BattleDrone>().CmdDamage(power);
+                        o.GetComponent<DroneDamageAction>().CmdDamage(power);
                     }
                     else if (o.CompareTag(TagNameManager.JAMMING_BOT))
                     {

@@ -9,7 +9,8 @@ namespace Online
     {
         [SerializeField] GameObject barrierObject = null;
         public GameObject BarrierObject { get { return barrierObject; } }
-        BattleDrone drone = null;
+        DroneSoundAction soundAction = null;
+        DroneDamageAction damageAction = null;
 
         const float MAX_HP = 100;
         [SyncVar] float syncHP = MAX_HP;
@@ -35,17 +36,15 @@ namespace Online
         [SyncVar, HideInInspector] public uint syncParentNetId = 0;
 
 
-        void Awake()
-        {
-            drone = GetComponent<BattleDrone>();
-        }
+        void Awake() { }
         void Start() { }
 
         public override void OnStartClient()
         {
             base.OnStartClient();
 
-            drone = GetComponent<BattleDrone>();
+            soundAction = GetComponent<DroneSoundAction>();
+            damageAction = GetComponent<DroneDamageAction>();
             material = barrierObject.GetComponent<Renderer>().material;
             CmdInit();
         }
@@ -57,7 +56,7 @@ namespace Online
             if (syncIsWeak) return;
 
             //ドローンが破壊されていたら回復処理を行わない
-            if (drone.IsDestroy) return;
+            if (damageAction.HP <= 0) return;
 
             //バリアが破壊されていたら修復処理
             if (syncHP <= 0)
@@ -159,11 +158,11 @@ namespace Online
             {
                 syncHP = 0;
                 RpcSetActiveBarrier(false);
-                drone.RpcPlayOneShotSEAllClient(SoundManager.SE.DESTROY_BARRIER, SoundManager.BaseSEVolume);
+                soundAction.RpcPlayOneShotSEAllClient(SoundManager.SE.DESTROY_BARRIER, SoundManager.BaseSEVolume);
             }
             syncRegeneCountTime = 0;
             syncIsRegene = false;
-            drone.RpcPlayOneShotSEAllClient(SoundManager.SE.BARRIER_DAMAGE, SoundManager.BaseSEVolume * 0.7f);
+            soundAction.RpcPlayOneShotSEAllClient(SoundManager.SE.BARRIER_DAMAGE, SoundManager.BaseSEVolume * 0.7f);
 
             //バリアの色変え
             float value = syncHP / MAX_HP;

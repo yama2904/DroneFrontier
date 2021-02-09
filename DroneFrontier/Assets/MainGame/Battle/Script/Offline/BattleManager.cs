@@ -139,6 +139,9 @@ namespace Offline
                         pd.stock--;
                         pd.drone = CreateDrone(pd.weapon, pd.isPlayer);
 
+                        //リスポーンSEの再生
+                        pd.drone.GetComponent<DroneSoundAction>().PlayOneShot(SoundManager.SE.RESPAWN, SoundManager.BaseSEVolume);                        
+
                         //残機UIの変更
                         if (pd.isPlayer)
                         {
@@ -293,7 +296,7 @@ namespace Offline
         {
             if (!isFinished)
             {
-                MainGameManager.Singleton.FinishGame(ranking);
+                FinishGame(ranking);
                 isFinished = true;
 
                 StopCoroutine(countCoroutine);

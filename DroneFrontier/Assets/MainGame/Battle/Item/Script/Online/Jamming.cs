@@ -15,7 +15,7 @@ namespace Online
         [SerializeField] Transform jammingBotPosition = null;
         GameObject createBot = null;
         bool isCreateBot = false;
-        List<BattleDrone> jamingPlayers = new List<BattleDrone>();
+        List<DroneStatusAction> jamingPlayers = new List<DroneStatusAction>();
 
 
         void Start() { }
@@ -26,6 +26,13 @@ namespace Online
             if (!isCreateBot) return;
             if (createBot == null)
             {
+                NetworkServer.Destroy(gameObject);
+            }
+
+            //生成したプレイヤーが死んだら削除
+            if(creater == null)
+            {
+                NetworkServer.Destroy(createBot);
                 NetworkServer.Destroy(gameObject);
             }
         }
@@ -99,7 +106,7 @@ namespace Online
         void OnDestroy()
         {
             //ジャミングを解除する
-            foreach (BattleDrone p in jamingPlayers)
+            foreach (DroneStatusAction p in jamingPlayers)
             {
                 if (p == null) continue;
                 p.UnSetJamming();
@@ -110,7 +117,7 @@ namespace Online
         {
             if (!other.CompareTag(TagNameManager.PLAYER)) return;   //プレイヤーのみ対象
 
-            BattleDrone p = other.GetComponent<BattleDrone>();
+            DroneStatusAction p = other.GetComponent<DroneStatusAction>();
             if (!p.isLocalPlayer) return;   //ローカルプレイヤーのみ処理
             if (ReferenceEquals(p.gameObject, creater)) return; //ジャミングを付与しないプレイヤーならスキップ
 
@@ -122,7 +129,7 @@ namespace Online
         {
             if (!other.CompareTag(TagNameManager.PLAYER)) return;   //プレイヤーのみ対象
 
-            BattleDrone p = other.GetComponent<BattleDrone>();
+            DroneStatusAction p = other.GetComponent<DroneStatusAction>();
             if (!p.isLocalPlayer) return;   //ローカルプレイヤーのみ処理
             if (ReferenceEquals(p.gameObject, creater)) return; //ジャミングを付与しないプレイヤーならスキップ
 

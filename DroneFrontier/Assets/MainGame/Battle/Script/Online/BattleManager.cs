@@ -14,17 +14,25 @@ namespace Online
         //アイテムを出現させるか
         public static bool IsItemSpawn { get; set; } = true;
 
+        //ストック
+        [SerializeField] int droneStock = 1;
+        [SerializeField] Image stockIcon = null;
+        [SerializeField] Text stockText = null;
+
         //プレイヤー情報
         public class PlayerData
         {
             public NetworkConnection conn;
             public BattleDrone drone = null;
+            public BaseWeapon.Weapon weapon = BaseWeapon.Weapon.NONE;
+            public string name = "";
+            public int stock = 0;
             public int ranking = 1;
             public bool isDestroy = false;
             public static int droneNum = MatchingManager.PlayerNum;  //残っているドローンの数
         }
-        static List<PlayerData> playerDatas = new List<PlayerData>();
-        static BattleDrone localDrone = null;
+        List<PlayerData> playerDatas = new List<PlayerData>();
+        int isLocalIndex = -1;
         int useIndex = 0;
 
         //ゲーム終了処理を行ったらtrue
@@ -71,6 +79,7 @@ namespace Online
                 Invoke(nameof(RpcPlayStartCountDown), 3.0f);
             }
 
+            stockText.text = droneStock.ToString();
             listener = GetComponent<AudioListener>();
             listener.enabled = false;
             timeText.enabled = false;
@@ -94,7 +103,8 @@ namespace Online
             //ゲームオーバーになったら他のプレイヤーのカメラにスペースキーで切り替える
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                if (localDrone.IsGameOver)
+                if (isLocalIndex == -1) return;
+                if (playerDatas[isLocalIndex].isDestroy)
                 {
                     //次のプレイヤーのカメラとリスナーに切り替える
                     int initIndex = useIndex;
@@ -136,9 +146,49 @@ namespace Online
 
             if (isServer)
             {
+                //破壊されたドローンを調べる
+                foreach (PlayerData pd in playerDatas)
+                {
+                    if (pd.isDestroy) continue;
+                    if (pd.drone == null)
+                    {
+                        //ストックが残っていたら復活
+                        if (pd.stock > 0)
+                        {
+                            Transform pos = NetworkManager.singleton.GetStartPosition();
+                            GameObject p = Instantiate(NewNetworkRoomManager.singleton.playerPrefab, pos.position, pos.rotation);
+                            NetworkServer.AddPlayerForConnection(pd.conn, p);
+                            pd.stock--;
+                            pd.drone = p.GetComponent<BattleDrone>();
+
+                            //リスポーンSEの再生
+                            pd.drone.GetComponent<DroneSoundAction>().RpcPlayOneShotSEAllClient(SoundManager.SE.RESPAWN, SoundManager.BaseSEVolume);
+
+                            //残機UIの変更
+                            TargetSetStockText(pd.conn, pd.stock.ToString());
+                        }
+                        //ストックが残っていなかったらランキングに記録
+                        else
+                        {
+                            pd.isDestroy = true;
+                            ranking[PlayerData.droneNum - 1] = pd.name;
+                            PlayerData.droneNum--;
+
+                            //残機UIの非表示
+                            TargetSetStockEnabled(pd.conn, false);
+                        }
+                    }
+                }
+
                 //最後のプレイヤーが残ったら終了処理
                 if (PlayerData.droneNum <= 1)
                 {
+                    foreach (PlayerData pd in playerDatas)
+                    {
+                        if (pd.isDestroy) continue;
+                        ranking[PlayerData.droneNum - 1] = pd.name;
+                        break;
+                    }
                     FinishGame();
                 }
             }
@@ -151,26 +201,29 @@ namespace Online
 
             playerDatas.Clear();
             PlayerData.droneNum = 0;
-            localDrone = null;
+            isLocalIndex = -1;
         }
 
 
         //プレイヤーの情報を登録する
-        public static void AddPlayerData(BattleDrone drone, bool isLocalPlayer, NetworkConnection conn)
+        public void AddPlayerData(BattleDrone drone, BaseWeapon.Weapon weapon, bool isLocalPlayer, NetworkConnection conn)
         {
             //既にリストにあったら処理しない
-            if (playerDatas.FindIndex(pd => pd.drone.netId == drone.netId) >= 0) return;
-
-            if (isLocalPlayer)
-            {
-                localDrone = drone;
-            }
+            if (playerDatas.FindIndex(pd => ReferenceEquals(pd.conn, conn)) >= 0) return;
 
             playerDatas.Add(new PlayerData
             {
                 conn = conn,
-                drone = drone
+                drone = drone,
+                weapon = weapon,
+                name = drone.name,
+                stock = droneStock
             });
+
+            if (isLocalPlayer)
+            {
+                isLocalIndex = playerDatas.Count - 1;
+            }
         }
 
         //ゲームオーバーになったプレイヤーを登録
@@ -191,8 +244,8 @@ namespace Online
             pd.drone.SetCameraDepth(-1);
 
             //オーディオリスナーを担当していたドローンなら一時的に自分のリスナーをオンにする
-            if (ReferenceEquals(localDrone, pd.drone) ||
-                (localDrone.IsGameOver && index == useIndex))
+            if (ReferenceEquals(playerDatas[isLocalIndex].drone, pd.drone) ||
+                (playerDatas[isLocalIndex].isDestroy && index == useIndex))
             {
                 listener.enabled = true;
             }
@@ -200,7 +253,7 @@ namespace Online
 
 
         //切断されたプレイヤーの処理
-        public static void DisconnectPlayer(NetworkConnection conn)
+        public void DisconnectPlayer(NetworkConnection conn)
         {
             int index = playerDatas.FindIndex(pd => ReferenceEquals(pd.conn, conn));
             if (index < 0) return;
@@ -257,12 +310,11 @@ namespace Online
                 yield return new WaitForSeconds(1f);
             }
 
-            int rank = 1;
             foreach (PlayerData pd in playerDatas)
             {
                 if (pd.isDestroy) continue;
-                pd.ranking = rank;
-                rank++;
+                ranking[PlayerData.droneNum - 1] = pd.name;
+                PlayerData.droneNum--;
             }
 
             FinishGame();
@@ -274,17 +326,27 @@ namespace Online
         {
             if (!isFinished)
             {
-                string[] ranking = new string[playerDatas.Count];
-                foreach (PlayerData pd in playerDatas)
-                {
-                    ranking[pd.ranking - 1] = pd.drone.name;
-                }
                 FinishGame(ranking);
                 isFinished = true;
 
                 RpcSetTextEnabled(false);
                 StopCoroutine(countCoroutine);
             }
+        }
+
+        //残機のテキスト変更
+        [TargetRpc]
+        void TargetSetStockText(NetworkConnection target, string text)
+        {
+            stockText.text = text;
+        }
+
+        //残機UI表示変更
+        [TargetRpc]
+        void TargetSetStockEnabled(NetworkConnection target, bool flag)
+        {
+            stockIcon.enabled = flag;
+            stockText.enabled = flag;
         }
 
 

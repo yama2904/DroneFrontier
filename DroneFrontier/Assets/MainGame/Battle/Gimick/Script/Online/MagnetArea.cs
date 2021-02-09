@@ -29,14 +29,8 @@ namespace Online
             }
         }
 
-        //バグ防止用
-        class HitPlayerData
-        {
-            public BattleDrone player;
-            public int id;
-        }
         //ヒットしているプレイヤーを格納
-        List<HitPlayerData> hitPlayerDatas = new List<HitPlayerData>();
+        List<DroneStatusAction> hitPlayerDatas = new List<DroneStatusAction>();
 
         //エリアが起動中か
         bool areaFlag = false;
@@ -49,19 +43,17 @@ namespace Online
             //プレイヤーのみ判定
             if (!other.CompareTag(TagNameManager.PLAYER)) return;
 
-            BattleDrone player = other.GetComponent<BattleDrone>();   //名前省略        
+            DroneStatusAction player = other.GetComponent<DroneStatusAction>();   //名前省略        
             if (!player.isLocalPlayer) return;  //ローカルプレイヤーのみ判定
 
             //バグ防止用
             //既に範囲内に入っているプレイヤーは除外
-            int index = hitPlayerDatas.FindIndex(p => p.player.netId == player.netId);
+            int index = hitPlayerDatas.FindIndex(p => p.netId == player.netId);
             if (index != -1) return;
 
             //プレイヤーに状態異常を与えてリストに格納
-            HitPlayerData hp = new HitPlayerData();
-            hp.player = player;
-            hp.id = player.SetSpeedDown(downPercent);
-            hitPlayerDatas.Add(hp);
+            player.SetSpeedDown(downPercent);
+            hitPlayerDatas.Add(player);
 
 
             //デバッグ用
@@ -75,13 +67,13 @@ namespace Online
             //プレイヤーのみ判定
             if (!other.CompareTag(TagNameManager.PLAYER)) return;
 
-            BattleDrone player = other.GetComponent<BattleDrone>();   //名前省略        
+            DroneStatusAction player = other.GetComponent<DroneStatusAction>();   //名前省略        
             if (!player.isLocalPlayer) return;  //ローカルプレイヤーのみ判定
 
             //抜けるプレイヤーをリストから探す
-            int index = hitPlayerDatas.FindIndex(p => p.player.netId == player.netId);
+            int index = hitPlayerDatas.FindIndex(p => p.netId == player.netId);
             if (index == -1) return;   //バグ防止用
-            player.UnSetSpeedDown(hitPlayerDatas[index].id);
+            player.UnSetSpeedDown(downPercent);
 
             //抜けたプレイヤーはリストから削除
             hitPlayerDatas.RemoveAt(index);
@@ -102,10 +94,10 @@ namespace Online
             else
             {
                 //速度低下中の全てのプレイヤーの速度を戻す
-                foreach (HitPlayerData hpd in hitPlayerDatas)
+                foreach (DroneStatusAction p in hitPlayerDatas)
                 {
-                    if (hpd.player == null) continue;
-                    hpd.player.UnSetSpeedDown(hpd.id);
+                    if (p == null) continue;
+                    p.UnSetSpeedDown(downPercent);
                 }
                 hitPlayerDatas.Clear();
 

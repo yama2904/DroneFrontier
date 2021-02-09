@@ -16,7 +16,7 @@ public class BarrierWeakLaser : MonoBehaviour
 
     class HitPlayerData
     {
-        public BattleDrone player;
+        public DroneStatusAction player;
         public float deltaTime; //計測用
     }
 
@@ -115,7 +115,7 @@ public class BarrierWeakLaser : MonoBehaviour
 
             if (o.CompareTag(TagNameManager.PLAYER))
             {
-                BattleDrone player = o.GetComponent<BattleDrone>();
+                DroneStatusAction player = o.GetComponent<DroneStatusAction>();
                 if (player.isLocalPlayer)
                 {
                     //既にリスト内に存在しているか調べる

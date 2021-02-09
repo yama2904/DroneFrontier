@@ -33,7 +33,7 @@ public class NewNetworkRoomManager : NetworkRoomManager
         {
             if (GameModeSelectScreenManager.Mode == GameModeSelectScreenManager.GameMode.BATTLE)
             {
-                BattleManager.DisconnectPlayer(conn);
+                BattleManager.Singleton.DisconnectPlayer(conn);
             }
             else if(GameModeSelectScreenManager.Mode == GameModeSelectScreenManager.GameMode.RACE)
             {

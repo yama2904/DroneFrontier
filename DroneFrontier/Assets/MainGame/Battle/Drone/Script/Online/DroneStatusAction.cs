@@ -19,13 +19,15 @@ namespace Online
 
             NONE
         }
-        List<bool> isStatus = new List<bool>();   //状態異常が付与されているか
+        bool[] isStatus = new bool[(int)Status.NONE];  //状態異常が付与されているか
 
         //アイコン
         [SerializeField] Image barrierWeakIcon = null;
         [SerializeField] Image jammingIcon = null;
         [SerializeField] Image speedDownIcon = null;
 
+        //サウンド
+        DroneSoundAction soundAction = null;
 
         //バリア用
         DroneBarrierAction barrier = null;
@@ -37,30 +39,25 @@ namespace Online
         //ジャミング用
         DroneLockOnAction lockOn = null;
         DroneRadarAction radar = null;
+        int jammingSoundId = -1;
+        int jammingCount = 0;
 
         //スピードダウン用
-        const int NOT_USE_VALUE = 0;
-        List<float> speedDownList = new List<float>();
-        float maxSpeed = 0;
-        float minSpeed = 0;
+        DroneBaseAction baseAction = null;
+        int speedDownSoundId = 0;
+        int speedDownCount = 0;
 
 
-        void Start() { }
-
-        public void Init(float minSpeed, float maxSpeed)
+        public override void OnStartClient()
         {
+            base.OnStartClient();
+
+            baseAction = GetComponent<DroneBaseAction>();
             barrier = GetComponent<DroneBarrierAction>();
+            soundAction = GetComponent<DroneSoundAction>();
             lockOn = GetComponent<DroneLockOnAction>();
             radar = GetComponent<DroneRadarAction>();
-            this.minSpeed = minSpeed;
-            this.maxSpeed = maxSpeed;
             createdStunScreenMask = Instantiate(stunScreenMask);
-
-            //配列初期化
-            for (int i = 0; i < (int)Status.NONE; i++)
-            {
-                isStatus.Add(false);
-            }
         }
 
         void Update()
@@ -77,22 +74,6 @@ namespace Online
             {
                 isStatus[(int)Status.STUN] = createdStunScreenMask.IsStun;
             }
-
-            //リストを使っていなかったらクリア
-            bool useList = false;
-            foreach (float value in speedDownList)
-            {
-                if (value != NOT_USE_VALUE)
-                {
-                    useList = true;
-                    break;
-                }
-            }
-            if (!useList)
-            {
-                speedDownList.Clear();
-                isStatus[(int)Status.SPEED_DOWN] = false;
-            }
         }
 
         public void ResetStatus()
@@ -105,12 +86,11 @@ namespace Online
             jammingIcon.enabled = false;
             speedDownIcon.enabled = false;
             createdStunScreenMask.UnSetStun();
-            speedDownList.Clear();
+            speedDownCount = 0;
         }
 
         public bool GetIsStatus(Status status)
         {
-            if (isStatus.Count <= 0) return false;  //バグ防止
             return isStatus[(int)status];
         }
 
@@ -169,10 +149,14 @@ namespace Online
         {
             if (lockOn == null) return;
             if (radar == null) return;
+            if (jammingCount++ > 0) return;  //既にジャミングにかかっている場合は無駄なので処理しない
 
             lockOn.StopLockOn();
             radar.StopRadar();
             isStatus[(int)Status.JAMMING] = true;
+
+            //SE再生
+            jammingSoundId = soundAction.PlayLoopSE(SoundManager.SE.JAMMING_NOISE, SoundManager.BaseSEVolume);
 
             //アイコン表示
             jammingIcon.enabled = true;
@@ -181,7 +165,11 @@ namespace Online
         //ジャミング解除
         public void UnSetJamming()
         {
+            //複数のジャミングに同時にかかっている場合は解除しない
+            if (jammingCount-- > 1) return;
+            
             isStatus[(int)Status.JAMMING] = false;
+            soundAction.StopLoopSE(jammingSoundId); //SE停止
 
             //アイコン非表示
             jammingIcon.enabled = false;
@@ -189,40 +177,35 @@ namespace Online
 
 
         //スピードダウン
-        public int SetSpeedDown(ref float speed, float downPercent)
+        public void SetSpeedDown(float downPercent)
         {
-            float speedPercent = 1 - downPercent;
-            float tempSpeed = speed;
-            speed *= speedPercent;
-
-            if (speed > maxSpeed)
-            {
-                speed = maxSpeed;
-                speedPercent = maxSpeed / tempSpeed;
-            }
-            if (speed < minSpeed)
-            {
-                speed = minSpeed;
-                speedPercent = minSpeed / tempSpeed;
-            }
-
-            speedDownList.Add(speedPercent);
             isStatus[(int)Status.SPEED_DOWN] = true;
+            baseAction.ModifySpeed(1 - downPercent);
+            speedDownCount++;
 
             //アイコン表示
             speedDownIcon.enabled = true;
 
-            return speedDownList.Count - 1;
+            //SE再生
+            speedDownSoundId = soundAction.PlayLoopSE(SoundManager.SE.MAGNETIC_AREA, SoundManager.BaseSEVolume);
         }
 
         //スピードダウン解除
-        public void UnSetSpeedDown(ref float speed, int id)
+        public void UnSetSpeedDown(float downPercent)
         {
-            speed /= speedDownList[id];
-            speedDownList[id] = NOT_USE_VALUE;
+            baseAction.ModifySpeed(1 / (1 - downPercent));
+
+            //スピードダウンがすべて解除されたらフラグも解除
+            if (--speedDownCount <= 0)
+            {
+                isStatus[(int)Status.SPEED_DOWN] = false;
+            }
 
             //アイコン非表示
             speedDownIcon.enabled = false;
+
+            //SE停止
+            soundAction.StopLoopSE(speedDownSoundId);
         }
     }
 }

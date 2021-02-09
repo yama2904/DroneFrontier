@@ -12,14 +12,6 @@ namespace Online
         Transform cacheTransform = null;
         DroneBaseAction baseAction = null;
 
-        //移動用
-        [SerializeField, Tooltip("移動速度")] float moveSpeed = 150.0f;  //移動速度
-        [HideInInspector] float maxSpeed = 100;       //最高速度
-        [HideInInspector] float minSpeed = 100;       //最低速度
-
-        //回転用
-        [SerializeField, Tooltip("回転速度")] public float rotateSpeed = 5.0f;
-
         //ドローンが移動した際にオブジェクトが傾く処理用
         float moveRotateSpeed = 0.02f;
         Quaternion frontMoveRotate = Quaternion.Euler(50, 0, 0);
@@ -81,9 +73,6 @@ namespace Online
             //コンポーネントの初期化
             cacheTransform = transform;
             baseAction = GetComponent<DroneBaseAction>();
-
-            maxSpeed = moveSpeed * 10;
-            minSpeed = moveSpeed * 0.2f;
         }
 
         void Start()
@@ -102,7 +91,7 @@ namespace Online
             //前進
             if (Input.GetKey(KeyCode.W))
             {
-                baseAction.Move(moveSpeed, cacheTransform.forward);
+                baseAction.Move(cacheTransform.forward);
                 baseAction.RotateDroneObject(frontMoveRotate, moveRotateSpeed);
             }
             else
@@ -115,7 +104,7 @@ namespace Online
             {
                 Quaternion leftAngle = Quaternion.Euler(0, -90, 0);
                 Vector3 left = leftAngle.normalized * cacheTransform.forward;
-                baseAction.Move(moveSpeed, left);
+                baseAction.Move(left);
                 baseAction.RotateDroneObject(leftMoveRotate, moveRotateSpeed);
             }
             else
@@ -128,7 +117,7 @@ namespace Online
             {
                 Quaternion backwardAngle = Quaternion.Euler(0, 180, 0);
                 Vector3 backward = backwardAngle.normalized * cacheTransform.forward;
-                baseAction.Move(moveSpeed, backward);
+                baseAction.Move(backward);
                 baseAction.RotateDroneObject(backMoveRotate, moveRotateSpeed);
             }
             else
@@ -141,7 +130,7 @@ namespace Online
             {
                 Quaternion rightAngle = Quaternion.Euler(0, 90, 0);
                 Vector3 right = rightAngle.normalized * cacheTransform.forward;
-                baseAction.Move(moveSpeed, right);
+                baseAction.Move(right);
                 baseAction.RotateDroneObject(rightMoveRotate, moveRotateSpeed);
             }
             else
@@ -154,19 +143,19 @@ namespace Online
             {
                 Quaternion upAngle = Quaternion.Euler(-90, 0, 0);
                 Vector3 upward = upAngle.normalized * Vector3.forward;
-                baseAction.Move(moveSpeed * 1.7f * Input.mouseScrollDelta.y, upward);
+                baseAction.Move(upward * 1.7f * Input.mouseScrollDelta.y);
             }
             if (Input.GetKey(KeyCode.R))
             {
                 Quaternion upAngle = Quaternion.Euler(-90, 0, 0);
                 Vector3 upward = upAngle.normalized * Vector3.forward;
-                baseAction.Move(moveSpeed, upward);
+                baseAction.Move(upward);
             }
             if (Input.GetKey(KeyCode.F))
             {
                 Quaternion downAngle = Quaternion.Euler(90, 0, 0);
                 Vector3 down = downAngle.normalized * Vector3.forward;
-                baseAction.Move(moveSpeed, down);
+                baseAction.Move(down);
             }
 
             #endregion
@@ -185,9 +174,10 @@ namespace Online
             //回転処理
             if (MainGameManager.IsCursorLock)
             {
-                float x = Input.GetAxis("Mouse X");
-                float y = Input.GetAxis("Mouse Y");
-                baseAction.Rotate(x, y, rotateSpeed * CameraManager.CameraSpeed);
+                Vector3 angle = Vector3.zero;
+                angle.x = Input.GetAxis("Mouse X");
+                angle.y = Input.GetAxis("Mouse Y");
+                baseAction.Rotate(angle * CameraManager.CameraSpeed);
             }
 
             #region Boost
@@ -198,7 +188,7 @@ namespace Online
                 //ブーストが使用可能なゲージ量ならブースト使用
                 if (boostGaugeImage.fillAmount >= BOOST_POSSIBLE_MIN)
                 {
-                    moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, boostAccele);
+                    baseAction.ModifySpeed(boostAccele);
                     isBoost = true;
                     PlaySE((int)SE.Boost, SoundManager.BaseSEVolume * 0.15f, true);    //加速音の再生
 
@@ -220,7 +210,7 @@ namespace Online
                     {
                         boostGaugeImage.fillAmount = 0;
 
-                        moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, 1 / boostAccele);
+                        baseAction.ModifySpeed(1 / boostAccele);
                         isBoost = false;
                         StopSE((int)SE.Boost);
 
@@ -232,7 +222,7 @@ namespace Online
                 //キーを離したらブースト停止
                 if (Input.GetKeyUp(KeyCode.Space))
                 {
-                    moveSpeed = baseAction.ModifySpeed(moveSpeed, minSpeed, maxSpeed, 1 / boostAccele);
+                    baseAction.ModifySpeed(1 / boostAccele);
                     isBoost = false;
                     StopSE((int)SE.Boost);
 

@@ -29,21 +29,14 @@ namespace Offline
 
         void Awake()
         {
-            cacheTransform = transform; //キャッシュ用
             _rigidbody = GetComponent<Rigidbody>();
-            cacheTransform = transform;
+            cacheTransform = _rigidbody.transform; //キャッシュ用
 
             initSpeed = moveSpeed;
             initRotateSpeed = rotateSpeed;
         }
 
         void Start() { }
-        
-        public void ResetParameters()
-        {
-            moveSpeed = initSpeed;
-            rotateSpeed = initRotateSpeed;
-        }
 
         //移動処理
         public void Move(Vector3 vec)

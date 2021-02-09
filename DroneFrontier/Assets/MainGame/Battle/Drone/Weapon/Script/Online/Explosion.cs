@@ -113,7 +113,7 @@ namespace Online
                 {
                     if (ReferenceEquals(other, o)) return;
                 }
-                other.GetComponent<BattleDrone>().CmdDamage(power);
+                other.GetComponent<DroneDamageAction>().CmdDamage(power);
                 wasHitObjects.Add(other.gameObject);
 
                 //デバッグ用

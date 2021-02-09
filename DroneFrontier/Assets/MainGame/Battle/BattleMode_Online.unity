@@ -3112,6 +3112,11 @@ PrefabInstance:
       propertyPath: sceneId
       value: 2017437995
       objectReference: {fileID: 0}
+    - target: {fileID: 180698877758680762, guid: d3f754749c36de940b3296b60635b9db,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 458785504828815647, guid: d3f754749c36de940b3296b60635b9db,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -3166,6 +3171,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 532035803867134748, guid: d3f754749c36de940b3296b60635b9db,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6358352569728279144, guid: d3f754749c36de940b3296b60635b9db,
         type: 3}

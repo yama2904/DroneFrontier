@@ -1,11 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Mirror;
 
-namespace Offline
+namespace Online
 {
     [RequireComponent(typeof(AudioSource))]
-    public class DroneSoundAction : MonoBehaviour
+    public class DroneSoundAction : NetworkBehaviour
     {
         //ループ専用
         struct LoopAudioData
@@ -34,13 +35,6 @@ namespace Offline
             }
         }
 
-        void Start()
-        {
-        }
-
-        void Update()
-        {
-        }
 
         public void PlayOneShot(SoundManager.SE se, float volume)
         {
@@ -84,6 +78,14 @@ namespace Offline
             lpd.isFree = true;
 
             return true;
+        }
+
+
+        //全てのクライアントでSEを再生する
+        [ClientRpc]
+        public void RpcPlayOneShotSEAllClient(SoundManager.SE se, float volume)
+        {
+            PlayOneShot(se, volume);
         }
     }
 }

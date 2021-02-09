@@ -61,9 +61,10 @@ namespace Offline
         Quaternion deathRotate = Quaternion.Euler(28, -28, -28);
         float deathRotateSpeed = 2f;
         float gravityAccele = 1f;  //落下加速用
-        float fallTime = 5.0f;   //死亡後の落下時間
+        float fallTime = 2.5f;     //死亡後の落下時間
         bool isDestroyFall = false;
         bool isDestroy = false;
+
 
         //アイテム枠
         enum ItemNum
@@ -80,8 +81,8 @@ namespace Offline
             base.Awake();
 
             //コンポーネントの取得
-            cacheTransform = transform;
             _rigidbody = GetComponent<Rigidbody>();
+            cacheTransform = _rigidbody.transform;
             animator = GetComponent<Animator>();
             baseAction = GetComponent<DroneBaseAction>();
             damageAction = GetComponent<DroneDamageAction>();
@@ -135,6 +136,7 @@ namespace Offline
             if (damageAction.HP <= 0)
             {
                 DestroyMe();
+                return;
             }
 
             #region Move
@@ -388,6 +390,8 @@ namespace Offline
 
                         baseAction.ModifySpeed(1 / boostAccele);
                         isBoost = false;
+
+                        //ブーストSE停止
                         soundAction.StopLoopSE(boostSoundId);
 
 
@@ -400,6 +404,8 @@ namespace Offline
                 {
                     baseAction.ModifySpeed(1 / boostAccele);
                     isBoost = false;
+
+                    //ブーストSE停止
                     soundAction.StopLoopSE(boostSoundId);
 
 
@@ -490,8 +496,8 @@ namespace Offline
             //死亡SE再生
             soundAction.PlayOneShot(SoundManager.SE.DEATH, SoundManager.BaseSEVolume);
 
-            //死亡後爆破
-            Invoke(nameof(CreateExplosion), 2.5f);
+            //爆破後消去
+            Invoke(nameof(CreateExplosion), fallTime);
         }
 
         //ドローンを非表示にして爆破
@@ -513,72 +519,8 @@ namespace Offline
             isDestroyFall = false;
 
             //爆破後一定時間で消去
-            Destroy(gameObject, fallTime);
+            Destroy(gameObject, 5f);
         }
-
-        //#region Respawn
-
-        ////リスポーン処理
-        //void Respawn()
-        //{
-        //    //ドローン表示
-        //    droneObject.gameObject.SetActive(true);
-        //    barrierAction.BarrierObject.SetActive(true);
-        //    mainWeapon.gameObject.SetActive(true);
-        //    subWeapon.gameObject.SetActive(true);
-
-        //    //当たり判定も戻す
-        //    GetComponent<Collider>().enabled = true;
-
-        //    //移動の初期化
-        //    _rigidbody.velocity = new Vector3(0, 0, 0);
-        //    baseAction.ResetParameters();
-
-        //    //開始時間更新
-        //    StartTime = Time.time;
-
-        //    //重力補正初期化
-        //    gravityAccele = 1f;
-
-        //    //所持アイテム初期化
-        //    itemAction.ResetItem();
-
-        //    //状態異常初期化
-        //    statusAction.ResetStatus();
-
-        //    //ブーストゲージ回復
-        //    boostGaugeImage.fillAmount = 1f;
-        //    isBoost = false;
-
-        //    //残機を表記に適用
-        //    stockText.text = stock.ToString();
-
-        //    //サブ武器初期化
-        //    subWeapon.GetComponent<BaseWeapon>().ResetWeapon();
-
-        //    //バリア復活
-        //    barrierAction.Init();
-
-        //    //プロペラ再生
-        //    animator.speed = 1f;
-
-        //    //角度の初期化
-        //    droneObject.localRotation = Quaternion.identity;
-        //    mainWeapon.transform.localRotation = Quaternion.identity;
-        //    subWeapon.transform.localRotation = Quaternion.identity;
-
-        //    //リスポーンSE再生
-        //    soundAction.PlayOneShot(SoundManager.SE.RESPAWN, SoundManager.BaseSEVolume);
-
-        //    //生成した爆破を削除
-        //    Destroy(createdExplosion);
-
-        //    //操作可能にする
-        //    deathFlags[(int)DeathFlag.DESTROY] = false;
-        //}
-
-        //#endregion
-
 
         //攻撃処理
         void UseWeapon(Weapon weapon)

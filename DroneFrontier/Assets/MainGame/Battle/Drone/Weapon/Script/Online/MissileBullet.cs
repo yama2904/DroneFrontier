@@ -53,7 +53,7 @@ namespace Online
 
             if (other.CompareTag(TagNameManager.PLAYER))
             {
-                other.GetComponent<BattleDrone>().CmdDamage(Power);
+                other.GetComponent<DroneDamageAction>().CmdDamage(Power);
             }
             else if (other.CompareTag(TagNameManager.JAMMING_BOT))
             {

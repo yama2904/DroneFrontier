@@ -158,9 +158,8 @@ namespace Offline
         //スピードダウン
         public void SetSpeedDown(float downPercent)
         {
-            baseAction.ModifySpeed(1 - downPercent);
-
             isStatus[(int)Status.SPEED_DOWN] = true;
+            baseAction.ModifySpeed(1 - downPercent);
             speedDownCount++;
 
             //アイコン表示
@@ -171,18 +170,19 @@ namespace Offline
         }
 
         //スピードダウン解除
-        public void UnSetSpeedDown(ref float speed)
+        public void UnSetSpeedDown(float downPercent)
         {
-            //アイコン非表示
-            speedDownIcon.enabled = false;
+            baseAction.ModifySpeed(1 / (1 - downPercent));
 
             //スピードダウンがすべて解除されたらフラグも解除
-            if(--speedDownCount <= 0)
+            if (--speedDownCount <= 0)
             {
                 isStatus[(int)Status.SPEED_DOWN] = false;
             }
 
-
+            //アイコン非表示
+            speedDownIcon.enabled = false;
+            
             //SE停止
             soundAction.StopLoopSE(speedDownSoundId);
         }
