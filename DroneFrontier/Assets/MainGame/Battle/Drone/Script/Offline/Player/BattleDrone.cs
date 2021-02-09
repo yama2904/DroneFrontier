@@ -122,9 +122,10 @@ namespace Offline
             //レーザーの場合はブーストを弱体化する
             if (setSubWeapon == BaseWeapon.Weapon.LASER)
             {
-                boostAccele *= 0.8f;
-                maxBoostTime *= 0.8f;
-                boostRecastTime *= 1.2f;
+                atackingDownSpeed *= 0.8f;
+                //boostAccele *= 0.8f;
+                //maxBoostTime *= 0.8f;
+                //boostRecastTime *= 1.2f;
             }
 
 
