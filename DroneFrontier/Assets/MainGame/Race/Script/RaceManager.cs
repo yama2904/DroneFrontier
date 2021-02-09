@@ -26,13 +26,16 @@ namespace Online
         protected override void Awake()
         {
             base.Awake();
+            Singleton = this;
         }
 
         public override void OnStartClient()
         {
             base.OnStartClient();
-            Singleton = this;
             PlayerData.goalNum = 0;
+
+            //3秒後にカウントダウンSE
+            Invoke(nameof(RpcPlayStartCountDown), 3.0f);
         }
 
         protected override void Update()

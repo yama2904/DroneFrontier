@@ -303,7 +303,7 @@ GameObject:
   - component: {fileID: 7924870443464684064}
   - component: {fileID: 3232264185571159848}
   m_Layer: 0
-  m_Name: LaserWeapon
+  m_Name: LaserWeapon_Online
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -347,7 +347,7 @@ MonoBehaviour:
   laserBullet: {fileID: 7073714418969793329, guid: 24eccdfad1ec7ec4db66c7497ec702e0,
     type: 3}
   maxShotTime: 10
-  hitPerSecond: 6
+  hitPerSecond: 8
   laserGaugeImage: {fileID: 5777160482292308128}
   laserGaugeFrameImage: {fileID: 7820020350304644270}
   _recast: 8

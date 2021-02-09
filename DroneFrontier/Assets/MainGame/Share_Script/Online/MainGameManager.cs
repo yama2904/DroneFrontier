@@ -8,9 +8,7 @@ namespace Online
 {
     public class MainGameManager : NetworkBehaviour
     {
-        //シングルトン
-        static MainGameManager singleton;
-        public static MainGameManager Singleton { get { return singleton; } }
+        public static MainGameManager Singleton { get; private set; }
 
         //ゲーム終了アニメーター
         [SerializeField] Animator finishAnimator = null;
@@ -62,7 +60,7 @@ namespace Online
         protected virtual void Awake()
         {
             //シングルトンの作成
-            singleton = this;
+            Singleton = this;
 
             //カーソルロック
             Cursor.lockState = CursorLockMode.Locked;

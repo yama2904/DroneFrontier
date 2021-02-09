@@ -108,8 +108,11 @@ namespace Online
                 {
                     //次のプレイヤーのカメラとリスナーに切り替える
                     int initIndex = useIndex;
-                    playerDatas[useIndex].drone.SetCameraDepth(0);
-                    playerDatas[useIndex].drone.SetAudioListener(false);
+                    if (playerDatas[useIndex].drone != null)
+                    {
+                        playerDatas[useIndex].drone.SetCameraDepth(0);
+                        playerDatas[useIndex].drone.SetAudioListener(false);
+                    }
                     listener.enabled = false;
                     while (true)
                     {
