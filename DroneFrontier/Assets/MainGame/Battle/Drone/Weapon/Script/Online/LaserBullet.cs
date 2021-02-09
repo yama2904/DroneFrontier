@@ -115,7 +115,8 @@ namespace Online
             return hits.Where(h => !h.transform.CompareTag(TagNameManager.ITEM))    //アイテム除外
                        .Where(h => !h.transform.CompareTag(TagNameManager.BULLET))  //弾丸除外
                        .Where(h => !h.transform.CompareTag(TagNameManager.GIMMICK)) //ギミック除外
-                       .Where(h => !h.transform.CompareTag(TagNameManager.JAMMING))
+                       .Where(h => !h.transform.CompareTag(TagNameManager.JAMMING)) //ジャミング除外
+                       .Where(h => !h.transform.CompareTag(TagNameManager.TOWER))   //タワー除外
                        .Where(h =>  //撃ったプレイヤーは当たり判定から除外
                        {
                            return !ReferenceEquals(h.transform.gameObject, shooter);

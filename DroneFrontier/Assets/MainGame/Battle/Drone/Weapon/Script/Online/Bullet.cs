@@ -74,6 +74,7 @@ namespace Online
             if (other.CompareTag(TagNameManager.ITEM)) return;
             if (other.CompareTag(TagNameManager.GIMMICK)) return;
             if (other.CompareTag(TagNameManager.JAMMING)) return;
+            if (other.CompareTag(TagNameManager.TOWER)) return;
 
             //プレイヤーの当たり判定
             if (other.CompareTag(TagNameManager.PLAYER))

@@ -150,8 +150,9 @@ namespace Online
             if (isServer)
             {
                 //破壊されたドローンを調べる
-                foreach (PlayerData pd in playerDatas)
+                for (int i = 0; i < playerDatas.Count; i++)
                 {
+                    PlayerData pd = playerDatas[i];
                     if (pd.isDestroy) continue;
                     if (pd.drone == null)
                     {
@@ -163,7 +164,6 @@ namespace Online
                             p.GetComponent<BattleDrone>().syncSetSubWeapon = pd.weapon;
                             NetworkServer.AddPlayerForConnection(pd.conn, p);
                             pd.stock--;
-                            pd.drone = p.GetComponent<BattleDrone>();
 
                             //リスポーンSEの再生
                             pd.drone.GetComponent<DroneSoundAction>().RpcPlayOneShotSEAllClient(SoundManager.SE.RESPAWN, SoundManager.BaseSEVolume);
@@ -174,7 +174,7 @@ namespace Online
                         //ストックが残っていなかったらランキングに記録
                         else
                         {
-                            pd.isDestroy = true;
+                            RpcSetIsDestroy(true, i);
                             ranking[PlayerData.droneNum - 1] = pd.name;
                             PlayerData.droneNum--;
 
@@ -212,9 +212,15 @@ namespace Online
         //プレイヤーの情報を登録する
         public void AddPlayerData(BattleDrone drone, bool isLocalPlayer, NetworkConnection conn)
         {
-            //既にリストにあったら処理しない
-            if (playerDatas.FindIndex(pd => ReferenceEquals(pd.conn, conn)) >= 0) return;
+            //既にリストにあったら更新
+            int index = playerDatas.FindIndex(pd => ReferenceEquals(pd.conn, conn));
+            if (index >= 0)
+            {
+                playerDatas[index].drone = drone;
+                return;
+            }
 
+            //リストになかったら追加
             playerDatas.Add(new PlayerData
             {
                 conn = conn,
@@ -282,6 +288,12 @@ namespace Online
             playerDatas.RemoveAt(index);
         }
 
+
+        [ClientRpc]
+        void RpcSetIsDestroy(bool isDestroy, int index)
+        {
+            playerDatas[index].isDestroy = isDestroy;
+        }
 
         //時間制限処理
         IEnumerator CountTime()
