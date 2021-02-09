@@ -115,7 +115,7 @@ namespace Online
         public override void OnStartClient()
         {
             base.OnStartClient();
-            BattleManager.Singleton.AddPlayerData(this, (BaseWeapon.Weapon)syncSetSubWeapon, isLocalPlayer, connectionToClient);
+            BattleManager.Singleton.AddPlayerData(this, isLocalPlayer, connectionToClient);
 
             //生成された時間の初期化
             StartTime = Time.time;

@@ -167,7 +167,7 @@ namespace Online
         {
             //複数のジャミングに同時にかかっている場合は解除しない
             if (jammingCount-- > 1) return;
-            
+
             isStatus[(int)Status.JAMMING] = false;
             soundAction.StopLoopSE(jammingSoundId); //SE停止
 
@@ -179,9 +179,11 @@ namespace Online
         //スピードダウン
         public void SetSpeedDown(float downPercent)
         {
-            isStatus[(int)Status.SPEED_DOWN] = true;
             baseAction.ModifySpeed(1 - downPercent);
-            speedDownCount++;
+            if (speedDownCount++ > 0) return;  //既にスピードダウンにかかっている場合は無駄なので処理しない
+
+            //フラグを立てる
+            isStatus[(int)Status.SPEED_DOWN] = true;
 
             //アイコン表示
             speedDownIcon.enabled = true;
@@ -195,11 +197,11 @@ namespace Online
         {
             baseAction.ModifySpeed(1 / (1 - downPercent));
 
-            //スピードダウンがすべて解除されたらフラグも解除
-            if (--speedDownCount <= 0)
-            {
-                isStatus[(int)Status.SPEED_DOWN] = false;
-            }
+            //同時にスピードダウンにかかっている場合は解除しない
+            if (speedDownCount-- > 1) return;
+
+            //フラグ解除
+            isStatus[(int)Status.SPEED_DOWN] = false;
 
             //アイコン非表示
             speedDownIcon.enabled = false;

@@ -24,7 +24,7 @@ namespace Online
         {
             public NetworkConnection conn;
             public BattleDrone drone = null;
-            public BaseWeapon.Weapon weapon = BaseWeapon.Weapon.NONE;
+            public int weapon = -1;
             public string name = "";
             public int stock = 0;
             public int ranking = 1;
@@ -157,6 +157,7 @@ namespace Online
                         {
                             Transform pos = NetworkManager.singleton.GetStartPosition();
                             GameObject p = Instantiate(NewNetworkRoomManager.singleton.playerPrefab, pos.position, pos.rotation);
+                            p.GetComponent<BattleDrone>().syncSetSubWeapon = pd.weapon;
                             NetworkServer.AddPlayerForConnection(pd.conn, p);
                             pd.stock--;
                             pd.drone = p.GetComponent<BattleDrone>();
@@ -206,7 +207,7 @@ namespace Online
 
 
         //プレイヤーの情報を登録する
-        public void AddPlayerData(BattleDrone drone, BaseWeapon.Weapon weapon, bool isLocalPlayer, NetworkConnection conn)
+        public void AddPlayerData(BattleDrone drone, bool isLocalPlayer, NetworkConnection conn)
         {
             //既にリストにあったら処理しない
             if (playerDatas.FindIndex(pd => ReferenceEquals(pd.conn, conn)) >= 0) return;
@@ -215,7 +216,7 @@ namespace Online
             {
                 conn = conn,
                 drone = drone,
-                weapon = weapon,
+                weapon = drone.syncSetSubWeapon,
                 name = drone.name,
                 stock = droneStock
             });
