@@ -244,7 +244,7 @@ namespace Online
             int rank = serverPlayerDatas[index].ranking;
             foreach (ServerPlayerData pd in serverPlayerDatas)
             {
-                if (pd.ranking > rank)
+                if (pd.ranking >= rank)
                 {
                     pd.ranking--;
                 }

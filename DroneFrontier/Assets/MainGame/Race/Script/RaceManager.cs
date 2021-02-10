@@ -102,6 +102,7 @@ namespace Online
 
 
         //切断されたプレイヤーの処理
+        [Server]
         public static void DisconnectPlayer(NetworkConnection conn)
         {
             int index = playerDatas.FindIndex(pd => ReferenceEquals(pd.conn, conn));
@@ -111,14 +112,14 @@ namespace Online
             int rank = playerDatas[index].ranking;
             foreach (PlayerData pd in playerDatas)
             {
-                if (pd.ranking > rank)
+                if (pd.ranking >= rank)
                 {
                     pd.ranking--;
                 }
             }
 
             //残りプレイヤーの修正
-            if (!playerDatas[index].isGoal)
+            if (playerDatas[index].isGoal)
             {
                 PlayerData.goalNum--;
             }
