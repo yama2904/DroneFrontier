@@ -53,12 +53,11 @@ namespace Online
                 {
                     if (!isFinished)
                     {
-                        string[] ranking = new string[playerDatas.Count];
                         foreach (PlayerData pd in playerDatas)
                         {
                             ranking[pd.ranking - 1] = pd.drone.name;
                         }
-                        FinishGame(ranking);
+                        FinishGame();
                         isFinished = true;
                     }
                 }

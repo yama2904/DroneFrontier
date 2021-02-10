@@ -137,27 +137,14 @@ namespace Online
 
         //ゲームの終了処理
         [Server]
-        public virtual void FinishGame(string[] ranking)
+        public void FinishGame()
         {
             //デバッグ用
             if (solo) return;
 
 
-            int index = 0;
-            for (; index < MatchingManager.PlayerNum; index++)
-            {
-                if (index < 0 || index >= ranking.Length) break;  //配列の範囲外ならやめる
-                this.ranking[index] = ranking[index];
-            }
-
-            //引数の配列の要素が足りなかったら空白文字で補う
-            for (; index < MatchingManager.PlayerNum; index++)
-            {
-                this.ranking[index] = "";
-            }
-
             RpcStopBGM();
-            StartCoroutine(FinishGameCoroutine(this.ranking));
+            StartCoroutine(FinishGameCoroutine(ranking));
         }
 
         IEnumerator FinishGameCoroutine(string[] ranking)
