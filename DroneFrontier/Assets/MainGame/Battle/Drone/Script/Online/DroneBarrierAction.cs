@@ -56,6 +56,7 @@ namespace Online
             if (syncIsWeak) return;
 
             //ドローンが破壊されていたら回復処理を行わない
+            if (damageAction == null) return;
             if (damageAction.HP <= 0) return;
 
             //バリアが破壊されていたら修復処理

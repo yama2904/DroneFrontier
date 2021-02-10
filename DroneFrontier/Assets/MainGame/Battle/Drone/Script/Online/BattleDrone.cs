@@ -115,7 +115,6 @@ namespace Online
         public override void OnStartClient()
         {
             base.OnStartClient();
-            BattleManager.Singleton.AddPlayerData(this, isLocalPlayer, connectionToClient);
 
             //生成された時間の初期化
             StartTime = Time.time;
@@ -136,6 +135,12 @@ namespace Online
 
             //プロペラは最初から流す
             soundAction.PlayLoopSE(SoundManager.SE.PROPELLER, SoundManager.BaseSEVolume);
+
+            if (isServer)
+            {
+                BattleManager.Singleton.AddServerPlayerData(this, connectionToClient);
+                //Invoke(nameof(AddServerPlayerData), 1f);
+            }
         }
 
         public override void OnStartLocalPlayer()
@@ -544,6 +549,13 @@ namespace Online
         public void SetAudioListener(bool flag)
         {
             baseAction.Listener.enabled = flag;
+        }
+
+
+        [Server]
+        void AddServerPlayerData()
+        {
+            BattleManager.Singleton.AddServerPlayerData(this, connectionToClient);
         }
 
         #region Death

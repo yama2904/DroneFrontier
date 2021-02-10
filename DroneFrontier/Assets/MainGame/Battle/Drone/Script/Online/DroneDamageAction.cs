@@ -34,6 +34,8 @@ namespace Online
         [ServerCallback]
         void Update()
         {
+            if (drone == null) return;
+
             if (Time.time - drone.StartTime <= nonDamageTime)
             {
                 if (!syncIsNonDamage)
