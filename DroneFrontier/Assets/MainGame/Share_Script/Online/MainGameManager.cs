@@ -135,6 +135,7 @@ namespace Online
             Cursor.visible = true;
         }
 
+
         //ゲームの終了処理
         [Server]
         public void FinishGame()
@@ -231,13 +232,6 @@ namespace Online
 
             Cursor.lockState = CursorLockMode.None;
             IsConfig = true;
-        }
-
-
-
-        //未使用
-        public static void SetPlayer(string name, BaseWeapon.Weapon weapon, bool isPlayer)
-        {
         }
     }
 }
