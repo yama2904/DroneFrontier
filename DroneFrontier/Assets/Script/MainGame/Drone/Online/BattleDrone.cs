@@ -24,6 +24,7 @@ namespace Online
         DroneBarrierAction barrierAction = null;
         DroneItemAction itemAction = null;
         DroneStatusAction statusAction = null;
+        AudioListener listener = null;
         NetworkTransformChild[] childObjects;
 
         //ドローンが移動した際にオブジェクトが傾く処理用
@@ -67,7 +68,7 @@ namespace Online
         [SerializeField] GameObject droneObject = null;
         [SerializeField] GameObject barrierObject = null;
         [SerializeField] GameObject explosion = null;     //破壊されたときに生成する爆破
-        [SyncVar] GameObject syncSpawnedExplosion = null;     //生成したexplosion
+        [SyncVar] GameObject syncSpawnedExplosion = null; //生成したexplosion
         Quaternion deathRotate = Quaternion.Euler(28, -28, -28);
         float deathRotateSpeed = 2f;
         float gravityAccele = 1f;  //落下加速用
@@ -133,13 +134,19 @@ namespace Online
             statusAction = GetComponent<DroneStatusAction>();
             childObjects = GetComponents<NetworkTransformChild>();
 
+            //AudioListenerの初期化
+            listener = GetComponent<AudioListener>();
+            if (!isLocalPlayer)
+            {
+                listener.enabled = false;
+            }
+
             //プロペラは最初から流す
             soundAction.PlayLoopSE(SoundManager.SE.PROPELLER, SoundManager.BaseSEVolume);
 
             if (isServer)
             {
                 BattleManager.Singleton.AddServerPlayerData(this, connectionToClient);
-                //Invoke(nameof(AddServerPlayerData), 1f);
             }
         }
 
@@ -539,7 +546,7 @@ namespace Online
         //AudioListenerのオンオフ
         public void SetAudioListener(bool flag)
         {
-            baseAction.Listener.enabled = flag;
+            listener.enabled = flag;
         }
 
 

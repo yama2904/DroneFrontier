@@ -10,7 +10,6 @@ namespace Online
         //コンポーネント用
         Rigidbody _rigidbody = null;
         Transform cacheTransform = null;  //キャッシュ用
-        public AudioListener Listener { get; private set; } = null;
 
         //移動用
         [SerializeField, Tooltip("移動速度")] float moveSpeed = 800;
@@ -41,13 +40,6 @@ namespace Online
             //初期値の保存
             initSpeed = moveSpeed;
             initRotateSpeed = rotateSpeed;
-
-            //AudioListenerの初期化
-            Listener = GetComponent<AudioListener>();
-            if (!isLocalPlayer)
-            {
-                Listener.enabled = false;
-            }
         }
 
         public override void OnStartLocalPlayer()
