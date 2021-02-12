@@ -24,7 +24,7 @@ namespace Offline
         [SerializeField] float regeneValue = 5.0f;       //バリアが回復する量
         [SerializeField] float resurrectBarrierTime = 15.0f;   //バリアが破壊されてから修復される時間
         [SerializeField] float resurrectBarrierHP = 10.0f;     //バリアが復活した際のHP
-        float regeneCountTime;    //計測用
+        float regeneTimeCount;    //計測用
         bool isRegene;    //回復中か
 
         float damagePercent;    //ダメージ倍率
@@ -52,41 +52,41 @@ namespace Offline
             //バリアが破壊されていたら修復処理
             if (HP <= 0)
             {
-                if (regeneCountTime >= resurrectBarrierTime)
+                if (regeneTimeCount >= resurrectBarrierTime)
                 {
                     ResurrectBarrier(resurrectBarrierHP);
-                    regeneCountTime = 0;
+                    regeneTimeCount = 0;
                 }
             }
             //バリアが回復を始めるまで待つ
             else if (!isRegene)
             {
-                if (regeneCountTime >= regeneStartTime)
+                if (regeneTimeCount >= regeneStartTime)
                 {
                     isRegene = true;
-                    regeneCountTime = 0;
+                    regeneTimeCount = 0;
                 }
             }
             //バリアの回復処理
             else
             {
-                if (regeneCountTime >= regeneInterval)
+                if (regeneTimeCount >= regeneInterval)
                 {
                     if (HP < MAX_HP)
                     {
                         Regene(regeneValue);
                     }
-                    regeneCountTime = 0;
+                    regeneTimeCount = 0;
                 }
             }
-            regeneCountTime += Time.deltaTime;
+            regeneTimeCount += Time.deltaTime;
         }
 
 
         public void Init()
         {
             HP = MAX_HP;
-            regeneCountTime = 0;
+            regeneTimeCount = 0;
             damagePercent = 1;
             isRegene = true;
             IsStrength = false;
@@ -108,7 +108,7 @@ namespace Offline
                 barrierObject.SetActive(false);
                 soundAction.PlayOneShot(SoundManager.SE.DESTROY_BARRIER, SoundManager.BaseSEVolume);
             }
-            regeneCountTime = 0;
+            regeneTimeCount = 0;
             isRegene = false;
             soundAction.PlayOneShot(SoundManager.SE.BARRIER_DAMAGE, SoundManager.BaseSEVolume * 0.7f);
 
@@ -193,7 +193,7 @@ namespace Offline
             SetBarrierColor(value, IsStrength);
 
             isRegene = false;
-            regeneCountTime = 0;
+            regeneTimeCount = 0;
 
             IsWeak = true;
         }

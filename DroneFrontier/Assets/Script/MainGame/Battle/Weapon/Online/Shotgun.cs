@@ -45,7 +45,7 @@ namespace Online
         {
             Recast = _recast;
             ShotInterval = 1.0f / shotPerSecond;
-            ShotCountTime = ShotInterval;
+            ShotTimeCount = ShotInterval;
             MaxBullets = _maxBullets;
             BulletsRemain = MaxBullets;
             BulletPower = _power;
@@ -87,11 +87,11 @@ namespace Online
             if (BulletsRemain >= MaxBullets) return;
 
             //リキャスト時間経過したら弾数を1個補充
-            if (RecastCountTime >= Recast)
+            if (RecastTimeCount >= Recast)
             {
                 UIs[BulletsRemain].fillAmount = 1f;
                 BulletsRemain++;        //弾数を回復
-                RecastCountTime = 0;    //リキャストのカウントをリセット
+                RecastTimeCount = 0;    //リキャストのカウントをリセット
 
 
                 //デバッグ用
@@ -99,14 +99,14 @@ namespace Online
             }
             else
             {
-                UIs[BulletsRemain].fillAmount = RecastCountTime / Recast;
+                UIs[BulletsRemain].fillAmount = RecastTimeCount / Recast;
             }
         }
 
         public override void ResetWeapon()
         {
-            RecastCountTime = 0;
-            ShotCountTime = ShotInterval;
+            RecastTimeCount = 0;
+            ShotTimeCount = ShotInterval;
             BulletsRemain = MaxBullets;
 
             //弾数UIのリセット
@@ -119,7 +119,7 @@ namespace Online
         public override void Shot(GameObject target = null)
         {
             //前回発射して発射間隔分の時間が経過していなかったら撃たない
-            if (ShotCountTime < ShotInterval) return;
+            if (ShotTimeCount < ShotInterval) return;
 
             //残り弾数が0だったら撃たない
             if (BulletsRemain <= 0) return;
@@ -146,10 +146,10 @@ namespace Online
             //残り弾丸がMAXで撃った場合のみリキャストを0にする
             if (BulletsRemain == MaxBullets)
             {
-                RecastCountTime = 0;
+                RecastTimeCount = 0;
             }
             BulletsRemain--;    //残り弾数を減らす
-            ShotCountTime = 0;  //発射間隔のカウントをリセット
+            ShotTimeCount = 0;  //発射間隔のカウントをリセット
 
 
             //デバッグ用

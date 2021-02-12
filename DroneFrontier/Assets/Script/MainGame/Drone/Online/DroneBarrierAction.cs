@@ -29,7 +29,7 @@ namespace Online
         [SerializeField] float regeneValue = 5.0f;       //バリアが回復する量
         [SerializeField] float resurrectBarrierTime = 15.0f;   //バリアが破壊されてから修復される時間
         [SerializeField] float resurrectBarrierHP = 10.0f;     //バリアが復活した際のHP
-        [SyncVar] float syncRegeneCountTime;    //計測用
+        [SyncVar] float syncRegeneTimeCount;    //計測用
         [SyncVar] bool syncIsRegene;    //回復中か
 
         [SyncVar] float syncDamagePercent;    //ダメージ倍率
@@ -62,41 +62,41 @@ namespace Online
             //バリアが破壊されていたら修復処理
             if (syncHP <= 0)
             {
-                if (syncRegeneCountTime >= resurrectBarrierTime)
+                if (syncRegeneTimeCount >= resurrectBarrierTime)
                 {
                     ResurrectBarrier(resurrectBarrierHP);
-                    syncRegeneCountTime = 0;
+                    syncRegeneTimeCount = 0;
                 }
             }
             //バリアが回復を始めるまで待つ
             else if (!syncIsRegene)
             {
-                if (syncRegeneCountTime >= regeneStartTime)
+                if (syncRegeneTimeCount >= regeneStartTime)
                 {
                     syncIsRegene = true;
-                    syncRegeneCountTime = 0;
+                    syncRegeneTimeCount = 0;
                 }
             }
             //バリアの回復処理
             else
             {
-                if (syncRegeneCountTime >= regeneInterval)
+                if (syncRegeneTimeCount >= regeneInterval)
                 {
                     if (syncHP < MAX_HP)
                     {
                         Regene(regeneValue);
                     }
-                    syncRegeneCountTime = 0;
+                    syncRegeneTimeCount = 0;
                 }
             }
-            syncRegeneCountTime += Time.deltaTime;
+            syncRegeneTimeCount += Time.deltaTime;
         }
 
         [Command(ignoreAuthority = true)]
         public void CmdInit()
         {
             syncHP = MAX_HP;
-            syncRegeneCountTime = 0;
+            syncRegeneTimeCount = 0;
             syncDamagePercent = 1;
             syncIsRegene = true;
             syncIsStrength = false;
@@ -161,7 +161,7 @@ namespace Online
                 RpcSetActiveBarrier(false);
                 soundAction.RpcPlayOneShotSEAllClient(SoundManager.SE.DESTROY_BARRIER, SoundManager.BaseSEVolume);
             }
-            syncRegeneCountTime = 0;
+            syncRegeneTimeCount = 0;
             syncIsRegene = false;
             soundAction.RpcPlayOneShotSEAllClient(SoundManager.SE.BARRIER_DAMAGE, SoundManager.BaseSEVolume * 0.7f);
 
@@ -250,7 +250,7 @@ namespace Online
             RpcSetBarrierColor(value, IsStrength);
 
             syncIsRegene = false;
-            syncRegeneCountTime = 0;
+            syncRegeneTimeCount = 0;
 
             syncIsWeak = true;
         }

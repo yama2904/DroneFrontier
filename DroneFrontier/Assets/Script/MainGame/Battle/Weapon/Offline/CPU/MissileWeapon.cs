@@ -22,9 +22,9 @@ namespace Offline
             [SerializeField, Tooltip("射程")] float destroyTime = 2.0f;
             [SerializeField, Tooltip("誘導力")] float trackingPower = 2.5f;
             [SerializeField, Tooltip("ストック可能な弾数")] int maxBulletNum = 3;
-            float shotInterval = 0;
-            float shotCountTime = 0;
-            float recastCountTime = 0;
+            float shotInterval = 0;  //発射間隔
+            float shotTimeCount = 0; //時間計測用
+            float recastTimeCount = 0;
             int haveBulletNum = 0;
 
 
@@ -32,7 +32,7 @@ namespace Offline
             {
                 //パラメータの初期化
                 shotInterval = 1f / shotPerSecond;
-                shotCountTime = shotInterval;
+                shotTimeCount = shotInterval;
                 haveBulletNum = maxBulletNum;
 
                 //弾丸生成
@@ -45,10 +45,10 @@ namespace Offline
                 //発射間隔のカウント
                 if (!setMissile)
                 {
-                    shotCountTime += Time.deltaTime;
-                    if (shotCountTime > shotInterval)
+                    shotTimeCount += Time.deltaTime;
+                    if (shotTimeCount > shotInterval)
                     {
-                        shotCountTime = shotInterval;
+                        shotTimeCount = shotInterval;
                         if (haveBulletNum > 0)  //弾丸が残っていない場合は処理しない
                         {
                             CreateMissile();
@@ -63,11 +63,11 @@ namespace Offline
                 //リキャスト時間経過したら弾数を1個補充
                 if (haveBulletNum < maxBulletNum)     //最大弾数持っていたら処理しない
                 {
-                    recastCountTime += Time.deltaTime;
-                    if (recastCountTime >= recast)
+                    recastTimeCount += Time.deltaTime;
+                    if (recastTimeCount >= recast)
                     {
                         haveBulletNum++;        //弾数を回復
-                        recastCountTime = 0;    //リキャストのカウントをリセット
+                        recastTimeCount = 0;    //リキャストのカウントをリセット
 
 
                         //デバッグ用
@@ -91,7 +91,7 @@ namespace Offline
             public override void Shot(GameObject target = null)
             {
                 //前回発射して発射間隔分の時間が経過していなかったら撃たない
-                if (shotCountTime < shotInterval) return;
+                if (shotTimeCount < shotInterval) return;
 
                 //バグ防止
                 if (!setMissile) return;
@@ -111,10 +111,10 @@ namespace Offline
                 //弾数を減らしてリキャスト開始
                 if (haveBulletNum == maxBulletNum)
                 {
-                    recastCountTime = 0;
+                    recastTimeCount = 0;
                 }
                 haveBulletNum--;    //残り弾数を減らす
-                shotCountTime = 0;  //発射間隔のカウントをリセット
+                shotTimeCount = 0;  //発射間隔のカウントをリセット
 
 
                 //デバッグ用

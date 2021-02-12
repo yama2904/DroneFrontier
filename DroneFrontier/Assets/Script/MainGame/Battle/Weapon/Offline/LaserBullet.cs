@@ -9,14 +9,13 @@ namespace Offline
     {
         //パラメータ
         const float LINE_RADIUS = 0.2f;
-        BaseDrone shooter = null;
-        float chargeTime = 0;
-        float power = 0;
-        float lineRange = 0;
-        float hitPerSecond = 0;
-        float shotInterval = 0;
-        float shotCountTime = 0;
-        bool isLocal = false;
+        BaseDrone shooter = null;  //発射したプレイヤー
+        float chargeTime = 0;      //チャージ時間
+        float power = 0;           //威力
+        float lineRange = 0;       //レーザーの半径
+        float shotInterval = 0;    //発射間隔
+        float shotTimeCount = 0;   //時間計測用
+        bool isPlayer = false;     //プレイヤーの弾丸か
 
         public bool IsShotBeam { get; private set; } = false;
         bool isStartCharge = false;
@@ -59,29 +58,28 @@ namespace Offline
         void FixedUpdate()
         {
             //発射間隔の管理
-            shotCountTime += Time.deltaTime;
-            if (shotCountTime > shotInterval)
+            shotTimeCount += Time.deltaTime;
+            if (shotTimeCount > shotInterval)
             {
-                shotCountTime = shotInterval;
+                shotTimeCount = shotInterval;
             }
         }
 
 
-        public void Init(BaseDrone drone, float power, float size, float chargeTime, float lineRange, float hitPerSecond, bool isLocal)
+        public void Init(BaseDrone drone, float power, float size, float chargeTime, float lineRange, float hitPerSecond, bool isPlayer)
         {
             shooter = drone;
             this.chargeTime = chargeTime;
             this.power = power;
             this.lineRange = lineRange;
-            this.hitPerSecond = hitPerSecond;
-            this.isLocal = isLocal;
+            this.isPlayer = isPlayer;
 
 
             //長さをスケールに合わせる
             this.lineRange *= size;
 
             shotInterval = 1f / hitPerSecond;
-            shotCountTime = shotInterval;
+            shotTimeCount = shotInterval;
 
             //Charge用処理//
             Vector3 cLocalScale = charge.transform.localScale;
@@ -157,7 +155,7 @@ namespace Offline
                 IsShotBeam = true;
 
                 //前回ヒットして発射間隔分の時間が経過していなかったら当たり判定を行わない
-                if (shotCountTime < shotInterval) return;
+                if (shotTimeCount < shotInterval) return;
 
                 //Y軸の誘導
                 RotateBullet(target);
@@ -195,14 +193,14 @@ namespace Offline
                         }
 
                         //発射間隔のカウントをリセット
-                        shotCountTime = 0;
+                        shotTimeCount = 0;
                     }
                     else if (hit.transform.CompareTag(TagNameManager.JAMMING_BOT))
                     {
                         hit.transform.GetComponent<JammingBot>().Damage(power);
 
                         //発射間隔のカウントをリセット
-                        shotCountTime = 0;
+                        shotTimeCount = 0;
                     }
                 }
                 else
@@ -269,7 +267,7 @@ namespace Offline
             //そのままレーザーを太くすると他プレイヤーから見ると異常に太く見えるので
             //ローカルプレイヤーのみ太くする
             float localScaleY = length;
-            if (isLocal)
+            if (isPlayer)
             {
                 localScaleY *= 40;
             }

@@ -578,7 +578,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d27047d3b3407144f8e1b9ef2e877d24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _camera: {fileID: 6808110575809998133}
+  cameraTransform: {fileID: 6808110575809998133}
   setSubWeapon: 4
   explosion: {fileID: 2212005194167726933, guid: 8dc076f9b5243664fa747acf0168fb56,
     type: 3}

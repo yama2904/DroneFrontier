@@ -20,17 +20,21 @@ namespace Offline
             DroneBarrierAction barrierAction = null;
 
             //カメラ
-            [SerializeField] Transform _camera = null;
+            [SerializeField] Transform cameraTransform = null;  //キャッシュ用
+
+            //AudioListener
+            AudioListener listener = null;
 
             //移動
-            Vector3 moveDir = Vector3.zero;
-            float moveDirTime = 0;
-            float moveDirCountTime = 0;
+            Vector3 moveSideDir = Vector3.zero;  //移動する方向(右か左)
+            float moveSideTime = 0;       //横移動する時間
+            float moveSideTimeCount = 0;  //時間計測
+            bool isMoveSide = false;      //横移動するか
 
             //回転
             const float CHANGE_ROTATE_TIME = 3f;
             Vector3 angle = Vector3.zero;
-            float rotateCountTime = CHANGE_ROTATE_TIME;
+            float rotateTimeCount = CHANGE_ROTATE_TIME;
             bool isRotate = false;
 
             //武器
@@ -44,10 +48,11 @@ namespace Offline
             BaseWeapon mainWeapon = null;
             BaseWeapon subWeapon = null;
             public BaseWeapon.Weapon setSubWeapon = BaseWeapon.Weapon.SHOTGUN;
+            float atackingSpeed = 1f;   //攻撃中の移動速度の変動用
 
             //攻撃処理
             int weaponTime = 0;
-            float weaponCountTime = 0;
+            float weaponTimeCount = 0;
             bool useMainWeapon = false;
 
 
@@ -78,6 +83,7 @@ namespace Offline
                 soundAction = GetComponent<DroneSoundAction>();
                 lockOnAction = GetComponent<DroneLockOnAction>();
                 barrierAction = GetComponent<DroneBarrierAction>();
+                listener = GetComponent<AudioListener>();
             }
 
             protected override void Start()
@@ -103,50 +109,66 @@ namespace Offline
                     DestroyMe();
                 }
 
+                //移動
+                moveSideTimeCount += Time.deltaTime;
                 if (!isDamage)
                 {
-                    //移動
                     if (lockOnAction.Target == null)
                     {
-                        baseAction.Move(cacheTransform.forward);
+                        baseAction.Move(cacheTransform.forward * atackingSpeed);
                     }
                     else
                     {
-
                         Vector3 diff = lockOnAction.Target.transform.position - cacheTransform.position;
-                        float changeDirDistance = 400f;
-                        if (setSubWeapon == BaseWeapon.Weapon.SHOTGUN)
+                        float changeDirDistance = 300f;
+                        if (!useMainWeapon)
                         {
-                            changeDirDistance = 75f;
+                            if (setSubWeapon == BaseWeapon.Weapon.SHOTGUN)
+                            {
+                                changeDirDistance = 75f;
+                            }
+                            else
+                            {
+                                changeDirDistance = 500f;
+                            }
                         }
 
                         //敵との一定の距離内に入ると移動方向切り替え
                         if (diff.sqrMagnitude <= Mathf.Pow(changeDirDistance, 2))
                         {
-                            moveDirCountTime += Time.deltaTime;
-                            if (moveDirCountTime >= moveDirTime)
+                            if (moveSideTimeCount >= moveSideTime)
                             {
                                 if (Random.Range(0, 2) == 0)
                                 {
                                     Quaternion leftAngle = Quaternion.Euler(0, -90, 0);
                                     Vector3 left = leftAngle.normalized * cacheTransform.forward;
-                                    moveDir = left;
+                                    moveSideDir = left;
                                 }
                                 else
                                 {
                                     Quaternion rightAngle = Quaternion.Euler(0, 90, 0);
                                     Vector3 right = rightAngle.normalized * cacheTransform.forward;
-                                    moveDir = right;
+                                    moveSideDir = right;
                                 }
 
-                                moveDirCountTime = 0;
-                                moveDirTime = Random.Range(2, 6);
+                                moveSideTimeCount = 0;
+                                moveSideTime = Random.Range(2, 6);
+                                isMoveSide = true;
                             }
-                            baseAction.Move(moveDir * 2f);
                         }
                         else
                         {
-                            baseAction.Move(cacheTransform.forward);
+                            baseAction.Move(cacheTransform.forward * atackingSpeed);
+                            if (moveSideTimeCount >= moveSideTime)
+                            {
+                                moveSideTimeCount = moveSideTime;
+                                isMoveSide = false;
+                            }
+                        }
+
+                        if (isMoveSide)
+                        {
+                            baseAction.Move(moveSideDir * atackingSpeed);
                         }
                     }
 
@@ -157,24 +179,25 @@ namespace Offline
                     }
                     else
                     {
-                        rotateCountTime += Time.deltaTime;
-                        if (rotateCountTime > CHANGE_ROTATE_TIME)
+                        rotateTimeCount += Time.deltaTime;
+                        if (rotateTimeCount > CHANGE_ROTATE_TIME)
                         {
                             StartRotate();
-                            rotateCountTime = 0;
+                            rotateTimeCount = 0;
                         }
                     }
                 }
+                //攻撃されたら止まって回転
                 else
                 {
                     if (lockOnAction.Target == null)
                     {
                         if (target != null)
                         {
-                            Vector3 diff = target.position - _camera.position;    //ターゲットとの距離
-                            Quaternion rotation = Quaternion.LookRotation(diff);  //ロックオンしたオブジェクトの方向
+                            Vector3 diff = target.position - cameraTransform.position;    //ターゲットとの距離
+                            Quaternion rotation = Quaternion.LookRotation(diff);  //攻撃してきた敵の方向
 
-                            //カメラの角度からtrackingSpeed(0～1)の速度でロックオンしたオブジェクトの角度に向く
+                            //攻撃してきた敵の方向に向く
                             cacheTransform.rotation = Quaternion.Slerp(cacheTransform.rotation, rotation, 0.1f);
                         }
                     }
@@ -188,22 +211,23 @@ namespace Offline
                 if (lockOnAction.UseLockOn(0.3f))
                 {
                     //ロックオン対象があれば攻撃
-                    weaponCountTime += Time.deltaTime;
-                    if (weaponCountTime >= weaponTime)
+                    weaponTimeCount += Time.deltaTime;
+                    if (weaponTimeCount >= weaponTime)
                     {
-                        weaponCountTime = 0;
+                        weaponTimeCount = 0;
                         if (setSubWeapon == BaseWeapon.Weapon.SHOTGUN)
                         {
+                            //ショットガンを使う場合は短時間
                             if (useMainWeapon)
-                            {
-                                weaponTime = Random.Range(8, 11);
-                            }
-                            else
                             {
                                 weaponTime = 3;
                             }
+                            else
+                            {
+                                weaponTime = Random.Range(8, 11);
+                            }
                         }
-                        if (setSubWeapon == BaseWeapon.Weapon.LASER)
+                        if (setSubWeapon == BaseWeapon.Weapon.MISSILE)
                         {
                             weaponTime = Random.Range(3, 8);
                         }
@@ -222,10 +246,28 @@ namespace Offline
                     {
                         subWeapon.Shot(lockOnAction.Target);
                     }
+
+                    //攻撃中の移動速度低下の設定
+                    if (useMainWeapon)
+                    {
+                        //ガトリング使用中は移動速度低下
+                        atackingSpeed = 0.5f;
+                    }
+                    //ミサイル使用中も移動速度低下
+                    else if (setSubWeapon == BaseWeapon.Weapon.MISSILE)
+                    {
+                        atackingSpeed = 0.5f;
+                    }
+                    //レーザーを使っている場合は移動速度低下の増加
+                    else if (setSubWeapon == BaseWeapon.Weapon.LASER)
+                    {
+                        atackingSpeed = 0.35f;
+                    }
                 }
                 else
                 {
-                    weaponCountTime = weaponTime;
+                    weaponTimeCount = weaponTime;
+                    atackingSpeed = 1f;
                 }
             }
 
@@ -255,6 +297,7 @@ namespace Offline
             }
 
 
+            //攻撃を受けたときに攻撃してきた敵に回転させる
             public void StartRotate(Transform target)
             {
                 if (lockOnAction.Target == null)
@@ -262,6 +305,18 @@ namespace Offline
                     isDamage = true;
                     this.target = target;
                 }
+            }
+
+            //カメラの深度操作
+            public void SetCameraDepth(int depth)
+            {
+                baseAction._Camera.depth = depth;
+            }
+
+            //AudioListenerのオンオフ
+            public void SetAudioListener(bool flag)
+            {
+                listener.enabled = flag;
             }
 
 
@@ -321,10 +376,11 @@ namespace Offline
             //回転の停止
             void StopRotate()
             {
+                //正面に障害物があるか
                 var hits = Physics.SphereCastAll(
-                            _camera.position,
+                            cameraTransform.position,
                             20f,
-                            _camera.forward,
+                            cameraTransform.forward,
                             100f)
                            .Where(h => !h.transform.CompareTag(TagNameManager.ITEM))    //アイテム除外
                            .Where(h => !h.transform.CompareTag(TagNameManager.BULLET))  //弾丸除外
@@ -337,6 +393,7 @@ namespace Offline
 
                 if (hits.Count > 0)
                 {
+                    //障害物がある場合は再度ランダムに回転
                     StartRotate();
                     return;
                 }
@@ -369,7 +426,7 @@ namespace Offline
                 if (collision.gameObject.CompareTag(TagNameManager.CPU)) return;
 
                 StartRotate();
-                rotateCountTime = 0;
+                rotateTimeCount = 0;
             }
         }
     }

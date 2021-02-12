@@ -472,18 +472,6 @@ namespace Offline
 
             }
 
-            //カメラの深度を変更する
-            public void SetCameraDepth(int depth)
-            {
-                baseAction._Camera.depth = depth;
-            }
-
-            //AudioListenerのオンオフ
-            public void SetAudioListener(bool flag)
-            {
-                //baseAction.Listener.enabled = flag;
-            }
-
 
             void DestroyMe()
             {

@@ -15,14 +15,14 @@ namespace Offline
         [SerializeField, Tooltip("1秒間に進む距離")] float speed = 500f;
         [SerializeField, Tooltip("射程")] float destroyTime = 1f;
         [SerializeField, Tooltip("誘導力")] float trackingPower = 3f;
-        float shotInterval = 0;
-        float shotCountTime = 0;
+        float shotInterval = 0;  //発射間隔
+        float shotTimeCount = 0; //時間計測用
 
         void Start()
         {
             //パラメータの初期化
             shotInterval = 1.0f / shotPerSecond;
-            shotCountTime = shotInterval;
+            shotTimeCount = shotInterval;
 
             //オーディオ初期化
             audioSource = GetComponent<AudioSource>();
@@ -31,17 +31,17 @@ namespace Offline
 
         void Update()
         {
-            shotCountTime += Time.deltaTime;
-            if (shotCountTime > shotInterval)
+            shotTimeCount += Time.deltaTime;
+            if (shotTimeCount > shotInterval)
             {
-                shotCountTime = shotInterval;
+                shotTimeCount = shotInterval;
             }
         }
 
         public override void Shot(GameObject target = null)
         {
             //前回発射して発射間隔分の時間が経過していなかったら撃たない
-            if (shotCountTime < shotInterval) return;
+            if (shotTimeCount < shotInterval) return;
 
 
             //弾丸生成
@@ -52,7 +52,7 @@ namespace Offline
             audioSource.Play();
 
             //発射間隔のカウントをリセット
-            shotCountTime = 0;  
+            shotTimeCount = 0;  
         }
 
         Bullet CreateBullet(Vector3 pos, Quaternion rotation, GameObject target)

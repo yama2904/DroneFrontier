@@ -11,7 +11,7 @@ namespace Online
         //パラメータ
         [SerializeField, Tooltip("レーザのサイズ(Scaleの代わり")] float scale = 1f;
         [SyncVar, HideInInspector] public float ShotInterval = 0;
-        float shotCountTime = 0;
+        float shotTimeCount = 0;
         [SerializeField, Tooltip("チャージ時間")] float chargeTime = 3.0f;
         [SerializeField, Tooltip("レーザーの当たり判定の半径")] float lineRadius = 0.1f;
         [SerializeField, Tooltip("レーザーの射程")] float lineRange = 100f;
@@ -101,10 +101,10 @@ namespace Online
         void Update()
         {
             //発射間隔の管理
-            shotCountTime += Time.deltaTime;
-            if (shotCountTime > ShotInterval)
+            shotTimeCount += Time.deltaTime;
+            if (shotTimeCount > ShotInterval)
             {
-                shotCountTime = ShotInterval;
+                shotTimeCount = ShotInterval;
             }
         }
 
@@ -271,7 +271,7 @@ namespace Online
                 IsShotBeam = true;
 
                 //前回ヒットして発射間隔分の時間が経過していなかったら当たり判定を行わない
-                if (shotCountTime < ShotInterval) return;
+                if (shotTimeCount < ShotInterval) return;
 
 
                 //Y軸の誘導
@@ -317,7 +317,7 @@ namespace Online
                     //ヒットした場所にEndオブジェクトを移動させる
                     endObjectTransform.position = hit.point;
 
-                    shotCountTime = 0;  //発射間隔のカウントをリセット
+                    shotTimeCount = 0;  //発射間隔のカウントをリセット
                 }
                 else
                 {

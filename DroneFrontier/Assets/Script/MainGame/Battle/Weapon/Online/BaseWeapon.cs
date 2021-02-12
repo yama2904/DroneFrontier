@@ -11,8 +11,8 @@ namespace Online
         [SerializeField] protected Transform shotPos = null;
 
         [SyncVar] protected GameObject shooter = null;      //武器の所持者
-        protected float RecastCountTime { get; set; } = 0;   //リキャスト時間をカウントする変数
-        protected float ShotCountTime { get; set; } = 0;     //1発ごとの間隔をカウントする変数
+        protected float RecastTimeCount { get; set; } = 0;   //リキャスト時間の計測用
+        protected float ShotTimeCount { get; set; } = 0;     //発射間隔の計測用
         protected float BulletPower { get; set; } = -1;      //弾丸の威力
 
         [SyncVar, HideInInspector] public uint parentNetId = 0;
@@ -92,16 +92,16 @@ namespace Online
         //リキャスト時間と発射間隔を管理する
         protected virtual void Update()
         {
-            RecastCountTime += Time.deltaTime;
-            if (RecastCountTime > recast)
+            RecastTimeCount += Time.deltaTime;
+            if (RecastTimeCount > recast)
             {
-                RecastCountTime = recast;
+                RecastTimeCount = recast;
             }
 
-            ShotCountTime += Time.deltaTime;
-            if (ShotCountTime > shotInterval)
+            ShotTimeCount += Time.deltaTime;
+            if (ShotTimeCount > shotInterval)
             {
-                ShotCountTime = shotInterval;
+                ShotTimeCount = shotInterval;
             }
         }
 

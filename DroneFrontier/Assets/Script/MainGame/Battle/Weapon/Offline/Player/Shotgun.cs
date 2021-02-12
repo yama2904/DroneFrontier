@@ -19,9 +19,9 @@ namespace Offline
         [SerializeField, Tooltip("射程")] float destroyTime = 0.6f;
         [SerializeField, Tooltip("リキャスト時間")] float recast = 2f;
         [SerializeField, Tooltip("ストック可能な弾数")] int maxBulletNum = 5;
-        float shotInterval = 0;
-        float shotCountTime = 0;
-        float recastCountTime = 0;
+        float shotInterval = 0;     //発射間隔
+        float shotTimeCount = 0;    //時間計測用
+        float recastTimeCount = 0;  //時間計測用
         int haveBulletNum = 0;
 
 
@@ -41,7 +41,7 @@ namespace Offline
         {
             //パラメータ初期化
             shotInterval = 1.0f / shotPerSecond;
-            shotCountTime = shotInterval;
+            shotTimeCount = shotInterval;
             haveBulletNum = maxBulletNum;
 
             //オーディオの初期化
@@ -75,16 +75,16 @@ namespace Offline
         void Update()
         {
             //リキャストと発射間隔のカウント
-            recastCountTime += Time.deltaTime;
-            if (recastCountTime > recast)
+            recastTimeCount += Time.deltaTime;
+            if (recastTimeCount > recast)
             {
-                recastCountTime = recast;
+                recastTimeCount = recast;
             }
 
-            shotCountTime += Time.deltaTime;
-            if (shotCountTime > shotInterval)
+            shotTimeCount += Time.deltaTime;
+            if (shotTimeCount > shotInterval)
             {
-                shotCountTime = shotInterval;
+                shotTimeCount = shotInterval;
             }
 
             //最大弾数持っているなら処理しない
@@ -92,11 +92,11 @@ namespace Offline
 
 
             //リキャスト時間経過したら弾数を1個補充
-            if (recastCountTime >= recast)
+            if (recastTimeCount >= recast)
             {
                 UIs[haveBulletNum].fillAmount = 1f;
                 haveBulletNum++;        //弾数を回復
-                recastCountTime = 0;    //リキャストのカウントをリセット
+                recastTimeCount = 0;    //リキャストのカウントをリセット
 
 
                 //デバッグ用
@@ -104,14 +104,14 @@ namespace Offline
             }
             else
             {
-                UIs[haveBulletNum].fillAmount = recastCountTime / recast;
+                UIs[haveBulletNum].fillAmount = recastTimeCount / recast;
             }
         }
 
         public override void Shot(GameObject target = null)
         {
             //前回発射して発射間隔分の時間が経過していなかったら撃たない
-            if (shotCountTime < shotInterval) return;
+            if (shotTimeCount < shotInterval) return;
 
             //残り弾数が0だったら撃たない
             if (haveBulletNum <= 0) return;
@@ -136,10 +136,10 @@ namespace Offline
             //残り弾丸がMAXで撃った場合のみリキャストを0にする
             if (haveBulletNum == maxBulletNum)
             {
-                recastCountTime = 0;
+                recastTimeCount = 0;
             }
             haveBulletNum--;    //残り弾数を減らす
-            shotCountTime = 0;  //発射間隔のカウントをリセット
+            shotTimeCount = 0;  //発射間隔のカウントをリセット
 
 
             //デバッグ用

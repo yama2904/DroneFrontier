@@ -38,7 +38,7 @@ namespace Online
             base.OnStartClient();
             Recast = _recast;
             ShotInterval = 1.0f / shotPerSecond;
-            ShotCountTime = ShotInterval;
+            ShotTimeCount = ShotInterval;
             MaxBullets = _maxBullets;
             BulletsRemain = MaxBullets;
             BulletPower = _power;
@@ -78,10 +78,10 @@ namespace Online
             //発射間隔のカウント
             if (!setMissile)
             {
-                ShotCountTime += Time.deltaTime;
-                if (ShotCountTime > ShotInterval)
+                ShotTimeCount += Time.deltaTime;
+                if (ShotTimeCount > ShotInterval)
                 {
-                    ShotCountTime = ShotInterval;
+                    ShotTimeCount = ShotInterval;
                     if (BulletsRemain > 0)  //弾丸が残っていない場合は処理しない
                     {
                         CmdCreateMissile();
@@ -97,12 +97,12 @@ namespace Online
             //リキャスト時間経過したら弾数を1個補充
             if (BulletsRemain < MaxBullets)     //最大弾数持っていたら処理しない
             {
-                RecastCountTime += Time.deltaTime;
-                if (RecastCountTime >= Recast)
+                RecastTimeCount += Time.deltaTime;
+                if (RecastTimeCount >= Recast)
                 {
                     UIs[BulletsRemain].fillAmount = 1f;
                     BulletsRemain++;        //弾数を回復
-                    RecastCountTime = 0;    //リキャストのカウントをリセット
+                    RecastTimeCount = 0;    //リキャストのカウントをリセット
 
 
                     //デバッグ用
@@ -110,15 +110,15 @@ namespace Online
                 }
                 else
                 {
-                    UIs[BulletsRemain].fillAmount = RecastCountTime / Recast;
+                    UIs[BulletsRemain].fillAmount = RecastTimeCount / Recast;
                 }
             }
         }
 
         public override void ResetWeapon()
         {
-            RecastCountTime = 0;
-            ShotCountTime = ShotInterval;
+            RecastTimeCount = 0;
+            ShotTimeCount = ShotInterval;
             BulletsRemain = MaxBullets;
 
             //弾数UIのリセット
@@ -173,7 +173,7 @@ namespace Online
         public override void Shot(GameObject target = null)
         {
             //前回発射して発射間隔分の時間が経過していなかったら撃たない
-            if (ShotCountTime < ShotInterval) return;
+            if (ShotTimeCount < ShotInterval) return;
 
             //バグ防止
             if (!setMissile) return;
@@ -197,10 +197,10 @@ namespace Online
             //弾数を減らしてリキャスト開始
             if (BulletsRemain == MaxBullets)
             {
-                RecastCountTime = 0;
+                RecastTimeCount = 0;
             }
             BulletsRemain--;    //残り弾数を減らす
-            ShotCountTime = 0;  //発射間隔のカウントをリセット
+            ShotTimeCount = 0;  //発射間隔のカウントをリセット
 
 
             //デバッグ用

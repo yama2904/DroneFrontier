@@ -17,7 +17,7 @@ namespace Offline
         ItemCreate[] createItems;
         int useSpawnItemsIndex = 0;
         int spawningNum = 0;  //スポーン中のアイテムの数
-        float spawnCountTime = 0;
+        float spawnTimeCount = 0;  //時間計測
 
 
         void Awake()
@@ -46,11 +46,11 @@ namespace Offline
             //フィールド上の全てのアイテムをスポーンしていたら処理しない
             if (spawningNum >= createItems.Length) return;
 
-            spawnCountTime += Time.deltaTime;
-            if (spawnCountTime >= spawnInterval)
+            spawnTimeCount += Time.deltaTime;
+            if (spawnTimeCount >= spawnInterval)
             {
                 ItemSpawn(spawnNum);
-                spawnCountTime = 0;
+                spawnTimeCount = 0;
             }
         }
 

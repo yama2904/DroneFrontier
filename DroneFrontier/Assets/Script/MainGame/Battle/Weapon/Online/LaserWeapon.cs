@@ -39,7 +39,7 @@ namespace Online
             //スーパークラスの変数
             Recast = _recast;
             ShotInterval = 1.0f / hitPerSecond;
-            ShotCountTime = ShotInterval;
+            ShotTimeCount = ShotInterval;
             BulletPower = _power;
         }
 
@@ -125,7 +125,7 @@ namespace Online
 
         public override void ResetWeapon()
         {
-            ShotCountTime = ShotInterval;
+            ShotTimeCount = ShotInterval;
             laserGaugeImage.fillAmount = 1.0f;
 
             //フラグ初期化

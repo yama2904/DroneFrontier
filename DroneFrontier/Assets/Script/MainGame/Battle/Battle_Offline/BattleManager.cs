@@ -33,6 +33,8 @@ namespace Offline
             public static int droneNum = 0;  //残っているドローンの数
         }
         List<PlayerData> playerDatas = new List<PlayerData>();
+        int useIndex = 0;
+        bool isPlayerDestroy = false;
 
         //ゲーム終了処理を行ったらtrue
         bool isFinished = false;
@@ -127,6 +129,70 @@ namespace Offline
             //カウントダウンが終わったら処理
             if (!StartFlag) return;
 
+            //プレイヤーがゲームオーバーになったらスペースキーで各CPUのカメラに切り替える
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                if (isPlayerDestroy)
+                {
+                    //次のプレイヤーのカメラとリスナーに切り替える
+                    int initIndex = useIndex;
+                    if (playerDatas[useIndex] != null)
+                    {
+                        if (playerDatas[useIndex].drone.CompareTag(TagNameManager.CPU))
+                        {
+                            //名前省略
+                            CPU.BattleDrone drone = playerDatas[useIndex].drone.GetComponent<CPU.BattleDrone>();
+
+                            drone.SetCameraDepth(0);
+                            drone.SetAudioListener(false);
+                        }
+                    }
+                    listener.enabled = false;
+                    while (true)
+                    {
+                        useIndex++;
+
+                        //無限ループ防止
+                        if (useIndex == initIndex)
+                        {
+                            break;
+                        }
+
+                        //配列の範囲外なら修正
+                        if (useIndex >= playerDatas.Count || useIndex < 0)
+                        {
+                            useIndex = 0;
+                        }
+
+                        Debug.Log("useIndex: " + useIndex);
+                        //バグ防止
+                        if (playerDatas[useIndex] == null)
+                        {
+                            continue;
+                        }
+                        //破壊されていたらスキップ
+                        if (playerDatas[useIndex].isDestroy)
+                        {
+                            continue;
+                        }
+                        //CPUのみ処理
+                        if (!playerDatas[useIndex].drone.CompareTag(TagNameManager.CPU))
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            //名前省略
+                            CPU.BattleDrone bd = playerDatas[useIndex].drone.GetComponent<CPU.BattleDrone>();
+
+                            bd.SetCameraDepth(5);
+                            bd.SetAudioListener(true);
+                            break;
+                        }
+                    }
+                }
+            }
+
             //破壊されたドローンを調べる
             foreach (PlayerData pd in playerDatas)
             {
@@ -140,7 +206,7 @@ namespace Offline
                         pd.drone = CreateDrone(pd.weapon, pd.isPlayer);
 
                         //リスポーンSEの再生
-                        pd.drone.GetComponent<DroneSoundAction>().PlayOneShot(SoundManager.SE.RESPAWN, SoundManager.BaseSEVolume);                        
+                        pd.drone.GetComponent<DroneSoundAction>().PlayOneShot(SoundManager.SE.RESPAWN, SoundManager.BaseSEVolume);
 
                         //残機UIの変更
                         if (pd.isPlayer)
@@ -160,53 +226,13 @@ namespace Offline
                         {
                             stockIcon.enabled = false;
                             stockText.enabled = false;
+
+                            listener.enabled = true;
+                            isPlayerDestroy = true;
                         }
                     }
                 }
             }
-
-            ////ゲームオーバーになったら他のプレイヤーのカメラにスペースキーで切り替える
-            //if (Input.GetKeyDown(KeyCode.Space))
-            //{
-            //    if (localDrone.IsGameOver)
-            //    {
-            //        //次のプレイヤーのカメラとリスナーに切り替える
-            //        int initIndex = useIndex;
-            //        playerDatas[useIndex].drone.SetCameraDepth(0);
-            //        playerDatas[useIndex].drone.SetAudioListener(false);
-            //        listener.enabled = false;
-            //        while (true)
-            //        {
-            //            useIndex++;
-
-            //            //無限ループ防止
-            //            if (useIndex == initIndex)
-            //            {
-            //                break;
-            //            }
-
-            //            //配列の範囲外なら修正
-            //            if (useIndex >= playerDatas.Count || useIndex < 0)
-            //            {
-            //                useIndex = 0;
-            //            }
-
-            //            //破壊されていたらスキップ
-            //            PlayerData pd = playerDatas[useIndex];
-            //            Debug.Log("useIndex: " + useIndex);
-            //            if (pd.isDestroy || pd.drone == null)
-            //            {
-            //                continue;
-            //            }
-            //            else
-            //            {
-            //                pd.drone.SetCameraDepth(5);
-            //                pd.drone.SetAudioListener(true);
-            //                break;
-            //            }
-            //        }
-            //    }
-            //}
 
             //最後のプレイヤーが残ったら終了処理
             if (PlayerData.droneNum <= 1)
