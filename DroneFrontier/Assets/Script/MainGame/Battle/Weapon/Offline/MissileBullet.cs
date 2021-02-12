@@ -93,7 +93,7 @@ namespace Offline
             }
             else if (other.CompareTag(TagNameManager.JAMMING_BOT))
             {
-                //名前省略
+                //キャッシュ用
                 JammingBot jb = other.GetComponent<JammingBot>();
 
                 //撃った人が放ったジャミングボットなら処理しない

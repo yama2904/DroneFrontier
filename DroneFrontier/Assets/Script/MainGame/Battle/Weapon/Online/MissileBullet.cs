@@ -39,13 +39,19 @@ namespace Online
             cacheTransform.Rotate(new Vector3(90, 0, 0));
         }
 
+
+        public override void Init(uint shooterNetId, float power, float trackingPower, float speed, float destroyTime, GameObject target = null)
+        {
+            base.Init(shooterNetId, power, trackingPower, speed, destroyTime, target);
+        }
+
+
         [ServerCallback]
         protected override void OnTriggerEnter(Collider other)
         {
             if (!isShot) return;
 
             //当たり判定を行わないオブジェクトだったら処理をしない
-            if (ReferenceEquals(other.gameObject, Shooter)) return;
             if (other.CompareTag(TagNameManager.BULLET)) return;
             if (other.CompareTag(TagNameManager.ITEM)) return;
             if (other.CompareTag(TagNameManager.GIMMICK)) return;
@@ -54,52 +60,53 @@ namespace Online
 
             if (other.CompareTag(TagNameManager.PLAYER))
             {
-                other.GetComponent<DroneDamageAction>().CmdDamage(Power);
+                //キャッシュ用
+                DroneDamageAction player = other.GetComponent<DroneDamageAction>();
+                if (player.netId == shooter) return;  //撃った本人なら処理しない
+                player.CmdDamage(power);
             }
             else if (other.CompareTag(TagNameManager.JAMMING_BOT))
             {
+                //キャッシュ用
                 JammingBot jb = other.GetComponent<JammingBot>();
-                if (jb.creater == Shooter)
-                {
-                    return;
-                }
-                jb.CmdDamage(Power);
+
+                //撃った人が放ったジャミングボットなら処理しない
+                if (jb.creater.GetComponent<BattleDrone>().netId == shooter) return;
+
+                //ジャミングボットにダメージ
+                jb.CmdDamage(power);
             }
             DestroyMe();
         }
 
+        [Server]
         void DestroyMe()
         {
-            CmdCreateExplosion();
+            CreateExplosion();
             NetworkServer.Destroy(gameObject);
         }
 
         #region CreateExplosion
 
-        private Explosion CreateExplosion()
+
+        [Server]
+        void CreateExplosion()
         {
             Explosion e = Instantiate(explosion, cacheTransform.position, Quaternion.identity);
-            e.Shooter = Shooter;
-            return e;
-        }
-
-        [Command(ignoreAuthority = true)]
-        void CmdCreateExplosion()
-        {
-            Explosion e = CreateExplosion();
+            e.Shooter = shooter;
             NetworkServer.Spawn(e.gameObject);
         }
 
         #endregion
 
-        [Command(ignoreAuthority = true)]
-        public void CmdShot(GameObject target)
+        [Server]
+        public void Shot(GameObject target)
         {
             RpcParentNull();
             RpcPlaySE();
 
-            Invoke(nameof(DestroyMe), DestroyTime);
-            Target = target;
+            Invoke(nameof(DestroyMe), destroyTime);
+            base.target = target;
             isShot = true;
         }
 

@@ -11,9 +11,14 @@ namespace Online
     {
         const float SHOT_POSSIBLE_MIN = 0.2f;  //発射可能な最低ゲージ量
         [SerializeField] LaserBullet laserBullet = null;
-        [SyncVar] GameObject createBullet = null;
-        [SerializeField, Tooltip("何秒発射できるか")] float maxShotTime = 5;
-        [SerializeField, Tooltip("1秒間にヒットする回数")] float hitPerSecond = 5.0f;
+        [SyncVar] GameObject createdBullet = null;
+        [SerializeField, Tooltip("威力")] protected float power = 5f;
+        [SerializeField, Tooltip("リキャスト時間")] float recast = 8f;
+        [SerializeField, Tooltip("何秒発射できるか")] float maxShotTime = 10;
+        [SerializeField, Tooltip("レーザーのサイズ(Scaleの代わり")] float size = 10f;
+        [SerializeField, Tooltip("チャージ時間")] float chargeTime = 2.0f;
+        [SerializeField, Tooltip("レーザーの射程")] float lineRange = 175f;
+        [SerializeField, Tooltip("1秒間にヒットする回数")] float hitPerSecond = 6.0f;
 
         [SerializeField] Image laserGaugeImage = null;
         [SerializeField] Image laserGaugeFrameImage = null;
@@ -28,20 +33,8 @@ namespace Online
         }
         List<bool> isShots = new List<bool>();
 
-        [SerializeField, Tooltip("リキャスト時間")] float _recast = 8f;
-        [SerializeField, Tooltip("威力")] float _power = 5f;
-
 
         #region Init
-
-        protected override void Start()
-        {
-            //スーパークラスの変数
-            Recast = _recast;
-            ShotInterval = 1.0f / hitPerSecond;
-            ShotTimeCount = ShotInterval;
-            BulletPower = _power;
-        }
 
         public override void Init()
         {
@@ -62,18 +55,17 @@ namespace Online
             lb.parentNetId = netId;
             lb.localPos = shotPos.localPosition;
             lb.localRot = shotPos.localRotation;
-            lb.ShotInterval = ShotInterval;
 
             NetworkServer.Spawn(lb.gameObject, connectionToClient);
+            lb.RpcInit(shooter, power, size, chargeTime, lineRange, hitPerSecond);
             lb.TargetSetIsLocalTrue(connectionToClient);
-            createBullet = lb.gameObject;
+            createdBullet = lb.gameObject;
         }
 
         #endregion
 
         #region Update
 
-        protected override void Update() { }
         public override void UpdateMe()
         {
             if (isShots.Count <= 0) return;
@@ -85,7 +77,7 @@ namespace Online
                 if (laserGaugeImage.fillAmount < 1.0f)
                 {
                     //ゲージを回復
-                    laserGaugeImage.fillAmount += 1.0f / Recast * Time.deltaTime;
+                    laserGaugeImage.fillAmount += 1.0f / recast * Time.deltaTime;
                     if (laserGaugeImage.fillAmount > 1.0f)
                     {
                         laserGaugeImage.fillAmount = 1.0f;
@@ -113,7 +105,7 @@ namespace Online
                 //フラグの更新が止まっていたら攻撃をストップ
                 else
                 {
-                    createBullet.GetComponent<LaserBullet>().StopShot();
+                    createdBullet.GetComponent<LaserBullet>().StopShot();
 
                     isShots[(int)ShotFlag.SHOT_START] = false;
                     isShots[(int)ShotFlag.SHOT_SHOTING] = false;
@@ -122,16 +114,6 @@ namespace Online
         }
 
         #endregion
-
-        public override void ResetWeapon()
-        {
-            ShotTimeCount = ShotInterval;
-            laserGaugeImage.fillAmount = 1.0f;
-
-            //フラグ初期化
-            isShots[(int)ShotFlag.SHOT_START] = false;
-            isShots[(int)ShotFlag.SHOT_SHOTING] = false;
-        }
 
 
         public override void Shot(GameObject target = null)
@@ -148,8 +130,8 @@ namespace Online
                 isShots[(int)ShotFlag.SHOT_START] = true;
             }
 
-            LaserBullet lb = createBullet.GetComponent<LaserBullet>();
-            lb.Shot(shooter, BulletPower, target);
+            LaserBullet lb = createdBullet.GetComponent<LaserBullet>();
+            lb.Shot(target);
             isShots[(int)ShotFlag.SHOT_SHOTING] = true;
 
             //撃っている間はゲージを減らす

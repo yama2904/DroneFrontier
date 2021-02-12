@@ -73,8 +73,7 @@ namespace Offline
             this.power = power;
             this.lineRange = lineRange;
             this.isPlayer = isPlayer;
-
-
+            
             //長さをスケールに合わせる
             this.lineRange *= size;
 

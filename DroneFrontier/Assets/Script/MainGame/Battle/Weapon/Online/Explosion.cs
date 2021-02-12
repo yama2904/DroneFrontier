@@ -8,7 +8,7 @@ namespace Online
 {
     public class Explosion : NetworkBehaviour
     {
-        [SyncVar, HideInInspector] public GameObject Shooter = null;  //撃ったプレイヤー
+        [SyncVar, HideInInspector] public uint Shooter;  //撃ったプレイヤー
         [SerializeField, Tooltip("爆発範囲")] float size = 20;    //爆発範囲
         [SerializeField, Tooltip("威力")] float power = 20;   //威力
         [SerializeField, Tooltip("爆発の中心地からの距離の威力減衰率(0～1)")] float powerDownRate = 0.2f; //中心地からの距離による威力減衰率
@@ -100,7 +100,6 @@ namespace Online
         private void OnTriggerEnter(Collider other)
         {
             //当たり判定を行わないオブジェクトだったら処理をしない
-            if (ReferenceEquals(other.gameObject, Shooter)) return;
             if (other.CompareTag(TagNameManager.BULLET)) return;
             if (other.CompareTag(TagNameManager.ITEM)) return;
             if (other.CompareTag(TagNameManager.JAMMING)) return;
@@ -113,7 +112,14 @@ namespace Online
                 {
                     if (ReferenceEquals(other, o)) return;
                 }
-                other.GetComponent<DroneDamageAction>().CmdDamage(power);
+
+                //キャッシュ用
+                DroneDamageAction player = other.GetComponent<DroneDamageAction>();
+
+                //撃った本人なら処理しない
+                if (player.netId == Shooter) return;  
+
+                player.CmdDamage(power);
                 wasHitObjects.Add(other.gameObject);
 
                 //デバッグ用
@@ -121,13 +127,16 @@ namespace Online
             }
             else if (other.CompareTag(TagNameManager.JAMMING_BOT))
             {
+                //キャッシュ用
                 JammingBot jb = other.GetComponent<JammingBot>();
-                if (ReferenceEquals(jb.creater, Shooter)) return;
+
+                //撃った人が放ったジャミングボットなら処理しない
+                if (jb.creater.GetComponent<BattleDrone>().netId == Shooter) return;
 
                 //既にヒット済のオブジェクトはスルー
                 foreach (GameObject o in wasHitObjects)
                 {
-                    if (ReferenceEquals(other.gameObject, o)) return;
+                    if (other.GetComponent<BattleDrone>().netId == o.GetComponent<BattleDrone>().netId) return;
                 }
                 other.GetComponent<JammingBot>().CmdDamage(power);
                 wasHitObjects.Add(other.gameObject);

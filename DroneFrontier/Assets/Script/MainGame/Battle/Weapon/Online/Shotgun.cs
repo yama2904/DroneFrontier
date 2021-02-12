@@ -10,19 +10,22 @@ namespace Online
     {
         //ショットガンのパラメータ
         [SerializeField] Bullet bullet = null;
-        [SerializeField, Tooltip("拡散力")] float angle = 10.0f;
-        [SerializeField, Tooltip("拡散力のランダム値")] float angleDiff = 3.0f;
+        [SerializeField, Tooltip("拡散力")] float angle = 4.2f;
+        [SerializeField, Tooltip("拡散力のランダム値")] float angleDiff = 2.8f;
         AudioSource audioSource = null;
 
         //弾丸のパラメータ
-        [SerializeField, Tooltip("1秒間に進む距離")] float speedPerSecond = 10.0f;
-        [SerializeField, Tooltip("射程")] float destroyTime = 0.3f;
-        float trackingPower = 0;
+        [SerializeField, Tooltip("威力")] float power = 5.5f;
+        [SerializeField, Tooltip("リキャスト時間")] float recast = 2f;
+        [SerializeField, Tooltip("ストック可能な弾数")] int maxBulletNum = 5;
+        [SerializeField, Tooltip("1秒間に進む距離")] float speed = 800f;
+        [SerializeField, Tooltip("射程")] float destroyTime = 0.6f;
         [SerializeField, Tooltip("1秒間に発射する弾数")] float shotPerSecond = 2.0f;
+        float shotInterval = 0;     //発射間隔
+        float shotTimeCount = 0;    //時間計測用
+        float recastTimeCount = 0;  //時間計測用
+        int haveBulletNum = 0;
 
-        [SerializeField, Tooltip("リキャスト時間")] float _recast = 2f;
-        [SerializeField, Tooltip("ストック可能な弾数")] int _maxBullets = 5;
-        [SerializeField, Tooltip("威力")] float _power = 8f;
 
         //所持弾数のUI用
         const float UI_POS_DIFF_X = 1.2f;
@@ -41,27 +44,18 @@ namespace Online
             audioSource.volume = SoundManager.BaseSEVolume;
         }
 
-        protected override void Start()
+        void Start()
         {
-            Recast = _recast;
-            ShotInterval = 1.0f / shotPerSecond;
-            ShotTimeCount = ShotInterval;
-            MaxBullets = _maxBullets;
-            BulletsRemain = MaxBullets;
-            BulletPower = _power;
-        }
-
-        protected override void Update()
-        {
-            //リキャストと発射間隔のカウント
-            base.Update();
+            shotInterval = 1.0f / shotPerSecond;
+            shotTimeCount = shotInterval;
+            haveBulletNum = maxBulletNum;
         }
 
         public override void Init()
         {
             //所持弾数のUI作成
-            UIs = new Image[_maxBullets];
-            for (int i = 0; i < _maxBullets; i++)
+            UIs = new Image[maxBulletNum];
+            for (int i = 0; i < maxBulletNum; i++)
             {
                 //bulletUIBackの生成
                 RectTransform back = Instantiate(bulletUIBack).GetComponent<RectTransform>();
@@ -83,15 +77,28 @@ namespace Online
 
         public override void UpdateMe()
         {
+            //リキャストと発射間隔のカウント
+            recastTimeCount += Time.deltaTime;
+            if (recastTimeCount > recast)
+            {
+                recastTimeCount = recast;
+            }
+
+            shotTimeCount += Time.deltaTime;
+            if (shotTimeCount > shotInterval)
+            {
+                shotTimeCount = shotInterval;
+            }
+
             //最大弾数持っているなら処理しない
-            if (BulletsRemain >= MaxBullets) return;
+            if (haveBulletNum >= maxBulletNum) return;
 
             //リキャスト時間経過したら弾数を1個補充
-            if (RecastTimeCount >= Recast)
+            if (recastTimeCount >= recast)
             {
-                UIs[BulletsRemain].fillAmount = 1f;
-                BulletsRemain++;        //弾数を回復
-                RecastTimeCount = 0;    //リキャストのカウントをリセット
+                UIs[haveBulletNum].fillAmount = 1f;
+                haveBulletNum++;        //弾数を回復
+                recastTimeCount = 0;    //リキャストのカウントをリセット
 
 
                 //デバッグ用
@@ -99,30 +106,17 @@ namespace Online
             }
             else
             {
-                UIs[BulletsRemain].fillAmount = RecastTimeCount / Recast;
-            }
-        }
-
-        public override void ResetWeapon()
-        {
-            RecastTimeCount = 0;
-            ShotTimeCount = ShotInterval;
-            BulletsRemain = MaxBullets;
-
-            //弾数UIのリセット
-            for (int i = 0; i < UIs.Length; i++)
-            {
-                UIs[i].fillAmount = 1f;
+                UIs[haveBulletNum].fillAmount = recastTimeCount / recast;
             }
         }
 
         public override void Shot(GameObject target = null)
         {
             //前回発射して発射間隔分の時間が経過していなかったら撃たない
-            if (ShotTimeCount < ShotInterval) return;
+            if (shotTimeCount < shotInterval) return;
 
             //残り弾数が0だったら撃たない
-            if (BulletsRemain <= 0) return;
+            if (haveBulletNum <= 0) return;
 
             //弾を散らす
             for (int i = -1; i <= 1; i++)
@@ -137,23 +131,23 @@ namespace Online
             CmdCallPlaySE();
 
             //所持弾丸のUIを灰色に変える
-            for (int i = BulletsRemain - 1; i < MaxBullets; i++)
+            for (int i = haveBulletNum - 1; i < maxBulletNum; i++)
             {
                 UIs[i].fillAmount = 0;
             }
 
             //残り弾丸がMAXで撃つと一瞬で弾丸が1個回復するので
             //残り弾丸がMAXで撃った場合のみリキャストを0にする
-            if (BulletsRemain == MaxBullets)
+            if (haveBulletNum == maxBulletNum)
             {
-                RecastTimeCount = 0;
+                recastTimeCount = 0;
             }
-            BulletsRemain--;    //残り弾数を減らす
-            ShotTimeCount = 0;  //発射間隔のカウントをリセット
+            haveBulletNum--;    //残り弾数を減らす
+            shotTimeCount = 0;  //発射間隔のカウントをリセット
 
 
             //デバッグ用
-            Debug.Log("残り弾数: " + BulletsRemain);
+            Debug.Log("残り弾数: " + haveBulletNum);
         }
 
         Bullet CreateBullet(Vector3 pos, Quaternion rotation, float angleX, float angleY, GameObject target)
@@ -161,12 +155,7 @@ namespace Online
             Bullet b = Instantiate(bullet, pos, rotation);    //弾丸の複製
 
             //弾丸のパラメータ設定
-            b.Shooter = shooter;    //撃ったプレイヤーを登録
-            b.Target = target;      //ロックオン中の敵
-            b.SpeedPerSecond = speedPerSecond;  //スピード
-            b.DestroyTime = destroyTime;        //射程
-            b.TrackingPower = trackingPower;    //誘導力
-            b.Power = BulletPower;              //威力
+            b.Init(shooter.netId, power, 0, speed, destroyTime, target);
 
             //弾丸の進む方向を変えて散らす処理
             Transform t = b.transform;  //キャッシュ

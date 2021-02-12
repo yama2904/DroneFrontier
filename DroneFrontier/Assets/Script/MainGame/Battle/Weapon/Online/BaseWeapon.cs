@@ -7,74 +7,10 @@ namespace Online
 {
     public abstract class BaseWeapon : NetworkBehaviour
     {
+        protected BattleDrone shooter = null;      //武器の所持者
         [SerializeField] protected Transform weaponLocalPos = null;
         [SerializeField] protected Transform shotPos = null;
-
-        [SyncVar] protected GameObject shooter = null;      //武器の所持者
-        protected float RecastTimeCount { get; set; } = 0;   //リキャスト時間の計測用
-        protected float ShotTimeCount { get; set; } = 0;     //発射間隔の計測用
-        protected float BulletPower { get; set; } = -1;      //弾丸の威力
-
         [SyncVar, HideInInspector] public uint parentNetId = 0;
-
-        //プロパティ用
-        float recast = 0;
-        float shotInterval = 0;
-        int maxBullets = 0;
-        int bulletsRemain = 0;
-
-        //リキャスト時間
-        protected float Recast
-        {
-            get
-            {
-                return recast;
-            }
-            set
-            {
-                if (value >= 0) recast = value;
-            }
-        }
-
-        //1発ごとの間隔
-        protected float ShotInterval
-        {
-            get
-            {
-                return shotInterval;
-            }
-            set
-            {
-                if (value >= 0) shotInterval = value;
-            }
-        }
-
-        //最大弾数
-        protected int MaxBullets
-        {
-            get
-            {
-                return maxBullets;
-            }
-            set
-            {
-                if (value >= 0) maxBullets = value;
-
-            }
-        }
-
-        //残り弾数
-        protected int BulletsRemain
-        {
-            get
-            {
-                return bulletsRemain;
-            }
-            set
-            {
-                if (value >= 0) bulletsRemain = value;
-            }
-        }
 
 
         public override void OnStartClient()
@@ -85,38 +21,9 @@ namespace Online
             transform.localPosition = weaponLocalPos.localPosition;
             transform.localRotation = weaponLocalPos.localRotation;
         }
-
-        void Awake() { }
-        protected abstract void Start();
-
-        //リキャスト時間と発射間隔を管理する
-        protected virtual void Update()
-        {
-            RecastTimeCount += Time.deltaTime;
-            if (RecastTimeCount > recast)
-            {
-                RecastTimeCount = recast;
-            }
-
-            ShotTimeCount += Time.deltaTime;
-            if (ShotTimeCount > shotInterval)
-            {
-                ShotTimeCount = shotInterval;
-            }
-        }
-
         public abstract void Init();
         public abstract void UpdateMe();
-        public abstract void ResetWeapon();
         public abstract void Shot(GameObject target = null);
-
-        public virtual void SetChild(Transform parent)
-        {
-            //Transform t = transform;
-            //t.SetParent(parent);
-            //t.localPosition = weaponLocalPos.localPosition;
-            //t.localRotation = weaponLocalPos.localRotation;
-        }
 
 
         public enum Weapon
@@ -159,7 +66,7 @@ namespace Online
                 Application.Quit();
             }
             BaseWeapon bw = o.GetComponent<BaseWeapon>();
-            bw.shooter = shooter;
+            bw.shooter = shooter.GetComponent<BattleDrone>();
             return bw;
         }
     }

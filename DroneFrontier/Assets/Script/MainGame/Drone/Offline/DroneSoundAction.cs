@@ -8,7 +8,7 @@ namespace Offline
     public class DroneSoundAction : MonoBehaviour
     {
         //ループ専用
-        struct LoopAudioData
+        class LoopAudioData
         {
             public AudioSource audioSource;
             public bool isFree;  //使用可能か
@@ -22,15 +22,18 @@ namespace Offline
         void Awake()
         {
             AudioSource[] audios = GetComponents<AudioSource>();
-            loopAudioDatas = new LoopAudioData[audios.Length];
+            loopAudioDatas = new LoopAudioData[audios.Length - 1];
 
             //初期化
             oneShotAudio = audios[0];
             for (int i = 1; i < audios.Length; i++)
             {
-                loopAudioDatas[i].audioSource = audios[i];
-                loopAudioDatas[i].audioSource.loop = true;
-                loopAudioDatas[i].isFree = true;
+                audios[i].loop = true;
+                loopAudioDatas[i] = new LoopAudioData
+                {
+                    audioSource = audios[i],
+                    isFree = true
+                };
             }
         }
 
@@ -75,7 +78,7 @@ namespace Offline
         public bool StopLoopSE(int id)
         {
             if (id == -1) return false;
-            if (loopAudioDatas.Length >= id) return false;
+            if (id >= loopAudioDatas.Length) return false;
 
             LoopAudioData lpd = loopAudioDatas[id];  //名前省略
             if (lpd.isFree) return false;

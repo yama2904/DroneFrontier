@@ -9,16 +9,19 @@ namespace Online
     public class LaserBullet : NetworkBehaviour
     {
         //パラメータ
-        [SerializeField, Tooltip("レーザのサイズ(Scaleの代わり")] float scale = 1f;
-        [SyncVar, HideInInspector] public float ShotInterval = 0;
-        float shotTimeCount = 0;
-        [SerializeField, Tooltip("チャージ時間")] float chargeTime = 3.0f;
-        [SerializeField, Tooltip("レーザーの当たり判定の半径")] float lineRadius = 0.1f;
-        [SerializeField, Tooltip("レーザーの射程")] float lineRange = 100f;
+        const float LINE_RADIUS = 0.2f;
+        BattleDrone shooter = null;  //発射したプレイヤー
+        float chargeTime = 0;        //チャージ時間
+        float power = 0;             //威力
+        float lineRange = 0;         //レーザーの半径
+        float shotInterval = 0;      //発射間隔
+        float shotTimeCount = 0;     //時間計測用
+        bool isLocal = false;
+
         public bool IsShotBeam { get; private set; } = false;
         bool isStartCharge = false;
         AudioSource audioSource = null;
-        bool isLocal = false;
+
 
         //親子付け用
         [SyncVar, HideInInspector] public uint parentNetId = 0;
@@ -40,7 +43,7 @@ namespace Online
 
         //Line用変数
         [SerializeField] ParticleSystem lineParticle = null;
-        Transform lineTransform;
+        Transform lineTransform = null;
 
         //End用変数
         [SerializeField] Transform endObjectTransform = null;
@@ -55,20 +58,42 @@ namespace Online
             transform.localPosition = localPos;
             transform.localRotation = localRot;
 
-            //長さをスケールに合わせる
-            lineRange *= scale;
+            //処理の軽量化用キャッシュ
+            Transform cacheTransform = transform;
+            lineTransform = lineParticle.transform;
+        }
 
-            Transform cacheTransform = transform;   //処理の軽量化用キャッシュ
+        void Update()
+        {
+            //発射間隔の管理
+            shotTimeCount += Time.deltaTime;
+            if (shotTimeCount > shotInterval)
+            {
+                shotTimeCount = shotInterval;
+            }
+        }
+
+
+        [ClientRpc]
+        public void RpcInit(BattleDrone drone, float power, float size, float chargeTime, float lineRange, float hitPerSecond)
+        {
+            shooter = drone;
+            this.chargeTime = chargeTime;
+            this.power = power;
+            this.lineRange = lineRange;
+
+            //長さをスケールに合わせる
+            this.lineRange *= size;
+
+            shotInterval = 1f / hitPerSecond;
+            shotTimeCount = shotInterval;
 
             //Charge用処理//
             Vector3 cLocalScale = charge.transform.localScale;
-            charge.transform.localScale = new Vector3(scale * cLocalScale.x, scale * cLocalScale.y, scale * cLocalScale.z);
+            charge.transform.localScale = new Vector3(size * cLocalScale.x, size * cLocalScale.y, size * cLocalScale.z);
             chargeEmission = charge.emission;
             chargeMinmaxcurve = chargeEmission.rateOverTime;
             rateovertimeAddAmout = MAX_RATE_OVER_TIME / chargeTime;  //1秒間で増加するRateOverTime量
-
-            //Lineオブジェクト
-            lineTransform = lineParticle.transform;
 
 
             //Start用処理//
@@ -77,7 +102,7 @@ namespace Online
             {
                 startChilds[i] = startObjcectTransform.GetChild(i).GetComponent<ParticleSystem>();
                 Vector3 sLocalScale = startChilds[i].transform.localScale;
-                startChilds[i].transform.localScale = new Vector3(scale * sLocalScale.x, scale * sLocalScale.y, scale * sLocalScale.z);
+                startChilds[i].transform.localScale = new Vector3(size * sLocalScale.x, size * sLocalScale.y, size * sLocalScale.z);
             }
             startObjcectTransform.localRotation = lineTransform.localRotation;  //Midwayと同じ向き
 
@@ -87,7 +112,7 @@ namespace Online
             {
                 ParticleSystem ps = endObjectTransform.GetChild(i).GetComponent<ParticleSystem>();
                 Vector3 eLocalScale = ps.transform.localScale;
-                ps.transform.localScale = new Vector3(scale * eLocalScale.x, scale * eLocalScale.y, scale * eLocalScale.z);
+                ps.transform.localScale = new Vector3(size * eLocalScale.x, size * eLocalScale.y, size * eLocalScale.z);
                 endChilds.Add(ps);
             }
             //初期座標の保存
@@ -98,18 +123,15 @@ namespace Online
             StopShot();
         }
 
-        void Update()
+        [TargetRpc]
+        public void TargetSetIsLocalTrue(NetworkConnection target)
         {
-            //発射間隔の管理
-            shotTimeCount += Time.deltaTime;
-            if (shotTimeCount > ShotInterval)
-            {
-                shotTimeCount = ShotInterval;
-            }
+            isLocal = true;
         }
 
+
         //リストから必要な要素だけ抜き取る
-        List<RaycastHit> FilterTargetRaycast(List<RaycastHit> hits, GameObject shooter)
+        List<RaycastHit> FilterTargetRaycast(List<RaycastHit> hits)
         {
             //不要な要素を除外する
             return hits.Where(h => !h.transform.CompareTag(TagNameManager.ITEM))    //アイテム除外
@@ -117,15 +139,18 @@ namespace Online
                        .Where(h => !h.transform.CompareTag(TagNameManager.GIMMICK)) //ギミック除外
                        .Where(h => !h.transform.CompareTag(TagNameManager.JAMMING)) //ジャミング除外
                        .Where(h => !h.transform.CompareTag(TagNameManager.TOWER))   //タワー除外
-                       .Where(h =>  //撃ったプレイヤーは当たり判定から除外
+                       .Where(h =>
                        {
-                           return !ReferenceEquals(h.transform.gameObject, shooter);
-                       })
-                       .Where(h =>  //ジャミングボットを生成したプレイヤーと打ったプレイヤーが同じなら除外
-                       {
+                           //撃った本人は当たり判定から除外
+                           if (h.transform.CompareTag(TagNameManager.PLAYER))
+                           {
+                               return h.transform.GetComponent<BattleDrone>().netId != shooter.netId;
+                           }
+
+                           //ジャミングボットを生成したプレイヤーと撃ったプレイヤーが同じなら除外
                            if (h.transform.CompareTag(TagNameManager.JAMMING_BOT))
                            {
-                               return !ReferenceEquals(h.transform.GetComponent<JammingBot>().creater, shooter);
+                               return !ReferenceEquals(h.transform.GetComponent<JammingBot>().creater, shooter.gameObject);
                            }
                            return true;
                        })
@@ -232,7 +257,7 @@ namespace Online
         #endregion
 
 
-        public void Shot(GameObject shooter, float power, GameObject target)
+        public void Shot(GameObject target)
         {
             #region Charge
 
@@ -271,7 +296,7 @@ namespace Online
                 IsShotBeam = true;
 
                 //前回ヒットして発射間隔分の時間が経過していなかったら当たり判定を行わない
-                if (shotTimeCount < ShotInterval) return;
+                if (shotTimeCount < shotInterval) return;
 
 
                 //Y軸の誘導
@@ -288,12 +313,12 @@ namespace Online
                 //レーザーの射線上にヒットした全てのオブジェクトを調べる
                 var hits = Physics.SphereCastAll(
                             lineTransform.position,    //レーザーの発射座標
-                            lineRadius,                //レーザーの半径
+                            LINE_RADIUS,               //レーザーの半径
                             lineTransform.forward,     //レーザーの正面
                             lineRange)                 //射程
                             .ToList();  //リスト化  
 
-                hits = FilterTargetRaycast(hits, shooter);
+                hits = FilterTargetRaycast(hits);
                 float lineLength = lineRange;   //レーザーの長さ
 
                 //ヒット処理
@@ -434,11 +459,5 @@ namespace Online
         }
 
         #endregion
-
-        [TargetRpc]
-        public void TargetSetIsLocalTrue(NetworkConnection target)
-        {
-            isLocal = true;
-        }
     }
 }
