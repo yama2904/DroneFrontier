@@ -60,7 +60,7 @@ namespace Online
         [SyncVar, HideInInspector] public int syncSetSubWeapon = 0;
         BaseWeapon.Weapon setSubWeapon = BaseWeapon.Weapon.SHOTGUN;
         bool[] usingWeapons = new bool[(int)Weapon.NONE];    //使用中の武器
-        [SerializeField, Tooltip("攻撃中の移動速度の低下率")] float atackingDownSpeed = 0.5f;   //攻撃中の移動速度の低下率
+        float[] atackingSpeeds = new float[(int)BaseWeapon.Weapon.NONE];   //攻撃中の移動速度
         bool isWeaponInit = false;
 
         //死亡処理用
@@ -146,6 +146,12 @@ namespace Online
         public override void OnStartLocalPlayer()
         {
             base.OnStartLocalPlayer();
+
+            //攻撃中の移動速度の設定
+            atackingSpeeds[(int)BaseWeapon.Weapon.GATLING] = 1f;
+            atackingSpeeds[(int)BaseWeapon.Weapon.SHOTGUN] = 1f;
+            atackingSpeeds[(int)BaseWeapon.Weapon.MISSILE] = 0.5f;
+            atackingSpeeds[(int)BaseWeapon.Weapon.LASER] = 0.35f;
 
             //ブースト初期化
             boostGaugeImage.enabled = true;
@@ -356,7 +362,7 @@ namespace Online
                 if (!usingWeapons[(int)Weapon.SUB] && !usingWeapons[(int)Weapon.MAIN])
                 {
                     //攻撃中は速度低下
-                    baseAction.ModifySpeed(atackingDownSpeed);
+                    baseAction.ModifySpeed(atackingSpeeds[(int)BaseWeapon.Weapon.GATLING]);
                     usingWeapons[(int)Weapon.MAIN] = true;
                 }
             }
@@ -372,7 +378,7 @@ namespace Online
                 //攻撃を止めたら速度を戻す
                 if (usingWeapons[(int)Weapon.MAIN])
                 {
-                    baseAction.ModifySpeed(1 / atackingDownSpeed);
+                    baseAction.ModifySpeed(1 / atackingSpeeds[(int)BaseWeapon.Weapon.GATLING]);
                     usingWeapons[(int)Weapon.MAIN] = false;
                 }
             }
@@ -384,15 +390,8 @@ namespace Online
                 //バグ防止用にサブ武器フラグも調べる
                 if (!usingWeapons[(int)Weapon.MAIN] && !usingWeapons[(int)Weapon.SUB])
                 {
-                    if (setSubWeapon == BaseWeapon.Weapon.MISSILE)
-                    {
-                        //攻撃中は速度低下
-                        baseAction.ModifySpeed(atackingDownSpeed);
-                    }
-                    if(setSubWeapon == BaseWeapon.Weapon.LASER)
-                    {
-                        baseAction.ModifySpeed(atackingDownSpeed * 0.75f);
-                    }
+                    //攻撃中は速度低下
+                    baseAction.ModifySpeed(atackingSpeeds[(int)setSubWeapon]);
                     usingWeapons[(int)Weapon.SUB] = true;
                 }
             }
@@ -408,15 +407,7 @@ namespace Online
                 //攻撃を止めたら速度を戻す
                 if (usingWeapons[(int)Weapon.SUB])
                 {
-                    if (setSubWeapon == BaseWeapon.Weapon.MISSILE)
-                    {
-                        //攻撃中は速度低下
-                        baseAction.ModifySpeed(1 / atackingDownSpeed);
-                    }
-                    if (setSubWeapon == BaseWeapon.Weapon.LASER)
-                    {
-                        baseAction.ModifySpeed(1 / (atackingDownSpeed * 0.75f));
-                    }
+                    baseAction.ModifySpeed(1 / atackingSpeeds[(int)setSubWeapon]);
                     usingWeapons[(int)Weapon.SUB] = false;
                 }
             }
@@ -580,8 +571,8 @@ namespace Online
             RpcSetActiveAllChildObject(false);
 
             //ついでに当たり判定も消す
-            RpcSetClliderEnabled(false); 
-            
+            RpcSetClliderEnabled(false);
+
             //爆破生成
             GameObject o = Instantiate(explosion, cacheTransform.position, Quaternion.identity);
             NetworkServer.Spawn(o, connectionToClient);
