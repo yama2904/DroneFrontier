@@ -9,7 +9,7 @@ namespace Online
     {
         public new static RaceManager Singleton { get; private set; }
 
-        class PlayerData
+        class ServerPlayerData
         {
             public NetworkConnection conn;
             public RaceDrone drone = null;
@@ -17,7 +17,7 @@ namespace Online
             public bool isGoal = false;
             public static int goalNum = 0;
         }
-        static List<PlayerData> playerDatas = new List<PlayerData>();
+        static List<ServerPlayerData> serverPlayerDatas = new List<ServerPlayerData>();
 
         //ゲーム終了処理を行ったらtrue
         bool isFinished = false;
@@ -29,10 +29,11 @@ namespace Online
             Singleton = this;
         }
 
+        [ServerCallback]
         public override void OnStartClient()
         {
             base.OnStartClient();
-            PlayerData.goalNum = 0;
+            ServerPlayerData.goalNum = 0;
 
             //3秒後にカウントダウンSE
             Invoke(nameof(RpcPlayStartCountDown), 3.0f);
@@ -49,11 +50,11 @@ namespace Online
             if (isServer)
             {
                 //ゴールしていないプレイヤーが1人になったら終了処理
-                if (PlayerData.goalNum >= MatchingManager.PlayerNum - 1)
+                if (ServerPlayerData.goalNum >= MatchingManager.PlayerNum - 1)
                 {
                     if (!isFinished)
                     {
-                        foreach (PlayerData pd in playerDatas)
+                        foreach (ServerPlayerData pd in serverPlayerDatas)
                         {
                             ranking[pd.ranking - 1] = pd.drone.name;
                         }
@@ -68,17 +69,17 @@ namespace Online
         {
             base.OnDestroy();
 
-            playerDatas.Clear();
-            PlayerData.goalNum = 0;
+            serverPlayerDatas.Clear();
+            ServerPlayerData.goalNum = 0;
         }
 
         //プレイヤー情報の登録
         public static void AddPlayerData(RaceDrone drone, NetworkConnection conn)
         {
             //既にリストにあったら処理しない
-            if (playerDatas.FindIndex(pd => pd.drone.netId == drone.netId) >= 0) return;
+            if (serverPlayerDatas.FindIndex(pd => pd.drone.netId == drone.netId) >= 0) return;
 
-            playerDatas.Add(new PlayerData
+            serverPlayerDatas.Add(new ServerPlayerData
             {
                 conn = conn,
                 drone = drone
@@ -88,16 +89,16 @@ namespace Online
         //ゴールしたプレイヤーを登録
         public void SetGoalDrone(uint netId)
         {
-            int index = playerDatas.FindIndex(playerData => playerData.drone.netId == netId);
+            int index = serverPlayerDatas.FindIndex(playerData => playerData.drone.netId == netId);
             if (index == -1) return;  //対応するドローンがなかったら処理しない
 
-            PlayerData pd = playerDatas[index];  //名前省略
+            ServerPlayerData pd = serverPlayerDatas[index];  //名前省略
             if (pd.isGoal) return;  //既にゴール処理を行っていたら処理しない
 
             //リスト情報の変更
-            pd.ranking = PlayerData.goalNum + 1;
+            pd.ranking = ServerPlayerData.goalNum + 1;
             pd.isGoal = true;
-            PlayerData.goalNum++;
+            ServerPlayerData.goalNum++;
         }
 
 
@@ -105,12 +106,12 @@ namespace Online
         [Server]
         public static void DisconnectPlayer(NetworkConnection conn)
         {
-            int index = playerDatas.FindIndex(pd => ReferenceEquals(pd.conn, conn));
+            int index = serverPlayerDatas.FindIndex(pd => ReferenceEquals(pd.conn, conn));
             if (index < 0) return;
 
             //ランキングを修正
-            int rank = playerDatas[index].ranking;
-            foreach (PlayerData pd in playerDatas)
+            int rank = serverPlayerDatas[index].ranking;
+            foreach (ServerPlayerData pd in serverPlayerDatas)
             {
                 if (pd.ranking >= rank)
                 {
@@ -119,13 +120,13 @@ namespace Online
             }
 
             //残りプレイヤーの修正
-            if (playerDatas[index].isGoal)
+            if (serverPlayerDatas[index].isGoal)
             {
-                PlayerData.goalNum--;
+                ServerPlayerData.goalNum--;
             }
 
             //切断されたプレイヤーをリストから削除
-            playerDatas.RemoveAt(index);
+            serverPlayerDatas.RemoveAt(index);
         }
     }
 }

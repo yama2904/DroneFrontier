@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(AudioSource))]
 public class SoundManager : MonoBehaviour
 {
     const string BGMFolder = "BGM/";
     const string SEFolder = "SE/";
 
-    protected static AudioClip[] BGMClips;   //BGM群
-    protected static AudioClip[] SEClips;    //SE群
+    protected static AudioClip[] bgmClips;   //BGM群
+    protected static AudioClip[] seClips;    //SE群
 
     public enum BGM
     {
@@ -53,36 +54,19 @@ public class SoundManager : MonoBehaviour
         NONE
     }
 
-    //AudioSource配列用
-    protected enum Audio
-    {
-        BGM,
-        SE_1,   //SEは10個まで再生可
-        SE_2,
-        SE_3,
-        SE_4,
-        SE_5,
-        SE_6,
-        SE_7,
-        SE_8,
-        SE_9,
-        SE_10,
-
-        NONE
-    }
-
     //ゲーム全体の音量
     static float baseBGMVolue = 1.0f;   //初期値は最大
     static float baseSEVolume = 1.0f;
 
     protected class AudioSourceData
     {
-        public AudioSource audioSource;
-        public float gameVolume;
-        public bool isPause; //一時停止しているか
-        public bool isFree;  //使っていなかったらtrue
+        public AudioSource audioSource = null;
+        public float gameVolume = 0;
+        public bool isPause = false; //一時停止しているか
+        public bool isFree = false;  //使っていなかったらtrue
     }
-    protected static AudioSourceData[] audioSourceDatas;
+    protected static AudioSourceData bgmAudioData = null;  //BGM用AudioSourceData
+    protected static AudioSourceData[] seAudioDatas;       //SE用AudioSourceData
 
     static float fadeVolume = 0;    //フェードイン又はフェードアウトの1フレームの音量変化量
     static float deltaTime = 0;     //static関数で使えるようにTime.deltaTimeを代入する変数
@@ -101,6 +85,8 @@ public class SoundManager : MonoBehaviour
 
     void Awake()
     {
+        #region SoundLoad
+
         string[] BGMPath = new string[(int)BGM.NONE];
         BGMPath[(int)BGM.DRONE_UP] = "Drone_up";
         BGMPath[(int)BGM.LOOP] = "LoopBGM";
@@ -136,53 +122,60 @@ public class SoundManager : MonoBehaviour
         SEPath[(int)SE.WALL_STUN] = "WallStun";
 
         //ResourcesファイルからClipをロード
-        BGMClips = new AudioClip[(int)BGM.NONE];
-        SEClips = new AudioClip[(int)SE.NONE];
+        bgmClips = new AudioClip[(int)BGM.NONE];
+        seClips = new AudioClip[(int)SE.NONE];
 
         //BGMをロード
         for (int i = 0; i < (int)BGM.NONE; i++)
         {
-            BGMClips[i] = Resources.Load<AudioClip>(BGMFolder + BGMPath[i]);
+            bgmClips[i] = Resources.Load<AudioClip>(BGMFolder + BGMPath[i]);
         }
 
         //SEをロード
         for (int i = 0; i < (int)SE.NONE; i++)
         {
-            SEClips[i] = Resources.Load<AudioClip>(SEFolder + SEPath[i]);
+            seClips[i] = Resources.Load<AudioClip>(SEFolder + SEPath[i]);
         }
 
-        //AudioSourceの初期化
-        audioSourceDatas = new AudioSourceData[(int)Audio.NONE];
-        AudioSource[] audios = GetComponents<AudioSource>();   //AudioSourceコンポーネントが複数いるので
-        for (int i = 0; i < (int)Audio.NONE; i++)
+        #endregion
+
+        #region Init
+
+        //AudioSourceDataの初期化
+        AudioSource[] audios = GetComponents<AudioSource>();   //全てのAudioSourceコンポーネントを取得
+
+        //BGM用AudioSourceDataの初期化
+        AudioSource bgmAudio = audios[0];
+        bgmAudio.loop = true;  //BGMはデフォルトでループ
+        bgmAudio.playOnAwake = false;  //起動直後再生させない
+        bgmAudioData = new AudioSourceData
         {
-            audioSourceDatas[i] = new AudioSourceData();
-            audioSourceDatas[i].audioSource = audios[i];
-        }
+            audioSource = bgmAudio
+        };
+        InitAudioSourceData(ref bgmAudioData);
 
-
-        //BGMの初期化
-        AudioSourceData BGMDatas = audioSourceDatas[(int)Audio.BGM];    //名前省略
-        InitAudioSourceData(ref BGMDatas);
-        BGMDatas.audioSource.loop = true;             //BGMはデフォルトでループさせる
-        BGMDatas.audioSource.playOnAwake = false;     //オブジェクト起動後再生させない
-
-        //SEの初期化
-        for (int i = (int)Audio.SE_1; i < (int)Audio.NONE; i++)
+        //SE用AudioSourceDataの初期化
+        seAudioDatas = new AudioSourceData[audios.Length - 1];
+        for (int i = 0; i < audios.Length - 1; i++)
         {
-            AudioSourceData asd = audioSourceDatas[i];  //名前省略
-
-            InitAudioSourceData(ref audioSourceDatas[i]);
-            asd.audioSource.playOnAwake = false;      //オブジェクト起動後再生させない
+            AudioSource seAudio = audios[i + 1];
+            seAudio.playOnAwake = false;  //起動直後再生させない
+            seAudioDatas[i] = new AudioSourceData
+            {
+                audioSource = audios[i + 1]
+            };
+            InitAudioSourceData(ref seAudioDatas[i]);
         }
+
+        #endregion
     }
 
     void Update()
     {
         //再生が終わったSEがあるか走査
-        for (int i = (int)Audio.SE_1; i < (int)Audio.NONE; i++)
+        for (int i = 0; i < seAudioDatas.Length; i++)
         {
-            AudioSourceData asd = audioSourceDatas[i];  //名前省略
+            AudioSourceData asd = seAudioDatas[i];  //名前省略
 
             //一時停止しているSEがあったら走査をスキップ
             if (asd.isPause) continue;
@@ -206,7 +199,7 @@ public class SoundManager : MonoBehaviour
         //フェードイン処理
         if (isFadeIn)
         {
-            AudioSource audio = audioSourceDatas[(int)Audio.BGM].audioSource;  //名前省略
+            AudioSource audio = bgmAudioData.audioSource;  //名前省略
 
             //フェード処理
             if (audio.isPlaying)
@@ -225,7 +218,7 @@ public class SoundManager : MonoBehaviour
         //フェードアウト処理
         if (isFadeOut)
         {
-            AudioSource audio = audioSourceDatas[(int)Audio.BGM].audioSource;  //名前省略
+            AudioSource audio = bgmAudioData.audioSource;  //名前省略
 
             //フェード処理
             if (audio.isPlaying)
@@ -243,6 +236,15 @@ public class SoundManager : MonoBehaviour
         deltaTime = Time.deltaTime;
     }
 
+    //AudioClipを取得
+    public static AudioClip GetAudioClip(SE se)
+    {
+        if (se == SE.NONE) return null;  //バグ防止
+        return seClips[(int)se];
+    }
+
+    #region BGM
+
     //ゲーム全体のBGMの音量を0～1で設定
     //設定画面での音量の設定など
     public static float BaseBGMVolume
@@ -253,7 +255,7 @@ public class SoundManager : MonoBehaviour
             float v = value;
             if (v < 0)
             {
-                v= 0;
+                v = 0;
             }
             if (v > 1.0f)
             {
@@ -261,10 +263,171 @@ public class SoundManager : MonoBehaviour
             }
             baseBGMVolue = v;
 
-            AudioSourceData asd = audioSourceDatas[(int)Audio.BGM]; //名前省略
+            AudioSourceData asd = bgmAudioData; //名前省略
             asd.audioSource.volume = AddVolumeBGM(asd.gameVolume);
         }
     }
+
+    //BGMの音量を0～1で変更
+    public static void SetGameBGMValume(float volume)
+    {
+        if (volume < 0)
+        {
+            volume = 0;
+        }
+        if (volume > 1.0f)
+        {
+            volume = 1.0f;
+        }
+        AudioSourceData asd = bgmAudioData; //名前省略
+
+        asd.gameVolume = volume;
+        asd.audioSource.volume = AddVolumeBGM(volume);
+    }
+
+    //ループしてBGMを再生
+    //複数BGMを再生できない
+    public static void Play(BGM bgm, float volume)
+    {
+        //バグ防止
+        if (bgm == BGM.NONE) return;
+
+        if (volume < 0)
+        {
+            volume = 0;
+        }
+        if (volume > 1.0f)
+        {
+            volume = 1.0f;
+        }
+        AudioSourceData asd = bgmAudioData; //名前省略
+
+        asd.audioSource.Stop();
+        asd.gameVolume = volume;
+        asd.isFree = false;
+        asd.audioSource.volume = AddVolumeBGM(volume);
+        asd.audioSource.clip = bgmClips[(int)bgm];
+        asd.audioSource.loop = true;
+        asd.audioSource.Play();
+
+        playingBGM = bgm;
+    }
+
+    //BGMを一時停止
+    public static void PauseBGM()
+    {
+        bgmAudioData.audioSource.Pause();
+    }
+
+    //一時停止しているBGMを再開
+    public static void UnPauseBGM()
+    {
+        bgmAudioData.audioSource.UnPause();
+    }
+
+    //BGMを停止
+    public static void StopBGM()
+    {
+        AudioSourceData asd = bgmAudioData; //名前省略
+
+        InitAudioSourceData(ref asd);
+        playingBGM = BGM.NONE;
+        isFadeIn = false;
+        isFadeOut = false;
+        fadeVolume = 0;
+    }
+
+    //再生されているBGMを返す
+    public static BGM IsPlayingBGM
+    {
+        get { return playingBGM; }
+    }
+
+    /*
+   フェード系処理は1フレームごとの音量変化の桁数が多すぎて
+   桁落ちがやばいので指定したtimeより数秒長く音量が
+   MAXになるまで時間がかかります
+   Debug.Logで確認しないとわからないくらいのバグだったのと
+   直せなかったので放置してます
+   */
+
+    //フェードイン(徐々にBGMを大きくする)
+    //timeは最大音量になるまでの時間
+    public static void FadeIn(BGM bgm, float time)
+    {
+        //バグ防止
+        if (bgm == BGM.NONE) return;
+
+        AudioSource audio = bgmAudioData.audioSource;  //名前省略
+        audio.clip = bgmClips[(int)bgm];
+        audio.Play();
+
+        if (isFadeOut)
+        {
+            isFadeOut = false;
+        }
+        isFadeIn = true;
+        float diff = 1.0f - audio.volume; //今の音量と最大音量の差
+        fadeVolume = (deltaTime / time) * diff;
+    }
+
+    //既に鳴らしているBGMをフェードイン
+    //BGMを最初から鳴らさずに済む
+    public static void FadeIn(float time)
+    {
+        if (isFadeOut)
+        {
+            isFadeOut = false;
+        }
+        isFadeIn = true;
+        float diff = 1.0f - bgmAudioData.audioSource.volume; //今の音量と最大音量の差
+        fadeVolume = (deltaTime / time) * diff;
+    }
+
+    //フェードアウト(徐々にBGMを小さくする)
+    //timeは音量が0になるまでの時間
+    public static void FadeOut(BGM bgm, float time)
+    {
+        //バグ防止
+        if (bgm == BGM.NONE) return;
+
+        AudioSource audio = bgmAudioData.audioSource;
+        audio.clip = bgmClips[(int)bgm];
+        audio.Play();
+
+        if (isFadeIn)
+        {
+            isFadeIn = false;
+        }
+        isFadeOut = true;
+        float diff = audio.volume; //今の音量と最小音量の差
+        fadeVolume = (deltaTime / time) * diff;
+    }
+
+    //既に鳴らしているBGMをフェードアウト
+    //BGMを最初から鳴らさずに済む
+    public static void FadeOut(float time)
+    {
+        if (isFadeIn)
+        {
+            isFadeIn = false;
+        }
+        isFadeOut = true;
+        float diff = bgmAudioData.audioSource.volume; //今の音量と最小音量の差
+        fadeVolume = (deltaTime / time) * diff;
+    }
+
+    //フェードイン・フェードアウトを途中で止めて音量をそのままにする
+    public static void StopFade()
+    {
+        isFadeIn = false;
+        isFadeOut = false;
+        fadeVolume = 0;
+    }
+
+    #endregion
+
+    #region SE
 
     //ゲーム全体のSEの音量を0～1で設定
     //設定画面での音量の設定など
@@ -284,69 +447,14 @@ public class SoundManager : MonoBehaviour
             }
             baseSEVolume = v;
 
-            for (int i = (int)Audio.SE_1; i < (int)Audio.NONE; i++)
+            for (int i = 0; i < seAudioDatas.Length; i++)
             {
-                AudioSourceData asd = audioSourceDatas[i]; //名前省略
+                AudioSourceData asd = seAudioDatas[i]; //名前省略
                 if (asd.isFree) continue;
                 asd.audioSource.volume = AddVolumeSE(asd.gameVolume);
             }
         }
     }
-
-    //BGMの音量を0～1で変更
-    public static void SetGameBGMValume(float volume)
-    {
-        if (volume < 0)
-        {
-            volume = 0;
-        }
-        if (volume > 1.0f)
-        {
-            volume = 1.0f;
-        }
-        AudioSourceData asd = audioSourceDatas[(int)Audio.BGM]; //名前省略
-
-        asd.gameVolume = volume;
-        asd.audioSource.volume = AddVolumeBGM(volume);
-    }
-
-
-    //AudioClipを取得
-    public static AudioClip GetAudioClip(SE se)
-    {
-        if (se == SE.NONE) return null;  //バグ防止
-        return SEClips[(int)se];
-    }
-
-
-    //ループしてBGMを再生
-    //複数BGMを再生できない
-    public static void Play(BGM bgm, float volume)
-    {
-        //バグ防止
-        if (bgm == BGM.NONE) return;
-
-        if (volume < 0)
-        {
-            volume = 0;
-        }
-        if (volume > 1.0f)
-        {
-            volume = 1.0f;
-        }
-        AudioSourceData asd = audioSourceDatas[(int)Audio.BGM]; //名前省略
-
-        asd.audioSource.Stop();
-        asd.gameVolume = volume;
-        asd.isFree = false;
-        asd.audioSource.volume = AddVolumeBGM(volume);
-        asd.audioSource.clip = BGMClips[(int)bgm];
-        asd.audioSource.loop = true;
-        asd.audioSource.Play();
-
-        playingBGM = bgm;
-    }
-
 
     /*
     概要:
@@ -371,9 +479,9 @@ public class SoundManager : MonoBehaviour
         if (se == SE.NONE) return -1;
 
         int index = -1;
-        for (int i = (int)Audio.SE_1; i < (int)Audio.NONE; i++)
+        for (int i = 0; i < seAudioDatas.Length; i++)
         {
-            AudioSourceData data = audioSourceDatas[i];
+            AudioSourceData data = seAudioDatas[i];
             if (data.isFree)
             {
                 index = i;
@@ -393,16 +501,16 @@ public class SoundManager : MonoBehaviour
         {
             volume = 1.0f;
         }
-        AudioSourceData asd = audioSourceDatas[index]; //名前省略
+        AudioSourceData asd = seAudioDatas[index]; //名前省略
 
         asd.gameVolume = volume;
         asd.isFree = false;
         asd.audioSource.volume = AddVolumeSE(volume);
-        asd.audioSource.clip = SEClips[(int)se];
+        asd.audioSource.clip = seClips[(int)se];
         asd.audioSource.loop = loop;
 
         //再生時間がclipの長さ以下か調べる
-        if (time > 0 && time < SEClips[(int)se].length)
+        if (time > 0 && time < seClips[(int)se].length)
         {
             asd.audioSource.time = time;
         }
@@ -411,37 +519,13 @@ public class SoundManager : MonoBehaviour
         return index;
     }
 
-    //BGMを一時停止
-    public static void PauseBGM()
-    {
-        audioSourceDatas[(int)Audio.BGM].audioSource.Pause();
-    }
-
-    //一時停止しているBGMを再開
-    public static void UnPauseBGM()
-    {
-        audioSourceDatas[(int)Audio.BGM].audioSource.UnPause();
-    }
-
-    //BGMを停止
-    public static void StopBGM()
-    {
-        AudioSourceData asd = audioSourceDatas[(int)Audio.BGM]; //名前省略
-
-        InitAudioSourceData(ref asd);
-        playingBGM = BGM.NONE;
-        isFadeIn = false;
-        isFadeOut = false;
-        fadeVolume = 0;
-    }
-
     //全てのSEを停止
     public static void StopSEAll()
     {
         //FreeSEManagerも整理
-        for (int i = (int)Audio.SE_1; i < (int)Audio.NONE; i++)
+        for (int i = 0; i < seAudioDatas.Length; i++)
         {
-            AudioSourceData asd = audioSourceDatas[i];  //名前省略
+            AudioSourceData asd = seAudioDatas[i];  //名前省略
 
             if (asd.isFree) continue;
             InitAudioSourceData(ref asd);
@@ -453,9 +537,9 @@ public class SoundManager : MonoBehaviour
     public static void PauseSE(int num)
     {
         //AudioSourceの配列内かチェック
-        if (!AudioSourceArrayCheck(num)) return;
+        if (!AudioSourceArrayCheck(seAudioDatas, num)) return;
 
-        AudioSourceData asd = audioSourceDatas[num];  //名前省略
+        AudioSourceData asd = seAudioDatas[num];  //名前省略
         if (asd.audioSource.isPlaying)
         {
             asd.audioSource.Pause();
@@ -467,9 +551,9 @@ public class SoundManager : MonoBehaviour
     public static void UnPauseSE(int num)
     {
         //AudioSourceの配列内かチェック
-        if (!AudioSourceArrayCheck(num)) return;
+        if (!AudioSourceArrayCheck(seAudioDatas, num)) return;
 
-        AudioSourceData asd = audioSourceDatas[num];  //名前省略
+        AudioSourceData asd = seAudioDatas[num];  //名前省略
         if (!asd.audioSource.isPlaying)
         {
             asd.audioSource.UnPause();
@@ -481,9 +565,9 @@ public class SoundManager : MonoBehaviour
     public static void StopSE(int num)
     {
         //AudioSourceの配列内かチェック
-        if (!AudioSourceArrayCheck(num)) return;
+        if (!AudioSourceArrayCheck(seAudioDatas, num)) return;
 
-        AudioSourceData asd = audioSourceDatas[num];  //名前省略
+        AudioSourceData asd = seAudioDatas[num];  //名前省略
         if (asd.audioSource.isPlaying)
         {
             InitAudioSourceData(ref asd);
@@ -492,12 +576,12 @@ public class SoundManager : MonoBehaviour
 
     //ループ設定しているSEのループを停止させる
     //その場でSEが止まるわけではなくclipのSEが鳴り終わるまで再生される
-    public static void StopLoop(int num)
+    public static void StopLoopSE(int num)
     {
         //AudioSourceの配列内かチェック
-        if (!AudioSourceArrayCheck(num)) return;
+        if (!AudioSourceArrayCheck(seAudioDatas, num)) return;
 
-        AudioSource audio = audioSourceDatas[num].audioSource;  //名前省略
+        AudioSource audio = seAudioDatas[num].audioSource;  //名前省略
         if (audio.loop)
         {
             audio.loop = false;
@@ -508,109 +592,23 @@ public class SoundManager : MonoBehaviour
     public static bool IsPlayingSE(int num)
     {
         //AudioSourceの配列内かチェック
-        if (!AudioSourceArrayCheck(num)) return false;
+        if (!AudioSourceArrayCheck(seAudioDatas, num)) return false;
 
-        if (audioSourceDatas[num].audioSource.isPlaying)
+        if (seAudioDatas[num].audioSource.isPlaying)
         {
             return true;
         }
         return false;
     }
 
-    //再生されているBGMを返す
-    public static BGM IsPlayingBGM
-    {
-        get { return playingBGM; }
-    }
-
     //SEの長さを返す
     public static float Length(SE se)
     {
-        return SEClips[(int)se].length;
+        return seClips[(int)se].length;
     }
 
+    #endregion
 
-    /*
-      フェード系処理は1フレームごとの音量変化の桁数が多すぎて
-      桁落ちがやばいので指定したtimeより数秒長く音量が
-      MAXになるまで時間がかかります
-      Debug.Logで確認しないとわからないくらいのバグだったのと
-      直せなかったので放置してます
-    */
-
-    //フェードイン(徐々にBGMを大きくする)
-    //timeは最大音量になるまでの時間
-    public static void FadeIn(BGM bgm, float time)
-    {
-        //バグ防止
-        if (bgm == BGM.NONE) return;
-
-        AudioSource audio = audioSourceDatas[(int)Audio.BGM].audioSource;
-        audio.clip = BGMClips[(int)bgm];
-        audio.Play();
-
-        if (isFadeOut)
-        {
-            isFadeOut = false;
-        }
-        isFadeIn = true;
-        float diff = 1.0f - audio.volume; //今の音量と最大音量の差
-        fadeVolume = (deltaTime / time) * diff;
-    }
-
-    //既に鳴らしているBGMをフェードイン
-    //BGMを最初から鳴らさずに済む
-    public static void FadeIn(float time)
-    {
-        if (isFadeOut)
-        {
-            isFadeOut = false;
-        }
-        isFadeIn = true;
-        float diff = 1.0f - audioSourceDatas[(int)Audio.BGM].audioSource.volume; //今の音量と最大音量の差
-        fadeVolume = (deltaTime / time) * diff;
-    }
-
-    //フェードアウト(徐々にBGMを小さくする)
-    //timeは音量が0になるまでの時間
-    public static void FadeOut(BGM bgm, float time)
-    {
-        //バグ防止
-        if (bgm == BGM.NONE) return;
-
-        AudioSource audio = audioSourceDatas[(int)Audio.BGM].audioSource;
-        audio.clip = BGMClips[(int)bgm];
-        audio.Play();
-
-        if (isFadeIn)
-        {
-            isFadeIn = false;
-        }
-        isFadeOut = true;
-        float diff = audio.volume; //今の音量と最小音量の差
-        fadeVolume = (deltaTime / time) * diff;
-    }
-
-    //既に鳴らしているBGMをフェードアウト
-    //BGMを最初から鳴らさずに済む
-    public static void FadeOut(float time)
-    {
-        if (isFadeIn)
-        {
-            isFadeIn = false;
-        }
-        isFadeOut = true;
-        float diff = audioSourceDatas[(int)Audio.BGM].audioSource.volume; //今の音量と最小音量の差
-        fadeVolume = (deltaTime / time) * diff;
-    }
-
-    //フェードイン・フェードアウトを途中で止めて音量をそのままにする
-    public static void StopFade()
-    {
-        isFadeIn = false;
-        isFadeOut = false;
-        fadeVolume = 0;
-    }
 
     //baseVolumeBGMとgameVolumeBGMを合わせた最終的なBGMの音量を取得
     private static float AddVolumeBGM(float volume)
@@ -655,9 +653,9 @@ public class SoundManager : MonoBehaviour
     }
 
     //AudioSourceの配列内かチェック
-    protected static bool AudioSourceArrayCheck(int num)
+    protected static bool AudioSourceArrayCheck(AudioSourceData[] array, int num)
     {
-        if (num < 0 || num > (int)Audio.NONE)
+        if (num < 0 || num >= array.Length)
         {
             //配列の範囲外
             return false;

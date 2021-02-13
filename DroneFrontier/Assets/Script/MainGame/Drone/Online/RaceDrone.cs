@@ -64,6 +64,8 @@ namespace Online
             boostGaugeImage.fillAmount = 1;
             boostGaugeFrameImage.enabled = true;
 
+            GetComponent<AudioListener>().enabled = true;
+
 
             Debug.Log("End: OnStartLocalPlayer");
         }

@@ -26,12 +26,12 @@ namespace Offline
 
             //初期化
             oneShotAudio = audios[0];
-            for (int i = 1; i < audios.Length; i++)
+            for (int i = 0; i < audios.Length - 1; i++)
             {
                 audios[i].loop = true;
                 loopAudioDatas[i] = new LoopAudioData
                 {
-                    audioSource = audios[i],
+                    audioSource = audios[i + 1],
                     isFree = true
                 };
             }

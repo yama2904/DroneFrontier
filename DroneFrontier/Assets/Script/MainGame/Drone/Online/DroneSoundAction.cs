@@ -32,7 +32,7 @@ namespace Online
                 audios[i].loop = true;
                 loopAudioDatas[i] = new LoopAudioData
                 {
-                    audioSource = audios[i],
+                    audioSource = audios[i + 1],
                     isFree = true
                 };
             }
