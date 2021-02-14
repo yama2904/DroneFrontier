@@ -47,13 +47,17 @@ namespace Offline
             }
             BaseWeapon mainWeapon = null;
             BaseWeapon subWeapon = null;
-            public BaseWeapon.Weapon setSubWeapon = BaseWeapon.Weapon.SHOTGUN;
+            public BaseWeapon.Weapon setSubWeapon = BaseWeapon.Weapon.NONE;
             float atackingSpeed = 1f;   //攻撃中の移動速度の変動用
 
             //攻撃処理
             int weaponTime = 0;
             float weaponTimeCount = 0;
             bool useMainWeapon = false;
+
+            //ショットガン用
+            float shotgunStayTime = 2f;
+            float shotgunStayTimeCount = 0;
 
 
             //死亡処理用
@@ -125,7 +129,7 @@ namespace Offline
                         {
                             if (setSubWeapon == BaseWeapon.Weapon.SHOTGUN)
                             {
-                                changeDirDistance = 75f;
+                                changeDirDistance = 30f;
                             }
                             else
                             {
@@ -133,29 +137,16 @@ namespace Offline
                             }
                         }
 
-                        //敵との一定の距離内に入ると移動方向切り替え
+                        //敵との一定の距離内に入ると左右移動
                         if (diff.sqrMagnitude <= Mathf.Pow(changeDirDistance, 2))
                         {
                             if (moveSideTimeCount >= moveSideTime)
                             {
-                                if (Random.Range(0, 2) == 0)
-                                {
-                                    Quaternion leftAngle = Quaternion.Euler(0, -90, 0);
-                                    Vector3 left = leftAngle.normalized * cacheTransform.forward;
-                                    moveSideDir = left;
-                                }
-                                else
-                                {
-                                    Quaternion rightAngle = Quaternion.Euler(0, 90, 0);
-                                    Vector3 right = rightAngle.normalized * cacheTransform.forward;
-                                    moveSideDir = right;
-                                }
-
+                                StartSideMove();
                                 moveSideTimeCount = 0;
-                                moveSideTime = Random.Range(2, 6);
-                                isMoveSide = true;
                             }
                         }
+                        //一定距離内にいないと直進
                         else
                         {
                             baseAction.Move(cacheTransform.forward * atackingSpeed);
@@ -212,6 +203,8 @@ namespace Offline
                 {
                     //ロックオン対象があれば攻撃
                     weaponTimeCount += Time.deltaTime;
+
+                    //一定時間で攻撃する武器切り替え
                     if (weaponTimeCount >= weaponTime)
                     {
                         weaponTimeCount = 0;
@@ -220,7 +213,8 @@ namespace Offline
                             //ショットガンを使う場合は短時間
                             if (useMainWeapon)
                             {
-                                weaponTime = 3;
+                                weaponTime = 5;
+                                shotgunStayTimeCount = 0;
                             }
                             else
                             {
@@ -244,7 +238,12 @@ namespace Offline
                     }
                     else
                     {
-                        subWeapon.Shot(lockOnAction.Target);
+                        //ショットガンは敵に近づいてから攻撃する
+                        shotgunStayTimeCount += Time.deltaTime;
+                        if (shotgunStayTimeCount >= shotgunStayTime)
+                        {
+                            subWeapon.Shot(lockOnAction.Target);
+                        }
                     }
 
                     //攻撃中の移動速度低下の設定
@@ -403,6 +402,27 @@ namespace Offline
             }
 
 
+            //左右移動
+            void StartSideMove()
+            {
+                if (Random.Range(0, 2) == 0)
+                {
+                    Quaternion leftAngle = Quaternion.Euler(0, -90, 0);
+                    Vector3 left = leftAngle.normalized * cacheTransform.forward;
+                    moveSideDir = left;
+                }
+                else
+                {
+                    Quaternion rightAngle = Quaternion.Euler(0, 90, 0);
+                    Vector3 right = rightAngle.normalized * cacheTransform.forward;
+                    moveSideDir = right;
+                }
+
+                moveSideTime = Random.Range(2, 6);
+                isMoveSide = true;
+            }
+
+
             //リスト内で最も距離が近いRaycastHitを返す
             void GetNearestObject(out RaycastHit hit, List<RaycastHit> hits)
             {
@@ -424,9 +444,32 @@ namespace Offline
             {
                 if (collision.gameObject.CompareTag(TagNameManager.PLAYER)) return;
                 if (collision.gameObject.CompareTag(TagNameManager.CPU)) return;
+                if (collision.gameObject.CompareTag(TagNameManager.JAMMING_BOT)) return;
 
-                StartRotate();
-                rotateTimeCount = 0;
+                if (lockOnAction.Target == null)
+                {
+                    StartRotate();
+                    rotateTimeCount = 0;
+                }
+                else
+                {
+                    StartSideMove();
+                    moveSideTimeCount = 0;
+                }
+            }
+
+            private void OnCollisionStay(Collision collision)
+            {
+                if (collision.gameObject.CompareTag(TagNameManager.PLAYER)) return;
+                if (collision.gameObject.CompareTag(TagNameManager.CPU)) return;
+                if (collision.gameObject.CompareTag(TagNameManager.JAMMING_BOT)) return;
+                if (lockOnAction.Target == null) return;
+
+                if (moveSideTimeCount >= moveSideTime)
+                {
+                    StartSideMove();
+                    moveSideTimeCount = 0;
+                }
             }
         }
     }
