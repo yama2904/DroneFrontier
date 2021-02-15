@@ -95,7 +95,7 @@ public class ConfigScreenManager : MonoBehaviour
         //メインゲーム中なら設定画面のを非表示
         if (Online.MainGameManager.IsMainGaming)
         {
-            Online.BattleManager.Singleton.ConfigToMainGame();
+            Online.MainGameManager.Singleton.ConfigToMainGame();
         }
         //ゲームモード選択画面に戻る
         else

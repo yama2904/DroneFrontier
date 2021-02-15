@@ -5,7 +5,7 @@ using Mirror;
 
 namespace Online
 {
-    public class RaceManager : MainGameManager
+    public class RaceManager : NetworkBehaviour
     {
         public new static RaceManager Singleton { get; private set; }
 
@@ -23,9 +23,8 @@ namespace Online
         bool isFinished = false;
 
 
-        protected override void Awake()
+        void Awake()
         {
-            base.Awake();
             Singleton = this;
         }
 
@@ -36,15 +35,13 @@ namespace Online
             ServerPlayerData.goalNum = 0;
 
             //3秒後にカウントダウンSE
-            Invoke(nameof(RpcPlayStartCountDown), 3.0f);
+            Invoke(nameof(CallRpcPlayStartCountDown), 3.0f);
         }
 
-        protected override void Update()
+        void Update()
         {
-            base.Update();
-
             //カウントダウンが終わってから処理
-            if (!StartFlag) return;
+            if (!MainGameManager.Singleton.StartFlag) return;
 
             //ゴールしたドローンを走査
             if (isServer)
@@ -54,21 +51,20 @@ namespace Online
                 {
                     if (!isFinished)
                     {
+                        string[] ranking = new string[serverPlayerDatas.Count];
                         foreach (ServerPlayerData pd in serverPlayerDatas)
                         {
                             ranking[pd.ranking - 1] = pd.drone.name;
                         }
-                        FinishGame();
+                        MainGameManager.Singleton.FinishGame(ranking);
                         isFinished = true;
                     }
                 }
             }
         }
 
-        protected override void OnDestroy()
+        void OnDestroy()
         {
-            base.OnDestroy();
-
             serverPlayerDatas.Clear();
             ServerPlayerData.goalNum = 0;
         }
@@ -127,6 +123,13 @@ namespace Online
 
             //切断されたプレイヤーをリストから削除
             serverPlayerDatas.RemoveAt(index);
+        }
+
+
+        [Server]
+        void CallRpcPlayStartCountDown()
+        {
+            MainGameManager.Singleton.RpcPlayStartCountDown();
         }
     }
 }

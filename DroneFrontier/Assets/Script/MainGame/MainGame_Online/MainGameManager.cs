@@ -10,6 +10,9 @@ namespace Online
     {
         public static MainGameManager Singleton { get; private set; }
 
+        //プレハブ
+        [SerializeField] BattleManager battleManagerPrefab = null;
+        [SerializeField] RaceManager raceManagerPrefab = null;
 
         //ゲーム終了アニメーター
         [SerializeField] Animator finishAnimator = null;
@@ -20,20 +23,18 @@ namespace Online
         //設定画面を開いているか
         public static bool IsConfig { get; private set; } = false;
 
-
-        //ゲーム開始のカウントダウンが鳴ったらtrue
-        protected bool startFlag = false;
-        public bool StartFlag { get { return startFlag; } }
+        //カウントダウンが終わったらtrue
+        public bool StartFlag { get; private set; } = false;
 
         //ランキング用配列
-        protected string[] ranking = new string[MatchingManager.PlayerNum];
+        string[] ranking = new string[MatchingManager.PlayerNum];
 
 
         //設定画面移動時のマスク用変数
         [SerializeField] protected Image screenMaskImage = null;
 
         //マスクする色
-        protected Color maskColor = new Color(0, 0, 0.5f);
+        Color maskColor = new Color(0, 0, 0.5f);
 
 
         //デバッグ用
@@ -47,6 +48,26 @@ namespace Online
         {
             base.OnStartClient();
 
+            if (isServer)
+            {
+                //Managerの生成
+                if (GameModeSelectScreenManager.Mode == GameModeSelectScreenManager.GameMode.BATTLE)
+                {
+                    BattleManager manager = Instantiate(battleManagerPrefab);
+                    NetworkServer.Spawn(manager.gameObject);
+                }
+                else if (GameModeSelectScreenManager.Mode == GameModeSelectScreenManager.GameMode.RACE)
+                {
+                    RaceManager manager = Instantiate(raceManagerPrefab);
+                    NetworkServer.Spawn(manager.gameObject);
+                }
+                else
+                {
+                    //エラー
+                    Application.Quit();
+                }
+            }
+
             //乱数のシード値の設定
             Random.InitState(System.DateTime.Now.Millisecond);
 
@@ -58,7 +79,7 @@ namespace Online
             screenMaskImage.enabled = false;
         }
 
-        protected virtual void Awake()
+        void Awake()
         {
             //シングルトンの作成
             Singleton = this;
@@ -71,11 +92,11 @@ namespace Online
             //デバッグ用
             if (solo)
             {
-                startFlag = true;
+                StartFlag = true;
             }
         }
 
-        protected virtual void Update()
+        void Update()
         {
             //カメラロック切り替え
             if (Input.GetKeyDown(KeyCode.Escape))
@@ -95,7 +116,7 @@ namespace Online
                 }
             }
 
-            if (!startFlag) return;
+            if (!StartFlag) return;
 
             //設定画面を開く
             if (Input.GetKeyDown(KeyCode.M))
@@ -128,7 +149,7 @@ namespace Online
         }
 
         //変数の初期化
-        protected virtual void OnDestroy()
+        void OnDestroy()
         {
             IsMainGaming = false;
             IsConfig = false;
@@ -137,19 +158,28 @@ namespace Online
         }
 
 
+        //カウントダウンの開始
+        [ClientRpc]
+        public void RpcPlayStartCountDown()
+        {
+            SoundManager.Play(SoundManager.SE.START_COUNT_DOWN_D, SoundManager.BaseSEVolume);
+            Invoke(nameof(SetStartFlagTrue), 4.5f);
+        }
+
         //ゲームの終了処理
         [Server]
-        public void FinishGame()
+        public void FinishGame(string[] ranking)
         {
             //デバッグ用
             if (solo) return;
 
 
             RpcStopBGM();
-            StartCoroutine(FinishGameCoroutine(ranking));
+            this.ranking = ranking;
+            StartCoroutine(FinishGameCoroutine());
         }
 
-        IEnumerator FinishGameCoroutine(string[] ranking)
+        IEnumerator FinishGameCoroutine()
         {
             SetAnimatorPlay();
             yield return new WaitForSeconds(2.0f);
@@ -178,7 +208,7 @@ namespace Online
         //スタートフラグを立てる
         void SetStartFlagTrue()
         {
-            startFlag = true;
+            StartFlag = true;
             SoundManager.Play(SoundManager.BGM.LOOP, SoundManager.BaseBGMVolume * 0.4f);
         }
 
@@ -186,13 +216,6 @@ namespace Online
         void RpcStopBGM()
         {
             SoundManager.StopBGM();
-        }
-
-        [ClientRpc]
-        protected void RpcPlayStartCountDown()
-        {
-            SoundManager.Play(SoundManager.SE.START_COUNT_DOWN_D, SoundManager.BaseSEVolume);
-            Invoke(nameof(SetStartFlagTrue), 4.5f);
         }
 
         [ClientRpc]
@@ -226,7 +249,7 @@ namespace Online
             IsConfig = false;
         }
 
-        protected virtual void MainGameToConfig()
+        void MainGameToConfig()
         {
             screenMaskImage.enabled = true;     //設定画面の背景にマスクをつける
             BaseScreenManager.SetScreen(BaseScreenManager.Screen.CONFIG);

@@ -146,7 +146,7 @@ namespace Online
 
             if (isServer)
             {
-                BattleManager.Singleton.AddServerPlayerData(this, connectionToClient);
+                BattleManager.AddServerPlayerData(this, connectionToClient);
             }
         }
 
@@ -192,7 +192,7 @@ namespace Online
         void Update()
         {
             if (!isLocalPlayer) return;
-            if (!BattleManager.Singleton.StartFlag) return;  //ゲーム開始フラグが立っていなかったら処理しない
+            if (!MainGameManager.Singleton.StartFlag) return;  //ゲーム開始フラグが立っていなかったら処理しない
 
             //死亡処理中は操作不可
             if (syncIsDestroyFall || syncIsDestroy) return;
@@ -662,7 +662,7 @@ namespace Online
         private void OnTriggerStay(Collider other)
         {
             if (!isLocalPlayer) return;
-            if (!BattleManager.Singleton.StartFlag) return;  //ゲーム開始フラグが立っていなかったら処理しない
+            if (!MainGameManager.Singleton.StartFlag) return;  //ゲーム開始フラグが立っていなかったら処理しない
 
             //死亡処理中は操作不可
             if (syncIsDestroyFall || syncIsDestroy) return;
