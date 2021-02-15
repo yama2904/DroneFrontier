@@ -10,6 +10,7 @@ namespace Online
     {
         public static MainGameManager Singleton { get; private set; }
 
+
         //ゲーム終了アニメーター
         [SerializeField] Animator finishAnimator = null;
 

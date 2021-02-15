@@ -23,6 +23,7 @@ namespace Online
         public class ServerPlayerData
         {
             public NetworkConnection conn;
+            public GameObject drone = null;
             public int weapon = -1;
             public string name = "";
             public int stock = 0;
@@ -31,7 +32,7 @@ namespace Online
             public static int droneNum = MatchingManager.PlayerNum;  //残っているドローンの数
         }
         List<ServerPlayerData> serverPlayerDatas = new List<ServerPlayerData>();
-        SyncList<GameObject> clientPlayers = new SyncList<GameObject>();
+        List<BattleDrone> clientPlayers = new List<BattleDrone>();
         bool isDestroy = false;
         int useIndex = 0;
 
@@ -97,6 +98,14 @@ namespace Online
         {
             base.Update();
 
+            if (Input.GetKeyDown(KeyCode.T))
+            {
+                foreach (BattleDrone o in clientPlayers)
+                {
+                    Debug.Log(o);
+                }
+            }
+
             //カウントダウンが終わったら処理
             if (!StartFlag) return;
 
@@ -109,11 +118,8 @@ namespace Online
                     int initIndex = useIndex;
                     if (clientPlayers[useIndex] != null)
                     {
-                        //名前省略
-                        BattleDrone drone = clientPlayers[useIndex].GetComponent<BattleDrone>();
-
-                        drone.SetCameraDepth(0);
-                        drone.SetAudioListener(false);
+                        clientPlayers[useIndex].SetCameraDepth(0);
+                        clientPlayers[useIndex].SetAudioListener(false);
                     }
                     listener.enabled = false;
                     while (true)
@@ -121,10 +127,7 @@ namespace Online
                         useIndex++;
 
                         //無限ループ防止
-                        if (useIndex == initIndex)
-                        {
-                            break;
-                        }
+                        if (useIndex == initIndex) break;
 
                         //配列の範囲外なら修正
                         if (useIndex >= clientPlayers.Count || useIndex < 0)
@@ -140,11 +143,8 @@ namespace Online
                         }
                         else
                         {
-                            //名前省略
-                            BattleDrone bd = clientPlayers[useIndex].GetComponent<BattleDrone>();
-
-                            bd.SetCameraDepth(5);
-                            bd.SetAudioListener(true);
+                            clientPlayers[useIndex].SetCameraDepth(5);
+                            clientPlayers[useIndex].SetAudioListener(true);
                             break;
                         }
                     }
@@ -158,7 +158,7 @@ namespace Online
                 {
                     ServerPlayerData pd = serverPlayerDatas[i];
                     if (pd.isDestroy) continue;
-                    if (clientPlayers[i] == null)
+                    if (pd.drone == null)
                     {
                         //ストックが残っていたら復活
                         if (pd.stock > 0)
@@ -167,11 +167,11 @@ namespace Online
                             GameObject p = Instantiate(NetworkManager.singleton.playerPrefab, pos.position, pos.rotation);
                             p.GetComponent<BattleDrone>().syncSetSubWeapon = pd.weapon;
                             NetworkServer.AddPlayerForConnection(pd.conn, p);
-                            clientPlayers[i] = p;
+                            pd.drone = p;
                             pd.stock--;
 
                             //リスポーンSEの再生
-                            clientPlayers[i].GetComponent<DroneSoundAction>().RpcPlayOneShotSEAllClient(SoundManager.SE.RESPAWN, SoundManager.BaseSEVolume);
+                            p.GetComponent<DroneSoundAction>().RpcPlayOneShotSEAllClient(SoundManager.SE.RESPAWN, SoundManager.BaseSEVolume);
 
                             //残機UIの変更
                             TargetSetStockText(pd.conn, pd.stock.ToString());
@@ -184,6 +184,11 @@ namespace Online
 
                             pd.ranking = ServerPlayerData.droneNum;
                             ServerPlayerData.droneNum--;
+
+                            foreach(ServerPlayerData spd in serverPlayerDatas)
+                            {
+                                //TargetAddClientPlayers(pd.conn, pd.drone);
+                            }
 
                             //残機UIの非表示
                             TargetSetStockEnabled(pd.conn, false);
@@ -217,17 +222,17 @@ namespace Online
         [Server]
         public void AddServerPlayerData(BattleDrone drone, NetworkConnection conn)
         {
-            //既にリストにあったら処理しない
-            if (serverPlayerDatas.FindIndex(pd => ReferenceEquals(pd.conn, conn)) >= 0) return;
+            //既に登録済みのクライアントなら処理しない
+            if (serverPlayerDatas.FindIndex(spd => ReferenceEquals(spd.conn, conn)) >= 0) return;
 
             serverPlayerDatas.Add(new ServerPlayerData
             {
                 conn = conn,
+                drone = drone.gameObject,
                 weapon = drone.syncSetSubWeapon,
                 name = drone.name,
                 stock = droneStock
             });
-            clientPlayers.Add(drone.gameObject);
 
             Debug.Log("AddServerPlayerData");
         }
@@ -258,7 +263,6 @@ namespace Online
 
             //切断されたプレイヤーをリストから削除
             serverPlayerDatas.RemoveAt(index);
-            clientPlayers.RemoveAt(index);
         }
 
 
@@ -316,7 +320,7 @@ namespace Online
         {
             if (!isFinished)
             {
-                for(int i = 0; i < serverPlayerDatas.Count; i++)
+                for (int i = 0; i < serverPlayerDatas.Count; i++)
                 {
                     ServerPlayerData spd = serverPlayerDatas[i];  //名前省略
                     ranking[spd.ranking - 1] = spd.name;

@@ -549,13 +549,6 @@ namespace Online
             listener.enabled = flag;
         }
 
-
-        [Server]
-        void AddServerPlayerData()
-        {
-            BattleManager.Singleton.AddServerPlayerData(this, connectionToClient);
-        }
-
         #region Death
 
         [Command(ignoreAuthority = true)]
