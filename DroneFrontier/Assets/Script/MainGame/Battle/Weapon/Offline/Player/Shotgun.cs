@@ -116,12 +116,52 @@ namespace Offline
             //残り弾数が0だったら撃たない
             if (haveBulletNum <= 0) return;
 
+
+            //敵の位置に応じて発射角度を修正
+            Quaternion rotation = shotPos.rotation;
+            if (target != null)
+            {
+                Vector3 diff = target.transform.position - shotPos.position;   //ターゲットとの距離
+                rotation = Quaternion.LookRotation(diff);   //ロックオンしたオブジェクトの方向
+
+                //const float MAX_LOOK_ANGLE = 5f;
+                //Vector3 diff = target.transform.position - shotPos.position;   //ターゲットとの距離
+                //rotation = Quaternion.LookRotation(diff);   //ロックオンしたオブジェクトの方向
+                //Vector3 rotationAngle = rotation.eulerAngles;
+                //Vector3 shotPosAngle = shotPos.eulerAngles;
+
+                //Debug.Log("rotation: " + rotationAngle);
+                //Debug.Log("shotPos: " + shotPosAngle);
+                //Debug.Log(rotationAngle.y - shotPosAngle.y);
+
+                ////X軸の修正
+                //if (rotationAngle.x - shotPosAngle.x > MAX_LOOK_ANGLE)
+                //{
+                //    rotationAngle.x = shotPosAngle.x + MAX_LOOK_ANGLE;
+                //}
+                //if (rotationAngle.x - shotPosAngle.x < -MAX_LOOK_ANGLE)
+                //{
+                //    rotationAngle.x = shotPosAngle.x - MAX_LOOK_ANGLE;
+                //}
+
+                ////Y軸の修正
+                //if (rotationAngle.y - shotPosAngle.y > MAX_LOOK_ANGLE)
+                //{
+                //    rotationAngle.y = shotPosAngle.y + MAX_LOOK_ANGLE;
+                //}
+                //if (rotationAngle.y - shotPosAngle.y < -MAX_LOOK_ANGLE)
+                //{
+                //    rotationAngle.y = shotPosAngle.y - MAX_LOOK_ANGLE;
+                //}
+                //rotation.eulerAngles = rotationAngle;
+            }
+
             //弾を散らす
             for (int i = -1; i <= 1; i++)
             {
                 for (int j = -1; j <= 1; j++)
                 {
-                    CreateBullet(shotPos.position, shotPos.rotation, angle * i, angle * j, target);
+                    CreateBullet(shotPos.position, rotation, angle * i, angle * j, target);
                 }
             }
             audioSource.Play();

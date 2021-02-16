@@ -110,12 +110,12 @@ MonoBehaviour:
   weaponLocalPos: {fileID: 3942076035453893563}
   shotPos: {fileID: 3942076035804782823}
   bullet: {fileID: 7930913983741502353, guid: a5a64a02c0e218e459be32483421c537, type: 3}
-  angle: 0
-  angleDiff: 1.5
+  angle: 1
+  angleDiff: 0.6
   power: 5.5
   shotPerSecond: 2
-  speed: 1600
-  destroyTime: 0.6
+  speed: 1500
+  destroyTime: 0.25
   recast: 2
   maxBulletNum: 5
 --- !u!82 &6194611169738717970
