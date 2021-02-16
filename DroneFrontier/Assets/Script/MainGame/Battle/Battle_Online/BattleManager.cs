@@ -28,6 +28,7 @@ namespace Online
             public string name = "";
             public int stock = MAX_STOCK;
             public int ranking = 1;
+            public float destroyTime = -1;
             public bool isDestroy = false;
             public static int droneNum = MatchingManager.PlayerNum;  //残っているドローンの数
         }
@@ -124,7 +125,7 @@ namespace Online
             if (isDestroy)
             {
                 //観戦中のプレイヤーが死亡したらカメラとリスナーを切り替える
-                if(clientPlayers[useIndex] == null)
+                if (clientPlayers[useIndex] == null)
                 {
                     SwitchingWatch();
                 }
@@ -159,6 +160,7 @@ namespace Online
                             NetworkServer.AddPlayerForConnection(destroyDrone.conn, p);
                             clientPlayers[i] = p;
                             destroyDrone.stock--;
+                            destroyDrone.destroyTime = Time.time;
 
                             //リスポーンSEの再生
                             p.GetComponent<DroneSoundAction>().RpcPlayOneShotSEAllClient(SoundManager.SE.RESPAWN, SoundManager.BaseSEVolume);
@@ -347,11 +349,43 @@ namespace Online
                 yield return new WaitForSeconds(1f);
             }
 
-            foreach (ServerPlayerData pd in serverPlayerDatas)
+            //残りストック数と死亡した時間に応じてランキング設定
+            int stock = 0;
+            while (ServerPlayerData.droneNum > 0)
             {
-                if (pd.isDestroy) continue;
-                pd.ranking = ServerPlayerData.droneNum;
-                ServerPlayerData.droneNum--;
+                List<int> destroyTimeIndex = new List<int>();
+                for (int i = 0; i < serverPlayerDatas.Count; i++)
+                {
+                    if (serverPlayerDatas[i].isDestroy) continue;
+                    if (serverPlayerDatas[i].stock == stock)
+                    {
+                        destroyTimeIndex.Add(i);
+                    }
+                }
+
+                //死亡した時間に応じてランキング順位変動
+                while(destroyTimeIndex.Count > 0)
+                {
+                    int minIndex = 0;
+                    for(int i = 0; i < destroyTimeIndex.Count; i++)
+                    {
+                        //死亡した時間が早いほどランキングが低い
+                        if(serverPlayerDatas[destroyTimeIndex[i]].destroyTime < serverPlayerDatas[destroyTimeIndex[minIndex]].destroyTime)
+                        {
+                            minIndex = i;
+                        }
+                    }
+
+                    //順位決定
+                    serverPlayerDatas[destroyTimeIndex[minIndex]].ranking = ServerPlayerData.droneNum;
+                    serverPlayerDatas[destroyTimeIndex[minIndex]].isDestroy = true;
+                    ServerPlayerData.droneNum--;
+
+                    //使用したインデックスは削除
+                    destroyTimeIndex.RemoveAt(minIndex);
+                }
+
+                stock++;
             }
 
             FinishGame();

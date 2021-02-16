@@ -135,7 +135,7 @@ MonoBehaviour:
   itemSpawnManager: {fileID: 8924024311699461542, guid: 2c51c9e39ebb87345bbc084eb7ed354f,
     type: 3}
   timeText: {fileID: 9082189199489186008}
-  maxTime: 5
+  maxTime: 1
 --- !u!114 &142472775378172193
 MonoBehaviour:
   m_ObjectHideFlags: 0

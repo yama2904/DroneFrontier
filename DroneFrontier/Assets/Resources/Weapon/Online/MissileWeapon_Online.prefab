@@ -194,13 +194,13 @@ MonoBehaviour:
   shotPos: {fileID: 3853599449480899470}
   parentNetId: 0
   missile: {fileID: 1587428493, guid: ced0661d0222eab4a80aaed9059f78c3, type: 3}
-  speedPerSecond: 500
-  destroyTime: 2
-  trackingPower: 2.2
+  power: 30
+  recast: 10
   shotPerSecond: 0.2
-  _recast: 10
-  _maxBullets: 3
-  _power: 30
+  speed: 500
+  destroyTime: 2
+  trackingPower: 2
+  maxBulletNum: 3
   UIParentCanvas: {fileID: 6189665354112945132}
   bulletUIBack: {fileID: 804041731371029093, guid: c3b934424d7f24d4fb8095d99bdf9988,
     type: 3}

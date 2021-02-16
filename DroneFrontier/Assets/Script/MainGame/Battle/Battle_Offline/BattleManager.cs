@@ -17,7 +17,7 @@ namespace Offline
         public static bool IsItemSpawn { get; set; } = true;
 
         //ストック
-        [SerializeField] int droneStock = 1;
+        const int MAX_STOCK = 1;
         [SerializeField] Image stockIcon = null;
         [SerializeField] Text stockText = null;
 
@@ -27,7 +27,8 @@ namespace Offline
             public GameObject drone = null;
             public BaseWeapon.Weapon weapon = BaseWeapon.Weapon.NONE;
             public string name = "";
-            public int stock = 0;
+            public int stock = MAX_STOCK;
+            public float destroyTime = 0;
             public bool isDestroy = false;
             public bool isPlayer = false;
             public static int droneNum = 0;  //残っているドローンの数
@@ -72,7 +73,6 @@ namespace Offline
                         drone = CreateDrone(cd.weapon, false),
                         weapon = cd.weapon,
                         name = cd.name,
-                        stock = droneStock,
                         isPlayer = false
                     });
                 }
@@ -82,7 +82,6 @@ namespace Offline
                     drone = CreateDrone(WeaponSelectScreenManager.weapon, true),
                     weapon = WeaponSelectScreenManager.weapon,
                     name = "Player",
-                    stock = droneStock,
                     isPlayer = true
                 });
             }
@@ -93,7 +92,7 @@ namespace Offline
             //残機UIの表示
             stockIcon.enabled = true;
             stockText.enabled = true;
-            stockText.text = droneStock.ToString();
+            stockText.text = MAX_STOCK.ToString();
 
 
             //フィールド上のアイテム処理
@@ -203,6 +202,7 @@ namespace Offline
                     if (pd.stock > 0)
                     {
                         pd.stock--;
+                        pd.destroyTime = Time.time;
                         pd.drone = CreateDrone(pd.weapon, pd.isPlayer);
 
                         //リスポーンSEの再生
@@ -307,11 +307,43 @@ namespace Offline
                 yield return new WaitForSeconds(1f);
             }
 
-            foreach (PlayerData pd in playerDatas)
+            //残りストック数と死亡した時間に応じてランキング設定
+            int stock = 0;
+            while (PlayerData.droneNum > 0)
             {
-                if (pd.isDestroy) continue;
-                ranking[PlayerData.droneNum - 1] = pd.name;
-                PlayerData.droneNum--;
+                List<int> destroyTimeIndex = new List<int>();
+                for (int i = 0; i < playerDatas.Count; i++)
+                {
+                    if (playerDatas[i].isDestroy) continue;
+                    if (playerDatas[i].stock == stock)
+                    {
+                        destroyTimeIndex.Add(i);
+                    }
+                }
+
+                //死亡した時間に応じてランキング順位変動
+                while (destroyTimeIndex.Count > 0)
+                {
+                    int minIndex = 0;
+                    for (int i = 0; i < destroyTimeIndex.Count; i++)
+                    {
+                        //死亡した時間が早いほどランキングが低い
+                        if (playerDatas[destroyTimeIndex[i]].destroyTime < playerDatas[destroyTimeIndex[minIndex]].destroyTime)
+                        {
+                            minIndex = i;
+                        }
+                    }
+
+                    //順位決定
+                   ranking[PlayerData.droneNum - 1] = playerDatas[destroyTimeIndex[minIndex]].name;
+                    playerDatas[destroyTimeIndex[minIndex]].isDestroy = true;
+                    PlayerData.droneNum--;
+
+                    //使用したインデックスは削除
+                    destroyTimeIndex.RemoveAt(minIndex);
+                }
+
+                stock++;
             }
 
             FinishGame();

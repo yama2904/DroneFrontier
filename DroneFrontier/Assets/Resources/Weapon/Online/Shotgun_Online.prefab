@@ -74,7 +74,7 @@ GameObject:
   - component: {fileID: 7492527968298259413}
   - component: {fileID: 5579497837742501447}
   m_Layer: 0
-  m_Name: Shotgun
+  m_Name: Shotgun_Online
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -116,14 +116,14 @@ MonoBehaviour:
   shotPos: {fileID: 3327285968758355378}
   parentNetId: 0
   bullet: {fileID: -2401255768182461159, guid: 28d3844a32c206344bb065ba45dff061, type: 3}
-  angle: 4.2
-  angleDiff: 2.8
-  speedPerSecond: 800
-  destroyTime: 0.6
+  angle: 3
+  angleDiff: 1.5
+  power: 5.5
+  recast: 2
+  maxBulletNum: 5
+  speed: 1600
+  destroyTime: 0.4
   shotPerSecond: 2
-  _recast: 2
-  _maxBullets: 5
-  _power: 5.5
   UIParentCanvas: {fileID: 156978992070708649}
   bulletUIBack: {fileID: 4532149927091886137, guid: 5f9c17bf46fb006448280160efa89794,
     type: 3}
