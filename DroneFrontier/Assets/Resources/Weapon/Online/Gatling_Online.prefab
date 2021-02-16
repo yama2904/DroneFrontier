@@ -217,11 +217,11 @@ MonoBehaviour:
   shotPos: {fileID: 1066345932}
   parentNetId: 0
   bullet: {fileID: -2401255768182461159, guid: 28d3844a32c206344bb065ba45dff061, type: 3}
-  speedPerSecond: 500
+  speed: 1000
   destroyTime: 1
-  trackingPower: 3
+  trackingPower: 2
   shotPerSecond: 10
-  _power: 1
+  power: 1
 --- !u!1001 &7656308088440253387
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -307,7 +307,7 @@ PrefabInstance:
     - target: {fileID: -927199367670048503, guid: 668fd1822a1131542b9717d3452cbc26,
         type: 3}
       propertyPath: m_Name
-      value: Gatling
+      value: Gatling_Online
       objectReference: {fileID: 0}
     - target: {fileID: -927199367670048503, guid: 668fd1822a1131542b9717d3452cbc26,
         type: 3}

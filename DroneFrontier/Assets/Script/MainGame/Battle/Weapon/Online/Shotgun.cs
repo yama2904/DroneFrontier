@@ -118,12 +118,44 @@ namespace Online
             //残り弾数が0だったら撃たない
             if (haveBulletNum <= 0) return;
 
+
+            //敵の位置に応じて発射角度を修正
+            Quaternion rotation = shotPos.rotation;
+            if (target != null)
+            {
+                Vector3 diff = target.transform.position - shotPos.position;   //ターゲットとの距離
+                rotation = Quaternion.LookRotation(diff);   //ロックオンしたオブジェクトの方向
+                Vector3 rotationoAngle = rotation.eulerAngles;
+                Vector3 shotPosAngle = shotPos.eulerAngles;
+
+                //X軸の修正
+                if (rotationoAngle.x - shotPosAngle.x > 30)
+                {
+                    rotationoAngle.x = shotPosAngle.x + 30;
+                }
+                if (rotationoAngle.x - shotPosAngle.x < -30)
+                {
+                    rotationoAngle.x = shotPosAngle.x - 30;
+                }
+
+                //Y軸の修正
+                if (rotationoAngle.y - shotPosAngle.y > 30)
+                {
+                    rotationoAngle.y = shotPosAngle.y + 30;
+                }
+                if (rotationoAngle.y - shotPosAngle.y < -30)
+                {
+                    rotationoAngle.y = shotPosAngle.y - 30;
+                }
+                rotation.eulerAngles = rotationoAngle;
+            }
+
             //弾を散らす
             for (int i = -1; i <= 1; i++)
             {
                 for (int j = -1; j <= 1; j++)
                 {
-                    CmdCreateBullet(shotPos.position, shotPos.rotation, angle * i, angle * j, target);
+                    CmdCreateBullet(shotPos.position, rotation, angle * i, angle * j, target);
                 }
             }
 

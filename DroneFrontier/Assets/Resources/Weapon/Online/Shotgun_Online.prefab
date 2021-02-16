@@ -116,13 +116,13 @@ MonoBehaviour:
   shotPos: {fileID: 3327285968758355378}
   parentNetId: 0
   bullet: {fileID: -2401255768182461159, guid: 28d3844a32c206344bb065ba45dff061, type: 3}
-  angle: 3
-  angleDiff: 1.5
+  angle: 1
+  angleDiff: 0.6
   power: 5.5
   recast: 2
   maxBulletNum: 5
-  speed: 1600
-  destroyTime: 0.4
+  speed: 1500
+  destroyTime: 0.25
   shotPerSecond: 2
   UIParentCanvas: {fileID: 156978992070708649}
   bulletUIBack: {fileID: 4532149927091886137, guid: 5f9c17bf46fb006448280160efa89794,

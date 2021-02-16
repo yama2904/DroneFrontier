@@ -129,6 +129,105 @@ namespace Online
             isLocal = true;
         }
 
+        public void Shot(GameObject target)
+        {
+            #region Charge
+
+            //チャージ処理
+            if (!isCharged)
+            {
+                //攻撃開始時
+                if (!isStartCharge)
+                {
+                    CmdCallRpcChargePlay(true);
+                    isStartCharge = true;
+                }
+
+                //徐々にチャージのエフェクトを増す
+                CmdCallRpcAddChargeParticle(rateovertimeAddAmout * Time.deltaTime);
+
+                //MAX_RATE_OVER_TIME経ったら発射
+                if (chargeEmission.rateOverTime.constant > MAX_RATE_OVER_TIME)
+                {
+                    //チャージを止める
+                    CmdCallRpcChargePlay(false);
+
+                    //レーザーの発射
+                    CmdCallRpcLaserPlay();
+
+                    isCharged = true;
+                }
+            }
+
+            #endregion
+
+            #region Laser
+
+            else
+            {
+                IsShotBeam = true;
+
+                //前回ヒットして発射間隔分の時間が経過していなかったら当たり判定を行わない
+                if (shotTimeCount < shotInterval) return;
+
+
+                //Y軸の誘導
+                if (isServer)
+                {
+                    RpcRotateBullet(target);
+                }
+                else
+                {
+                    CmdCallRpcRotateBullet(target);
+                }
+
+
+                //レーザーの射線上にヒットした全てのオブジェクトを調べる
+                var hits = Physics.SphereCastAll(
+                            lineTransform.position,    //レーザーの発射座標
+                            LINE_RADIUS,               //レーザーの半径
+                            lineTransform.forward,     //レーザーの正面
+                            lineRange)                 //射程
+                            .ToList();  //リスト化  
+
+                hits = FilterTargetRaycast(hits);
+                float lineLength = lineRange;   //レーザーの長さ
+
+                //ヒット処理
+                if (hits.Count > 0)
+                {
+                    GetNearestObject(out RaycastHit hit, hits);
+                    GameObject o = hit.transform.gameObject;    //名前省略
+
+                    if (o.CompareTag(TagNameManager.PLAYER))
+                    {
+                        o.GetComponent<DroneDamageAction>().CmdDamage(power);
+                    }
+                    else if (o.CompareTag(TagNameManager.JAMMING_BOT))
+                    {
+                        o.GetComponent<JammingBot>().CmdDamage(power);
+                    }
+
+                    //ヒットしたオブジェクトの距離とレーザーの長さを合わせる
+                    lineLength = hit.distance;
+
+                    //ヒットした場所にEndオブジェクトを移動させる
+                    endObjectTransform.position = hit.point;
+
+                    shotTimeCount = 0;  //発射間隔のカウントをリセット
+                }
+                else
+                {
+                    //レーザーの末端にEndオブジェクトを移動
+                    endObjectTransform.position = lineTransform.position + (lineTransform.forward * lineRange);
+                }
+                //レーザーの長さに応じてオブジェクトの座標やサイズを変える
+                CmdCallModifyLaserLength(lineLength);
+            }
+
+            #endregion
+        }
+
 
         //リストから必要な要素だけ抜き取る
         List<RaycastHit> FilterTargetRaycast(List<RaycastHit> hits)
@@ -255,106 +354,6 @@ namespace Online
         }
 
         #endregion
-
-
-        public void Shot(GameObject target)
-        {
-            #region Charge
-
-            //チャージ処理
-            if (!isCharged)
-            {
-                //攻撃開始時
-                if (!isStartCharge)
-                {
-                    CmdCallRpcChargePlay(true);
-                    isStartCharge = true;
-                }
-
-                //徐々にチャージのエフェクトを増す
-                CmdCallRpcAddChargeParticle(rateovertimeAddAmout * Time.deltaTime);
-
-                //MAX_RATE_OVER_TIME経ったら発射
-                if (chargeEmission.rateOverTime.constant > MAX_RATE_OVER_TIME)
-                {
-                    //チャージを止める
-                    CmdCallRpcChargePlay(false);
-
-                    //レーザーの発射
-                    CmdCallRpcLaserPlay();
-
-                    isCharged = true;
-                }
-            }
-
-            #endregion
-
-            #region Laser
-
-            else
-            {
-                IsShotBeam = true;
-
-                //前回ヒットして発射間隔分の時間が経過していなかったら当たり判定を行わない
-                if (shotTimeCount < shotInterval) return;
-
-
-                //Y軸の誘導
-                if (isServer)
-                {
-                    RpcRotateBullet(target);
-                }
-                else
-                {
-                    CmdCallRpcRotateBullet(target);
-                }
-
-
-                //レーザーの射線上にヒットした全てのオブジェクトを調べる
-                var hits = Physics.SphereCastAll(
-                            lineTransform.position,    //レーザーの発射座標
-                            LINE_RADIUS,               //レーザーの半径
-                            lineTransform.forward,     //レーザーの正面
-                            lineRange)                 //射程
-                            .ToList();  //リスト化  
-
-                hits = FilterTargetRaycast(hits);
-                float lineLength = lineRange;   //レーザーの長さ
-
-                //ヒット処理
-                if (hits.Count > 0)
-                {
-                    GetNearestObject(out RaycastHit hit, hits);
-                    GameObject o = hit.transform.gameObject;    //名前省略
-
-                    if (o.CompareTag(TagNameManager.PLAYER))
-                    {
-                        o.GetComponent<DroneDamageAction>().CmdDamage(power);
-                    }
-                    else if (o.CompareTag(TagNameManager.JAMMING_BOT))
-                    {
-                        o.GetComponent<JammingBot>().CmdDamage(power);
-                    }
-
-                    //ヒットしたオブジェクトの距離とレーザーの長さを合わせる
-                    lineLength = hit.distance;
-
-                    //ヒットした場所にEndオブジェクトを移動させる
-                    endObjectTransform.position = hit.point;
-
-                    shotTimeCount = 0;  //発射間隔のカウントをリセット
-                }
-                else
-                {
-                    //レーザーの末端にEndオブジェクトを移動
-                    endObjectTransform.position = lineTransform.position + (lineTransform.forward * lineRange);
-                }
-                //レーザーの長さに応じてオブジェクトの座標やサイズを変える
-                CmdCallModifyLaserLength(lineLength);
-            }
-
-            #endregion
-        }
 
         [Command(ignoreAuthority = true)]
         void CmdCallRpcRotateBullet(GameObject target)
