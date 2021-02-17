@@ -64,9 +64,11 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0.1
   destroyTime: 60
+  jammingTime: 5
   jammingBot: {fileID: -262730393769487688, guid: ebdc99f08c939844497af790155f08da,
     type: 3}
   jammingBotPosition: {fileID: 6319352941471360500}
+  particle: {fileID: 591015899469301369}
 --- !u!114 &-6304882260566110974
 MonoBehaviour:
   m_ObjectHideFlags: 0
