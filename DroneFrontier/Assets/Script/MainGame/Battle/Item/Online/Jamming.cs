@@ -10,30 +10,60 @@ namespace Online
     {
         [SyncVar] GameObject creater;
         [SerializeField, Tooltip("ジャミングボットの生存時間")] float destroyTime = 60.0f;
+        [SerializeField, Tooltip("ジャミングエリアから出てジャミングが継続する時間")] float jammingTime = 5f;
 
         [SerializeField] JammingBot jammingBot = null;
         [SerializeField] Transform jammingBotPosition = null;
-        GameObject createBot = null;
-        bool isCreateBot = false;
-        List<DroneStatusAction> jammingPlayers = new List<DroneStatusAction>();
+        [SerializeField] ParticleSystem particle = null;
+        GameObject createdBot = null;
+        [SyncVar] bool syncIsCreateBot = false;
+        bool isDestroy = false;
+
+        class JammingPlayerData
+        {
+            public DroneStatusAction player;
+            public float jammingTime = 0;
+            public bool isExit = false;
+        }
+        List<JammingPlayerData> jammingPlayerDatas = new List<JammingPlayerData>();
 
 
         void Start() { }
 
-        [ServerCallback]
         void Update()
         {
-            if (!isCreateBot) return;
-            if (createBot == null)
+            if (!syncIsCreateBot) return;
+
+            for(int i = jammingPlayerDatas.Count - 1; i >= 0; i--)
             {
-                NetworkServer.Destroy(gameObject);
+                //名前省略
+                JammingPlayerData jpd = jammingPlayerDatas[i];
+
+                //ジャミングエリアから出て一定時間たったプレイヤーのジャミングを解除
+                if (jpd.isExit)
+                {
+                    jpd.jammingTime += Time.deltaTime;
+                    if(jpd.jammingTime >= jammingTime)
+                    {
+                        jpd.player.UnSetJamming();
+                        jammingPlayerDatas.RemoveAt(i);
+                    }
+                }
             }
 
-            //生成したプレイヤーが死んだら削除
-            if(creater == null)
+            if (isServer)
             {
-                NetworkServer.Destroy(createBot);
-                NetworkServer.Destroy(gameObject);
+                if (createdBot == null)
+                {
+                    RpcStopJamming();
+                }
+
+                //生成したプレイヤーが死んだら削除
+                if (creater == null)
+                {
+                    NetworkServer.Destroy(createdBot);
+                    RpcStopJamming();
+                }
             }
         }
 
@@ -51,9 +81,9 @@ namespace Online
             JammingBot jb = Instantiate(jammingBot);
 
             jb.creater = creater;
-            createBot = jb.gameObject;
-            NetworkServer.Spawn(createBot);
-            isCreateBot = true;
+            createdBot = jb.gameObject;
+            NetworkServer.Spawn(createdBot);
+            syncIsCreateBot = true;
 
             //ボットを生成した場所にオブジェクトがあるとオブジェクトの中にBotが入りこんで
             //破壊不可になるのでオブジェクトがある場合は避ける
@@ -87,29 +117,41 @@ namespace Online
             }
 
             //生成したボットと自分も移動
-            createBot.transform.position = pos;
+            createdBot.transform.position = pos;
             transform.position = pos;
 
             //一定時間後にボットを削除
-            Invoke(nameof(DestroyMe), destroyTime);
+            Invoke(nameof(DestroyJammingBot), destroyTime);
 
 
             //デバッグ用
             Debug.Log("ジャミングボット生成");
         }
 
-        void DestroyMe()
+
+        //ジャミングボットの破壊
+        [Server]
+        void DestroyJammingBot()
         {
-            NetworkServer.Destroy(createBot);
+            NetworkServer.Destroy(createdBot);
+        }
+
+        //ジャミングを停止する
+        [ClientRpc]
+        void RpcStopJamming()
+        {
+            GetComponent<Collider>().enabled = false;
+            Destroy(particle);
+            Destroy(gameObject, jammingTime);
         }
 
         void OnDestroy()
         {
             //ジャミングを解除する
-            foreach (DroneStatusAction p in jammingPlayers)
+            foreach (JammingPlayerData p in jammingPlayerDatas)
             {
-                if (p == null) continue;
-                p.UnSetJamming();
+                if (p.player == null) continue;
+                p.player.UnSetJamming();
             }
         }
 
@@ -121,8 +163,20 @@ namespace Online
             if (!p.isLocalPlayer) return;   //ローカルプレイヤーのみ処理
             if (ReferenceEquals(p.gameObject, creater)) return; //ジャミングを付与しないプレイヤーならスキップ
 
-            p.SetJamming(); //ジャミング付与
-            jammingPlayers.Add(p);    //リストに追加
+            //既にリストにある場合は経過時間をリセット
+            int index = jammingPlayerDatas.FindIndex(o => ReferenceEquals(p, o.player));
+            if(index >= 0)
+            {
+                jammingPlayerDatas[index].jammingTime = 0;
+                return;
+            }
+
+            //リストにない場合はジャミング付与してリストに追加
+            p.SetJamming();
+            jammingPlayerDatas.Add(new JammingPlayerData
+            {
+                player = p
+            });
         }
 
         private void OnTriggerExit(Collider other)
@@ -134,11 +188,10 @@ namespace Online
             if (ReferenceEquals(p.gameObject, creater)) return; //ジャミングを付与しないプレイヤーならスキップ
 
             //リストにない場合は処理しない
-            int index = jammingPlayers.FindIndex(o => ReferenceEquals(p, o));
+            int index = jammingPlayerDatas.FindIndex(o => ReferenceEquals(p, o.player));
             if (index == -1) return;
 
-            p.UnSetJamming();   //ジャミング解除
-            jammingPlayers.RemoveAt(index);  //解除したプレイヤーをリストから削除
+            jammingPlayerDatas[index].isExit = true;
         }
     }
 }
