@@ -63,7 +63,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
-  destroyTime: 60
+  destroyTime: 30
   jammingTime: 5
   jammingBot: {fileID: -262730393769487688, guid: ebdc99f08c939844497af790155f08da,
     type: 3}
