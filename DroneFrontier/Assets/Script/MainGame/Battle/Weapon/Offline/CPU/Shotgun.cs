@@ -81,12 +81,21 @@ namespace Offline
                 //残り弾数が0だったら撃たない
                 if (haveBulletNum <= 0) return;
 
+
+                //敵の位置に応じて発射角度を修正
+                Quaternion rotation = shotPos.rotation;
+                if (target != null)
+                {
+                    Vector3 diff = target.transform.position - shotPos.position;   //ターゲットとの距離
+                    rotation = Quaternion.LookRotation(diff);   //ロックオンしたオブジェクトの方向
+                }
+
                 //弾を散らす
                 for (int i = -1; i <= 1; i++)
                 {
                     for (int j = -1; j <= 1; j++)
                     {
-                        CreateBullet(shotPos.position, shotPos.rotation, angle * i, angle * j, target);
+                        CreateBullet(shotPos.position, rotation, angle * i, angle * j, target);
                     }
                 }
                 audioSource.Play();

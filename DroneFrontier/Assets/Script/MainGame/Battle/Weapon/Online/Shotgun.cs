@@ -125,33 +125,6 @@ namespace Online
             {
                 Vector3 diff = target.transform.position - shotPos.position;   //ターゲットとの距離
                 rotation = Quaternion.LookRotation(diff);   //ロックオンしたオブジェクトの方向
-
-                //const float MAX_LOOK_ANGLE = 50f;
-                //Vector3 diff = target.transform.position - shotPos.position;   //ターゲットとの距離
-                //rotation = Quaternion.LookRotation(diff);   //ロックオンしたオブジェクトの方向
-                //Vector3 rotationoAngle = rotation.eulerAngles;
-                //Vector3 shotPosAngle = shotPos.eulerAngles;
-
-                ////X軸の修正
-                //if (rotationoAngle.x - shotPosAngle.x > MAX_LOOK_ANGLE)
-                //{
-                //    rotationoAngle.x = shotPosAngle.x + MAX_LOOK_ANGLE;
-                //}
-                //if (rotationoAngle.x - shotPosAngle.x < -MAX_LOOK_ANGLE)
-                //{
-                //    rotationoAngle.x = shotPosAngle.x - MAX_LOOK_ANGLE;
-                //}
-
-                ////Y軸の修正
-                //if (rotationoAngle.y - shotPosAngle.y > MAX_LOOK_ANGLE)
-                //{
-                //    rotationoAngle.y = shotPosAngle.y + MAX_LOOK_ANGLE;
-                //}
-                //if (rotationoAngle.y - shotPosAngle.y < -MAX_LOOK_ANGLE)
-                //{
-                //    rotationoAngle.y = shotPosAngle.y - MAX_LOOK_ANGLE;
-                //}
-                //rotation.eulerAngles = rotationoAngle;
             }
 
             //弾を散らす
