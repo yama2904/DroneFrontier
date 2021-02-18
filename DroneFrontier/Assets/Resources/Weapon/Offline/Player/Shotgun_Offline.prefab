@@ -133,7 +133,7 @@ MonoBehaviour:
   bullet: {fileID: 7930913983741502353, guid: a5a64a02c0e218e459be32483421c537, type: 3}
   angle: 1
   angleDiff: 0.6
-  power: 5.5
+  power: 4.5
   shotPerSecond: 2
   speed: 1500
   destroyTime: 0.25
