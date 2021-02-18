@@ -51,6 +51,7 @@ namespace Online
                 }
             }
 
+            if (isDestroy) return;
             if (isServer)
             {
                 if (createdBot == null)
@@ -143,6 +144,7 @@ namespace Online
             GetComponent<Collider>().enabled = false;
             Destroy(particle);
             Destroy(gameObject, jammingTime);
+            isDestroy = true;
         }
 
         void OnDestroy()
