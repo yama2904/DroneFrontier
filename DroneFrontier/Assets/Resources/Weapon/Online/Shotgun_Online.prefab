@@ -118,7 +118,7 @@ MonoBehaviour:
   bullet: {fileID: -2401255768182461159, guid: 28d3844a32c206344bb065ba45dff061, type: 3}
   angle: 1
   angleDiff: 0.6
-  power: 5.5
+  power: 4.5
   recast: 2
   maxBulletNum: 5
   speed: 1500
