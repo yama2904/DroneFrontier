@@ -155,6 +155,8 @@ namespace kcp2k
         // reads the next message from connection.
         bool ReceiveNext(out ArraySegment<byte> message)
         {
+            message = new ArraySegment<byte>();
+
             // read only one message
             int msgSize = kcp.PeekSize();
             if (msgSize > 0)

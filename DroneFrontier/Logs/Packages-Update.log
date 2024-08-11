@@ -43,3 +43,19 @@ The following packages were 追加済:
   com.unity.textmeshpro@2.0.1
   com.unity.timeline@1.2.14
   com.unity.ugui@1.0.0
+
+=== Sun Aug 11 15:54:05 2024
+
+Packages were changed.
+Update Mode: updateDependencies
+
+The following packages were 追加済:
+  com.unity.ide.visualstudio@2.0.22
+  com.unity.ai.navigation@1.1.5
+The following packages were 更新済:
+  com.unity.collab-proxy をバージョン 1.2.16 から 2.4.4 へ
+  com.unity.ide.rider をバージョン 1.1.4 から 3.0.31 へ
+  com.unity.ide.vscode をバージョン 1.2.0 から 1.2.5 へ
+  com.unity.test-framework をバージョン 1.1.14 から 1.1.33 へ
+  com.unity.textmeshpro をバージョン 2.0.1 から 3.0.6 へ
+  com.unity.timeline をバージョン 1.2.14 から 1.7.6 へ
