@@ -8,7 +8,7 @@ namespace Offline
     {    
         public float Power { get; protected set; } = 0;  //威力
 
-        protected BaseDrone shooter = null;
+        protected IBattleDrone shooter = null;
         protected GameObject target = null;   //誘導する対象
         protected float trackingPower = 0;    //追従力
         protected float speed = 0;            //1秒間に進む量
@@ -60,7 +60,7 @@ namespace Offline
             cacheTransform.position += cacheTransform.forward * speed * Time.deltaTime;
         }
 
-        public virtual void Init(BaseDrone drone, float power, float trackingPower, float speed, float destroyTime, GameObject target = null)
+        public virtual void Init(IBattleDrone drone, float power, float trackingPower, float speed, float destroyTime, GameObject target = null)
         {
             shooter = drone;
             Power = power;
@@ -83,15 +83,16 @@ namespace Offline
             if (other.CompareTag(TagNameManager.PLAYER) || other.CompareTag(TagNameManager.CPU))
             {
                 //撃った本人なら処理しない
-                if (other.GetComponent<BaseDrone>().PlayerID == shooter.PlayerID) return;
+                if (other.GetComponent<IBattleDrone>() == shooter) return;
 
                 //ダメージ処理
                 other.GetComponent<DroneDamageAction>().Damage(Power);
 
-                if (other.CompareTag(TagNameManager.CPU))
-                {
-                    other.GetComponent<CPU.BattleDrone>().StartRotate(shooter.transform);
-                }
+                // ToDo:CPU側で処理させる
+                //if (other.CompareTag(TagNameManager.CPU))
+                //{
+                //    other.GetComponent<CPU.BattleDrone>().StartRotate(shooter.transform);
+                //}
             }
             else if (other.CompareTag(TagNameManager.JAMMING_BOT))
             {
@@ -99,7 +100,7 @@ namespace Offline
                 JammingBot jb = other.GetComponent<JammingBot>();
 
                 //撃った人が放ったジャミングボットなら処理しない
-                if (jb.creater.PlayerID == shooter.PlayerID) return;
+                if (jb.creater == shooter) return;
 
                 //ダメージ処理
                 jb.Damage(Power);

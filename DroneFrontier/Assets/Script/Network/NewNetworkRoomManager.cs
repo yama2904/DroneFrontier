@@ -31,11 +31,11 @@ public class NewNetworkRoomManager : NetworkRoomManager
         MatchingManager.Singleton.DisconnectPlayer(conn);
         if (MainGameManager.IsMainGaming)
         {
-            if (GameModeSelectScreenManager.Mode == GameModeSelectScreenManager.GameMode.BATTLE)
+            if (GameModeSelectManager.Mode == GameModeSelectManager.GameMode.BATTLE)
             {
                 BattleManager.Singleton.DisconnectPlayer(conn);
             }
-            else if(GameModeSelectScreenManager.Mode == GameModeSelectScreenManager.GameMode.RACE)
+            else if(GameModeSelectManager.Mode == GameModeSelectManager.GameMode.RACE)
             {
                 RaceManager.DisconnectPlayer(conn);
             }
@@ -104,7 +104,7 @@ public class NewNetworkRoomManager : NetworkRoomManager
         GameObject createDrone = playerPrefab;
 
         //レースモードならドローンを変える
-        if (GameModeSelectScreenManager.Mode == GameModeSelectScreenManager.GameMode.RACE)
+        if (GameModeSelectManager.Mode == GameModeSelectManager.GameMode.RACE)
         {
             createDrone = raceDrone;
         }
@@ -117,9 +117,9 @@ public class NewNetworkRoomManager : NetworkRoomManager
             player.name = MatchingManager.playerDatas[index].name;
 
             //バトルモードなら武器も設定
-            if (GameModeSelectScreenManager.Mode == GameModeSelectScreenManager.GameMode.BATTLE)
+            if (GameModeSelectManager.Mode == GameModeSelectManager.GameMode.BATTLE)
             {
-                player.GetComponent<BattleDrone>().syncSetSubWeapon = (int)MatchingManager.playerDatas[index].weapon;
+                player.GetComponent<Online.BattleDrone>().syncSetSubWeapon = (int)MatchingManager.playerDatas[index].weapon;
             }
         }
         return player;
@@ -156,7 +156,7 @@ public class NewNetworkRoomManager : NetworkRoomManager
     public override void OnRoomServerPlayersReady()
     {
         //レースモードならシーン先切り替え
-        if (GameModeSelectScreenManager.Mode == GameModeSelectScreenManager.GameMode.RACE)
+        if (GameModeSelectManager.Mode == GameModeSelectManager.GameMode.RACE)
         {
             GameplayScene = raceScene;
         }
@@ -180,7 +180,7 @@ public class NewNetworkRoomManager : NetworkRoomManager
         if (!MainGameManager.IsMainGaming)
         {
             //SEの再生
-            SoundManager.Play(SoundManager.SE.CANCEL, SoundManager.BaseSEVolume);
+            SoundManager.Play(SoundManager.SE.CANCEL, SoundManager.SEVolume);
         }
         else
         {
@@ -191,7 +191,7 @@ public class NewNetworkRoomManager : NetworkRoomManager
         StopClient();  //クライアントを停止
         MatchingManager.Singleton.Init();  //MatchingManagerの初期化
         Mirror.Discovery.CustomNetworkDiscoveryHUD.Singleton.Init();  //DiscoveryHUDの初期化
-        NonGameManager.LoadNonGameScene(BaseScreenManager.Screen.KURIBOCCHI);
+        HomeSceneManager.LoadHomeScene(BaseScreenManager.Screen.SOLO_MULTI_SELECT);
 
 
         base.OnClientDisconnect(conn);

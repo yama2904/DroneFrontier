@@ -39,7 +39,7 @@ namespace Offline
                 //オーディオの初期化
                 audioSource = GetComponent<AudioSource>();
                 audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.SHOTGUN);
-                audioSource.volume = SoundManager.BaseSEVolume;
+                audioSource.volume = SoundManager.SEVolume;
             }
 
             void Update()

@@ -25,7 +25,7 @@ namespace Online
             base.OnStartClient();
             audioSource = GetComponent<AudioSource>();
             audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.EXPLOSION_MISSILE);
-            audioSource.volume = SoundManager.BaseSEVolume;
+            audioSource.volume = SoundManager.SEVolume;
             audioSource.time = 0.2f;
             audioSource.Play();
         }

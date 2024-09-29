@@ -14,7 +14,7 @@ namespace Offline
         [SerializeField, Tooltip("爆発の中心地からの距離の威力減衰率(0～1)")] float powerDownRate = 0.2f; //中心地からの距離による威力減衰率
         [SerializeField, Tooltip("威力が減衰しない範囲")] float notPowerDownRange = 0.25f; //威力が減衰しない範囲
         [SerializeField, Tooltip("lengthReference長さごとにpowerDownRate%ダメージが減少する")] float lengthReference = 0.1f;    //威力減衰の基準の長さ
-        public BaseDrone shooter = null;
+        public IBattleDrone shooter = null;
         AudioSource audioSource = null;
 
         List<GameObject> wasHitObjects = new List<GameObject>();    //ダメージを与えたオブジェクトを全て格納する
@@ -56,7 +56,7 @@ namespace Offline
             //オーディオの初期化
             audioSource = GetComponent<AudioSource>();
             audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.EXPLOSION_MISSILE);
-            audioSource.volume = SoundManager.BaseSEVolume;
+            audioSource.volume = SoundManager.SEVolume;
             audioSource.time = 0.2f;
             audioSource.Play();
 
@@ -103,7 +103,7 @@ namespace Offline
             if (other.CompareTag(TagNameManager.PLAYER) || other.CompareTag(TagNameManager.CPU))
             {
                 //ミサイルを撃った本人なら処理しない
-                if (other.GetComponent<BaseDrone>().PlayerID == shooter.PlayerID) return;
+                if (other.GetComponent<IBattleDrone>() == shooter) return;
 
                 //既にヒット済のオブジェクトはスルー
                 foreach (GameObject o in wasHitObjects)
@@ -113,10 +113,11 @@ namespace Offline
                 other.GetComponent<DroneDamageAction>().Damage(power);
                 wasHitObjects.Add(other.gameObject);
 
-                if (other.CompareTag(TagNameManager.CPU))
-                {
-                    other.GetComponent<CPU.BattleDrone>().StartRotate(shooter.transform);
-                }
+                // ToDo:CPU側に処理させる
+                //if (other.CompareTag(TagNameManager.CPU))
+                //{
+                //    other.GetComponent<CPU.BattleDrone>().StartRotate(shooter.transform);
+                //}
 
                 //デバッグ用
                 Debug.Log(other.name + "にExplosionで" + CalcPower(other.transform.position) + "ダメージ");
@@ -127,7 +128,7 @@ namespace Offline
                 JammingBot jb = other.GetComponent<JammingBot>();
 
                 //撃った人が放ったジャミングボットなら処理しない
-                if (jb.creater.PlayerID == shooter.PlayerID) return;
+                if (jb.creater == shooter) return;
 
                 //既にヒット済のオブジェクトはスルー
                 foreach (GameObject o in wasHitObjects)

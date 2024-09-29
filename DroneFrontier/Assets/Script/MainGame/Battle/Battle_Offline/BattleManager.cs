@@ -1,103 +1,148 @@
-﻿using System.Collections;
+﻿using Cysharp.Threading.Tasks;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace Offline
 {
-    public class BattleManager : MainGameManager
+    public class BattleManager : MonoBehaviour
     {
-        [SerializeField] GameObject playerPrefab = null;
-        [SerializeField] GameObject cpuPrefab = null;
+        /// <summary>
+        /// CPU情報
+        /// </summary>
+        public class CpuData
+        {
+            public string Name { get; set; }
+            public BaseWeapon.Weapon Weapon { get; set; } = BaseWeapon.Weapon.NONE;
+        }
 
-        //シングルトン
-        public new static BattleManager Singleton { get; private set; }
+        /// <summary>
+        /// CPUリスト
+        /// </summary>
+        public static List<CpuData> CpuList = new List<CpuData>();
 
-        //アイテムを出現させるか
+        /// <summary>
+        /// アイテムを出現させるか
+        /// </summary>
         public static bool IsItemSpawn { get; set; } = true;
 
-        //ストック
-        const int MAX_STOCK = 1;
-        [SerializeField] Image stockIcon = null;
-        [SerializeField] Text stockText = null;
+        [SerializeField, Tooltip("ドローンスポーン管理オブジェクト")]
+        private DroneSpawnManager _droneSpawnManager = null;
 
-        //プレイヤー情報
-        public class PlayerData
+        [SerializeField, Tooltip("アイテムスポーン管理オブジェクト")]
+        private ItemSpawnManager _itemSpawnManager = null;
+
+        [SerializeField, Tooltip("観戦モード用オブジェクト")]
+        private WatchingGame _watchingGame = null;
+
+        [SerializeField, Tooltip("残り時間を表示するTextUI")]
+        private Text _timeText = null;
+
+        [SerializeField, Tooltip("制限時間(分)")]
+        private int _gameTime = 5;
+
+        [SerializeField, Tooltip("ゲーム終了アニメーター")]
+        private Animator _finishAnimator = null;
+
+        /// <summary>
+        /// ドローン情報
+        /// </summary>
+        private class DroneData
         {
-            public GameObject drone = null;
-            public BaseWeapon.Weapon weapon = BaseWeapon.Weapon.NONE;
-            public string name = "";
-            public int stock = MAX_STOCK;
-            public float destroyTime = 0;
-            public bool isDestroy = false;
-            public bool isPlayer = false;
-            public static int droneNum = 0;  //残っているドローンの数
-        }
-        List<PlayerData> playerDatas = new List<PlayerData>();
-        int useIndex = 0;
-        bool isPlayerDestroy = false;
+            /// <summary>
+            /// ドローン本体情報
+            /// </summary>
+            public IBattleDrone Drone { get; set; } = null;
 
-        //ゲーム終了処理を行ったらtrue
-        bool isFinished = false;
+            /// <summary>
+            /// 残ストック数
+            /// </summary>
+            public int StockNum { get; set; } = 0;
 
-        //ゲーム開始時に生成
-        [SerializeField] ItemCreateManager itemCreateManager = null;
-
-        //残り時間
-        [SerializeField] Text timeText = null;
-        [SerializeField, Tooltip("制限時間(分)")] int maxTime = 5;
-        Coroutine countCoroutine = null;
-
-        //キャッシュ用
-        AudioListener listener = null;
-
-
-        protected override void Awake()
-        {
-            base.Awake();
-            Singleton = this;
+            /// <summary>
+            /// 前回破壊された時間
+            /// </summary>
+            public float DestroyTime { get; set; } = 0;
         }
 
-        protected override void Start()
-        {
-            base.Start();
+        /// <summary>
+        /// 各ドローン情報
+        /// </summary>
+        private Dictionary<string, DroneData> _droneDatas = new Dictionary<string, DroneData>();
 
-            if (!isSolo)
+        /// <summary>
+        /// ゲーム終了時に呼ばれるキャンセルトークン
+        /// </summary>
+        private CancellationTokenSource _cancelToken = new CancellationTokenSource();
+
+        /// <summary>
+        /// ゲーム終了フラグ
+        /// </summary>
+        private bool _gameFinished = false;
+
+        /// <summary>
+        /// ロック用オブジェクト
+        /// </summary>
+        private readonly object _lock = new object();
+
+        private void Awake()
+        {
+            // 乱数のシード値の設定
+            UnityEngine.Random.InitState(DateTime.Now.Millisecond);
+        }
+
+        private async void Start()
+        {
+            // カーソルロック
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+
+            // プレイヤードローンをスポーン
+            IBattleDrone spawnDrone = _droneSpawnManager.SpawnDrone("Player", WeaponSelectManager.weapon, true);
+            DroneData droneData = new DroneData()
             {
-                //ドローンの生成
-                foreach (CPUSelectScreenManager.CPUData cd in CPUSelectScreenManager.CPUDatas)
+                Drone = spawnDrone,
+                StockNum = spawnDrone.StockNum,
+                DestroyTime = 0
+            };
+            _droneDatas.Add(spawnDrone.Name, droneData);
+
+            // カウントダウン終了までスクリプト無効化
+            (spawnDrone as BattleDrone).enabled = false;
+
+            // CPUドローンをスポーン
+            foreach (CpuData cpu in CpuList)
+            {
+                spawnDrone = _droneSpawnManager.SpawnDrone(cpu.Name, cpu.Weapon, false);
+                droneData = new DroneData()
                 {
-                    //CPUの生成
-                    playerDatas.Add(new PlayerData
-                    {
-                        drone = CreateDrone(cd.weapon, false),
-                        weapon = cd.weapon,
-                        name = cd.name,
-                        isPlayer = false
-                    });
-                }
-                //プレイヤーの生成
-                playerDatas.Add(new PlayerData
-                {
-                    drone = CreateDrone(WeaponSelectScreenManager.weapon, true),
-                    weapon = WeaponSelectScreenManager.weapon,
-                    name = "Player",
-                    isPlayer = true
-                });
+                    Drone = spawnDrone,
+                    StockNum = spawnDrone.StockNum,
+                    DestroyTime = 0
+                };
+                _droneDatas.Add(cpu.Name, droneData);
+
+                // カウントダウン終了までスクリプト無効化
+                (spawnDrone as CpuBattleDrone).enabled = false;
             }
 
-            //残りプレイヤー数の初期化
-            PlayerData.droneNum = playerNum;
+            // ドローン破壊イベント設定
+            _droneSpawnManager.DroneDestroyEvent += DroneDestroy;
 
-            //残機UIの表示
-            stockIcon.enabled = true;
-            stockText.enabled = true;
-            stockText.text = MAX_STOCK.ToString();
-
-
-            //フィールド上のアイテム処理
-            if (!IsItemSpawn)
+            // アイテムOnの場合スポナー起動
+            if (IsItemSpawn)
             {
+                _itemSpawnManager.enabled = true;
+            }
+            else
+            {
+                // アイテムOffの場合スポナー削除
+                Destroy(_itemSpawnManager.gameObject);
+
                 GameObject[] items = GameObject.FindGameObjectsWithTag(TagNameManager.ITEM_SPAWN);
                 foreach (GameObject item in items)
                 {
@@ -105,262 +150,171 @@ namespace Offline
                 }
             }
 
-            //アイテムスポーン処理
-            if (IsItemSpawn)
+            // BGM停止
+            SoundManager.StopBGM();
+
+            // 3秒後にカウントダウンSE再生
+            await UniTask.Delay(TimeSpan.FromSeconds(3));
+            SoundManager.Play(SoundManager.SE.START_COUNT_DOWN_D, SoundManager.SEVolume);
+
+            // カウントダウンSE終了後にゲーム開始
+            await UniTask.Delay(TimeSpan.FromSeconds(4.5));
+            SoundManager.Play(SoundManager.BGM.LOOP, SoundManager.BGMVolume * 0.4f);
+            StartCountDown().Forget();
+
+            // 各ドローンのスクリプト有効化
+            foreach (DroneData drone in _droneDatas.Values)
             {
-                itemCreateManager = Instantiate(itemCreateManager);
+                if (drone.Drone is BattleDrone player)
+                {
+                    player.enabled = true;
+                }
+                else
+                {
+                    (drone.Drone as CpuBattleDrone).enabled = true;
+                }
             }
-            countCoroutine = StartCoroutine(CountTime());
-
-            //3秒後にカウントダウンSE
-            Invoke(nameof(PlayStartCountDown), 3.0f);
-
-
-            listener = GetComponent<AudioListener>();
-            listener.enabled = false;
-            timeText.enabled = false;
         }
 
-        protected override void Update()
+        private void Update()
         {
-            base.Update();
-
-            //カウントダウンが終わったら処理
-            if (!StartFlag) return;
-
-            //プレイヤーがゲームオーバーになったらスペースキーで各CPUのカメラに切り替える
-            if (Input.GetKeyDown(KeyCode.Space))
+            // カメラロック切り替え
+            if (Input.GetKeyDown(KeyCode.Escape))
             {
-                if (isPlayerDestroy)
+                if (Cursor.lockState == CursorLockMode.None)
                 {
-                    //次のプレイヤーのカメラとリスナーに切り替える
-                    int initIndex = useIndex;
-                    if (playerDatas[useIndex] != null)
+                    Cursor.lockState = CursorLockMode.Locked;
+                    Cursor.visible = false;
+                    Debug.Log("カメラロック");
+                }
+                else
+                {
+                    Cursor.lockState = CursorLockMode.None;
+                    Cursor.visible = true;
+                    Debug.Log("カメラロック解除");
+                }
+            }
+        }
+
+        /// <summary>
+        /// ゲーム終了時の初期化処理
+        /// </summary>
+        private void OnDestroy()
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+
+        /// <summary>
+        /// 制限時間のカウントダウン開始
+        /// </summary>
+        /// <returns></returns>
+        private async UniTask StartCountDown()
+        {
+            try
+            {
+                // 1分ごとに残り時間を表示する
+                for (int time = _gameTime - 1; time > 0; time--)
+                {
+                    await UniTask.Delay(TimeSpan.FromSeconds(60), cancellationToken: _cancelToken.Token);
+
+                    _timeText.enabled = true;
+                    _timeText.text = "残 り " + time + " 分";
+
+                    // 4秒後に非表示
+                    UniTask.Void(async () =>
                     {
-                        if (playerDatas[useIndex].drone.CompareTag(TagNameManager.CPU))
-                        {
-                            //名前省略
-                            CPU.BattleDrone drone = playerDatas[useIndex].drone.GetComponent<CPU.BattleDrone>();
+                        await UniTask.Delay(TimeSpan.FromSeconds(4), cancellationToken: _cancelToken.Token);
+                        _timeText.enabled = false;
+                    });
+                }
 
-                            drone.SetCameraDepth(0);
-                            drone.SetAudioListener(false);
-                        }
-                    }
-                    listener.enabled = false;
-                    while (true)
-                    {
-                        useIndex++;
+                // 残り10秒になったら毎秒残り時間を表示
+                await UniTask.Delay(TimeSpan.FromSeconds(50), cancellationToken: _cancelToken.Token);
+                _timeText.enabled = true;
+                for (int i = 10; i > 0; i--)
+                {
+                    _timeText.text = "残 り " + i + " 秒";
+                    await UniTask.Delay(TimeSpan.FromSeconds(1), cancellationToken: _cancelToken.Token);
+                }
 
-                        //無限ループ防止
-                        if (useIndex == initIndex)
-                        {
-                            break;
-                        }
+                // 制限時間によるゲーム終了
+                FinishGame();
+            }
+            catch (OperationCanceledException e)
+            {
+                // ゲーム終了によるカウントダウンキャンセル
 
-                        //配列の範囲外なら修正
-                        if (useIndex >= playerDatas.Count || useIndex < 0)
-                        {
-                            useIndex = 0;
-                        }
+                // 残り時間非表示
+                _timeText.enabled = false;
+            }
+        }
 
-                        Debug.Log("useIndex: " + useIndex);
-                        //バグ防止
-                        if (playerDatas[useIndex] == null)
-                        {
-                            continue;
-                        }
-                        //破壊されていたらスキップ
-                        if (playerDatas[useIndex].isDestroy)
-                        {
-                            continue;
-                        }
-                        //CPUのみ処理
-                        if (!playerDatas[useIndex].drone.CompareTag(TagNameManager.CPU))
-                        {
-                            continue;
-                        }
-                        else
-                        {
-                            //名前省略
-                            CPU.BattleDrone bd = playerDatas[useIndex].drone.GetComponent<CPU.BattleDrone>();
+        /// <summary>
+        /// ドローン破壊イベント
+        /// </summary>
+        /// <param name="destroyDrone">破壊されたドローン</param>
+        /// <param name="respawnDrone">リスポーンしたドローン</param>
+        private void DroneDestroy(IBattleDrone destroyDrone, IBattleDrone respawnDrone)
+        {
+            // 破壊されたドローン情報取得
+            DroneData droneData = _droneDatas[destroyDrone.Name];
 
-                            bd.SetCameraDepth(5);
-                            bd.SetAudioListener(true);
-                            break;
-                        }
-                    }
+            // リスポーンドローンがnullの場合は残機無し
+            if (respawnDrone == null)
+            {
+                // プレイヤーの場合は観戦モード起動
+                if (destroyDrone is BattleDrone)
+                {
+                    _watchingGame.enabled = true;
                 }
             }
 
-            //破壊されたドローンを調べる
-            foreach (PlayerData pd in playerDatas)
+            // 破壊されたドローン情報更新
+            droneData.Drone = respawnDrone;
+            droneData.StockNum--;
+            droneData.DestroyTime = Time.time;
+
+            // 残り1人になった場合はゲーム終了
+            List<DroneData> aliveDrones = _droneDatas.Where(x => x.Value.Drone == null)
+                                                     .Select(x => x.Value)
+                                                     .ToList();
+            if (aliveDrones.Count == 1)
             {
-                if (pd.isDestroy) continue;
-                if (pd.drone == null)
-                {
-                    //ストックが残っていたら復活
-                    if (pd.stock > 0)
-                    {
-                        pd.stock--;
-                        pd.destroyTime = Time.time;
-                        pd.drone = CreateDrone(pd.weapon, pd.isPlayer);
-
-                        //リスポーンSEの再生
-                        pd.drone.GetComponent<DroneSoundAction>().PlayOneShot(SoundManager.SE.RESPAWN, SoundManager.BaseSEVolume);
-
-                        //残機UIの変更
-                        if (pd.isPlayer)
-                        {
-                            stockText.text = pd.stock.ToString();
-                        }
-                    }
-                    //ストックが残っていなかったらランキングに記録
-                    else
-                    {
-                        pd.isDestroy = true;
-                        ranking[PlayerData.droneNum - 1] = pd.name;
-                        PlayerData.droneNum--;
-
-                        //残機UIの非表示
-                        if (pd.isPlayer)
-                        {
-                            stockIcon.enabled = false;
-                            stockText.enabled = false;
-
-                            listener.enabled = true;
-                            isPlayerDestroy = true;
-                        }
-                    }
-                }
-            }
-
-            //最後のプレイヤーが残ったら終了処理
-            if (PlayerData.droneNum <= 1)
-            {
-                if (isSolo) return;
-                foreach (PlayerData pd in playerDatas)
-                {
-                    if (pd.isDestroy) continue;
-                    ranking[PlayerData.droneNum - 1] = pd.name;
-                    break;
-                }
                 FinishGame();
             }
         }
 
-        //変数の初期化
-        protected override void OnDestroy()
+        /// <summary>
+        /// ゲーム終了処理
+        /// </summary>
+        private async void FinishGame()
         {
-            base.OnDestroy();
-
-            playerDatas.Clear();
-            PlayerData.droneNum = 0;
-        }
-
-
-        GameObject CreateDrone(BaseWeapon.Weapon weapon, bool isPlayer)
-        {
-            Transform pos = StartPosition.Singleton.GetPos();
-            GameObject o = null;
-
-            //プレイヤーの生成
-            if (isPlayer)
+            // ゲーム終了のバッティング防止
+            lock (_lock)
             {
-                o = Instantiate(playerPrefab, pos.position, pos.rotation);
-                o.GetComponent<Player.BattleDrone>().setSubWeapon = weapon;
-                return o;
-            }
-            //CPUの生成
-            o = Instantiate(cpuPrefab, pos.position, pos.rotation);
-            o.GetComponent<CPU.BattleDrone>().setSubWeapon = weapon;
-            return o;
-        }
-
-        //時間制限処理
-        IEnumerator CountTime()
-        {
-            //スタートフラグが立つまで停止
-            while (!MainGameManager.Singleton.StartFlag) yield return null;
-
-            if (maxTime > 1)
-            {
-                yield return new WaitForSeconds(60f);
+                if (_gameFinished) return;
+                _gameFinished = true;
             }
 
-            for (int i = maxTime - 1; i > 1; i--)
-            {
-                timeText.enabled = true;
-                timeText.text = "残 り " + i + " 分";
+            // キャンセルトークン発行
+            _cancelToken.Cancel();
 
-                yield return new WaitForSeconds(4f);
-                timeText.enabled = false;
-                yield return new WaitForSeconds(56f);
-            }
+            // ゲーム終了アニメーション再生
+            _finishAnimator.SetBool("SetFinish", true);
 
-            timeText.enabled = true;
-            timeText.text = "残 り " + 1 + " 分";
-            yield return new WaitForSeconds(1f);
+            // ゲーム終了SE再生
+            SoundManager.Play(SoundManager.SE.FINISH, SoundManager.SEVolume);
 
-            for (int i = 59; i >= 0; i--)
-            {
-                timeText.text = i + " 秒";
-                yield return new WaitForSeconds(1f);
-            }
+            // [残ストック数 DESC, 破壊された時間 DESC]でソートしてランキング設定
+            string[] ranking = _droneDatas.OrderByDescending(x => x.Value.StockNum)
+                                          .ThenByDescending(x => x.Value.DestroyTime)
+                                          .Select(x => x.Key).ToArray();
+            ResultSceneManager.SetRank(ranking);
 
-            //残りストック数と死亡した時間に応じてランキング設定
-            int stock = 0;
-            while (PlayerData.droneNum > 0)
-            {
-                List<int> destroyTimeIndex = new List<int>();
-                for (int i = 0; i < playerDatas.Count; i++)
-                {
-                    if (playerDatas[i].isDestroy) continue;
-                    if (playerDatas[i].stock == stock)
-                    {
-                        destroyTimeIndex.Add(i);
-                    }
-                }
-
-                //死亡した時間に応じてランキング順位変動
-                while (destroyTimeIndex.Count > 0)
-                {
-                    int minIndex = 0;
-                    for (int i = 0; i < destroyTimeIndex.Count; i++)
-                    {
-                        //死亡した時間が早いほどランキングが低い
-                        if (playerDatas[destroyTimeIndex[i]].destroyTime < playerDatas[destroyTimeIndex[minIndex]].destroyTime)
-                        {
-                            minIndex = i;
-                        }
-                    }
-
-                    //順位決定
-                   ranking[PlayerData.droneNum - 1] = playerDatas[destroyTimeIndex[minIndex]].name;
-                    playerDatas[destroyTimeIndex[minIndex]].isDestroy = true;
-                    PlayerData.droneNum--;
-
-                    //使用したインデックスは削除
-                    destroyTimeIndex.RemoveAt(minIndex);
-                }
-
-                stock++;
-            }
-
-            FinishGame();
-        }
-
-        //ゲームの終了処理
-        void FinishGame()
-        {
-            if (!isFinished)
-            {
-                FinishGame(ranking);
-                isFinished = true;
-
-                StopCoroutine(countCoroutine);
-
-                timeText.enabled = false;
-            }
+            // 3秒後リザルト画面に移動
+            await UniTask.Delay(TimeSpan.FromSeconds(3));
+            SceneManager.LoadScene("ResultScene");
         }
     }
 }

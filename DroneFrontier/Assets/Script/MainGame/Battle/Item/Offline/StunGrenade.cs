@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Offline
 {
-    public class StunGrenade : MonoBehaviour
+    public class StunGrenade : MonoBehaviour, IGameItem
     {
         GameObject thrower = null;
         [SerializeField] StunImpact stunImpact = null;
@@ -14,8 +14,10 @@ namespace Offline
         [SerializeField, Tooltip("着弾時間")] float impactTime = 1.0f;   //着弾時間
         [SerializeField, Tooltip("重力")] float gravity = 1f; //重力
 
+        /// <summary>
+        /// キャッシュ用Rigidbody
+        /// </summary>
         Rigidbody _rigidbody = null;
-
 
         void Awake()
         {
@@ -25,6 +27,22 @@ namespace Offline
         private void FixedUpdate()
         {
             _rigidbody.AddForce(new Vector3(0, gravity * -1, 0), ForceMode.Acceleration);
+        }
+
+        public bool UseItem(GameObject drone)
+        {
+            thrower = drone;
+
+            //playerの座標と向きのコピー
+            Transform cacheTransform = transform;
+            cacheTransform.position = thrower.transform.position;
+            cacheTransform.rotation = thrower.transform.rotation;
+
+            //投てき処理
+            _rigidbody.AddForce(throwRotate.forward * throwPower, ForceMode.Impulse);
+            Invoke(nameof(CreateImpact), impactTime);
+
+            return true;
         }
 
         public void ThrowGrenade(GameObject thrower)

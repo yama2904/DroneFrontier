@@ -49,7 +49,7 @@ namespace Offline
             CreateBullet(shotPos.position, transform.rotation, target);
 
             //SE再生
-            audioSource.volume = SoundManager.BaseSEVolume;
+            audioSource.volume = SoundManager.SEVolume;
             audioSource.Play();
 
             //発射間隔のカウントをリセット

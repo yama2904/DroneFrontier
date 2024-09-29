@@ -91,7 +91,7 @@ namespace Offline
                 else if (type == Item.ItemType.JAMMING)
                 {
                     Jamming j = Instantiate(jamming);
-                    j.CreateBot(GetComponent<BaseDrone>());
+                    j.CreateBot(GetComponent<IBattleDrone>());
                 }
 
                 //スタングレネード
@@ -103,7 +103,6 @@ namespace Offline
 
                 //デバッグ用
                 Debug.Log("アイテム使用");
-
 
                 return true;
             }

@@ -52,7 +52,7 @@ namespace Online
             audios[(int)SE.WALL_STUN].clip = SoundManager.GetAudioClip(SoundManager.SE.WALL_STUN);
 
             //プロペラは延々流す
-            PlaySE((int)SE.PROPELLER, SoundManager.BaseSEVolume, true);
+            PlaySE((int)SE.PROPELLER, SoundManager.SEVolume, true);
         }
 
         public override void OnStartLocalPlayer()
@@ -192,7 +192,7 @@ namespace Online
                 {
                     baseAction.ModifySpeed(boostAccele);
                     isBoost = true;
-                    PlaySE((int)SE.Boost, SoundManager.BaseSEVolume * 0.15f, true);    //加速音の再生
+                    PlaySE((int)SE.Boost, SoundManager.SEVolume * 0.15f, true);    //加速音の再生
 
 
                     //デバッグ用

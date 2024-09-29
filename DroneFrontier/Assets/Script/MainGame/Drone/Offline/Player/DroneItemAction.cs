@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -19,21 +18,32 @@ namespace Offline
             //アイテム枠の画像
             [SerializeField] RectTransform itemFrameImage = null;
 
-            //各アイテムのアイコン
-            [SerializeField] RectTransform barrierIconImage = null;
-            [SerializeField] RectTransform jammingIconImage = null;
-            [SerializeField] RectTransform stunGrenadeIconImage = null;
-
-
-            //画像を生成する際に必要な情報
-            class ItemData
+            /// <summary>
+            /// 所持アイテム情報
+            /// </summary>
+            private class ItemData
             {
-                public Vector3 anchoredPos;  //画像を生成した際にセットするローカル座標
-                public Image createImage = null;   //生成した画像
-                public Item.ItemType type = Item.ItemType.NONE;
-                public bool isUsing = false;
+                /// <summary>
+                /// アイコンの座標
+                /// </summary>
+                public Vector3 AnchoredPosition { get; set; }
+
+                /// <summary>
+                /// アイテム本体
+                /// </summary>
+                public IGameItem Item { get; set; }
+
+                /// <summary>
+                /// アイテムアイコン
+                /// </summary>
+                public Image Icon { get; set; }
+
+                /// <summary>
+                /// アイテム所持中であるか
+                /// </summary>
+                public bool having = false;
             }
-            List<ItemData> itemDatas = new List<ItemData>();
+            private List<ItemData> itemDatas = new List<ItemData>();
 
 
             //初期化
@@ -48,43 +58,32 @@ namespace Offline
 
                     //リストに追加
                     ItemData id = new ItemData();
-                    id.anchoredPos = rect.anchoredPosition;
+                    id.AnchoredPosition = rect.anchoredPosition;
                     itemDatas.Add(id);
                 }
             }
 
-            //所持アイテムを更新する
-            //成功したらtrue
-            public bool SetItem(Item.ItemType type)
+            /// <summary>
+            /// 所持アイテムを設定
+            /// </summary>
+            /// <param name="item">設定するアイテム</param>
+            /// <returns>アイテム枠が全て埋まっている場合はfalse</returns>
+            public bool SetItem(SpawnItem item)
             {
-                //バグ防止
-                if (type == Item.ItemType.NONE) return false;
-
-                foreach (ItemData id in itemDatas)
+                foreach (ItemData data in itemDatas)
                 {
-                    if (id.isUsing) continue;
+                    // アイテム所持中の場合は次の枠
+                    if (data.having) continue;
 
-                    //取得したアイテムのUIの表示
-                    RectTransform rect = null;
-                    if (type == Item.ItemType.BARRIER_STRENGTH)
-                    {
-                        rect = Instantiate(barrierIconImage);
-                    }
-                    if (type == Item.ItemType.JAMMING)
-                    {
-                        rect = Instantiate(jammingIconImage);
-                    }
-                    if (type == Item.ItemType.STUN_GRENADE)
-                    {
-                        rect = Instantiate(stunGrenadeIconImage);
-                    }
+                    // 設定するアイテムのアイコン表示
+                    RectTransform rect = Instantiate(item.IconImage);
                     rect.SetParent(UIParentCanvas.transform);
-                    rect.anchoredPosition = id.anchoredPos;
+                    rect.anchoredPosition = data.AnchoredPosition;
 
-                    //リストの情報を更新
-                    id.createImage = rect.GetComponent<Image>();
-                    id.type = type;
-                    id.isUsing = true;
+                    // リストの情報を更新
+                    data.Item = item.Item.GetComponent<IGameItem>();
+                    data.Icon = rect.GetComponent<Image>();
+                    data.having = true;
 
                     return true;
                 }
@@ -92,58 +91,28 @@ namespace Offline
             }
 
 
-            //アイテムを使用する
-            //成功したらtrue
+            /// <summary>
+            /// 指定された番号のアイテム使用
+            /// </summary>
+            /// <param name="number">アイテムを使用する番号</param>
+            /// <returns>使用に成功した場合true</returns>
             public bool UseItem(int number)
             {
-                //バグ防止
-                if (number >= itemDatas.Count) return false;
+                ItemData data = itemDatas[number];
 
-                ItemData id = itemDatas[number];  //名前省略
+                // アイテムを持っていない
+                if (!data.having) return false;
 
-                //アイテムを持っていない
-                if (!id.isUsing) return false;
+                // アイテム存在チェック
+                if (data.Item == null) return false;
 
-                //アイテム使用失敗したらfalse
-                if (!UseItem(id.type)) return false;
+                // アイテム使用
+                if (!data.Item.UseItem(gameObject)) return false;
 
-                //リストの情報を更新
-                Destroy(id.createImage);
-                id.type = Item.ItemType.NONE;
-                id.isUsing = false;
-
-                return true;
-            }
-
-            bool UseItem(Item.ItemType type)
-            {
-                //バリア強化
-                if (type == Item.ItemType.BARRIER_STRENGTH)
-                {
-                    //強化できなかったらアイテムを消去しない
-                    if (!BarrierStrength.Strength(GetComponent<DroneStatusAction>()))
-                    {
-                        return false;
-                    }
-                }
-
-                //ジャミング
-                else if (type == Item.ItemType.JAMMING)
-                {
-                    Jamming j = Instantiate(jamming);
-                    j.CreateBot(GetComponent<BaseDrone>());
-                }
-
-                //スタングレネード
-                else if (type == Item.ItemType.STUN_GRENADE)
-                {
-                    StunGrenade s = Instantiate(stunGrenade);
-                    s.ThrowGrenade(gameObject);
-                }
-
-                //デバッグ用
-                Debug.Log("アイテム使用");
-
+                // リストの情報を更新
+                Destroy(data.Icon);
+                data.Item = null;
+                data.having = false;
 
                 return true;
             }

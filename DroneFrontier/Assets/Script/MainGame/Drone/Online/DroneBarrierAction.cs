@@ -159,11 +159,11 @@ namespace Online
             {
                 syncHP = 0;
                 RpcSetActiveBarrier(false);
-                soundAction.RpcPlayOneShotSEAllClient(SoundManager.SE.DESTROY_BARRIER, SoundManager.BaseSEVolume);
+                soundAction.RpcPlayOneShotSEAllClient(SoundManager.SE.DESTROY_BARRIER, SoundManager.SEVolume);
             }
             syncRegeneTimeCount = 0;
             syncIsRegene = false;
-            soundAction.RpcPlayOneShotSEAllClient(SoundManager.SE.BARRIER_DAMAGE, SoundManager.BaseSEVolume * 0.7f);
+            soundAction.RpcPlayOneShotSEAllClient(SoundManager.SE.BARRIER_DAMAGE, SoundManager.SEVolume * 0.7f);
 
             //バリアの色変え
             float value = syncHP / MAX_HP;

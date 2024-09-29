@@ -106,11 +106,11 @@ namespace Offline
             {
                 HP = 0;
                 barrierObject.SetActive(false);
-                soundAction.PlayOneShot(SoundManager.SE.DESTROY_BARRIER, SoundManager.BaseSEVolume);
+                soundAction.PlayOneShot(SoundManager.SE.DESTROY_BARRIER, SoundManager.SEVolume);
             }
             regeneTimeCount = 0;
             isRegene = false;
-            soundAction.PlayOneShot(SoundManager.SE.BARRIER_DAMAGE, SoundManager.BaseSEVolume * 0.7f);
+            soundAction.PlayOneShot(SoundManager.SE.BARRIER_DAMAGE, SoundManager.SEVolume * 0.7f);
 
             //バリアの色変え
             float value = HP / MAX_HP;

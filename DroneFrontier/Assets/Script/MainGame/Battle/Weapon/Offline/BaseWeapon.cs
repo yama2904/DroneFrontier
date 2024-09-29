@@ -6,7 +6,7 @@ namespace Offline
 {
     public abstract class BaseWeapon : MonoBehaviour
     {
-        protected BaseDrone shooter = null;  //武器の所持者
+        protected IBattleDrone shooter = null;  //武器の所持者
         [SerializeField] protected Transform weaponLocalPos = null;
         [SerializeField] protected Transform shotPos = null;
 
@@ -31,7 +31,7 @@ namespace Offline
             NONE
         }
 
-        public static BaseWeapon CreateWeapon(BaseDrone shooter, Weapon weapon, bool isPlayer)
+        public static BaseWeapon CreateWeapon(IBattleDrone shooter, Weapon weapon, bool isPlayer)
         {
             const string FOLDER_PATH = "Weapon/Offline/";
             string ADD_PATH = "Player/";

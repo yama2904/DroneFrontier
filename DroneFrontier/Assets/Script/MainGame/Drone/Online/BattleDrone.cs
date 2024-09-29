@@ -142,7 +142,7 @@ namespace Online
             }
 
             //プロペラは最初から流す
-            soundAction.PlayLoopSE(SoundManager.SE.PROPELLER, SoundManager.BaseSEVolume);
+            soundAction.PlayLoopSE(SoundManager.SE.PROPELLER, SoundManager.SEVolume);
 
             if (isServer)
             {
@@ -329,7 +329,7 @@ namespace Online
                 //レーダー音の再生
                 if (Input.GetKeyDown(KeyCode.Q))
                 {
-                    soundAction.PlayOneShot(SoundManager.SE.RADAR, SoundManager.BaseSEVolume);
+                    soundAction.PlayOneShot(SoundManager.SE.RADAR, SoundManager.SEVolume);
                 }
                 //レーダー使用
                 if (Input.GetKey(KeyCode.Q))
@@ -433,7 +433,7 @@ namespace Online
                     isBoost = true;
 
                     //加速音の再生
-                    boostSoundId = soundAction.PlayLoopSE(SoundManager.SE.BOOST, SoundManager.BaseSEVolume * 0.15f);
+                    boostSoundId = soundAction.PlayLoopSE(SoundManager.SE.BOOST, SoundManager.SEVolume * 0.15f);
 
 
                     //デバッグ用
@@ -558,7 +558,7 @@ namespace Online
             syncIsDestroy = true;
 
             //全クライアントで死亡SE再生
-            soundAction.RpcPlayOneShotSEAllClient(SoundManager.SE.DEATH, SoundManager.BaseSEVolume);
+            soundAction.RpcPlayOneShotSEAllClient(SoundManager.SE.DEATH, SoundManager.SEVolume);
 
             //死亡後爆破
             Invoke(nameof(CreateExplosion), fallTime);
@@ -637,7 +637,7 @@ namespace Online
             //アイテム枠にアイテムを持っていたら使用
             if (itemAction.UseItem((int)item))
             {
-                soundAction.PlayOneShot(SoundManager.SE.USE_ITEM, SoundManager.BaseSEVolume);
+                soundAction.PlayOneShot(SoundManager.SE.USE_ITEM, SoundManager.SEVolume);
             }
         }
 

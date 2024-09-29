@@ -27,12 +27,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 44203507864318130}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3283794339626208219
 MonoBehaviour:
@@ -52,7 +53,7 @@ MonoBehaviour:
   showDebugMessages: 0
   serverTickRate: 30
   offlineScene: 
-  onlineScene: Assets/Scene/NonGame/MatchingScene.unity
+  onlineScene: 
   transport: {fileID: 44203507864318129}
   networkAddress: localhost
   maxConnections: 4
@@ -88,14 +89,14 @@ MonoBehaviour:
   minPlayers: 2
   roomPlayerPrefab: {fileID: -4659048564045045932, guid: aedbe4351cfd0d54bb38896070012749,
     type: 3}
-  RoomScene: Assets/Scene/NonGame/MatchingScene.unity
-  GameplayScene: Assets/Scene/MainGame/BattleMode_Online.unity
+  RoomScene: 
+  GameplayScene: 
   _allPlayersReady: 0
   roomSlots: []
   clientIndex: 0
   raceDrone: {fileID: 3215491144051122303, guid: 54a58e15937ed7c4e83960a830b2d326,
     type: 3}
-  raceScene: Assets/Scene/MainGame/RaceModeScene.unity
+  raceScene: 
 --- !u!114 &44203507864318129
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -137,6 +138,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 44203507864318128}
+        m_TargetAssemblyTypeName: 
         m_MethodName: OnDiscoveredServer
         m_Mode: 0
         m_Arguments:

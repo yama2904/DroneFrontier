@@ -40,7 +40,7 @@ namespace Online
         //デバッグ用
         public static bool IsCursorLock { get; private set; } = true;
         [Header("デバッグ用")]
-        [SerializeField] protected GameModeSelectScreenManager.GameMode debugGameMode = GameModeSelectScreenManager.GameMode.NONE;
+        [SerializeField] protected GameModeSelectManager.GameMode debugGameMode = GameModeSelectManager.GameMode.NONE;
         [SerializeField] protected bool solo = false;
 
 
@@ -51,12 +51,12 @@ namespace Online
             if (isServer)
             {
                 //Managerの生成
-                if (GameModeSelectScreenManager.Mode == GameModeSelectScreenManager.GameMode.BATTLE)
+                if (GameModeSelectManager.Mode == GameModeSelectManager.GameMode.BATTLE)
                 {
                     BattleManager manager = Instantiate(battleManagerPrefab);
                     NetworkServer.Spawn(manager.gameObject);
                 }
-                else if (GameModeSelectScreenManager.Mode == GameModeSelectScreenManager.GameMode.RACE)
+                else if (GameModeSelectManager.Mode == GameModeSelectManager.GameMode.RACE)
                 {
                     RaceManager manager = Instantiate(raceManagerPrefab);
                     NetworkServer.Spawn(manager.gameObject);
@@ -140,10 +140,10 @@ namespace Online
                 {
                     NetworkManager.singleton.StopHost();    //ホストを停止
                     MatchingManager.Singleton.Init();
-                    ResultScreenManager.SetRank(ranking);
+                    ResultSceneManager.SetRank(ranking);
 
                     //リザルト画面に移動
-                    NonGameManager.LoadNonGameScene(BaseScreenManager.Screen.RESULT);
+                    HomeSceneManager.LoadHomeScene(BaseScreenManager.Screen.RESULT);
                 }
             }
         }
@@ -162,7 +162,7 @@ namespace Online
         [ClientRpc]
         public void RpcPlayStartCountDown()
         {
-            SoundManager.Play(SoundManager.SE.START_COUNT_DOWN_D, SoundManager.BaseSEVolume);
+            SoundManager.Play(SoundManager.SE.START_COUNT_DOWN_D, SoundManager.SEVolume);
             Invoke(nameof(SetStartFlagTrue), 4.5f);
         }
 
@@ -198,10 +198,10 @@ namespace Online
             NetworkManager.singleton.StopClient();  //クライアントを停止
             MatchingManager.Singleton.Init();  //MatchingManagerの初期化
             Mirror.Discovery.CustomNetworkDiscoveryHUD.Singleton.Init();
-            ResultScreenManager.SetRank(ranking);
+            ResultSceneManager.SetRank(ranking);
 
             //リザルト画面に移動
-            NonGameManager.LoadNonGameScene(BaseScreenManager.Screen.RESULT);
+            HomeSceneManager.LoadHomeScene(BaseScreenManager.Screen.RESULT);
         }
 
 
@@ -209,7 +209,7 @@ namespace Online
         void SetStartFlagTrue()
         {
             StartFlag = true;
-            SoundManager.Play(SoundManager.BGM.LOOP, SoundManager.BaseBGMVolume * 0.4f);
+            SoundManager.Play(SoundManager.BGM.LOOP, SoundManager.BGMVolume * 0.4f);
         }
 
         [ClientRpc]
@@ -221,7 +221,7 @@ namespace Online
         [ClientRpc]
         void RpcPlayFinishSE()
         {
-            SoundManager.Play(SoundManager.SE.FINISH, SoundManager.BaseSEVolume);
+            SoundManager.Play(SoundManager.SE.FINISH, SoundManager.SEVolume);
         }
 
         //アニメーターの再生

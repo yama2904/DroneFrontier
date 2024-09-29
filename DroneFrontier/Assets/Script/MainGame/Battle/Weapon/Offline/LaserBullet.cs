@@ -9,7 +9,7 @@ namespace Offline
     {
         //パラメータ
         const float LINE_RADIUS = 0.2f;
-        BaseDrone shooter = null;  //発射したプレイヤー
+        IBattleDrone shooter = null;  //発射したプレイヤー
         float chargeTime = 0;      //チャージ時間
         float power = 0;           //威力
         float lineRange = 0;       //レーザーの半径
@@ -66,7 +66,7 @@ namespace Offline
         }
 
 
-        public void Init(BaseDrone drone, float power, float size, float chargeTime, float lineRange, float hitPerSecond, bool isPlayer)
+        public void Init(IBattleDrone drone, float power, float size, float chargeTime, float lineRange, float hitPerSecond, bool isPlayer)
         {
             shooter = drone;
             this.chargeTime = chargeTime;
@@ -186,10 +186,11 @@ namespace Offline
                     {
                         hit.transform.GetComponent<DroneDamageAction>().Damage(power);
 
-                        if (hit.transform.CompareTag(TagNameManager.CPU))
-                        {
-                            hit.transform.GetComponent<CPU.BattleDrone>().StartRotate(shooter.transform);
-                        }
+                        // CPU側に処理させる
+                        //if (hit.transform.CompareTag(TagNameManager.CPU))
+                        //{
+                        //    hit.transform.GetComponent<CPU.BattleDrone>().StartRotate(shooter.transform);
+                        //}
 
                         //発射間隔のカウントをリセット
                         shotTimeCount = 0;
@@ -228,13 +229,13 @@ namespace Offline
                            //撃った本人は当たり判定から除外
                            if (h.transform.CompareTag(TagNameManager.PLAYER) || h.transform.CompareTag(TagNameManager.CPU))
                            {
-                               return h.transform.GetComponent<BaseDrone>().PlayerID != shooter.PlayerID;
+                               return h.transform.GetComponent<IBattleDrone>() != shooter;
                            }
 
                            //ジャミングボットを生成したプレイヤーと撃ったプレイヤーが同じなら除外
                            if (h.transform.CompareTag(TagNameManager.JAMMING_BOT))
                            {
-                               return h.transform.GetComponent<JammingBot>().creater.PlayerID != shooter.PlayerID;
+                               return h.transform.GetComponent<IBattleDrone>() != shooter;
                            }
                            return true;
                        })
@@ -345,7 +346,7 @@ namespace Offline
                 charge.Play();
                 audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.BEAM_CAHRGE);
                 audioSource.time = 0.2f;
-                audioSource.volume = SoundManager.BaseSEVolume * 0.15f;
+                audioSource.volume = SoundManager.SEVolume * 0.15f;
                 audioSource.Play();
             }
             else
@@ -374,7 +375,7 @@ namespace Offline
 
             //レーザー音の再生
             audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.BEAM);
-            audioSource.volume = SoundManager.BaseSEVolume * 0.05f;
+            audioSource.volume = SoundManager.SEVolume * 0.05f;
             audioSource.loop = true;
             audioSource.Play();
         }

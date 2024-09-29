@@ -39,7 +39,7 @@ namespace Offline
         }
 
 
-        public override void Init(BaseDrone drone, float power, float trackingPower, float speed, float destroyTime, GameObject target = null)
+        public override void Init(IBattleDrone drone, float power, float trackingPower, float speed, float destroyTime, GameObject target = null)
         {
             base.Init(drone, power, trackingPower, speed, destroyTime, target);
         }
@@ -50,7 +50,7 @@ namespace Offline
             transform.parent = null;
 
             //SE再生
-            audioSource.volume = SoundManager.BaseSEVolume;
+            audioSource.volume = SoundManager.SEVolume;
             audioSource.Play();
 
             Invoke(nameof(DestroyMe), destroyTime);
@@ -81,15 +81,16 @@ namespace Offline
             if (other.CompareTag(TagNameManager.PLAYER) || other.CompareTag(TagNameManager.CPU))
             {
                 //撃った本人なら処理しない
-                if (other.GetComponent<BaseDrone>().PlayerID == shooter.PlayerID) return;
+                if (other.GetComponent<IBattleDrone>() == shooter) return;
 
                 //ダメージ処理
                 other.GetComponent<DroneDamageAction>().Damage(Power);
 
-                if (other.CompareTag(TagNameManager.CPU))
-                {
-                    other.GetComponent<CPU.BattleDrone>().StartRotate(shooter.transform);
-                }
+                // ToDo:CPU側に処理させる
+                //if (other.CompareTag(TagNameManager.CPU))
+                //{
+                //    other.GetComponent<CPU.BattleDrone>().StartRotate(shooter.transform);
+                //}
             }
             else if (other.CompareTag(TagNameManager.JAMMING_BOT))
             {
@@ -97,7 +98,7 @@ namespace Offline
                 JammingBot jb = other.GetComponent<JammingBot>();
 
                 //撃った人が放ったジャミングボットなら処理しない
-                if (jb.creater.PlayerID == shooter.PlayerID) return;
+                if (jb.creater == shooter) return;
 
                 //ダメージ処理
                 jb.Damage(Power);

@@ -78,7 +78,7 @@ namespace Online
         [ClientRpc]
         void RpcPlaySE()
         {
-            audioSource.volume = SoundManager.BaseSEVolume;
+            audioSource.volume = SoundManager.SEVolume;
             audioSource.Play();
         }
     }

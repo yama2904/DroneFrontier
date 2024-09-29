@@ -14,7 +14,7 @@ namespace Online
 
         //生成する画像用
         [SerializeField] MatchingScreenManager matchingScreen = null;
-        [SerializeField] WeaponSelectScreenManager weaponSelectScreen = null;
+        [SerializeField] WeaponSelectManager weaponSelectScreen = null;
         static MatchingScreenManager createMatchingScreen = null;
 
         //接続中のプレイヤー情報
@@ -50,7 +50,7 @@ namespace Online
                 GetComponent<NetworkRoomPlayer>().CmdChangeReadyState(true);
             }
 
-            CmdAddPlayer(KuribocchiScreenManager.playerName);
+            CmdAddPlayer(SoloMultiSelectManager.playerName);
         }
 
         [ServerCallback]
@@ -116,7 +116,7 @@ namespace Online
             NetworkManager.singleton.StopClient();  //クライアントを停止
             Init();
             Mirror.Discovery.CustomNetworkDiscoveryHUD.Singleton.Init();
-            NonGameManager.LoadNonGameScene(BaseScreenManager.Screen.KURIBOCCHI);
+            HomeSceneManager.LoadHomeScene(BaseScreenManager.Screen.SOLO_MULTI_SELECT);
         }
 
 
@@ -125,7 +125,7 @@ namespace Online
         public void CreateWeaponSelectScreen()
         {
             RpcDesroyMatchingScreen();
-            WeaponSelectScreenManager ws = Instantiate(weaponSelectScreen);
+            WeaponSelectManager ws = Instantiate(weaponSelectScreen);
             NetworkServer.Spawn(ws.gameObject, connectionToClient);
             ws.DisplayItemSelect();
         }

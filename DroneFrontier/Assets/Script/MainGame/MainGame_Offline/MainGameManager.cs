@@ -9,13 +9,6 @@ namespace Offline
     {
         public static MainGameManager Singleton { get; private set; }
 
-
-        //メインゲーム中か
-        public static bool IsMainGaming { get; private set; } = false;
-
-        //設定画面を開いているか
-        public static bool IsConfig { get; private set; } = false;
-
         //マウスロック中か
         public static bool IsCursorLock { get; private set; } = true;
 
@@ -51,7 +44,7 @@ namespace Offline
             Singleton = this;
 
             //プレイ人数の初期化
-            playerNum = CPUSelectScreenManager.CPUNum + 1;
+            //playerNum = CPUSelectManager.CPUNum + 1;
 
             //ランキング配列の初期化
             ranking = new string[playerNum];
@@ -62,7 +55,7 @@ namespace Offline
 
         protected virtual void Start()
         {
-            //カーソルロック
+            // カーソルロック
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
 
@@ -96,8 +89,6 @@ namespace Offline
         //変数の初期化
         protected virtual void OnDestroy()
         {
-            IsMainGaming = false;
-            IsConfig = false;
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
         }
@@ -106,7 +97,7 @@ namespace Offline
         //ゲーム開始のカウントダウンを開始する
         public virtual void PlayStartCountDown()
         {
-            SoundManager.Play(SoundManager.SE.START_COUNT_DOWN_D, SoundManager.BaseSEVolume);
+            SoundManager.Play(SoundManager.SE.START_COUNT_DOWN_D, SoundManager.SEVolume);
             Invoke(nameof(SetStartFlagTrue), 4.5f);
         }
 
@@ -134,26 +125,26 @@ namespace Offline
         {
             SetAnimatorPlay();
             yield return new WaitForSeconds(2.0f);
-            SoundManager.Play(SoundManager.SE.FINISH, SoundManager.BaseSEVolume);
+            SoundManager.Play(SoundManager.SE.FINISH, SoundManager.SEVolume);
 
             yield return new WaitForSeconds(3.0f);
-            ResultScreenManager.SetRank(ranking);
+            ResultSceneManager.SetRank(ranking);
 
             //リザルト画面に移動
-            NonGameManager.LoadNonGameScene(BaseScreenManager.Screen.RESULT);
+            HomeSceneManager.LoadHomeScene(BaseScreenManager.Screen.RESULT);
         }
 
         //スタートフラグを立てる
         void SetStartFlagTrue()
         {
             startFlag = true;
-            SoundManager.Play(SoundManager.BGM.LOOP, SoundManager.BaseBGMVolume * 0.4f);
+            SoundManager.Play(SoundManager.BGM.LOOP, SoundManager.BGMVolume * 0.4f);
         }
 
 
         protected virtual void PlayFinishSE()
         {
-            SoundManager.Play(SoundManager.SE.FINISH, SoundManager.BaseSEVolume);
+            SoundManager.Play(SoundManager.SE.FINISH, SoundManager.SEVolume);
         }
 
         //アニメーターの再生

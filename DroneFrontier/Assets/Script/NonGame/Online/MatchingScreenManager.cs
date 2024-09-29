@@ -35,13 +35,13 @@ namespace Online
         public void SelectDecision()
         {
             //SE再生
-            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.BaseSEVolume);
+            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
 
             //1人しかいない場合は開始しない
             if (MatchingManager.PlayerNum <= 1) return;
 
             NewNetworkDiscovery.Singleton.StopDiscovery();  //ブロードキャストを止める
-            if (GameModeSelectScreenManager.Mode == GameModeSelectScreenManager.GameMode.BATTLE)
+            if (GameModeSelectManager.Mode == GameModeSelectManager.GameMode.BATTLE)
             {
                 MatchingManager.Singleton.CreateWeaponSelectScreen();
             }
@@ -54,14 +54,14 @@ namespace Online
         public void SelectBack()
         {
             //SE再生
-            SoundManager.Play(SoundManager.SE.CANCEL, SoundManager.BaseSEVolume);
+            SoundManager.Play(SoundManager.SE.CANCEL, SoundManager.SEVolume);
 
             if (IsServer)
             {
                 NetworkManager.singleton.StopHost();    //ホストを停止
                 NewNetworkDiscovery.Singleton.StopDiscovery();  //ブロードキャストを止める
                 MatchingManager.Singleton.Init();
-                NonGameManager.LoadNonGameScene(BaseScreenManager.Screen.KURIBOCCHI);
+                HomeSceneManager.LoadHomeScene(BaseScreenManager.Screen.SOLO_MULTI_SELECT);
             }
             else
             {

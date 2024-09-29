@@ -85,7 +85,7 @@ namespace Offline
                 if (barrier.IsStrength) return false;
                 if (barrier.IsWeak) return false;
                 if (barrier.HP <= 0) return false;
-
+                
                 barrier.BarrierStrength(strengthPercent, time);
                 isStatus[(int)Status.BARRIER_STRENGTH] = true;
 
@@ -138,7 +138,7 @@ namespace Offline
                 isStatus[(int)Status.JAMMING] = true;
 
                 //SE再生
-                jammingSoundId = soundAction.PlayLoopSE(SoundManager.SE.JAMMING_NOISE, SoundManager.BaseSEVolume);
+                jammingSoundId = soundAction.PlayLoopSE(SoundManager.SE.JAMMING_NOISE, SoundManager.SEVolume);
 
                 //アイコン表示
                 jammingIcon.enabled = true;
@@ -168,7 +168,7 @@ namespace Offline
                 speedDownIcon.enabled = true;
 
                 //SE再生
-                speedDownSoundId = soundAction.PlayLoopSE(SoundManager.SE.MAGNETIC_AREA, SoundManager.BaseSEVolume);
+                speedDownSoundId = soundAction.PlayLoopSE(SoundManager.SE.MAGNETIC_AREA, SoundManager.SEVolume);
             }
 
             //スピードダウン解除

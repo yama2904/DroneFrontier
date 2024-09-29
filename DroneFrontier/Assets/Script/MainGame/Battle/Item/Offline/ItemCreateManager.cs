@@ -14,6 +14,7 @@ namespace Offline
         [SerializeField, Tooltip("フィールド上に出現させるアイテムの上限")] int maxSpawnNum = 10;
         [SerializeField, Tooltip("アイテムが出現する間隔")] float spawnInterval = 10f;
         [SerializeField, Tooltip("定期的にスポーンするアイテムの数")] int spawnNum = 1;
+        [SerializeField] GameObject[] _spawnItems = null;
         ItemCreate[] createItems;
         int useSpawnItemsIndex = 0;
         int spawningNum = 0;  //スポーン中のアイテムの数

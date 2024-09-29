@@ -1,14 +1,13 @@
-﻿using System.Collections;
+﻿using Offline.Player;
 using System.Collections.Generic;
-using UnityEngine;
 using System.Linq;
-using Offline.Player;
+using UnityEngine;
 
 namespace Offline
 {
-    public class Jamming : MonoBehaviour
+    public class Jamming : MonoBehaviour, IGameItem
     {
-        uint playerID;
+        IBattleDrone creater;
         [SerializeField, Tooltip("ジャミングボットの生存時間")] float destroyTime = 60.0f;
 
         [SerializeField] JammingBot jammingBot = null;
@@ -17,8 +16,15 @@ namespace Offline
         bool isCreateBot = false;
         List<DroneStatusAction> jamingPlayers = new List<DroneStatusAction>();
 
+        /// <summary>
+        /// キャッシュ用Transform
+        /// </summary>
+        private Transform _transform = null;
 
-        void Start() { }
+        void Start() 
+        {
+            _transform = transform;
+        }
 
         void Update()
         {
@@ -29,14 +35,63 @@ namespace Offline
             }
         }
 
+        public bool UseItem(GameObject drone)
+        {
+            //ボット生成
+            createBot = Instantiate(jammingBot);
+
+            createBot.creater = creater;
+            isCreateBot = true;
+
+            //ボットを生成した場所にオブジェクトがあるとオブジェクトの中にBotが入りこんで
+            //破壊不可になるのでオブジェクトがある場合は避ける
+            var hits = Physics.SphereCastAll(
+                _transform.position, jammingBot.transform.localScale.x, _transform.up, jammingBotPosition.localPosition.y)
+                // ToDo:未定
+                //.Where(h => !ReferenceEquals(creater.gameObject, h.transform.gameObject))
+                .Where(h => !h.transform.CompareTag(TagNameManager.JAMMING))
+                .Where(h => !h.transform.CompareTag(TagNameManager.ITEM))
+                .Where(h => !h.transform.CompareTag(TagNameManager.BULLET))
+                .Where(h => !h.transform.CompareTag(TagNameManager.GIMMICK))
+                .ToArray();
+
+            Vector3 pos = jammingBotPosition.position;
+            if (hits.Length > 0)
+            {
+                //一番近いオブジェクトの手前に避ける
+                RaycastHit hit = hits[0];
+                float minTargetDistance = float.MaxValue;   //初期化
+                foreach (RaycastHit h in hits)
+                {
+                    //距離が最小だったら更新
+                    if (h.distance < minTargetDistance)
+                    {
+                        minTargetDistance = h.distance;
+                        hit = h;
+                    }
+                }
+
+                pos = new Vector3(jammingBotPosition.position.x, hit.point.y - 8f, jammingBotPosition.position.z);
+            }
+            //生成したボットと自分も移動
+            createBot.transform.position = pos;
+            transform.position = pos;
+
+            //一定時間後にボットを削除
+            Destroy(createBot.gameObject, destroyTime);
+
+            return true;
+        }
+
         //ジャミングボットを生成する
-        public void CreateBot(BaseDrone creater)
+        public void CreateBot(IBattleDrone creater)
         {
             //キャッシュ
             Transform t = transform;
 
-            playerID = creater.PlayerID;
-            t.position = creater.transform.position;
+            // ToDo:未定
+            //playerID = creater.PlayerID;
+            //t.position = creater.transform.position;
 
             //ボット生成
             createBot = Instantiate(jammingBot);
@@ -48,7 +103,8 @@ namespace Offline
             //破壊不可になるのでオブジェクトがある場合は避ける
             var hits = Physics.SphereCastAll(
                 t.position, jammingBot.transform.localScale.x, t.up, jammingBotPosition.localPosition.y)
-                .Where(h => !ReferenceEquals(creater.gameObject, h.transform.gameObject))
+                // ToDo:未定
+                //.Where(h => !ReferenceEquals(creater.gameObject, h.transform.gameObject))
                 .Where(h => !h.transform.CompareTag(TagNameManager.JAMMING))
                 .Where(h => !h.transform.CompareTag(TagNameManager.ITEM))
                 .Where(h => !h.transform.CompareTag(TagNameManager.BULLET))
@@ -99,7 +155,7 @@ namespace Offline
         private void OnTriggerEnter(Collider other)
         {
             if (!other.CompareTag(TagNameManager.PLAYER)) return;   //プレイヤーのみ対象
-            if (other.GetComponent<BaseDrone>().PlayerID == playerID) return; //ジャミングを付与しないプレイヤーならスキップ
+            if (other.GetComponent<IBattleDrone>() == creater) return; //ジャミングを付与しないプレイヤーならスキップ
             
             DroneStatusAction player = other.GetComponent<DroneStatusAction>();  //名前省略
             player.SetJamming(); //ジャミング付与
@@ -109,7 +165,7 @@ namespace Offline
         private void OnTriggerExit(Collider other)
         {
             if (!other.CompareTag(TagNameManager.PLAYER)) return;   //プレイヤーのみ対象
-            if (other.GetComponent<BaseDrone>().PlayerID == playerID) return; //ジャミングを付与しないプレイヤーならスキップ
+            if (other.GetComponent<IBattleDrone>() == creater) return; //ジャミングを付与しないプレイヤーならスキップ
 
             //名前省略
             DroneStatusAction player = other.GetComponent<DroneStatusAction>(); 
