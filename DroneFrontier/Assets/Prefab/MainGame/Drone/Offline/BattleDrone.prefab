@@ -190,7 +190,7 @@ GameObject:
   - component: {fileID: 4628606036387432893}
   - component: {fileID: 2635881008999006223}
   m_Layer: 0
-  m_Name: BattleDrone_Offline
+  m_Name: BattleDrone
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -298,11 +298,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc2b24deb4e840e42b80037e9be1769c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 800
-  droneObject: {fileID: 6103758830164412855}
-  rotateSpeed: 5
-  limitCameraTiltX: 40
-  _camera: {fileID: 2032111343277000741}
+  _moveSpeed: 800
+  _rotateObject: {fileID: 6103758830164412855}
+  _rotateSpeed: 2
+  _maxCameraRotateX: 40
 --- !u!114 &-4235326530564925763
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -29,13 +29,13 @@ namespace Offline
             DroneLockOnAction lockOn = null;
 
             //スピードダウン用
-            DroneBaseAction baseAction = null;
+            DroneMove baseAction = null;
             int speedDownCount = 0;
 
 
             void Start()
             {
-                baseAction = GetComponent<DroneBaseAction>();
+                baseAction = GetComponent<DroneMove>();
                 barrier = GetComponent<DroneBarrierAction>();
                 lockOn = GetComponent<DroneLockOnAction>();
             }
@@ -124,7 +124,7 @@ namespace Offline
             //スピードダウン
             public void SetSpeedDown(float downPercent)
             {
-                baseAction.ModifySpeed(1 - downPercent);
+                baseAction.MoveSpeed *= 1 - downPercent;
 
                 isStatus[(int)Status.SPEED_DOWN] = true;
                 speedDownCount++;

@@ -43,14 +43,14 @@ namespace Offline
             int jammingSoundId = -1;
 
             //スピードダウン用
-            DroneBaseAction baseAction = null;
+            DroneMove baseAction = null;
             int speedDownSoundId = 0;
             int speedDownCount = 0;
 
 
             void Start()
             {
-                baseAction = GetComponent<DroneBaseAction>();
+                baseAction = GetComponent<DroneMove>();
                 soundAction = GetComponent<DroneSoundAction>();
                 barrier = GetComponent<DroneBarrierAction>();
                 lockOn = GetComponent<DroneLockOnAction>();
@@ -161,7 +161,7 @@ namespace Offline
             public void SetSpeedDown(float downPercent)
             {
                 isStatus[(int)Status.SPEED_DOWN] = true;
-                baseAction.ModifySpeed(1 - downPercent);
+                baseAction.MoveSpeed *= (1 - downPercent);
                 speedDownCount++;
 
                 //アイコン表示
@@ -174,7 +174,7 @@ namespace Offline
             //スピードダウン解除
             public void UnSetSpeedDown(float downPercent)
             {
-                baseAction.ModifySpeed(1 / (1 - downPercent));
+                baseAction.MoveSpeed *= 1 / (1 - downPercent);
 
                 //スピードダウンがすべて解除されたらフラグも解除
                 if (--speedDownCount <= 0)

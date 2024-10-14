@@ -9,14 +9,15 @@ public class CpuBattleDrone : BaseDrone, IBattleDrone
     Transform cacheTransform = null;
     Rigidbody _rigidbody = null;
     Animator animator = null;
-    DroneBaseAction baseAction = null;
+    DroneMove baseAction = null;
     DroneDamageAction damageAction = null;
     DroneSoundAction soundAction = null;
     Offline.CPU.DroneLockOnAction lockOnAction = null;
     DroneBarrierAction barrierAction = null;
 
-    //カメラ
     [SerializeField] Transform cameraTransform = null;  //キャッシュ用
+
+    [SerializeField] Camera _camera = null;
 
     //AudioListener
     AudioListener listener = null;
@@ -95,7 +96,7 @@ public class CpuBattleDrone : BaseDrone, IBattleDrone
         cacheTransform = transform;
         _rigidbody = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
-        baseAction = GetComponent<DroneBaseAction>();
+        baseAction = GetComponent<DroneMove>();
         damageAction = GetComponent<DroneDamageAction>();
         soundAction = GetComponent<DroneSoundAction>();
         lockOnAction = GetComponent<Offline.CPU.DroneLockOnAction>();
@@ -179,7 +180,7 @@ public class CpuBattleDrone : BaseDrone, IBattleDrone
             //回転
             if (isRotate && lockOnAction.Target == null)
             {
-                baseAction.Rotate(angle * 0.15f);
+                baseAction.RotateCamera(0.7f, 0.7f);
             }
             else
             {
@@ -293,7 +294,7 @@ public class CpuBattleDrone : BaseDrone, IBattleDrone
             gravityAccele += 20 * Time.deltaTime;
 
             //ドローンを傾ける
-            baseAction.RotateDroneObject(deathRotate, deathRotateSpeed * Time.deltaTime);
+            baseAction.Rotate(deathRotate, deathRotateSpeed * Time.deltaTime);
 
             //メイン武器を傾ける
             mainWeapon.transform.localRotation = Quaternion.Slerp(mainWeapon.transform.localRotation, deathRotate, deathRotateSpeed * Time.deltaTime);
@@ -322,7 +323,7 @@ public class CpuBattleDrone : BaseDrone, IBattleDrone
     //カメラの深度操作
     public void SetCameraDepth(int depth)
     {
-        baseAction._Camera.depth = depth;
+        _camera.depth = depth;
     }
 
     //AudioListenerのオンオフ

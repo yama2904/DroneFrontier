@@ -3,7 +3,7 @@
 public class CameraManager : MonoBehaviour
 {
     //const float MAX_CAMERA_SPEED = 2.0f;    //カメラ感度の最高値
-    const float MIN_CAMERA_SPEED = 0.2f;    //カメラ感度の最低値
+    private const float MIN_CAMERA_SPEED = 0.3f;    //カメラ感度の最低値
 
     public static short ReverseX { get; private set; } = 1;
     public static short ReverseY { get; private set; } = 1;

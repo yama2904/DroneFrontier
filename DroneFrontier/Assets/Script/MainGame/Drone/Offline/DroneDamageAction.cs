@@ -30,20 +30,22 @@ namespace Offline
 
         void Update()
         {
-            if(Time.time - drone.StartTime <= nonDamageTime)
-            {
-                if (!isNonDamage)
-                {
-                    SetNonDamage(true);
-                }
-            }
-            else
-            {
-                if (isNonDamage)
-                {
-                    SetNonDamage(false);
-                }
-            }
+            //if(Time.time - drone.StartTime <= nonDamageTime)
+            //{
+            //    if (!isNonDamage)
+            //    {
+            //        SetNonDamage(true);
+            //    }
+            //}
+            //else
+            //{
+            //    if (isNonDamage)
+            //    {
+            //        SetNonDamage(false);
+            //    }
+            //}
+
+            SetNonDamage(true);
         }
 
         private void LateUpdate()

@@ -5,13 +5,13 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class BattleDrone : BaseDrone, IBattleDrone
+public class BattleDrone : MonoBehaviour, IBattleDrone
 {
     // コンポーネント用
     Transform _transform = null;
     Rigidbody _rigidbody = null;
     Animator _animator = null;
-    DroneBaseAction _baseAction = null;
+    DroneMove _baseAction = null;
     DroneDamageAction damageAction = null;
     DroneSoundAction soundAction = null;
     DroneLockOnAction lockOnAction = null;
@@ -43,13 +43,6 @@ public class BattleDrone : BaseDrone, IBattleDrone
     /// ドローンのサブ武器
     /// </summary>
     public BaseWeapon.Weapon SubWeapon { get; set; } = BaseWeapon.Weapon.SHOTGUN;
-
-    // ドローンが移動した際にオブジェクトが傾く処理用
-    float moveRotateSpeed = 2f;
-    Quaternion frontMoveRotate = Quaternion.Euler(50, 0, 0);
-    Quaternion leftMoveRotate = Quaternion.Euler(0, 0, 60);
-    Quaternion rightMoveRotate = Quaternion.Euler(0, 0, -60);
-    Quaternion backMoveRotate = Quaternion.Euler(-70, 0, 0);
 
     // ロックオン
     [SerializeField, Tooltip("ロックオンした際に敵に向く速度")] float lockOnTrackingSpeed = 0.2f;
@@ -121,7 +114,7 @@ public class BattleDrone : BaseDrone, IBattleDrone
         _rigidbody = GetComponent<Rigidbody>();
         _transform = _rigidbody.transform;
         _animator = GetComponent<Animator>();
-        _baseAction = GetComponent<DroneBaseAction>();
+        _baseAction = GetComponent<DroneMove>();
         damageAction = GetComponent<DroneDamageAction>();
         soundAction = GetComponent<DroneSoundAction>();
         lockOnAction = GetComponent<DroneLockOnAction>();
@@ -134,10 +127,8 @@ public class BattleDrone : BaseDrone, IBattleDrone
         StockNum = _maxStock;
     }
 
-    protected override void Start()
+    private void Start()
     {
-        base.Start();
-
         // コンポーネントの初期化
         lockOnAction.Init();
         itemAction.Init((int)ItemNum.NONE);
@@ -166,7 +157,7 @@ public class BattleDrone : BaseDrone, IBattleDrone
         soundAction.PlayLoopSE(SoundManager.SE.PROPELLER, SoundManager.SEVolume);
     }
 
-    void Update()
+    private void Update()
     {
         // 死亡処理中は操作不可
         if (_isDestroyFalling || _isDestroy) return;
@@ -182,71 +173,39 @@ public class BattleDrone : BaseDrone, IBattleDrone
         // 前進
         if (Input.GetKey(KeyCode.W))
         {
-            _baseAction.Move(_transform.forward);
-            _baseAction.RotateDroneObject(frontMoveRotate, moveRotateSpeed * Time.deltaTime);
-        }
-        else
-        {
-            _baseAction.RotateDroneObject(Quaternion.identity, moveRotateSpeed * Time.deltaTime);
+            _baseAction.Move(DroneMove.Direction.Forward);
         }
 
         // 左移動
         if (Input.GetKey(KeyCode.A))
         {
-            Quaternion leftAngle = Quaternion.Euler(0, -90, 0);
-            Vector3 left = leftAngle.normalized * _transform.forward;
-            _baseAction.Move(left);
-            _baseAction.RotateDroneObject(leftMoveRotate, moveRotateSpeed * Time.deltaTime);
-        }
-        else
-        {
-            _baseAction.RotateDroneObject(Quaternion.identity, moveRotateSpeed * Time.deltaTime);
+            _baseAction.Move(DroneMove.Direction.Left);
         }
 
         // 後退
         if (Input.GetKey(KeyCode.S))
         {
-            Quaternion backwardAngle = Quaternion.Euler(0, 180, 0);
-            Vector3 backward = backwardAngle.normalized * _transform.forward;
-            _baseAction.Move(backward);
-            _baseAction.RotateDroneObject(backMoveRotate, moveRotateSpeed * Time.deltaTime);
-        }
-        else
-        {
-            _baseAction.RotateDroneObject(Quaternion.identity, moveRotateSpeed * Time.deltaTime);
+            _baseAction.Move(DroneMove.Direction.Backwad);
         }
 
         // 右移動
         if (Input.GetKey(KeyCode.D))
         {
-            Quaternion rightAngle = Quaternion.Euler(0, 90, 0);
-            Vector3 right = rightAngle.normalized * _transform.forward;
-            _baseAction.Move(right);
-            _baseAction.RotateDroneObject(rightMoveRotate, moveRotateSpeed * Time.deltaTime);
-        }
-        else
-        {
-            _baseAction.RotateDroneObject(Quaternion.identity, moveRotateSpeed * Time.deltaTime);
+            _baseAction.Move(DroneMove.Direction.Right);
         }
 
         // 上下移動
         if (Input.mouseScrollDelta.y != 0)
         {
-            Quaternion upAngle = Quaternion.Euler(-90, 0, 0);
-            Vector3 upward = upAngle.normalized * Vector3.forward;
-            _baseAction.Move(upward * Input.mouseScrollDelta.y);
+            _baseAction.Move(_transform.up * Input.mouseScrollDelta.y);
         }
         if (Input.GetKey(KeyCode.R))
         {
-            Quaternion upAngle = Quaternion.Euler(-90, 0, 0);
-            Vector3 upward = upAngle.normalized * Vector3.forward;
-            _baseAction.Move(upward);
+            _baseAction.Move(_transform.up);
         }
         if (Input.GetKey(KeyCode.F))
         {
-            Quaternion downAngle = Quaternion.Euler(90, 0, 0);
-            Vector3 down = downAngle.normalized * Vector3.forward;
-            _baseAction.Move(down);
+            _baseAction.Move(_transform.up * -1);
         }
 
         #endregion
@@ -297,10 +256,9 @@ public class BattleDrone : BaseDrone, IBattleDrone
         // 回転処理
         if (Cursor.lockState == CursorLockMode.Locked)
         {
-            Vector3 angle = Vector3.zero;
-            angle.x = Input.GetAxis("Mouse X");
-            angle.y = Input.GetAxis("Mouse Y");
-            _baseAction.Rotate(angle * CameraManager.CameraSpeed);
+            float x = Input.GetAxis("Mouse X") * CameraManager.ReverseX * CameraManager.CameraSpeed;
+            float y = Input.GetAxis("Mouse Y") * CameraManager.ReverseY * CameraManager.CameraSpeed;
+            _baseAction.RotateCamera(x, y);
         }
 
 
@@ -314,7 +272,7 @@ public class BattleDrone : BaseDrone, IBattleDrone
             if (!usingWeapons[(int)Weapon.SUB] && !usingWeapons[(int)Weapon.MAIN])
             {
                 // 攻撃中は速度低下
-                _baseAction.ModifySpeed(atackingDownSpeed);
+                _baseAction.MoveSpeed *= atackingDownSpeed;
                 usingWeapons[(int)Weapon.MAIN] = true;
             }
         }
@@ -330,7 +288,7 @@ public class BattleDrone : BaseDrone, IBattleDrone
             // 攻撃を止めたら速度を戻す
             if (usingWeapons[(int)Weapon.MAIN])
             {
-                _baseAction.ModifySpeed(1 / atackingDownSpeed);
+                _baseAction.MoveSpeed *= 1 / atackingDownSpeed;
                 usingWeapons[(int)Weapon.MAIN] = false;
             }
         }
@@ -345,12 +303,12 @@ public class BattleDrone : BaseDrone, IBattleDrone
                 if (SubWeapon == BaseWeapon.Weapon.MISSILE)
                 {
                     // 攻撃中は速度低下
-                    _baseAction.ModifySpeed(atackingDownSpeed);
+                    _baseAction.MoveSpeed *= atackingDownSpeed;
                 }
                 // レーザーの場合は低下率増加
                 if (SubWeapon == BaseWeapon.Weapon.LASER)
                 {
-                    _baseAction.ModifySpeed(atackingDownSpeed * 0.75f);
+                    _baseAction.MoveSpeed *= atackingDownSpeed * 0.75f;
                 }
                 usingWeapons[(int)Weapon.SUB] = true;
             }
@@ -370,12 +328,12 @@ public class BattleDrone : BaseDrone, IBattleDrone
                 if (SubWeapon == BaseWeapon.Weapon.MISSILE)
                 {
                     // 攻撃中は速度低下
-                    _baseAction.ModifySpeed(1 / atackingDownSpeed);
+                    _baseAction.MoveSpeed *= 1 / atackingDownSpeed;
                 }
                 // レーザーの場合は低下率増加
                 if (SubWeapon == BaseWeapon.Weapon.LASER)
                 {
-                    _baseAction.ModifySpeed(1 / (atackingDownSpeed * 0.75f));
+                    _baseAction.MoveSpeed *= 1 / (atackingDownSpeed * 0.75f);
                 }
                 usingWeapons[(int)Weapon.SUB] = false;
             }
@@ -391,7 +349,7 @@ public class BattleDrone : BaseDrone, IBattleDrone
             // ブーストが使用可能なゲージ量ならブースト使用
             if (boostGaugeImage.fillAmount >= BOOST_POSSIBLE_MIN)
             {
-                _baseAction.ModifySpeed(boostAccele);
+                _baseAction.MoveSpeed *= boostAccele;
                 isBoost = true;
 
                 // 加速音の再生
@@ -414,7 +372,7 @@ public class BattleDrone : BaseDrone, IBattleDrone
                 {
                     boostGaugeImage.fillAmount = 0;
 
-                    _baseAction.ModifySpeed(1 / boostAccele);
+                    _baseAction.MoveSpeed *= 1 / boostAccele;
                     isBoost = false;
 
                     // ブーストSE停止
@@ -428,7 +386,7 @@ public class BattleDrone : BaseDrone, IBattleDrone
             // キーを離したらブースト停止
             if (Input.GetKeyUp(KeyCode.Space))
             {
-                _baseAction.ModifySpeed(1 / boostAccele);
+                _baseAction.MoveSpeed *= 1 / boostAccele;
                 isBoost = false;
 
                 // ブーストSE停止
@@ -476,7 +434,7 @@ public class BattleDrone : BaseDrone, IBattleDrone
             gravityAccele += 20 * Time.deltaTime;
 
             // ドローンを傾ける
-            _baseAction.RotateDroneObject(deathRotate, deathRotateSpeed * Time.deltaTime);
+            _baseAction.Rotate(deathRotate, deathRotateSpeed * Time.deltaTime);
 
             // メイン武器を傾ける
             mainWeapon.transform.localRotation = Quaternion.Slerp(mainWeapon.transform.localRotation, deathRotate, deathRotateSpeed * Time.deltaTime);

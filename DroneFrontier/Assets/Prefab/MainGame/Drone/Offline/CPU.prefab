@@ -623,6 +623,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cameraTransform: {fileID: 6808110575809998133}
+  _camera: {fileID: 6808110575809998135}
   explosion: {fileID: 2212005194167726933, guid: 8dc076f9b5243664fa747acf0168fb56,
     type: 3}
   droneObject: {fileID: 1656250088969202853}
@@ -639,7 +640,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 600
-  droneObject: {fileID: 1656250088969202853}
+  _rotateObject: {fileID: 1656250088969202853}
   rotateSpeed: 5
   limitCameraTiltX: 40
   _camera: {fileID: 6808110575809998135}

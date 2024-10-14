@@ -1293,15 +1293,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c672266a678ab2246abb4166b084aeb6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _playerDrone: {fileID: 985328476376835486, guid: 2af327453245f4f40b532c4b235f9506,
-    type: 3}
-  _cpuDrone: {fileID: 5756816350272667788, guid: e0086ec4cddbc7742b3f2f12ff4c5821,
-    type: 3}
-  _droneSpawnPositions:
-  - {fileID: 109799378}
-  - {fileID: 156392037}
-  - {fileID: 291693923}
-  - {fileID: 782312791}
   _droneSpawnManager: {fileID: 722117023}
   _itemSpawnManager: {fileID: 1011074923}
   _watchingGame: {fileID: 1201505800}
@@ -1415,10 +1406,10 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 2118360467}
-  - {fileID: 8200932790367939753}
-  - {fileID: 158291429}
   - {fileID: 149561200}
+  - {fileID: 158291429}
   - {fileID: 179752583}
+  - {fileID: 8200932790367939753}
   - {fileID: 1201505801}
   - {fileID: 722117024}
   - {fileID: 1011074922}
