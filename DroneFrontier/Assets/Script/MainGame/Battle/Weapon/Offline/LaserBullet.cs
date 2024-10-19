@@ -184,7 +184,7 @@ namespace Offline
                     if (hit.transform.CompareTag(TagNameManager.PLAYER) ||
                         hit.transform.CompareTag(TagNameManager.CPU))
                     {
-                        hit.transform.GetComponent<DroneDamageAction>().Damage(power);
+                        hit.transform.GetComponent<DroneDamageComponent>().Damage(shooter.GameObject, power);
 
                         // CPU側に処理させる
                         //if (hit.transform.CompareTag(TagNameManager.CPU))

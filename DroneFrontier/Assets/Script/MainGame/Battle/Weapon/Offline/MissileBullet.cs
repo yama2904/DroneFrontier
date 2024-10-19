@@ -6,6 +6,8 @@ namespace Offline
 {
     public class MissileBullet : Bullet
     {
+        public GameObject Source { get; private set; } = null;
+
         [SerializeField] Explosion explosion = null;
         bool isShot = false;
         AudioSource audioSource = null;
@@ -84,7 +86,7 @@ namespace Offline
                 if (other.GetComponent<IBattleDrone>() == shooter) return;
 
                 //ダメージ処理
-                other.GetComponent<DroneDamageAction>().Damage(Power);
+                other.GetComponent<DroneDamageComponent>().Damage(shooter.GameObject, Power);
 
                 // ToDo:CPU側に処理させる
                 //if (other.CompareTag(TagNameManager.CPU))

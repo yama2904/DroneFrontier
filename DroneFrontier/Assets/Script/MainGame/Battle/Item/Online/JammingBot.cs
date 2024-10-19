@@ -47,7 +47,7 @@ namespace Online
         [Command(ignoreAuthority = true)]
         public void CmdDamage(float power)
         {
-            float p = Useful.DecimalPointTruncation(power, 1);   //小数点第2以下切り捨て
+            float p = Useful.Floor(power, 1);   //小数点第2以下切り捨て
             HP -= p;
             if (HP < 0)
             {

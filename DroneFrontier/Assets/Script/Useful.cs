@@ -1,19 +1,21 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class Useful : MonoBehaviour
+public class Useful
 {
-    //小数点切り捨て
-    //引数1を引数2未満の小数点を切り捨てる
-    public static float DecimalPointTruncation(float value, int num)
+    /// <summary>
+    /// 指定した桁数より小さい小数部を切り捨て
+    /// </summary>
+    /// <param name="value">切り捨てる値</param>
+    /// <param name="digits">戻り値の小数部の桁数</param>
+    /// <returns></returns>
+    public static float Floor(float value, int digits)
     {
-        if(num == 0)
+        if(digits == 0)
         {
             return Mathf.Floor(value);
         }
 
-        float x = Mathf.Pow(10, num);
+        float x = Mathf.Pow(10, digits);
         value *= x;
         value = Mathf.Floor(value) / x;
 

@@ -151,7 +151,7 @@ namespace Online
         [Server]
         public void Damage(float power)
         {
-            float p = Useful.DecimalPointTruncation(power * syncDamagePercent, 1);  //小数点第2以下切り捨て
+            float p = Useful.Floor(power * syncDamagePercent, 1);  //小数点第2以下切り捨て
             syncHP -= p;
 
             //バリアHPが0になったらバリアを非表示
@@ -238,7 +238,7 @@ namespace Online
             }
             else
             {
-                syncHP = Useful.DecimalPointTruncation((syncHP *= 0.5f), 1);
+                syncHP = Useful.Floor((syncHP *= 0.5f), 1);
 
 
                 //デバッグ用

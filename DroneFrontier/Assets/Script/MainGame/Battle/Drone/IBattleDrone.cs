@@ -1,13 +1,23 @@
 using Offline;
 using System;
-using UnityEngine.EventSystems;
+using UnityEngine;
 
 public interface IBattleDrone
 {
+    /// <summary>
+    /// ドローンのゲームオブジェクト
+    /// </summary>
+    public GameObject GameObject { get; }
+
     // <summary>
     /// ドローンの名前
     /// </summary>
     public string Name { get; set; }
+
+    /// <summary>
+    /// ドローンのHP
+    /// </summary>
+    public float HP { get; set; }
 
     /// <summary>
     /// 現在のストック数

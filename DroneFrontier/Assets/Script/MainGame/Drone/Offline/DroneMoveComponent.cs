@@ -1,10 +1,8 @@
 ﻿using UnityEngine;
-using UnityEngine.UIElements;
-using UnityEngine.Windows;
 
 namespace Offline
 {
-    public class DroneMove : MonoBehaviour
+    public class DroneMoveComponent : MonoBehaviour
     {
         public enum Direction
         {

@@ -11,19 +11,48 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
     Transform _transform = null;
     Rigidbody _rigidbody = null;
     Animator _animator = null;
-    DroneMove _baseAction = null;
-    DroneDamageAction damageAction = null;
+    DroneMoveComponent _baseAction = null;
+    DroneDamageComponent damageAction = null;
     DroneSoundAction soundAction = null;
     DroneLockOnAction lockOnAction = null;
     DroneRadarAction radarAction = null;
-    DroneBarrierAction barrierAction = null;
     DroneItemAction itemAction = null;
-    DroneStatusAction statusAction = null;
+    DroneStatus statusAction = null;
+
+    /// <summary>
+    /// ドローンのゲームオブジェクト
+    /// </summary>
+    public GameObject GameObject { get; private set; } = null;
 
     /// <summary>
     /// ドローンの名前
     /// </summary>
     public string Name { get; set; } = "";
+
+    /// <summary>
+    /// ドローンのHP
+    /// </summary>
+    public float HP
+    {
+        get { return _hp; }
+        set
+        {
+            if (_hp <= 0) return;
+
+            if (value > 0)
+            {
+                // 小数点第2以下切り捨て
+                _hp = Useful.Floor(value, 1);
+            }
+            else
+            {
+                // HPが0になったら破壊処理
+                _hp = 0;
+                Destroy().Forget();
+            }
+        }
+    }
+    private float _hp = 0;
 
     /// <summary>
     /// 現在のストック数
@@ -43,6 +72,9 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
     /// ドローンのサブ武器
     /// </summary>
     public BaseWeapon.Weapon SubWeapon { get; set; } = BaseWeapon.Weapon.SHOTGUN;
+
+    [SerializeField, Tooltip("ドローンの最大HP")]
+    private float _maxHP = 100f;
 
     // ロックオン
     [SerializeField, Tooltip("ロックオンした際に敵に向く速度")] float lockOnTrackingSpeed = 0.2f;
@@ -111,17 +143,20 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
     protected void Awake()
     {
         // コンポーネントの取得
+        GameObject = gameObject;
         _rigidbody = GetComponent<Rigidbody>();
         _transform = _rigidbody.transform;
         _animator = GetComponent<Animator>();
-        _baseAction = GetComponent<DroneMove>();
-        damageAction = GetComponent<DroneDamageAction>();
+        _baseAction = GetComponent<DroneMoveComponent>();
+        damageAction = GetComponent<DroneDamageComponent>();
         soundAction = GetComponent<DroneSoundAction>();
         lockOnAction = GetComponent<DroneLockOnAction>();
         radarAction = GetComponent<DroneRadarAction>();
-        barrierAction = GetComponent<DroneBarrierAction>();
         itemAction = GetComponent<DroneItemAction>();
-        statusAction = GetComponent<DroneStatusAction>();
+        statusAction = GetComponent<DroneStatus>();
+
+        // HP初期化
+        _hp = _maxHP;
 
         // ストック数初期化
         StockNum = _maxStock;
@@ -162,36 +197,30 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
         // 死亡処理中は操作不可
         if (_isDestroyFalling || _isDestroy) return;
 
-        if (damageAction.HP <= 0)
-        {
-            Destroy().Forget();
-            return;
-        }
-
         #region Move
 
         // 前進
         if (Input.GetKey(KeyCode.W))
         {
-            _baseAction.Move(DroneMove.Direction.Forward);
+            _baseAction.Move(DroneMoveComponent.Direction.Forward);
         }
 
         // 左移動
         if (Input.GetKey(KeyCode.A))
         {
-            _baseAction.Move(DroneMove.Direction.Left);
+            _baseAction.Move(DroneMoveComponent.Direction.Left);
         }
 
         // 後退
         if (Input.GetKey(KeyCode.S))
         {
-            _baseAction.Move(DroneMove.Direction.Backwad);
+            _baseAction.Move(DroneMoveComponent.Direction.Backwad);
         }
 
         // 右移動
         if (Input.GetKey(KeyCode.D))
         {
-            _baseAction.Move(DroneMove.Direction.Right);
+            _baseAction.Move(DroneMoveComponent.Direction.Right);
         }
 
         // 上下移動
@@ -215,7 +244,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
         // ロックオン使用
         if (Input.GetKey(KeyCode.LeftShift))
         {
-            if (!statusAction.GetIsStatus(DroneStatusAction.Status.JAMMING))
+            if (!statusAction.GetIsStatus(DroneStatus.Status.JAMMING))
             {
                 lockOnAction.UseLockOn(lockOnTrackingSpeed);
             }
@@ -231,7 +260,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
         #region Radar
 
         // ジャミング中は処理しない
-        if (!statusAction.GetIsStatus(DroneStatusAction.Status.JAMMING))
+        if (!statusAction.GetIsStatus(DroneStatus.Status.JAMMING))
         {
             // レーダー音の再生
             if (Input.GetKeyDown(KeyCode.Q))
@@ -468,7 +497,6 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
 
         // ドローンの非表示
         droneObject.gameObject.SetActive(false);
-        barrierAction.BarrierObject.SetActive(false);
         mainWeapon.gameObject.SetActive(false);
         subWeapon.gameObject.SetActive(false);
 

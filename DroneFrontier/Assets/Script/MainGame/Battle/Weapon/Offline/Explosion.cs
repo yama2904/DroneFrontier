@@ -110,7 +110,7 @@ namespace Offline
                 {
                     if (ReferenceEquals(other, o)) return;
                 }
-                other.GetComponent<DroneDamageAction>().Damage(power);
+                other.GetComponent<DroneDamageComponent>().Damage(shooter.GameObject, power);
                 wasHitObjects.Add(other.gameObject);
 
                 // ToDo:CPU側に処理させる

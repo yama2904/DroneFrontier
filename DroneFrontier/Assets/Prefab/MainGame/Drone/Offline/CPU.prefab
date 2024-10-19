@@ -627,6 +627,7 @@ MonoBehaviour:
   explosion: {fileID: 2212005194167726933, guid: 8dc076f9b5243664fa747acf0168fb56,
     type: 3}
   droneObject: {fileID: 1656250088969202853}
+  _maxHP: 100
 --- !u!114 &2268401430616989749
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -639,11 +640,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc2b24deb4e840e42b80037e9be1769c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 600
+  _moveSpeed: 800
   _rotateObject: {fileID: 1656250088969202853}
-  rotateSpeed: 5
-  limitCameraTiltX: 40
-  _camera: {fileID: 6808110575809998135}
+  _rotateSpeed: 2
+  _maxCameraRotateX: 40
 --- !u!114 &2690737355441408120
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -668,7 +668,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32f5b74b902376c4f9a573e3e9d5a3b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nonDamageTime: 4
+  _damageInterval: 4
 --- !u!114 &8846344343629425355
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -696,12 +696,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 750f686589563ae4aa983852f92bf93d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  barrierObject: {fileID: 5507814870411257281}
-  regeneStartTime: 8
-  regeneInterval: 1
-  regeneValue: 5
-  resurrectBarrierTime: 15
-  resurrectBarrierHP: 10
+  _barrierObject: {fileID: 5507814870411257281}
+  _barrierMaxHP: 100
+  _regeneStartTime: 8
+  _regeneInterval: 1
+  _regeneValue: 5
+  _resurrectBarrierTime: 15
+  _resurrectBarrierHP: 10
 --- !u!114 &5158804489917226534
 MonoBehaviour:
   m_ObjectHideFlags: 0

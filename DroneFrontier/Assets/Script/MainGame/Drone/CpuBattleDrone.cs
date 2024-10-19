@@ -9,11 +9,10 @@ public class CpuBattleDrone : BaseDrone, IBattleDrone
     Transform cacheTransform = null;
     Rigidbody _rigidbody = null;
     Animator animator = null;
-    DroneMove baseAction = null;
-    DroneDamageAction damageAction = null;
+    DroneMoveComponent baseAction = null;
+    DroneDamageComponent damageAction = null;
     DroneSoundAction soundAction = null;
     Offline.CPU.DroneLockOnAction lockOnAction = null;
-    DroneBarrierAction barrierAction = null;
 
     [SerializeField] Transform cameraTransform = null;  //キャッシュ用
 
@@ -71,9 +70,38 @@ public class CpuBattleDrone : BaseDrone, IBattleDrone
     bool isDamage = false;
 
     /// <summary>
+    /// ドローンのゲームオブジェクト
+    /// </summary>
+    public GameObject GameObject { get; private set; } = null;
+
+    /// <summary>
     /// ドローンの名前
     /// </summary>
     public string Name { get; set; } = "";
+
+    /// <summary>
+    /// ドローンのHP
+    /// </summary>
+    public float HP
+    {
+        get { return _hp; }
+        set
+        {
+            if (_hp <= 0) return;
+
+            if (value > 0)
+            {
+                _hp = value;
+            }
+            else
+            {
+                // HPが0になったら破壊処理
+                _hp = 0;
+                DestroyMe();
+            }
+        }
+    }
+    private float _hp = 0;
 
     /// <summary>
     /// 現在のストック数
@@ -90,18 +118,27 @@ public class CpuBattleDrone : BaseDrone, IBattleDrone
     /// </summary>
     public event System.EventHandler DroneDestroyEvent;
 
+    [SerializeField, Tooltip("ドローンの最大HP")]
+    private float _maxHP = 100f;
+
     protected void Awake()
     {
         //コンポーネントの取得
+        GameObject = gameObject;
         cacheTransform = transform;
         _rigidbody = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
-        baseAction = GetComponent<DroneMove>();
-        damageAction = GetComponent<DroneDamageAction>();
+        baseAction = GetComponent<DroneMoveComponent>();
+        damageAction = GetComponent<DroneDamageComponent>();
         soundAction = GetComponent<DroneSoundAction>();
         lockOnAction = GetComponent<Offline.CPU.DroneLockOnAction>();
-        barrierAction = GetComponent<DroneBarrierAction>();
         listener = GetComponent<AudioListener>();
+
+        // HP初期化
+        HP = _maxHP;
+
+        // ダメージイベント設定
+        damageAction.DamageEvent += DamageHandler;
     }
 
     protected override void Start()
@@ -121,11 +158,6 @@ public class CpuBattleDrone : BaseDrone, IBattleDrone
 
         //死亡処理中は操作不可
         if (isDestroyFall || isDestroy) return;
-
-        if (damageAction.HP <= 0)
-        {
-            DestroyMe();
-        }
 
         //移動
         moveSideTimeCount += Time.deltaTime;
@@ -309,15 +341,23 @@ public class CpuBattleDrone : BaseDrone, IBattleDrone
         }
     }
 
-
-    //攻撃を受けたときに攻撃してきた敵に回転させる
-    public void StartRotate(Transform target)
+    /// <summary>
+    /// ダメージハンドラー
+    /// </summary>
+    /// <param name="sender">イベントオブジェクト</param>
+    /// <param name="source">ダメージを与えたオブジェクト</param>
+    /// <param name="damage">ダメージ量</param>
+    public void DamageHandler(DroneDamageComponent sender, GameObject source, float damage)
     {
         if (lockOnAction.Target == null)
         {
             isDamage = true;
-            this.target = target;
+            target = source.transform;
         }
+    }
+    //攻撃を受けたときに攻撃してきた敵に回転させる
+    public void StartRotate(Transform target)
+    {
     }
 
     //カメラの深度操作
@@ -354,7 +394,6 @@ public class CpuBattleDrone : BaseDrone, IBattleDrone
     {
         //ドローンの非表示
         droneObject.gameObject.SetActive(false);
-        barrierAction.BarrierObject.SetActive(false);
         mainWeapon.gameObject.SetActive(false);
         subWeapon.gameObject.SetActive(false);
 

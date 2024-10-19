@@ -78,7 +78,7 @@ namespace Online
             if (syncDamageCount > MAX_COUNT_ONE_FRAME) return;
 
             //小数点第2以下切り捨て
-            float p = Useful.DecimalPointTruncation(power, 1);
+            float p = Useful.Floor(power, 1);
 
             if (barrierAction.HP > 0)
             {

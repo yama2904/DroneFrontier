@@ -275,6 +275,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d82b5d0b9af5c664ea870bb1ccd11410, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _maxHP: 100
   lockOnTrackingSpeed: 0.2
   boostGaugeImage: {fileID: 2857361770131387079}
   boostAccele: 2.1
@@ -314,7 +315,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32f5b74b902376c4f9a573e3e9d5a3b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nonDamageTime: 4
+  _nonDamageableTime: 4
+  _oneFrameMaxCount: 8
 --- !u!114 &-1792523218723476118
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -371,12 +373,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 750f686589563ae4aa983852f92bf93d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  barrierObject: {fileID: 1019914192911024339}
-  regeneStartTime: 8
-  regeneInterval: 1
-  regeneValue: 5
-  resurrectBarrierTime: 15
-  resurrectBarrierHP: 10
+  _barrierObject: {fileID: 1019914192911024339}
+  _barrierMaxHP: 100
+  _regeneStartTime: 8
+  _regeneInterval: 1
+  _regeneValue: 5
+  _resurrectBarrierTime: 15
+  _resurrectBarrierHP: 10
 --- !u!114 &1161670642716100562
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2467,6 +2470,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3741294095708302921, guid: debfdb94bb6e6904488a042039c09b30,
+        type: 3}
+      propertyPath: m_CastShadows
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

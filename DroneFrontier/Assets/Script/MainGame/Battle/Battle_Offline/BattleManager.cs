@@ -241,7 +241,7 @@ namespace Offline
                 // 制限時間によるゲーム終了
                 FinishGame();
             }
-            catch (OperationCanceledException e)
+            catch (OperationCanceledException)
             {
                 // ゲーム終了によるカウントダウンキャンセル
 

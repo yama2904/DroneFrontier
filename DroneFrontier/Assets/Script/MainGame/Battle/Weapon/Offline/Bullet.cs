@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Offline
 {
     public class Bullet : MonoBehaviour
-    {    
+    {
         public float Power { get; protected set; } = 0;  //威力
 
         protected IBattleDrone shooter = null;
@@ -86,7 +86,7 @@ namespace Offline
                 if (other.GetComponent<IBattleDrone>() == shooter) return;
 
                 //ダメージ処理
-                other.GetComponent<DroneDamageAction>().Damage(Power);
+                other.GetComponent<DroneDamageComponent>().Damage(shooter.GameObject, Power);
 
                 // ToDo:CPU側で処理させる
                 //if (other.CompareTag(TagNameManager.CPU))

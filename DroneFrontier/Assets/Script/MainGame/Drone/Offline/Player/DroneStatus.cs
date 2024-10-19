@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,8 +7,13 @@ namespace Offline
 {
     namespace Player
     {
-        public class DroneStatusAction : MonoBehaviour
+        public class DroneStatus : MonoBehaviour
         {
+            /// <summary>
+            /// 変化中のステータスリスト
+            /// </summary>
+            public List<IDroneStatus> Statuses { get; private set; } = new List<IDroneStatus>();
+
             //弱体や強化などの状態
             public enum Status
             {
@@ -31,7 +36,7 @@ namespace Offline
             DroneSoundAction soundAction = null;
 
             //バリア用
-            DroneBarrierAction barrier = null;
+            DroneBarrierComponent barrier = null;
 
             //スタン用
             [SerializeField] StunScreenMask stunScreenMask = null;
@@ -43,16 +48,16 @@ namespace Offline
             int jammingSoundId = -1;
 
             //スピードダウン用
-            DroneMove baseAction = null;
+            DroneMoveComponent baseAction = null;
             int speedDownSoundId = 0;
             int speedDownCount = 0;
 
 
             void Start()
             {
-                baseAction = GetComponent<DroneMove>();
+                baseAction = GetComponent<DroneMoveComponent>();
                 soundAction = GetComponent<DroneSoundAction>();
-                barrier = GetComponent<DroneBarrierAction>();
+                barrier = GetComponent<DroneBarrierComponent>();
                 lockOn = GetComponent<DroneLockOnAction>();
                 radar = GetComponent<DroneRadarAction>();
                 createdStunScreenMask = Instantiate(stunScreenMask);
@@ -63,8 +68,8 @@ namespace Offline
                 //フラグの更新
                 if (barrier != null)
                 {
-                    isStatus[(int)Status.BARRIER_STRENGTH] = barrier.IsStrength;
-                    isStatus[(int)Status.BARRIER_WEAK] = barrier.IsWeak;
+                    //isStatus[(int)Status.BARRIER_STRENGTH] = barrier.IsStrengthenAAA;
+                    //isStatus[(int)Status.BARRIER_WEAK] = barrier.IsWeak;
                 }
                 if (createdStunScreenMask != null)
                 {
@@ -72,50 +77,30 @@ namespace Offline
                 }
             }
 
-            public bool GetIsStatus(Status status)
+            /// <summary>
+            /// ドローンにステータス変化を追加する
+            /// </summary>
+            /// <param name="status">追加するステータス変化</param>
+            /// <param name="status">パラメータ</param>
+            /// <returns>true:成功, false:失敗</returns>
+            public bool AddStatus(IDroneStatus status, params object[] parameters)
             {
-                return isStatus[(int)status];
-            }
+                // ステータス変化実行
+                bool success = status.Invoke(gameObject, parameters);
+                if (!success) return false;
 
+                // ステータス終了イベントを設定してリストに追加
+                status.StatusEndEvent += StatusEndEvent;
+                Statuses.Add(status);
 
-            //バリア強化
-            public bool SetBarrierStrength(float strengthPercent, float time)
-            {
-                if (barrier == null) return false;
-                if (barrier.IsStrength) return false;
-                if (barrier.IsWeak) return false;
-                if (barrier.HP <= 0) return false;
-                
-                barrier.BarrierStrength(strengthPercent, time);
-                isStatus[(int)Status.BARRIER_STRENGTH] = true;
+                // ToDo:ステータス変化アイコンを表示
 
                 return true;
             }
 
-
-            //バリア弱体化
-            public void SetBarrierWeak()
+            public bool GetIsStatus(Status status)
             {
-                if (barrier == null) return;
-                if (barrier.IsWeak) return;
-
-                barrier.BarrierWeak();
-                isStatus[(int)Status.BARRIER_WEAK] = true;
-
-                //アイコン表示
-                barrierWeakIcon.enabled = true;
-            }
-
-            //バリア弱体化解除
-            public void UnSetBarrierWeak()
-            {
-                if (barrier == null) return;
-
-                barrier.StopBarrierWeak();
-                isStatus[(int)Status.BARRIER_WEAK] = false;
-
-                //アイコン非表示
-                barrierWeakIcon.enabled = false;
+                return isStatus[(int)status];
             }
 
 
@@ -187,6 +172,17 @@ namespace Offline
 
                 //SE停止
                 soundAction.StopLoopSE(speedDownSoundId);
+            }
+
+            /// <summary>
+            /// ステータス変化終了イベント
+            /// </summary>
+            /// <param name="sender">イベントオブジェクト</param>
+            /// <param name="e">イベント引数</param>
+            private void StatusEndEvent(object sender, EventArgs e)
+            {
+                // ステータスリストから除去
+                Statuses.Remove(sender as IDroneStatus);
             }
         }
     }

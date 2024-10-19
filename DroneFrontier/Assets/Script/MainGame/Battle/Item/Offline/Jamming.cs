@@ -14,7 +14,7 @@ namespace Offline
         [SerializeField] Transform jammingBotPosition = null;
         JammingBot createBot = null;
         bool isCreateBot = false;
-        List<DroneStatusAction> jamingPlayers = new List<DroneStatusAction>();
+        List<DroneStatus> jamingPlayers = new List<DroneStatus>();
 
         /// <summary>
         /// キャッシュ用Transform
@@ -145,7 +145,7 @@ namespace Offline
         void OnDestroy()
         {
             //ジャミングを解除する
-            foreach (DroneStatusAction p in jamingPlayers)
+            foreach (DroneStatus p in jamingPlayers)
             {
                 if (p == null) continue;
                 p.UnSetJamming();
@@ -157,7 +157,7 @@ namespace Offline
             if (!other.CompareTag(TagNameManager.PLAYER)) return;   //プレイヤーのみ対象
             if (other.GetComponent<IBattleDrone>() == creater) return; //ジャミングを付与しないプレイヤーならスキップ
             
-            DroneStatusAction player = other.GetComponent<DroneStatusAction>();  //名前省略
+            DroneStatus player = other.GetComponent<DroneStatus>();  //名前省略
             player.SetJamming(); //ジャミング付与
             jamingPlayers.Add(player);    //リストに追加
         }
@@ -168,7 +168,7 @@ namespace Offline
             if (other.GetComponent<IBattleDrone>() == creater) return; //ジャミングを付与しないプレイヤーならスキップ
 
             //名前省略
-            DroneStatusAction player = other.GetComponent<DroneStatusAction>(); 
+            DroneStatus player = other.GetComponent<DroneStatus>(); 
             
             //リストにない場合は処理しない
             int index = jamingPlayers.FindIndex(o => ReferenceEquals(o, player));

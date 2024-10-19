@@ -23,20 +23,20 @@ namespace Offline
             bool[] isStatus = new bool[(int)Status.NONE];   //状態異常が付与されているか
 
             //バリア用
-            DroneBarrierAction barrier = null;
+            DroneBarrierComponent barrier = null;
 
             //ジャミング用
             DroneLockOnAction lockOn = null;
 
             //スピードダウン用
-            DroneMove baseAction = null;
+            DroneMoveComponent baseAction = null;
             int speedDownCount = 0;
 
 
             void Start()
             {
-                baseAction = GetComponent<DroneMove>();
-                barrier = GetComponent<DroneBarrierAction>();
+                baseAction = GetComponent<DroneMoveComponent>();
+                barrier = GetComponent<DroneBarrierComponent>();
                 lockOn = GetComponent<DroneLockOnAction>();
             }
 
@@ -45,8 +45,8 @@ namespace Offline
                 //フラグの更新
                 if (barrier != null)
                 {
-                    isStatus[(int)Status.BARRIER_STRENGTH] = barrier.IsStrength;
-                    isStatus[(int)Status.BARRIER_WEAK] = barrier.IsWeak;
+                    //isStatus[(int)Status.BARRIER_STRENGTH] = barrier.IsStrengthenAAA;
+                    //isStatus[(int)Status.BARRIER_WEAK] = barrier.IsWeak;
                 }
             }
 
@@ -68,36 +68,15 @@ namespace Offline
             public bool SetBarrierStrength(float strengthPercent, float time)
             {
                 if (barrier == null) return false;
-                if (barrier.IsStrength) return false;
-                if (barrier.IsWeak) return false;
+                //if (barrier.IsStrengthenAAA) return false;
+                //if (barrier.IsWeak) return false;
                 if (barrier.HP <= 0) return false;
 
-                barrier.BarrierStrength(strengthPercent, time);
+                //barrier.BarrierStrength(strengthPercent, time);
                 isStatus[(int)Status.BARRIER_STRENGTH] = true;
 
                 return true;
             }
-
-
-            //バリア弱体化
-            public void SetBarrierWeak()
-            {
-                if (barrier == null) return;
-                if (barrier.IsWeak) return;
-
-                barrier.BarrierWeak();
-                isStatus[(int)Status.BARRIER_WEAK] = true;
-            }
-
-            //バリア弱体化解除
-            public void UnSetBarrierWeak()
-            {
-                if (barrier == null) return;
-
-                barrier.StopBarrierWeak();
-                isStatus[(int)Status.BARRIER_WEAK] = false;
-            }
-
 
             //スタン
             public void SetStun(float time)
