@@ -181,8 +181,8 @@ namespace Offline
                     //ヒットした場所にEndオブジェクトを移動させる
                     endObjectTransform.position = hit.point;
 
-                    if (hit.transform.CompareTag(TagNameManager.PLAYER) ||
-                        hit.transform.CompareTag(TagNameManager.CPU))
+                    if (hit.transform.CompareTag(TagNameConst.PLAYER) ||
+                        hit.transform.CompareTag(TagNameConst.CPU))
                     {
                         hit.transform.GetComponent<DroneDamageComponent>().Damage(shooter.GameObject, power);
 
@@ -195,7 +195,7 @@ namespace Offline
                         //発射間隔のカウントをリセット
                         shotTimeCount = 0;
                     }
-                    else if (hit.transform.CompareTag(TagNameManager.JAMMING_BOT))
+                    else if (hit.transform.CompareTag(TagNameConst.JAMMING_BOT))
                     {
                         hit.transform.GetComponent<JammingBot>().Damage(power);
 
@@ -220,20 +220,20 @@ namespace Offline
         List<RaycastHit> FilterTargetRaycast(List<RaycastHit> hits)
         {
             //不要な要素を除外する
-            return hits.Where(h => !h.transform.CompareTag(TagNameManager.ITEM))    //アイテム除外
-                       .Where(h => !h.transform.CompareTag(TagNameManager.BULLET))  //弾丸除外
-                       .Where(h => !h.transform.CompareTag(TagNameManager.GIMMICK)) //ギミック除外
-                       .Where(h => !h.transform.CompareTag(TagNameManager.JAMMING)) //ジャミングエリア除外
+            return hits.Where(h => !h.transform.CompareTag(TagNameConst.ITEM))    //アイテム除外
+                       .Where(h => !h.transform.CompareTag(TagNameConst.BULLET))  //弾丸除外
+                       .Where(h => !h.transform.CompareTag(TagNameConst.GIMMICK)) //ギミック除外
+                       .Where(h => !h.transform.CompareTag(TagNameConst.JAMMING)) //ジャミングエリア除外
                        .Where(h =>
                        {
                            //撃った本人は当たり判定から除外
-                           if (h.transform.CompareTag(TagNameManager.PLAYER) || h.transform.CompareTag(TagNameManager.CPU))
+                           if (h.transform.CompareTag(TagNameConst.PLAYER) || h.transform.CompareTag(TagNameConst.CPU))
                            {
                                return h.transform.GetComponent<IBattleDrone>() != shooter;
                            }
 
                            //ジャミングボットを生成したプレイヤーと撃ったプレイヤーが同じなら除外
-                           if (h.transform.CompareTag(TagNameManager.JAMMING_BOT))
+                           if (h.transform.CompareTag(TagNameConst.JAMMING_BOT))
                            {
                                return h.transform.GetComponent<IBattleDrone>() != shooter;
                            }

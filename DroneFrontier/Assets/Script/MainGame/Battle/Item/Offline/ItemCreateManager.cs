@@ -29,7 +29,7 @@ namespace Offline
 
         void Start()
         {
-            createItems = GameObject.FindGameObjectsWithTag(TagNameManager.ITEM_SPAWN)
+            createItems = GameObject.FindGameObjectsWithTag(TagNameConst.ITEM_SPAWN)
                          .Select(o => o.GetComponent<ItemCreate>()).ToArray();
 
             //処理の無駄なのでアイテムがなかったらスキップ

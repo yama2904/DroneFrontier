@@ -143,7 +143,7 @@ namespace Offline
                 // アイテムOffの場合スポナー削除
                 Destroy(_itemSpawnManager.gameObject);
 
-                GameObject[] items = GameObject.FindGameObjectsWithTag(TagNameManager.ITEM_SPAWN);
+                GameObject[] items = GameObject.FindGameObjectsWithTag(TagNameConst.ITEM_SPAWN);
                 foreach (GameObject item in items)
                 {
                     Destroy(item);

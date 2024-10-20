@@ -13,7 +13,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
     Animator _animator = null;
     DroneMoveComponent _baseAction = null;
     DroneDamageComponent damageAction = null;
-    DroneSoundAction soundAction = null;
+    DroneSoundComponent soundAction = null;
     DroneLockOnAction lockOnAction = null;
     DroneRadarAction radarAction = null;
     DroneItemAction itemAction = null;
@@ -149,7 +149,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
         _animator = GetComponent<Animator>();
         _baseAction = GetComponent<DroneMoveComponent>();
         damageAction = GetComponent<DroneDamageComponent>();
-        soundAction = GetComponent<DroneSoundAction>();
+        soundAction = GetComponent<DroneSoundComponent>();
         lockOnAction = GetComponent<DroneLockOnAction>();
         radarAction = GetComponent<DroneRadarAction>();
         itemAction = GetComponent<DroneItemAction>();
@@ -585,7 +585,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
         // Eキーでアイテム取得
         if (Input.GetKey(KeyCode.E))
         {
-            if (other.CompareTag(TagNameManager.ITEM))
+            if (other.CompareTag(TagNameConst.ITEM))
             {
                 SpawnItem item = other.GetComponent<SpawnItem>();
                 if (itemAction.SetItem(item))

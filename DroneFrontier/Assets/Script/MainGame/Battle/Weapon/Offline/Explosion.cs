@@ -95,12 +95,12 @@ namespace Offline
         private void OnTriggerEnter(Collider other)
         {
             //当たり判定を行わないオブジェクトだったら処理をしない
-            if (other.CompareTag(TagNameManager.BULLET)) return;
-            if (other.CompareTag(TagNameManager.ITEM)) return;
-            if (other.CompareTag(TagNameManager.JAMMING)) return;
-            if (other.CompareTag(TagNameManager.GIMMICK)) return;
+            if (other.CompareTag(TagNameConst.BULLET)) return;
+            if (other.CompareTag(TagNameConst.ITEM)) return;
+            if (other.CompareTag(TagNameConst.JAMMING)) return;
+            if (other.CompareTag(TagNameConst.GIMMICK)) return;
 
-            if (other.CompareTag(TagNameManager.PLAYER) || other.CompareTag(TagNameManager.CPU))
+            if (other.CompareTag(TagNameConst.PLAYER) || other.CompareTag(TagNameConst.CPU))
             {
                 //ミサイルを撃った本人なら処理しない
                 if (other.GetComponent<IBattleDrone>() == shooter) return;
@@ -122,7 +122,7 @@ namespace Offline
                 //デバッグ用
                 Debug.Log(other.name + "にExplosionで" + CalcPower(other.transform.position) + "ダメージ");
             }
-            else if (other.CompareTag(TagNameManager.JAMMING_BOT))
+            else if (other.CompareTag(TagNameConst.JAMMING_BOT))
             {
                 //名前省略
                 JammingBot jb = other.GetComponent<JammingBot>();

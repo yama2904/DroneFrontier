@@ -52,20 +52,20 @@ namespace Online
             if (!isShot) return;
 
             //当たり判定を行わないオブジェクトだったら処理をしない
-            if (other.CompareTag(TagNameManager.BULLET)) return;
-            if (other.CompareTag(TagNameManager.ITEM)) return;
-            if (other.CompareTag(TagNameManager.GIMMICK)) return;
-            if (other.CompareTag(TagNameManager.JAMMING)) return;
-            if (other.CompareTag(TagNameManager.TOWER)) return;
+            if (other.CompareTag(TagNameConst.BULLET)) return;
+            if (other.CompareTag(TagNameConst.ITEM)) return;
+            if (other.CompareTag(TagNameConst.GIMMICK)) return;
+            if (other.CompareTag(TagNameConst.JAMMING)) return;
+            if (other.CompareTag(TagNameConst.TOWER)) return;
 
-            if (other.CompareTag(TagNameManager.PLAYER))
+            if (other.CompareTag(TagNameConst.PLAYER))
             {
                 //キャッシュ用
                 DroneDamageAction player = other.GetComponent<DroneDamageAction>();
                 if (player.netId == shooter) return;  //撃った本人なら処理しない
                 player.CmdDamage(power);
             }
-            else if (other.CompareTag(TagNameManager.JAMMING_BOT))
+            else if (other.CompareTag(TagNameConst.JAMMING_BOT))
             {
                 //キャッシュ用
                 JammingBot jb = other.GetComponent<JammingBot>();

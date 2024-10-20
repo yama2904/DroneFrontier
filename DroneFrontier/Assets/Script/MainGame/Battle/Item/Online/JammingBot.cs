@@ -22,7 +22,7 @@ namespace Online
             t.localEulerAngles = angle;
 
             //生成した自分のジャミングボットをプレイヤーがロックオン・照射しないように設定
-            if (creater.CompareTag(TagNameManager.PLAYER))
+            if (creater.CompareTag(TagNameConst.PLAYER))
             {
                 creater.GetComponent<DroneLockOnAction>().SetNotLockOnObject(gameObject);
                 creater.GetComponent<DroneRadarAction>().SetNotRadarObject(gameObject);
@@ -34,7 +34,7 @@ namespace Online
             if (creater == null) return;
 
             //SetNotLockOnObject、SetNotRadarObjectを解除
-            if (creater.CompareTag(TagNameManager.PLAYER))
+            if (creater.CompareTag(TagNameConst.PLAYER))
             {
                 creater.GetComponent<DroneLockOnAction>().UnSetNotLockOnObject(gameObject);
                 creater.GetComponent<DroneRadarAction>().UnSetNotRadarObject(gameObject);

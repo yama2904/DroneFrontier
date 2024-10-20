@@ -29,7 +29,7 @@ namespace Offline
         {
             //投げたプレイヤーなら当たり判定から除外
             if (ReferenceEquals(other.gameObject, thrower)) return;
-            if (!other.CompareTag(TagNameManager.PLAYER)) return;   //プレイヤーのみ対象
+            if (!other.CompareTag(TagNameConst.PLAYER)) return;   //プレイヤーのみ対象
 
             other.GetComponent<DroneStatus>().SetStun(stunTime);
         }

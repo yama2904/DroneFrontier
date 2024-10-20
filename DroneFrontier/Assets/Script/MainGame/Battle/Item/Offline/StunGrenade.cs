@@ -72,10 +72,10 @@ namespace Offline
         {
             //特定のオブジェクトはすり抜け
             if (ReferenceEquals(other.gameObject, thrower)) return;
-            if (other.CompareTag(TagNameManager.ITEM)) return;
-            if (other.CompareTag(TagNameManager.GIMMICK)) return;
-            if (other.CompareTag(TagNameManager.JAMMING)) return;
-            if (other.CompareTag(TagNameManager.BULLET)) return;
+            if (other.CompareTag(TagNameConst.ITEM)) return;
+            if (other.CompareTag(TagNameConst.GIMMICK)) return;
+            if (other.CompareTag(TagNameConst.JAMMING)) return;
+            if (other.CompareTag(TagNameConst.BULLET)) return;
             CreateImpact();
         }
     }

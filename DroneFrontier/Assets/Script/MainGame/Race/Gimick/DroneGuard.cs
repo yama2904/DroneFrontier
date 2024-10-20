@@ -48,7 +48,7 @@ namespace Online
 
         private void OnCollisionEnter(Collision collision)
         {
-            if (collision.gameObject.CompareTag(TagNameManager.PLAYER))
+            if (collision.gameObject.CompareTag(TagNameConst.PLAYER))
             {
                 RaceDrone p = collision.gameObject.GetComponent<RaceDrone>();
                 if (!p.isLocalPlayer) return;

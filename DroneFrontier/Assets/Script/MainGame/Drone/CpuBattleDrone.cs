@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class CpuBattleDrone : BaseDrone, IBattleDrone
+public class CpuBattleDrone : MonoBehaviour, IBattleDrone
 {
     //コンポーネント用
     Transform cacheTransform = null;
@@ -11,7 +11,7 @@ public class CpuBattleDrone : BaseDrone, IBattleDrone
     Animator animator = null;
     DroneMoveComponent baseAction = null;
     DroneDamageComponent damageAction = null;
-    DroneSoundAction soundAction = null;
+    DroneSoundComponent soundAction = null;
     Offline.CPU.DroneLockOnAction lockOnAction = null;
 
     [SerializeField] Transform cameraTransform = null;  //キャッシュ用
@@ -130,7 +130,7 @@ public class CpuBattleDrone : BaseDrone, IBattleDrone
         animator = GetComponent<Animator>();
         baseAction = GetComponent<DroneMoveComponent>();
         damageAction = GetComponent<DroneDamageComponent>();
-        soundAction = GetComponent<DroneSoundAction>();
+        soundAction = GetComponent<DroneSoundComponent>();
         lockOnAction = GetComponent<Offline.CPU.DroneLockOnAction>();
         listener = GetComponent<AudioListener>();
 
@@ -141,10 +141,8 @@ public class CpuBattleDrone : BaseDrone, IBattleDrone
         damageAction.DamageEvent += DamageHandler;
     }
 
-    protected override void Start()
+    private void Start()
     {
-        base.Start();
-
         //武器初期化
         mainWeapon = BaseWeapon.CreateWeapon(this, BaseWeapon.Weapon.GATLING, false);
         mainWeapon.SetParent(transform);
@@ -152,10 +150,8 @@ public class CpuBattleDrone : BaseDrone, IBattleDrone
         subWeapon.SetParent(transform);
     }
 
-    void Update()
+    private void Update()
     {
-        //if (!MainGameManager.Singleton.StartFlag) return;  //ゲーム開始フラグが立っていなかったら処理しない
-
         //死亡処理中は操作不可
         if (isDestroyFall || isDestroy) return;
 
@@ -434,13 +430,13 @@ public class CpuBattleDrone : BaseDrone, IBattleDrone
                     20f,
                     cameraTransform.forward,
                     100f)
-                   .Where(h => !h.transform.CompareTag(TagNameManager.ITEM))    //アイテム除外
-                   .Where(h => !h.transform.CompareTag(TagNameManager.BULLET))  //弾丸除外
-                   .Where(h => !h.transform.CompareTag(TagNameManager.GIMMICK)) //ギミック除外
-                   .Where(h => !h.transform.CompareTag(TagNameManager.JAMMING)) //ジャミングエリア除外
-                   .Where(h => !h.transform.CompareTag(TagNameManager.JAMMING_BOT)) //ジャミングボット除外
-                   .Where(h => !h.transform.CompareTag(TagNameManager.PLAYER))  //プレイヤー除外
-                   .Where(h => !h.transform.CompareTag(TagNameManager.CPU))     //CPU除外
+                   .Where(h => !h.transform.CompareTag(TagNameConst.ITEM))    //アイテム除外
+                   .Where(h => !h.transform.CompareTag(TagNameConst.BULLET))  //弾丸除外
+                   .Where(h => !h.transform.CompareTag(TagNameConst.GIMMICK)) //ギミック除外
+                   .Where(h => !h.transform.CompareTag(TagNameConst.JAMMING)) //ジャミングエリア除外
+                   .Where(h => !h.transform.CompareTag(TagNameConst.JAMMING_BOT)) //ジャミングボット除外
+                   .Where(h => !h.transform.CompareTag(TagNameConst.PLAYER))  //プレイヤー除外
+                   .Where(h => !h.transform.CompareTag(TagNameConst.CPU))     //CPU除外
                    .ToList();  //リスト化
 
         if (hits.Count > 0)
@@ -495,9 +491,9 @@ public class CpuBattleDrone : BaseDrone, IBattleDrone
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag(TagNameManager.PLAYER)) return;
-        if (collision.gameObject.CompareTag(TagNameManager.CPU)) return;
-        if (collision.gameObject.CompareTag(TagNameManager.JAMMING_BOT)) return;
+        if (collision.gameObject.CompareTag(TagNameConst.PLAYER)) return;
+        if (collision.gameObject.CompareTag(TagNameConst.CPU)) return;
+        if (collision.gameObject.CompareTag(TagNameConst.JAMMING_BOT)) return;
 
         if (lockOnAction.Target == null)
         {
@@ -513,9 +509,9 @@ public class CpuBattleDrone : BaseDrone, IBattleDrone
 
     private void OnCollisionStay(Collision collision)
     {
-        if (collision.gameObject.CompareTag(TagNameManager.PLAYER)) return;
-        if (collision.gameObject.CompareTag(TagNameManager.CPU)) return;
-        if (collision.gameObject.CompareTag(TagNameManager.JAMMING_BOT)) return;
+        if (collision.gameObject.CompareTag(TagNameConst.PLAYER)) return;
+        if (collision.gameObject.CompareTag(TagNameConst.CPU)) return;
+        if (collision.gameObject.CompareTag(TagNameConst.JAMMING_BOT)) return;
         if (lockOnAction.Target == null) return;
 
         if (moveSideTimeCount >= moveSideTime)

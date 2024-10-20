@@ -79,7 +79,7 @@ namespace Offline
         private CancellationTokenSource _cancel = new CancellationTokenSource();
 
         //サウンド
-        DroneSoundAction soundAction = null;
+        DroneSoundComponent soundAction = null;
 
         /// <summary>
         /// バリアにダメージを与える
@@ -212,7 +212,7 @@ namespace Offline
         {
             // 各コンポーネント取得
             _drone = GetComponent<IBattleDrone>();
-            soundAction = GetComponent<DroneSoundAction>();
+            soundAction = GetComponent<DroneSoundComponent>();
             _material = _barrierObject.GetComponent<Renderer>().material;
 
             // HP初期化

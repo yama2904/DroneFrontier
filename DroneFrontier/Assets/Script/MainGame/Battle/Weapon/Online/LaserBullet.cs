@@ -199,11 +199,11 @@ namespace Online
                     GetNearestObject(out RaycastHit hit, hits);
                     GameObject o = hit.transform.gameObject;    //名前省略
 
-                    if (o.CompareTag(TagNameManager.PLAYER))
+                    if (o.CompareTag(TagNameConst.PLAYER))
                     {
                         o.GetComponent<DroneDamageAction>().CmdDamage(power);
                     }
-                    else if (o.CompareTag(TagNameManager.JAMMING_BOT))
+                    else if (o.CompareTag(TagNameConst.JAMMING_BOT))
                     {
                         o.GetComponent<JammingBot>().CmdDamage(power);
                     }
@@ -233,21 +233,21 @@ namespace Online
         List<RaycastHit> FilterTargetRaycast(List<RaycastHit> hits)
         {
             //不要な要素を除外する
-            return hits.Where(h => !h.transform.CompareTag(TagNameManager.ITEM))    //アイテム除外
-                       .Where(h => !h.transform.CompareTag(TagNameManager.BULLET))  //弾丸除外
-                       .Where(h => !h.transform.CompareTag(TagNameManager.GIMMICK)) //ギミック除外
-                       .Where(h => !h.transform.CompareTag(TagNameManager.JAMMING)) //ジャミング除外
-                       .Where(h => !h.transform.CompareTag(TagNameManager.TOWER))   //タワー除外
+            return hits.Where(h => !h.transform.CompareTag(TagNameConst.ITEM))    //アイテム除外
+                       .Where(h => !h.transform.CompareTag(TagNameConst.BULLET))  //弾丸除外
+                       .Where(h => !h.transform.CompareTag(TagNameConst.GIMMICK)) //ギミック除外
+                       .Where(h => !h.transform.CompareTag(TagNameConst.JAMMING)) //ジャミング除外
+                       .Where(h => !h.transform.CompareTag(TagNameConst.TOWER))   //タワー除外
                        .Where(h =>
                        {
                            //撃った本人は当たり判定から除外
-                           if (h.transform.CompareTag(TagNameManager.PLAYER))
+                           if (h.transform.CompareTag(TagNameConst.PLAYER))
                            {
                                return h.transform.GetComponent<BattleDrone>().netId != shooter.netId;
                            }
 
                            //ジャミングボットを生成したプレイヤーと撃ったプレイヤーが同じなら除外
-                           if (h.transform.CompareTag(TagNameManager.JAMMING_BOT))
+                           if (h.transform.CompareTag(TagNameConst.JAMMING_BOT))
                            {
                                return !ReferenceEquals(h.transform.GetComponent<JammingBot>().creater, shooter.gameObject);
                            }

@@ -4,53 +4,29 @@ using UnityEngine.UI;
 
 public class ResultSceneManager : MonoBehaviour
 {
-    [SerializeField] Text NameText1st = null;   //一位の名前を表示するテキスト
-    [SerializeField] Text NameText2st = null;   //二位の名前を表示するテキスト
-    [SerializeField] Text NameText3st = null;   //三位の名前を表示するテキスト
-    [SerializeField] Text NameText4st = null;   //四位の名前を表示するテキスト
+    [SerializeField, Tooltip("一位の名前を表示するテキスト")] 
+    private Text NameText1st = null;
 
-    static string[] ranking = null;
+    [SerializeField, Tooltip("二位の名前を表示するテキスト")]
+    private Text NameText2st = null;
 
-    void Start()
+    [SerializeField, Tooltip("三位の名前を表示するテキスト")]
+    private Text NameText3st = null;
+
+    [SerializeField, Tooltip("四位の名前を表示するテキスト")]
+    private Text NameText4st = null; 
+
+    private static string[] _ranking = null;
+
+    /// <summary>
+    /// 順位が高い人から昇順に名前を指定してランキングを設定
+    /// </summary>
+    /// <param name="names">ランキングに表示する名前</param>
+    public static void SetRank(params string[] names)
     {
-        // カーソル表示
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
-
-        // バグ防止
-        if (ranking == null) return;
-
-        for (int i = 0; i < ranking.Length; i++)
-        {
-            switch (i)
-            {
-                // 一位
-                case 0:
-                    NameText1st.text = ranking[i];
-                    break;
-
-                // 二位
-                case 1:
-                    NameText2st.text = ranking[i];
-                    break;
-
-                // 三位
-                case 2:
-                    NameText3st.text = ranking[i];
-                    break;
-
-                // 四位
-                case 3:
-                    NameText4st.text = ranking[i];
-                    break;
-            }
-        }
-
-        // 初期化
-        ranking = null;
+        _ranking = new string[names.Length];
+        _ranking = names;
     }
-
-    void Update() { }
 
     public void SelectEnd()
     {
@@ -61,13 +37,39 @@ public class ResultSceneManager : MonoBehaviour
         SceneManager.LoadScene("HomeScene");
     }
 
-    /// <summary>
-    /// 順位が高い人から昇順に名前を指定してランキングを設定
-    /// </summary>
-    /// <param name="names">ランキングに表示する名前</param>
-    public static void SetRank(params string[] names)
+    private void Start()
     {
-        ranking = new string[names.Length];
-        ranking = names;
+        // カーソル表示
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
+        for (int i = 0; i < _ranking.Length; i++)
+        {
+            switch (i)
+            {
+                // 一位
+                case 0:
+                    NameText1st.text = _ranking[i];
+                    break;
+
+                // 二位
+                case 1:
+                    NameText2st.text = _ranking[i];
+                    break;
+
+                // 三位
+                case 2:
+                    NameText3st.text = _ranking[i];
+                    break;
+
+                // 四位
+                case 3:
+                    NameText4st.text = _ranking[i];
+                    break;
+            }
+        }
+
+        // 初期化
+        _ranking = null;
     }
 }

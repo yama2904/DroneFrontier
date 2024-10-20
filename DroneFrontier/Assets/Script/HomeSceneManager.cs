@@ -25,16 +25,13 @@ public class HomeSceneManager : MonoBehaviour
     [SerializeField]
     private CPUSelectManager _cpuSelectManager;
 
-    static BaseScreenManager.Screen startScreen = BaseScreenManager.Screen.TITLE;
-    static bool isStarted = false;
-
     void Start()
     {
-        if (!isStarted)
-        {
-            Instantiate(_createNetworkManager);
-        }
-        isStarted = true;
+        //if (!isStarted)
+        //{
+        //    Instantiate(_createNetworkManager);
+        //}
+        //isStarted = true;
 
         // 設定画面の戻るボタン動作設定
         _configManager.ButtonClick += ClickConfigButton;
@@ -58,16 +55,12 @@ public class HomeSceneManager : MonoBehaviour
         }
     }
 
-    public static void LoadMainGameScene()
-    {
-        SoundManager.StopBGM();
-        SceneManager.LoadScene("BattleMode_Offline");
-    }
-
     public static void LoadHomeScene(BaseScreenManager.Screen startScreen)
     {
-        HomeSceneManager.startScreen = startScreen;
-        SceneManager.LoadScene("HomeScene");
+        // 後で消す
+
+        //HomeSceneManager.startScreen = startScreen;
+        //SceneManager.LoadScene("HomeScene");
     }
 
     #region ボタンイベント

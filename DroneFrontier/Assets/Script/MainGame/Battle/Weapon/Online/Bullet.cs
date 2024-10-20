@@ -78,20 +78,20 @@ namespace Online
         protected virtual void OnTriggerEnter(Collider other)
         {
             //当たり判定を行わないオブジェクトは処理しない
-            if (other.CompareTag(TagNameManager.BULLET)) return;
-            if (other.CompareTag(TagNameManager.ITEM)) return;
-            if (other.CompareTag(TagNameManager.GIMMICK)) return;
-            if (other.CompareTag(TagNameManager.JAMMING)) return;
-            if (other.CompareTag(TagNameManager.TOWER)) return;
+            if (other.CompareTag(TagNameConst.BULLET)) return;
+            if (other.CompareTag(TagNameConst.ITEM)) return;
+            if (other.CompareTag(TagNameConst.GIMMICK)) return;
+            if (other.CompareTag(TagNameConst.JAMMING)) return;
+            if (other.CompareTag(TagNameConst.TOWER)) return;
 
             //プレイヤーの当たり判定
-            if (other.CompareTag(TagNameManager.PLAYER))
+            if (other.CompareTag(TagNameConst.PLAYER))
             {
                 DroneDamageAction player = other.GetComponent<DroneDamageAction>();
                 if (player.netId == shooter) return;   //撃った本人なら処理しない
                 player.CmdDamage(power);
             }
-            else if (other.CompareTag(TagNameManager.JAMMING_BOT))
+            else if (other.CompareTag(TagNameConst.JAMMING_BOT))
             {
                 JammingBot jb = other.GetComponent<JammingBot>();
                 if (ReferenceEquals(jb.creater, shooter))

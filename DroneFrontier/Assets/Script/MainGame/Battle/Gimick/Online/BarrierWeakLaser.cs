@@ -113,7 +113,7 @@ public class BarrierWeakLaser : MonoBehaviour
             SearchNearestObject(out RaycastHit hit, hits);
             GameObject o = hit.transform.gameObject;    //名前省略
 
-            if (o.CompareTag(TagNameManager.PLAYER))
+            if (o.CompareTag(TagNameConst.PLAYER))
             {
                 DroneStatusAction player = o.GetComponent<DroneStatusAction>();
                 if (player.isLocalPlayer)
@@ -157,11 +157,11 @@ public class BarrierWeakLaser : MonoBehaviour
     List<RaycastHit> FilterTargetRaycast(List<RaycastHit> hits)
     {
         //不要な要素を除外する
-        return hits.Where(h => !h.transform.CompareTag(TagNameManager.ITEM))    //アイテム除外
-                   .Where(h => !h.transform.CompareTag(TagNameManager.BULLET))  //弾丸除外
-                   .Where(h => !h.transform.CompareTag(TagNameManager.GIMMICK)) //ギミックエリア除外
-                   .Where(h => !h.transform.CompareTag(TagNameManager.JAMMING)) //ジャミングエリア除外
-                   .Where(h => !h.transform.CompareTag(TagNameManager.TOWER))   //タワー除外
+        return hits.Where(h => !h.transform.CompareTag(TagNameConst.ITEM))    //アイテム除外
+                   .Where(h => !h.transform.CompareTag(TagNameConst.BULLET))  //弾丸除外
+                   .Where(h => !h.transform.CompareTag(TagNameConst.GIMMICK)) //ギミックエリア除外
+                   .Where(h => !h.transform.CompareTag(TagNameConst.JAMMING)) //ジャミングエリア除外
+                   .Where(h => !h.transform.CompareTag(TagNameConst.TOWER))   //タワー除外
                    .ToList();
     }
 

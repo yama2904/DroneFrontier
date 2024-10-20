@@ -74,13 +74,13 @@ namespace Offline
             if (!isShot) return;
 
             //当たり判定を行わないオブジェクトは処理しない
-            if (other.CompareTag(TagNameManager.BULLET)) return;
-            if (other.CompareTag(TagNameManager.ITEM)) return;
-            if (other.CompareTag(TagNameManager.GIMMICK)) return;
-            if (other.CompareTag(TagNameManager.JAMMING)) return;
+            if (other.CompareTag(TagNameConst.BULLET)) return;
+            if (other.CompareTag(TagNameConst.ITEM)) return;
+            if (other.CompareTag(TagNameConst.GIMMICK)) return;
+            if (other.CompareTag(TagNameConst.JAMMING)) return;
 
             //プレイヤーの当たり判定
-            if (other.CompareTag(TagNameManager.PLAYER) || other.CompareTag(TagNameManager.CPU))
+            if (other.CompareTag(TagNameConst.PLAYER) || other.CompareTag(TagNameConst.CPU))
             {
                 //撃った本人なら処理しない
                 if (other.GetComponent<IBattleDrone>() == shooter) return;
@@ -94,7 +94,7 @@ namespace Offline
                 //    other.GetComponent<CPU.BattleDrone>().StartRotate(shooter.transform);
                 //}
             }
-            else if (other.CompareTag(TagNameManager.JAMMING_BOT))
+            else if (other.CompareTag(TagNameConst.JAMMING_BOT))
             {
                 //キャッシュ用
                 JammingBot jb = other.GetComponent<JammingBot>();

@@ -61,7 +61,7 @@ public class DroneRadarAction : MonoBehaviour
             //各要素の座標をビューポートに変換(画面左下が0:0、右上が1:1)して条件に合うものだけリストに詰め込む
             Vector3 screenPoint = _camera.WorldToViewportPoint(h.transform.position);
             return screenPoint.x > 0 && screenPoint.x < 1 && screenPoint.y > 0 && screenPoint.y < 1 && screenPoint.z > 0;
-        }).Where(h => h.CompareTag(TagNameManager.PLAYER) || h.CompareTag(TagNameManager.CPU) || h.CompareTag(TagNameManager.ITEM) || h.CompareTag(TagNameManager.JAMMING_BOT))  //照射対象を選択       
+        }).Where(h => h.CompareTag(TagNameConst.PLAYER) || h.CompareTag(TagNameConst.CPU) || h.CompareTag(TagNameConst.ITEM) || h.CompareTag(TagNameConst.JAMMING_BOT))  //照射対象を選択       
           .Where(h =>   //notRadarObjects内のオブジェクトがある場合は除外
           {
               if (notRadarObjects.FindIndex(o => ReferenceEquals(o, h.gameObject)) == -1)
@@ -128,11 +128,11 @@ public class DroneRadarAction : MonoBehaviour
                 SearchData sd = new SearchData();
                 sd.target = hit.transform;
                 //プレイヤーかCPUなら赤い表示
-                if (hit.CompareTag(TagNameManager.PLAYER) || hit.CompareTag(TagNameManager.CPU) || hit.CompareTag(TagNameManager.JAMMING_BOT))
+                if (hit.CompareTag(TagNameConst.PLAYER) || hit.CompareTag(TagNameConst.CPU) || hit.CompareTag(TagNameConst.JAMMING_BOT))
                 {
                     sd.marker = Instantiate(enemyMarker).transform.GetChild(0).GetComponent<RectTransform>();
                 }
-                else if (hit.CompareTag(TagNameManager.ITEM))
+                else if (hit.CompareTag(TagNameConst.ITEM))
                 {
                     sd.marker = Instantiate(itemMarker).transform.GetChild(0).GetComponent<RectTransform>();
                 }

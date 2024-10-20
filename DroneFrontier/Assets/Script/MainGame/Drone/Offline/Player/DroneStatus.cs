@@ -33,7 +33,7 @@ namespace Offline
             [SerializeField] Image speedDownIcon = null;
 
             //サウンド
-            DroneSoundAction soundAction = null;
+            DroneSoundComponent soundAction = null;
 
             //バリア用
             DroneBarrierComponent barrier = null;
@@ -56,7 +56,7 @@ namespace Offline
             void Start()
             {
                 baseAction = GetComponent<DroneMoveComponent>();
-                soundAction = GetComponent<DroneSoundAction>();
+                soundAction = GetComponent<DroneSoundComponent>();
                 barrier = GetComponent<DroneBarrierComponent>();
                 lockOn = GetComponent<DroneLockOnAction>();
                 radar = GetComponent<DroneRadarAction>();

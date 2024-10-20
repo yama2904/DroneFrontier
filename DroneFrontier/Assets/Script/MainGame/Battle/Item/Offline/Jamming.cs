@@ -49,10 +49,10 @@ namespace Offline
                 _transform.position, jammingBot.transform.localScale.x, _transform.up, jammingBotPosition.localPosition.y)
                 // ToDo:未定
                 //.Where(h => !ReferenceEquals(creater.gameObject, h.transform.gameObject))
-                .Where(h => !h.transform.CompareTag(TagNameManager.JAMMING))
-                .Where(h => !h.transform.CompareTag(TagNameManager.ITEM))
-                .Where(h => !h.transform.CompareTag(TagNameManager.BULLET))
-                .Where(h => !h.transform.CompareTag(TagNameManager.GIMMICK))
+                .Where(h => !h.transform.CompareTag(TagNameConst.JAMMING))
+                .Where(h => !h.transform.CompareTag(TagNameConst.ITEM))
+                .Where(h => !h.transform.CompareTag(TagNameConst.BULLET))
+                .Where(h => !h.transform.CompareTag(TagNameConst.GIMMICK))
                 .ToArray();
 
             Vector3 pos = jammingBotPosition.position;
@@ -105,10 +105,10 @@ namespace Offline
                 t.position, jammingBot.transform.localScale.x, t.up, jammingBotPosition.localPosition.y)
                 // ToDo:未定
                 //.Where(h => !ReferenceEquals(creater.gameObject, h.transform.gameObject))
-                .Where(h => !h.transform.CompareTag(TagNameManager.JAMMING))
-                .Where(h => !h.transform.CompareTag(TagNameManager.ITEM))
-                .Where(h => !h.transform.CompareTag(TagNameManager.BULLET))
-                .Where(h => !h.transform.CompareTag(TagNameManager.GIMMICK))
+                .Where(h => !h.transform.CompareTag(TagNameConst.JAMMING))
+                .Where(h => !h.transform.CompareTag(TagNameConst.ITEM))
+                .Where(h => !h.transform.CompareTag(TagNameConst.BULLET))
+                .Where(h => !h.transform.CompareTag(TagNameConst.GIMMICK))
                 .ToArray();
 
             Vector3 pos = jammingBotPosition.position;
@@ -154,7 +154,7 @@ namespace Offline
 
         private void OnTriggerEnter(Collider other)
         {
-            if (!other.CompareTag(TagNameManager.PLAYER)) return;   //プレイヤーのみ対象
+            if (!other.CompareTag(TagNameConst.PLAYER)) return;   //プレイヤーのみ対象
             if (other.GetComponent<IBattleDrone>() == creater) return; //ジャミングを付与しないプレイヤーならスキップ
             
             DroneStatus player = other.GetComponent<DroneStatus>();  //名前省略
@@ -164,7 +164,7 @@ namespace Offline
 
         private void OnTriggerExit(Collider other)
         {
-            if (!other.CompareTag(TagNameManager.PLAYER)) return;   //プレイヤーのみ対象
+            if (!other.CompareTag(TagNameConst.PLAYER)) return;   //プレイヤーのみ対象
             if (other.GetComponent<IBattleDrone>() == creater) return; //ジャミングを付与しないプレイヤーならスキップ
 
             //名前省略

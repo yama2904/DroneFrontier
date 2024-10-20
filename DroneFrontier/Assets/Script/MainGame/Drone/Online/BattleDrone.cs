@@ -671,7 +671,7 @@ namespace Online
             //Eキーでアイテム取得
             if (Input.GetKey(KeyCode.E))
             {
-                if (other.CompareTag(TagNameManager.ITEM))
+                if (other.CompareTag(TagNameConst.ITEM))
                 {
                     Item item = other.GetComponent<Item>();
                     if (itemAction.SetItem(item.Type))

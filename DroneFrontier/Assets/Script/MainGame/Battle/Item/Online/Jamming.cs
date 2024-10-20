@@ -91,10 +91,10 @@ namespace Online
             var hits = Physics.SphereCastAll(
                 t.position, jammingBot.transform.localScale.x, t.up, jammingBotPosition.localPosition.y)
                 .Where(h => !ReferenceEquals(creater, h.transform.gameObject))
-                .Where(h => !h.transform.CompareTag(TagNameManager.JAMMING))
-                .Where(h => !h.transform.CompareTag(TagNameManager.ITEM))
-                .Where(h => !h.transform.CompareTag(TagNameManager.BULLET))
-                .Where(h => !h.transform.CompareTag(TagNameManager.GIMMICK))
+                .Where(h => !h.transform.CompareTag(TagNameConst.JAMMING))
+                .Where(h => !h.transform.CompareTag(TagNameConst.ITEM))
+                .Where(h => !h.transform.CompareTag(TagNameConst.BULLET))
+                .Where(h => !h.transform.CompareTag(TagNameConst.GIMMICK))
                 .ToArray();
 
             Vector3 pos = jammingBotPosition.position;
@@ -159,7 +159,7 @@ namespace Online
 
         private void OnTriggerEnter(Collider other)
         {
-            if (!other.CompareTag(TagNameManager.PLAYER)) return;   //プレイヤーのみ対象
+            if (!other.CompareTag(TagNameConst.PLAYER)) return;   //プレイヤーのみ対象
 
             DroneStatusAction p = other.GetComponent<DroneStatusAction>();
             if (!p.isLocalPlayer) return;   //ローカルプレイヤーのみ処理
@@ -183,7 +183,7 @@ namespace Online
 
         private void OnTriggerExit(Collider other)
         {
-            if (!other.CompareTag(TagNameManager.PLAYER)) return;   //プレイヤーのみ対象
+            if (!other.CompareTag(TagNameConst.PLAYER)) return;   //プレイヤーのみ対象
 
             DroneStatusAction p = other.GetComponent<DroneStatusAction>();
             if (!p.isLocalPlayer) return;   //ローカルプレイヤーのみ処理

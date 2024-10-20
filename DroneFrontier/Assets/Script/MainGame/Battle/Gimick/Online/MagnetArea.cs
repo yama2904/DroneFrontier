@@ -41,7 +41,7 @@ namespace Online
             if (!areaFlag) return;
 
             //プレイヤーのみ判定
-            if (!other.CompareTag(TagNameManager.PLAYER)) return;
+            if (!other.CompareTag(TagNameConst.PLAYER)) return;
 
             DroneStatusAction player = other.GetComponent<DroneStatusAction>();   //名前省略        
             if (!player.isLocalPlayer) return;  //ローカルプレイヤーのみ判定
@@ -65,7 +65,7 @@ namespace Online
             if (!areaFlag) return;
 
             //プレイヤーのみ判定
-            if (!other.CompareTag(TagNameManager.PLAYER)) return;
+            if (!other.CompareTag(TagNameConst.PLAYER)) return;
 
             DroneStatusAction player = other.GetComponent<DroneStatusAction>();   //名前省略        
             if (!player.isLocalPlayer) return;  //ローカルプレイヤーのみ判定

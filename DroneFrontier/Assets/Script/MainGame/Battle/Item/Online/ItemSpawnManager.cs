@@ -32,7 +32,7 @@ namespace Online
         [ServerCallback]
         void Start()
         {
-            spawnItems = GameObject.FindGameObjectsWithTag(TagNameManager.ITEM_SPAWN)
+            spawnItems = GameObject.FindGameObjectsWithTag(TagNameConst.ITEM_SPAWN)
                          .Select(o => o.GetComponent<ItemSpawn>()).ToArray();
 
             //処理の無駄なのでアイテムがなかったらスキップ
