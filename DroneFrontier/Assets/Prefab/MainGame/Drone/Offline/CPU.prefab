@@ -523,6 +523,7 @@ GameObject:
   - component: {fileID: 5756816350272667786}
   - component: {fileID: 5756816350272667789}
   - component: {fileID: 2268401430616989749}
+  - component: {fileID: 1387660337042471973}
   - component: {fileID: 2690737355441408120}
   - component: {fileID: 5756816350272667790}
   - component: {fileID: 8846344343629425355}
@@ -641,9 +642,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _moveSpeed: 800
-  _rotateObject: {fileID: 1656250088969202853}
   _rotateSpeed: 2
   _maxCameraRotateX: 40
+--- !u!114 &1387660337042471973
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5756816350272667788}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6441f4abe982c004cb315dd02e9ba03f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _rotateObject: {fileID: 1656250088969202853}
 --- !u!114 &2690737355441408120
 MonoBehaviour:
   m_ObjectHideFlags: 0

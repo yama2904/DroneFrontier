@@ -11,12 +11,13 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
     Transform _transform = null;
     Rigidbody _rigidbody = null;
     Animator _animator = null;
-    DroneMoveComponent _baseAction = null;
-    DroneSoundComponent soundAction = null;
-    DroneLockOnAction lockOnAction = null;
-    DroneRadarAction radarAction = null;
-    DroneItemComponent itemAction = null;
-    DroneStatusComponent statusAction = null;
+    DroneMoveComponent _moveComponent = null;
+    DroneRotateComponent _rotateComponent = null;
+    DroneSoundComponent _soundComponent = null;
+    DroneLockOnAction _lockOnComponent = null;
+    DroneRadarAction _radarComponent = null;
+    DroneItemComponent _itemComponent = null;
+    DroneStatusComponent _statusComponent = null;
 
     /// <summary>
     /// ドローンのゲームオブジェクト
@@ -146,12 +147,13 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
         _rigidbody = GetComponent<Rigidbody>();
         _transform = _rigidbody.transform;
         _animator = GetComponent<Animator>();
-        _baseAction = GetComponent<DroneMoveComponent>();
-        soundAction = GetComponent<DroneSoundComponent>();
-        lockOnAction = GetComponent<DroneLockOnAction>();
-        radarAction = GetComponent<DroneRadarAction>();
-        itemAction = GetComponent<DroneItemComponent>();
-        statusAction = GetComponent<DroneStatusComponent>();
+        _moveComponent = GetComponent<DroneMoveComponent>();
+        _rotateComponent = GetComponent<DroneRotateComponent>();
+        _soundComponent = GetComponent<DroneSoundComponent>();
+        _lockOnComponent = GetComponent<DroneLockOnAction>();
+        _radarComponent = GetComponent<DroneRadarAction>();
+        _itemComponent = GetComponent<DroneItemComponent>();
+        _statusComponent = GetComponent<DroneStatusComponent>();
 
         // HP初期化
         _hp = _maxHP;
@@ -163,7 +165,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
     private void Start()
     {
         // コンポーネントの初期化
-        lockOnAction.Init();
+        _lockOnComponent.Init();
 
 
         // 武器初期化
@@ -186,7 +188,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
 
 
         // プロペラは最初から流す
-        soundAction.PlayLoopSE(SoundManager.SE.PROPELLER, SoundManager.SEVolume);
+        _soundComponent.PlayLoopSE(SoundManager.SE.PROPELLER, SoundManager.SEVolume);
     }
 
     private void Update()
@@ -199,39 +201,39 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
         // 前進
         if (Input.GetKey(KeyCode.W))
         {
-            _baseAction.Move(DroneMoveComponent.Direction.Forward);
+            _moveComponent.Move(DroneMoveComponent.Direction.Forward);
         }
 
         // 左移動
         if (Input.GetKey(KeyCode.A))
         {
-            _baseAction.Move(DroneMoveComponent.Direction.Left);
+            _moveComponent.Move(DroneMoveComponent.Direction.Left);
         }
 
         // 後退
         if (Input.GetKey(KeyCode.S))
         {
-            _baseAction.Move(DroneMoveComponent.Direction.Backwad);
+            _moveComponent.Move(DroneMoveComponent.Direction.Backwad);
         }
 
         // 右移動
         if (Input.GetKey(KeyCode.D))
         {
-            _baseAction.Move(DroneMoveComponent.Direction.Right);
+            _moveComponent.Move(DroneMoveComponent.Direction.Right);
         }
 
         // 上下移動
         if (Input.mouseScrollDelta.y != 0)
         {
-            _baseAction.Move(_transform.up * Input.mouseScrollDelta.y);
+            _moveComponent.Move(_transform.up * Input.mouseScrollDelta.y);
         }
         if (Input.GetKey(KeyCode.R))
         {
-            _baseAction.Move(_transform.up);
+            _moveComponent.Move(_transform.up);
         }
         if (Input.GetKey(KeyCode.F))
         {
-            _baseAction.Move(_transform.up * -1);
+            _moveComponent.Move(_transform.up * -1);
         }
 
         #endregion
@@ -241,15 +243,15 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
         // ロックオン使用
         if (Input.GetKey(KeyCode.LeftShift))
         {
-            if (!statusAction.GetIsStatus(DroneStatusComponent.Status.JAMMING))
+            if (!_statusComponent.GetIsStatus(DroneStatusComponent.Status.JAMMING))
             {
-                lockOnAction.UseLockOn(lockOnTrackingSpeed);
+                _lockOnComponent.UseLockOn(lockOnTrackingSpeed);
             }
         }
         // ロックオン解除
         if (Input.GetKeyUp(KeyCode.LeftShift))
         {
-            lockOnAction.StopLockOn();
+            _lockOnComponent.StopLockOn();
         }
 
         #endregion
@@ -257,23 +259,23 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
         #region Radar
 
         // ジャミング中は処理しない
-        if (!statusAction.GetIsStatus(DroneStatusComponent.Status.JAMMING))
+        if (!_statusComponent.GetIsStatus(DroneStatusComponent.Status.JAMMING))
         {
             // レーダー音の再生
             if (Input.GetKeyDown(KeyCode.Q))
             {
-                soundAction.PlayOneShot(SoundManager.SE.RADAR, SoundManager.SEVolume);
+                _soundComponent.PlayOneShot(SoundManager.SE.RADAR, SoundManager.SEVolume);
             }
             // レーダー使用
             if (Input.GetKey(KeyCode.Q))
             {
-                radarAction.UseRadar();
+                _radarComponent.UseRadar();
             }
         }
         // レーダー終了
         if (Input.GetKeyUp(KeyCode.Q))
         {
-            radarAction.StopRadar();
+            _radarComponent.StopRadar();
         }
 
         #endregion
@@ -284,7 +286,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
         {
             float x = Input.GetAxis("Mouse X") * CameraManager.ReverseX * CameraManager.CameraSpeed;
             float y = Input.GetAxis("Mouse Y") * CameraManager.ReverseY * CameraManager.CameraSpeed;
-            _baseAction.RotateCamera(x, y);
+            _moveComponent.RotateCamera(x, y);
         }
 
 
@@ -298,7 +300,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
             if (!usingWeapons[(int)Weapon.SUB] && !usingWeapons[(int)Weapon.MAIN])
             {
                 // 攻撃中は速度低下
-                _baseAction.MoveSpeed *= atackingDownSpeed;
+                _moveComponent.MoveSpeed *= atackingDownSpeed;
                 usingWeapons[(int)Weapon.MAIN] = true;
             }
         }
@@ -314,7 +316,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
             // 攻撃を止めたら速度を戻す
             if (usingWeapons[(int)Weapon.MAIN])
             {
-                _baseAction.MoveSpeed *= 1 / atackingDownSpeed;
+                _moveComponent.MoveSpeed *= 1 / atackingDownSpeed;
                 usingWeapons[(int)Weapon.MAIN] = false;
             }
         }
@@ -329,12 +331,12 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
                 if (SubWeapon == BaseWeapon.Weapon.MISSILE)
                 {
                     // 攻撃中は速度低下
-                    _baseAction.MoveSpeed *= atackingDownSpeed;
+                    _moveComponent.MoveSpeed *= atackingDownSpeed;
                 }
                 // レーザーの場合は低下率増加
                 if (SubWeapon == BaseWeapon.Weapon.LASER)
                 {
-                    _baseAction.MoveSpeed *= atackingDownSpeed * 0.75f;
+                    _moveComponent.MoveSpeed *= atackingDownSpeed * 0.75f;
                 }
                 usingWeapons[(int)Weapon.SUB] = true;
             }
@@ -354,12 +356,12 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
                 if (SubWeapon == BaseWeapon.Weapon.MISSILE)
                 {
                     // 攻撃中は速度低下
-                    _baseAction.MoveSpeed *= 1 / atackingDownSpeed;
+                    _moveComponent.MoveSpeed *= 1 / atackingDownSpeed;
                 }
                 // レーザーの場合は低下率増加
                 if (SubWeapon == BaseWeapon.Weapon.LASER)
                 {
-                    _baseAction.MoveSpeed *= 1 / (atackingDownSpeed * 0.75f);
+                    _moveComponent.MoveSpeed *= 1 / (atackingDownSpeed * 0.75f);
                 }
                 usingWeapons[(int)Weapon.SUB] = false;
             }
@@ -375,11 +377,11 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
             // ブーストが使用可能なゲージ量ならブースト使用
             if (boostGaugeImage.fillAmount >= BOOST_POSSIBLE_MIN)
             {
-                _baseAction.MoveSpeed *= boostAccele;
+                _moveComponent.MoveSpeed *= boostAccele;
                 isBoost = true;
 
                 // 加速音の再生
-                boostSoundId = soundAction.PlayLoopSE(SoundManager.SE.BOOST, SoundManager.SEVolume * 0.15f);
+                boostSoundId = _soundComponent.PlayLoopSE(SoundManager.SE.BOOST, SoundManager.SEVolume * 0.15f);
 
                 // デバッグ用
                 Debug.Log("ブースト使用");
@@ -398,11 +400,11 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
                 {
                     boostGaugeImage.fillAmount = 0;
 
-                    _baseAction.MoveSpeed *= 1 / boostAccele;
+                    _moveComponent.MoveSpeed *= 1 / boostAccele;
                     isBoost = false;
 
                     // ブーストSE停止
-                    soundAction.StopLoopSE(boostSoundId);
+                    _soundComponent.StopLoopSE(boostSoundId);
 
 
                     // デバッグ用
@@ -412,11 +414,11 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
             // キーを離したらブースト停止
             if (Input.GetKeyUp(KeyCode.Space))
             {
-                _baseAction.MoveSpeed *= 1 / boostAccele;
+                _moveComponent.MoveSpeed *= 1 / boostAccele;
                 isBoost = false;
 
                 // ブーストSE停止
-                soundAction.StopLoopSE(boostSoundId);
+                _soundComponent.StopLoopSE(boostSoundId);
 
 
                 // デバッグ用
@@ -460,7 +462,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
             gravityAccele += 20 * Time.deltaTime;
 
             // ドローンを傾ける
-            _baseAction.Rotate(deathRotate, deathRotateSpeed * Time.deltaTime);
+            _rotateComponent.Rotate(deathRotate, deathRotateSpeed * Time.deltaTime);
 
             // メイン武器を傾ける
             mainWeapon.transform.localRotation = Quaternion.Slerp(mainWeapon.transform.localRotation, deathRotate, deathRotateSpeed * Time.deltaTime);
@@ -482,12 +484,15 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
         _isDestroyFalling = true;
         _isDestroy = true;
 
+        // 移動コンポーネント停止
+        _moveComponent.enabled = false;
+
         // 死んだのでロックオン・レーダー解除
-        lockOnAction.StopLockOn();
-        radarAction.StopRadar();
+        _lockOnComponent.StopLockOn();
+        _radarComponent.StopRadar();
 
         // 死亡SE再生
-        soundAction.PlayOneShot(SoundManager.SE.DEATH, SoundManager.SEVolume);
+        _soundComponent.PlayOneShot(SoundManager.SE.DEATH, SoundManager.SEVolume);
 
         // 一定時間経過してから爆破
         await UniTask.Delay(TimeSpan.FromSeconds(fallTime));
@@ -560,16 +565,16 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
             return;
         }
 
-        bw.Shot(lockOnAction.Target);
+        bw.Shot(_lockOnComponent.Target);
     }
 
     // アイテム使用
     void UseItem(ItemNum item)
     {
         // アイテム枠にアイテムを持っていたら使用
-        if (itemAction.UseItem((int)item))
+        if (_itemComponent.UseItem((int)item))
         {
-            soundAction.PlayOneShot(SoundManager.SE.USE_ITEM, SoundManager.SEVolume);
+            _soundComponent.PlayOneShot(SoundManager.SE.USE_ITEM, SoundManager.SEVolume);
         }
     }
 
@@ -585,7 +590,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
             if (other.CompareTag(TagNameConst.ITEM))
             {
                 SpawnItem item = other.GetComponent<SpawnItem>();
-                if (itemAction.SetItem(item))
+                if (_itemComponent.SetItem(item))
                 {
                     Destroy(other.gameObject);
                 }

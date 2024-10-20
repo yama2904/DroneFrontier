@@ -2,14 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class CpuBattleDrone : MonoBehaviour, IBattleDrone
 {
     //コンポーネント用
-    Transform cacheTransform = null;
+    Transform _transform = null;
     Rigidbody _rigidbody = null;
     Animator animator = null;
     DroneMoveComponent baseAction = null;
+    DroneRotateComponent _rotateComponent = null;
     DroneDamageComponent damageAction = null;
     DroneSoundComponent soundAction = null;
     Offline.CPU.DroneLockOnAction lockOnAction = null;
@@ -125,10 +127,11 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone
     {
         //コンポーネントの取得
         GameObject = gameObject;
-        cacheTransform = transform;
+        _transform = transform;
         _rigidbody = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
         baseAction = GetComponent<DroneMoveComponent>();
+        _rotateComponent = GetComponent<DroneRotateComponent>();
         damageAction = GetComponent<DroneDamageComponent>();
         soundAction = GetComponent<DroneSoundComponent>();
         lockOnAction = GetComponent<Offline.CPU.DroneLockOnAction>();
@@ -161,11 +164,11 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone
         {
             if (lockOnAction.Target == null)
             {
-                baseAction.Move(cacheTransform.forward * atackingSpeed);
+                baseAction.Move(_transform.forward * atackingSpeed);
             }
             else
             {
-                Vector3 diff = lockOnAction.Target.transform.position - cacheTransform.position;
+                Vector3 diff = lockOnAction.Target.transform.position - _transform.position;
                 float changeDirDistance = 300f;
                 if (!useMainWeapon)
                 {
@@ -191,7 +194,7 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone
                 //一定距離内にいないと直進
                 else
                 {
-                    baseAction.Move(cacheTransform.forward * atackingSpeed);
+                    baseAction.Move(_transform.forward * atackingSpeed);
                     if (moveSideTimeCount >= moveSideTime)
                     {
                         moveSideTimeCount = moveSideTime;
@@ -231,7 +234,7 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone
                     Quaternion rotation = Quaternion.LookRotation(diff);  //攻撃してきた敵の方向
 
                     //攻撃してきた敵の方向に向く
-                    cacheTransform.rotation = Quaternion.Slerp(cacheTransform.rotation, rotation, 0.1f);
+                    _transform.rotation = Quaternion.Slerp(_transform.rotation, rotation, 0.1f);
                 }
             }
             else
@@ -322,7 +325,7 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone
             gravityAccele += 20 * Time.deltaTime;
 
             //ドローンを傾ける
-            baseAction.Rotate(deathRotate, deathRotateSpeed * Time.deltaTime);
+            _rotateComponent.Rotate(deathRotate, deathRotateSpeed * Time.deltaTime);
 
             //メイン武器を傾ける
             mainWeapon.transform.localRotation = Quaternion.Slerp(mainWeapon.transform.localRotation, deathRotate, deathRotateSpeed * Time.deltaTime);
@@ -375,6 +378,9 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone
         isDestroyFall = true;
         isDestroy = true;
 
+        // 移動コンポーネント停止
+        baseAction.enabled = false;
+
         //死んだのでロックオン・レーダー解除
         lockOnAction.StopLockOn();
 
@@ -397,7 +403,7 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone
         GetComponent<Collider>().enabled = false;
 
         //爆破生成
-        Instantiate(explosion, cacheTransform);
+        Instantiate(explosion, _transform);
 
         //落下停止
         isDestroyFall = false;
@@ -457,13 +463,13 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone
         if (Random.Range(0, 2) == 0)
         {
             Quaternion leftAngle = Quaternion.Euler(0, -90, 0);
-            Vector3 left = leftAngle.normalized * cacheTransform.forward;
+            Vector3 left = leftAngle.normalized * _transform.forward;
             moveSideDir = left;
         }
         else
         {
             Quaternion rightAngle = Quaternion.Euler(0, 90, 0);
-            Vector3 right = rightAngle.normalized * cacheTransform.forward;
+            Vector3 right = rightAngle.normalized * _transform.forward;
             moveSideDir = right;
         }
 

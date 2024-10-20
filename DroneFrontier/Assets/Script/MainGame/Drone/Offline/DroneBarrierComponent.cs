@@ -78,8 +78,10 @@ namespace Offline
         /// </summary>
         private CancellationTokenSource _cancel = new CancellationTokenSource();
 
-        //サウンド
-        DroneSoundComponent soundAction = null;
+        /// <summary>
+        /// ドローンのSE再生用コンポーネント
+        /// </summary>
+        DroneSoundComponent _soundComponent = null;
 
         /// <summary>
         /// バリアにダメージを与える
@@ -103,13 +105,13 @@ namespace Offline
             // HPが残っている場合はダメージSE再生
             if (HP > 0)
             {
-                soundAction.PlayOneShot(SoundManager.SE.BARRIER_DAMAGE, SoundManager.SEVolume * 0.7f);
+                _soundComponent.PlayOneShot(SoundManager.SE.BARRIER_DAMAGE, SoundManager.SEVolume * 0.7f);
             }
             else
             {
                 // 破壊された場合はバリア破壊SE
                 HP = 0;
-                soundAction.PlayOneShot(SoundManager.SE.DESTROY_BARRIER, SoundManager.SEVolume);
+                _soundComponent.PlayOneShot(SoundManager.SE.DESTROY_BARRIER, SoundManager.SEVolume);
                 Debug.Log($"{_drone.Name}:バリア破壊");
             }
 
@@ -212,7 +214,7 @@ namespace Offline
         {
             // 各コンポーネント取得
             _drone = GetComponent<IBattleDrone>();
-            soundAction = GetComponent<DroneSoundComponent>();
+            _soundComponent = GetComponent<DroneSoundComponent>();
             _material = _barrierObject.GetComponent<Renderer>().material;
 
             // HP初期化

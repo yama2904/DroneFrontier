@@ -52,7 +52,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330151409864257607}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -174,6 +174,7 @@ GameObject:
   - component: {fileID: 985328476376835480}
   - component: {fileID: 6494057307830908661}
   - component: {fileID: 6715498070689482023}
+  - component: {fileID: 4120123392277730585}
   - component: {fileID: -4235326530564925763}
   - component: {fileID: -1792523218723476118}
   - component: {fileID: 6158696015299256227}
@@ -300,9 +301,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _moveSpeed: 800
-  _rotateObject: {fileID: 6103758830164412855}
   _rotateSpeed: 2
   _maxCameraRotateX: 40
+--- !u!114 &4120123392277730585
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 985328476376835486}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6441f4abe982c004cb315dd02e9ba03f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _rotateObject: {fileID: 6103758830164412855}
 --- !u!114 &-4235326530564925763
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -342,7 +355,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _camera: {fileID: 2032111343277000741}
-  lockOnImage: {fileID: 330151409864257605}
+  _reticleImage: {fileID: 330151409864257605}
+  _noLockOnColor: {r: 255, g: 255, b: 255, a: 128}
+  _lockingOnColor: {r: 255, g: 0, b: 0, a: 200}
   searchRadius: 450
   maxDistance: 450
 --- !u!114 &985328476376835487
@@ -392,9 +407,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f8aa241feb617cd4b8b4bb3c9a5aa909, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jamming: {fileID: 4629807058533697132, guid: f2b903147de9c594fbd08f01478554df, type: 3}
-  stunGrenade: {fileID: 4455615085730636014, guid: e9da81246f730184e816fc2d7f4bb1ba,
-    type: 3}
   _maxItemNum: 2
   _itemFrameImages:
   - {fileID: 5902566705743016184}

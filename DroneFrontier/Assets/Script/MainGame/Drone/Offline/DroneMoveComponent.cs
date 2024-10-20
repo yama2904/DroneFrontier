@@ -59,9 +59,6 @@ namespace Offline
         [SerializeField, Tooltip("移動速度")] 
         private float _moveSpeed = 800;
 
-        [SerializeField, Tooltip("移動時に回転させるオブジェクト")] 
-        private Transform _rotateObject = null;
-
         [SerializeField, Tooltip("移動時のドローン回転速度")] 
         private float _rotateSpeed = 2f;
 
@@ -73,63 +70,54 @@ namespace Offline
         /// </summary>
         private bool[] _movingDirs = new bool[(int)Direction.None];
 
-        /// <summary>
-        /// 回転中であるか
-        /// </summary>
-        private bool _rotating = false;
-
         // 各コンポーネント
         private Rigidbody _rigidbody = null;
         private Transform _transform = null;
+        private DroneRotateComponent _rotateComponent = null;
 
         private void Awake()
         {
             // コンポーネント取得
             _rigidbody = GetComponent<Rigidbody>();
             _transform = transform;
+            _rotateComponent = GetComponent<DroneRotateComponent>();
 
             // 初期速度保存
             InitSpeed = _moveSpeed;
         }
 
-        private void Start() { }
-
         private void Update()
         {
-            if (!_rotating)
+            // 移動している方向に傾ける
+            Quaternion rotate = Quaternion.identity;
+            for (int i = 0; i < _movingDirs.Length; i++)
             {
-                // 移動している方向に傾ける
-                Quaternion rotate = Quaternion.identity;
-                for (int i = 0; i < _movingDirs.Length; i++)
+                // 移動フラグが立っていない場合はスキップ
+                if (!_movingDirs[i]) continue;
+
+                // 移動方向へ傾ける
+                switch ((Direction)i)
                 {
-                    // 移動フラグが立っていない場合はスキップ
-                    if (!_movingDirs[i]) continue;
+                    case Direction.Forward:
+                        rotate *= Quaternion.Euler(25, 0, 0);
+                        break;
 
-                    // 移動方向へ傾ける
-                    switch ((Direction)i)
-                    {
-                        case Direction.Forward:
-                            rotate *= Quaternion.Euler(25, 0, 0);
-                            break;
+                    case Direction.Left:
+                        rotate *= Quaternion.Euler(0, 0, 30);
+                        break;
 
-                        case Direction.Left:
-                            rotate *= Quaternion.Euler(0, 0, 30);
-                            break;
+                    case Direction.Right:
+                        rotate *= Quaternion.Euler(0, 0, -30);
+                        break;
 
-                        case Direction.Right:
-                            rotate *= Quaternion.Euler(0, 0, -30);
-                            break;
-
-                        case Direction.Backwad:
-                            rotate *= Quaternion.Euler(-35, 0, 0);
-                            break;
-                    }
+                    case Direction.Backwad:
+                        rotate *= Quaternion.Euler(-35, 0, 0);
+                        break;
                 }
-                _rotateObject.localRotation = Quaternion.Slerp(_rotateObject.localRotation, rotate, _rotateSpeed * Time.deltaTime);
             }
+            _rotateComponent.Rotate(rotate, _rotateSpeed * Time.deltaTime);
 
             // フラグ初期化
-            _rotating = false;
             for (int i = 0; i < _movingDirs.Length; i++)
             {
                 _movingDirs[i] = false;
@@ -187,17 +175,6 @@ namespace Offline
         {
             Vector3 force = vec * _moveSpeed;
             _rigidbody.AddForce(force + (force - _rigidbody.velocity), ForceMode.Force);
-        }
-
-        /// <summary>
-        /// 指定した角度と回転量でドローンを回転
-        /// </summary>
-        /// <param name="rotate">回転先角度</param>
-        /// <param name="value">回転量（0～1）</param>
-        public void Rotate(Quaternion rotate, float value)
-        {
-            _rotateObject.localRotation = Quaternion.Slerp(_rotateObject.localRotation, rotate, value);
-            _rotating = true;
         }
 
         /// <summary>

@@ -1,16 +1,25 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Linq;
 
 public class DroneLockOnAction : MonoBehaviour
 {
-    //キャッシュ用
-    Transform playerTransform = null;
-
     //カメラ用変数
-    [SerializeField] Camera _camera = null;
+    [SerializeField, Tooltip("ドローンのカメラ")]
+    private Camera _camera = null;
+
+    [SerializeField, Tooltip("レティクル画像")]
+    private Image _reticleImage = null;
+
+    //ロックオン処理用変数
+    [SerializeField, Tooltip("非ロックオン中のレティクルの色")]
+    Color _noLockOnColor = new Color(255, 255, 255, 128);
+
+    [SerializeField, Tooltip("ロックオン中のレティクルの色")]
+    Color _lockingOnColor = new Color(255, 0, 0, 200);
+
+    Transform _transform = null;
     Transform cameraTransform = null;
 
     //ターゲット用変数
@@ -18,10 +27,6 @@ public class DroneLockOnAction : MonoBehaviour
     Transform targetTransform = null;
     bool isTarget = false;   //ロックオンしているか
 
-    //ロックオン処理用変数
-    Color notLockOnColor = new Color(255, 255, 255, 128);
-    Color lockOnColor = new Color(255, 0, 0, 200);
-    [SerializeField] Image lockOnImage = null;    //ロックオンした際に表示する画像
     List<GameObject> notLockOnObjects = new List<GameObject>();
     public float TrackingSpeed { get; set; } = 0;     //ロックオンした際に敵にカメラを向ける速度
     [SerializeField] float searchRadius = 450f; //ロックオンする範囲
@@ -30,14 +35,14 @@ public class DroneLockOnAction : MonoBehaviour
 
     void Awake()
     {
-        playerTransform = transform;
+        _transform = transform;
         cameraTransform = _camera.transform;
     }
 
     public void Init()
     {
-        lockOnImage.enabled = true;
-        lockOnImage.color = notLockOnColor;
+        // 非ロックオン状態でレティクル初期化
+        _reticleImage.color = _noLockOnColor;
 
         //自分をロックオンしない対象に入れる
         notLockOnObjects.Add(gameObject);
@@ -104,7 +109,7 @@ public class DroneLockOnAction : MonoBehaviour
                 }
 
                 //ロックオン画像の色変更
-                lockOnImage.color = lockOnColor;
+                _reticleImage.color = _lockingOnColor;
 
                 //ターゲット用変数更新
                 Target = t;
@@ -128,7 +133,7 @@ public class DroneLockOnAction : MonoBehaviour
                     Quaternion rotation = Quaternion.LookRotation(diff);   //ロックオンしたオブジェクトの方向
 
                     //カメラの角度からtrackingSpeed(0～1)の速度でロックオンしたオブジェクトの角度に向く
-                    playerTransform.rotation = Quaternion.Slerp(playerTransform.rotation, rotation, TrackingSpeed);
+                    _transform.rotation = Quaternion.Slerp(_transform.rotation, rotation, TrackingSpeed);
                 }
                 //ロックオンしている最中に対象が消滅したらロックオン解除
                 else
@@ -149,7 +154,7 @@ public class DroneLockOnAction : MonoBehaviour
         if (isTarget)
         {
             //ロックオン画像の色変更
-            lockOnImage.color = notLockOnColor;
+            _reticleImage.color = _noLockOnColor;
 
             //ターゲット用変数の更新
             Target = null;
