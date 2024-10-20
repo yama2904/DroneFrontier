@@ -7,7 +7,7 @@ namespace Offline
 {
     namespace Player
     {
-        public class DroneStatus : MonoBehaviour
+        public class DroneStatusComponent : MonoBehaviour
         {
             /// <summary>
             /// 変化中のステータスリスト

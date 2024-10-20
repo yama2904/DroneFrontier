@@ -16,7 +16,7 @@ namespace Offline
 
         public bool UseItem(GameObject drone)
         {
-            return drone.GetComponent<DroneStatus>().AddStatus(_barrierStrengthen.GetComponent<IDroneStatus>(), _damageDownPercent, _time);
+            return drone.GetComponent<DroneStatusComponent>().AddStatus(_barrierStrengthen.GetComponent<IDroneStatus>(), _damageDownPercent, _time);
         }
     }
 }

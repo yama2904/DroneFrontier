@@ -527,8 +527,8 @@ GameObject:
   - component: {fileID: 5756816350272667790}
   - component: {fileID: 8846344343629425355}
   - component: {fileID: 2702255915945675599}
-  - component: {fileID: 5158804489917226534}
   - component: {fileID: 3144627419471916392}
+  - component: {fileID: 1737714871206060867}
   - component: {fileID: 993888715167761601}
   - component: {fileID: 3448523090443018778}
   - component: {fileID: 6775327954476149997}
@@ -668,7 +668,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32f5b74b902376c4f9a573e3e9d5a3b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _damageInterval: 4
+  _nonDamageableTime: 4
+  _oneFrameMaxCount: 8
 --- !u!114 &8846344343629425355
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -703,21 +704,6 @@ MonoBehaviour:
   _regeneValue: 5
   _resurrectBarrierTime: 15
   _resurrectBarrierHP: 10
---- !u!114 &5158804489917226534
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5756816350272667788}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 41f0f6e71698f5a4386582a5b84eaf06, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  jamming: {fileID: 4629807058533697132, guid: f2b903147de9c594fbd08f01478554df, type: 3}
-  stunGrenade: {fileID: 4455615085730636014, guid: e9da81246f730184e816fc2d7f4bb1ba,
-    type: 3}
 --- !u!114 &3144627419471916392
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -730,6 +716,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 097bcd7eeec2d6c44be596f9d6817627, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1737714871206060867
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5756816350272667788}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f8aa241feb617cd4b8b4bb3c9a5aa909, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _maxItemNum: 2
+  _itemFrameImages: []
 --- !u!95 &993888715167761601
 Animator:
   serializedVersion: 5

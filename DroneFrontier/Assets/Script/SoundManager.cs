@@ -117,150 +117,6 @@ public class SoundManager : MonoBehaviour
     private static bool isFadeIn = false;   //フェードインするか
     private static bool isFadeOut = false;  //フェードアウトするか
 
-
-    void Awake()
-    {
-        DontDestroyOnLoad(gameObject);
-
-        #region SoundLoad
-
-        // 各BGMのファイル名設定
-        string[] BGMPath = new string[(int)BGM.NONE];
-        BGMPath[(int)BGM.DRONE_UP] = "Drone_up";
-        BGMPath[(int)BGM.LOOP] = "LoopBGM";
-        BGMPath[(int)BGM.THREE_MIN] = "ThreeMinBGM";
-
-        // 各SEのファイル名設定
-        string[] SEPath = new string[(int)SE.NONE];
-        SEPath[(int)SE.BARRIER_DAMAGE] = "BarrierDamage";
-        SEPath[(int)SE.BEAM] = "Beam";
-        SEPath[(int)SE.BEAM_1] = "Beam_1";
-        SEPath[(int)SE.BEAM_2] = "Beam_2";
-        SEPath[(int)SE.BEAM_CAHRGE] = "BeamCharge";
-        SEPath[(int)SE.BEAM_START] = "BeamStart";
-        SEPath[(int)SE.BOOST] = "Boost";
-        SEPath[(int)SE.CANCEL] = "Cancel";
-        SEPath[(int)SE.DEATH] = "Death";
-        SEPath[(int)SE.DESTROY_BARRIER] = "DestroyBarrier";
-        SEPath[(int)SE.EXPLOSION_MISSILE] = "ExplosionMissile";
-        SEPath[(int)SE.FALL_BUILDING] = "FallBuilding";
-        SEPath[(int)SE.FINISH] = "Finish";
-        SEPath[(int)SE.GATLING] = "Gatling";
-        SEPath[(int)SE.JAMMING_NOISE] = "JammingNoise";
-        SEPath[(int)SE.KAMAITACHI] = "Kamaitachi";
-        SEPath[(int)SE.MAGNETIC_AREA] = "MagneticArea";
-        SEPath[(int)SE.MISSILE] = "Missile";
-        SEPath[(int)SE.PROPELLER] = "Propeller";
-        SEPath[(int)SE.RADAR] = "Radar";
-        SEPath[(int)SE.RESPAWN] = "Respawn";
-        SEPath[(int)SE.SELECT] = "Select";
-        SEPath[(int)SE.SHOTGUN] = "Shotgun";
-        SEPath[(int)SE.START_COUNT_DOWN_D] = "StartCountDown(D)";
-        SEPath[(int)SE.START_COUNT_DOWN_M] = "StartCountDown(M)";
-        SEPath[(int)SE.USE_ITEM] = "UseItem";
-        SEPath[(int)SE.WALL_STUN] = "WallStun";
-
-        // ResourcesフォルダからBGMをロード
-        _bgmClips = new AudioClip[(int)BGM.NONE];
-        for (int i = 0; i < (int)BGM.NONE; i++)
-        {
-            _bgmClips[i] = Resources.Load<AudioClip>(Path.Combine(BGMFolder, BGMPath[i]));
-        }
-
-        // ResourcesフォルダからSEをロード
-        _seClips = new AudioClip[(int)SE.NONE];
-        for (int i = 0; i < (int)SE.NONE; i++)
-        {
-            _seClips[i] = Resources.Load<AudioClip>(Path.Combine(SEFolder + SEPath[i]));
-        }
-
-        #endregion
-
-        // 各AudioSourceDataの初期化
-
-        // 全てのAudioSourceコンポーネントを取得
-        AudioSource[] audios = GetComponents<AudioSource>();
-
-        // BGM用AudioSourceDataの初期化
-        audios[0].loop = true;
-        _bgmAudioData = new AudioSourceData
-        {
-            AudioSource = audios[0]
-        };
-        InitAudioSourceData(ref _bgmAudioData);
-
-        // SE用AudioSourceDataの初期化
-        _seAudioDatas = new AudioSourceData[audios.Length - 1];
-        for (int i = 0; i < audios.Length - 1; i++)
-        {
-            _seAudioDatas[i] = new AudioSourceData
-            {
-                AudioSource = audios[i + 1]
-            };
-            InitAudioSourceData(ref _seAudioDatas[i]);
-        }
-    }
-
-    void Update()
-    {
-        // 再生が終わったSEがあるか走査
-        for (int i = 0; i < _seAudioDatas.Length; i++)
-        {
-            AudioSourceData asd = _seAudioDatas[i];
-
-            // 一時停止しているSEがあったら走査をスキップ
-            if (asd.IsPause) continue;
-
-            // 再生が終わったAudioSourceを初期化
-            if (!asd.AudioSource.isPlaying)
-            {
-                if (!asd.IsFree)
-                {
-                    InitAudioSourceData(ref asd);
-                }
-            }
-        }
-
-        //フェードイン処理
-        if (isFadeIn)
-        {
-            AudioSource audio = _bgmAudioData.AudioSource;
-
-            //フェード処理
-            if (audio.isPlaying)
-            {
-                audio.volume += AddVolumeBGM(fadeVolume);
-
-                if (audio.volume >= BGMVolume)
-                {
-                    audio.volume = BGMVolume;
-                    isFadeIn = false;
-                    fadeVolume = 0;
-                }
-            }
-        }
-
-        //フェードアウト処理
-        if (isFadeOut)
-        {
-            AudioSource audio = _bgmAudioData.AudioSource;
-
-            //フェード処理
-            if (audio.isPlaying)
-            {
-                audio.volume -= AddVolumeBGM(fadeVolume);
-
-                if (audio.volume <= 0)
-                {
-                    audio.volume = 0;
-                    isFadeOut = false;
-                    fadeVolume = 0;
-                }
-            }
-        }
-        deltaTime = Time.deltaTime;
-    }
-
     /// <summary>
     /// 指定したBGMのAudioClipを取得
     /// </summary>
@@ -584,6 +440,148 @@ public class SoundManager : MonoBehaviour
 
     #endregion
 
+    private void Awake()
+    {
+        DontDestroyOnLoad(gameObject);
+
+        #region SoundLoad
+
+        // 各BGMのファイル名設定
+        string[] BGMPath = new string[(int)BGM.NONE];
+        BGMPath[(int)BGM.DRONE_UP] = "Drone_up";
+        BGMPath[(int)BGM.LOOP] = "LoopBGM";
+        BGMPath[(int)BGM.THREE_MIN] = "ThreeMinBGM";
+
+        // 各SEのファイル名設定
+        string[] SEPath = new string[(int)SE.NONE];
+        SEPath[(int)SE.BARRIER_DAMAGE] = "BarrierDamage";
+        SEPath[(int)SE.BEAM] = "Beam";
+        SEPath[(int)SE.BEAM_1] = "Beam_1";
+        SEPath[(int)SE.BEAM_2] = "Beam_2";
+        SEPath[(int)SE.BEAM_CAHRGE] = "BeamCharge";
+        SEPath[(int)SE.BEAM_START] = "BeamStart";
+        SEPath[(int)SE.BOOST] = "Boost";
+        SEPath[(int)SE.CANCEL] = "Cancel";
+        SEPath[(int)SE.DEATH] = "Death";
+        SEPath[(int)SE.DESTROY_BARRIER] = "DestroyBarrier";
+        SEPath[(int)SE.EXPLOSION_MISSILE] = "ExplosionMissile";
+        SEPath[(int)SE.FALL_BUILDING] = "FallBuilding";
+        SEPath[(int)SE.FINISH] = "Finish";
+        SEPath[(int)SE.GATLING] = "Gatling";
+        SEPath[(int)SE.JAMMING_NOISE] = "JammingNoise";
+        SEPath[(int)SE.KAMAITACHI] = "Kamaitachi";
+        SEPath[(int)SE.MAGNETIC_AREA] = "MagneticArea";
+        SEPath[(int)SE.MISSILE] = "Missile";
+        SEPath[(int)SE.PROPELLER] = "Propeller";
+        SEPath[(int)SE.RADAR] = "Radar";
+        SEPath[(int)SE.RESPAWN] = "Respawn";
+        SEPath[(int)SE.SELECT] = "Select";
+        SEPath[(int)SE.SHOTGUN] = "Shotgun";
+        SEPath[(int)SE.START_COUNT_DOWN_D] = "StartCountDown(D)";
+        SEPath[(int)SE.START_COUNT_DOWN_M] = "StartCountDown(M)";
+        SEPath[(int)SE.USE_ITEM] = "UseItem";
+        SEPath[(int)SE.WALL_STUN] = "WallStun";
+
+        // ResourcesフォルダからBGMをロード
+        _bgmClips = new AudioClip[(int)BGM.NONE];
+        for (int i = 0; i < (int)BGM.NONE; i++)
+        {
+            _bgmClips[i] = Resources.Load<AudioClip>(Path.Combine(BGMFolder, BGMPath[i]));
+        }
+
+        // ResourcesフォルダからSEをロード
+        _seClips = new AudioClip[(int)SE.NONE];
+        for (int i = 0; i < (int)SE.NONE; i++)
+        {
+            _seClips[i] = Resources.Load<AudioClip>(Path.Combine(SEFolder + SEPath[i]));
+        }
+
+        #endregion
+
+        // 各AudioSourceDataの初期化
+
+        // 全てのAudioSourceコンポーネントを取得
+        AudioSource[] audios = GetComponents<AudioSource>();
+
+        // BGM用AudioSourceDataの初期化
+        audios[0].loop = true;
+        _bgmAudioData = new AudioSourceData
+        {
+            AudioSource = audios[0]
+        };
+        InitAudioSourceData(ref _bgmAudioData);
+
+        // SE用AudioSourceDataの初期化
+        _seAudioDatas = new AudioSourceData[audios.Length - 1];
+        for (int i = 0; i < audios.Length - 1; i++)
+        {
+            _seAudioDatas[i] = new AudioSourceData
+            {
+                AudioSource = audios[i + 1]
+            };
+            InitAudioSourceData(ref _seAudioDatas[i]);
+        }
+    }
+
+    private void Update()
+    {
+        // 再生が終わったSEがあるか走査
+        for (int i = 0; i < _seAudioDatas.Length; i++)
+        {
+            AudioSourceData asd = _seAudioDatas[i];
+
+            // 一時停止しているSEがあったら走査をスキップ
+            if (asd.IsPause) continue;
+
+            // 再生が終わったAudioSourceを初期化
+            if (!asd.AudioSource.isPlaying)
+            {
+                if (!asd.IsFree)
+                {
+                    InitAudioSourceData(ref asd);
+                }
+            }
+        }
+
+        //フェードイン処理
+        if (isFadeIn)
+        {
+            AudioSource audio = _bgmAudioData.AudioSource;
+
+            //フェード処理
+            if (audio.isPlaying)
+            {
+                audio.volume += AddVolumeBGM(fadeVolume);
+
+                if (audio.volume >= BGMVolume)
+                {
+                    audio.volume = BGMVolume;
+                    isFadeIn = false;
+                    fadeVolume = 0;
+                }
+            }
+        }
+
+        //フェードアウト処理
+        if (isFadeOut)
+        {
+            AudioSource audio = _bgmAudioData.AudioSource;
+
+            //フェード処理
+            if (audio.isPlaying)
+            {
+                audio.volume -= AddVolumeBGM(fadeVolume);
+
+                if (audio.volume <= 0)
+                {
+                    audio.volume = 0;
+                    isFadeOut = false;
+                    fadeVolume = 0;
+                }
+            }
+        }
+        deltaTime = Time.deltaTime;
+    }
 
     //baseVolumeBGMとgameVolumeBGMを合わせた最終的なBGMの音量を取得
     private static float AddVolumeBGM(float volume)

@@ -12,12 +12,11 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
     Rigidbody _rigidbody = null;
     Animator _animator = null;
     DroneMoveComponent _baseAction = null;
-    DroneDamageComponent damageAction = null;
     DroneSoundComponent soundAction = null;
     DroneLockOnAction lockOnAction = null;
     DroneRadarAction radarAction = null;
-    DroneItemAction itemAction = null;
-    DroneStatus statusAction = null;
+    DroneItemComponent itemAction = null;
+    DroneStatusComponent statusAction = null;
 
     /// <summary>
     /// ドローンのゲームオブジェクト
@@ -148,12 +147,11 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
         _transform = _rigidbody.transform;
         _animator = GetComponent<Animator>();
         _baseAction = GetComponent<DroneMoveComponent>();
-        damageAction = GetComponent<DroneDamageComponent>();
         soundAction = GetComponent<DroneSoundComponent>();
         lockOnAction = GetComponent<DroneLockOnAction>();
         radarAction = GetComponent<DroneRadarAction>();
-        itemAction = GetComponent<DroneItemAction>();
-        statusAction = GetComponent<DroneStatus>();
+        itemAction = GetComponent<DroneItemComponent>();
+        statusAction = GetComponent<DroneStatusComponent>();
 
         // HP初期化
         _hp = _maxHP;
@@ -166,7 +164,6 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
     {
         // コンポーネントの初期化
         lockOnAction.Init();
-        itemAction.Init((int)ItemNum.NONE);
 
 
         // 武器初期化
@@ -244,7 +241,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
         // ロックオン使用
         if (Input.GetKey(KeyCode.LeftShift))
         {
-            if (!statusAction.GetIsStatus(DroneStatus.Status.JAMMING))
+            if (!statusAction.GetIsStatus(DroneStatusComponent.Status.JAMMING))
             {
                 lockOnAction.UseLockOn(lockOnTrackingSpeed);
             }
@@ -260,7 +257,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
         #region Radar
 
         // ジャミング中は処理しない
-        if (!statusAction.GetIsStatus(DroneStatus.Status.JAMMING))
+        if (!statusAction.GetIsStatus(DroneStatusComponent.Status.JAMMING))
         {
             // レーダー音の再生
             if (Input.GetKeyDown(KeyCode.Q))

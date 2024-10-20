@@ -31,7 +31,7 @@ namespace Offline
             if (ReferenceEquals(other.gameObject, thrower)) return;
             if (!other.CompareTag(TagNameConst.PLAYER)) return;   //プレイヤーのみ対象
 
-            other.GetComponent<DroneStatus>().SetStun(stunTime);
+            other.GetComponent<DroneStatusComponent>().SetStun(stunTime);
         }
     }
 }
