@@ -2,10 +2,11 @@
 using Offline;
 using Offline.Player;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class BattleDrone : MonoBehaviour, IBattleDrone
+public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn
 {
     // コンポーネント用
     Transform _transform = null;
@@ -14,7 +15,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
     DroneMoveComponent _moveComponent = null;
     DroneRotateComponent _rotateComponent = null;
     DroneSoundComponent _soundComponent = null;
-    DroneLockOnAction _lockOnComponent = null;
+    DroneLockOnComponent _lockOnComponent = null;
     DroneRadarAction _radarComponent = null;
     DroneItemComponent _itemComponent = null;
     DroneStatusComponent _statusComponent = null;
@@ -73,11 +74,18 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
     /// </summary>
     public BaseWeapon.Weapon SubWeapon { get; set; } = BaseWeapon.Weapon.SHOTGUN;
 
+    /// <summary>
+    /// ロックオン可能であるか
+    /// </summary>
+    public bool IsLockableOn { get; } = true;
+
+    /// <summary>
+    /// ロックオン不可にするオブジェクト
+    /// </summary>
+    public List<GameObject> NotLockableOnList { get; } = new List<GameObject>();
+
     [SerializeField, Tooltip("ドローンの最大HP")]
     private float _maxHP = 100f;
-
-    // ロックオン
-    [SerializeField, Tooltip("ロックオンした際に敵に向く速度")] float lockOnTrackingSpeed = 0.2f;
 
     // ブースト用
     const float BOOST_POSSIBLE_MIN = 0.2f;  // ブースト可能な最低ゲージ量
@@ -150,7 +158,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
         _moveComponent = GetComponent<DroneMoveComponent>();
         _rotateComponent = GetComponent<DroneRotateComponent>();
         _soundComponent = GetComponent<DroneSoundComponent>();
-        _lockOnComponent = GetComponent<DroneLockOnAction>();
+        _lockOnComponent = GetComponent<DroneLockOnComponent>();
         _radarComponent = GetComponent<DroneRadarAction>();
         _itemComponent = GetComponent<DroneItemComponent>();
         _statusComponent = GetComponent<DroneStatusComponent>();
@@ -164,10 +172,6 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
 
     private void Start()
     {
-        // コンポーネントの初期化
-        _lockOnComponent.Init();
-
-
         // 武器初期化
         mainWeapon = BaseWeapon.CreateWeapon(this, BaseWeapon.Weapon.GATLING, true);
         mainWeapon.SetParent(transform);
@@ -245,7 +249,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone
         {
             if (!_statusComponent.GetIsStatus(DroneStatusComponent.Status.JAMMING))
             {
-                _lockOnComponent.UseLockOn(lockOnTrackingSpeed);
+                _lockOnComponent.StartLockOn();
             }
         }
         // ロックオン解除

@@ -19,7 +19,7 @@ namespace Online
         DroneBaseAction baseAction = null;
         DroneDamageAction damageAction = null;
         DroneSoundAction soundAction = null;
-        DroneLockOnAction lockOnAction = null;
+        DroneLockOnComponent lockOnAction = null;
         DroneRadarAction radarAction = null;
         DroneBarrierAction barrierAction = null;
         DroneItemAction itemAction = null;
@@ -33,9 +33,6 @@ namespace Online
         Quaternion leftMoveRotate = Quaternion.Euler(0, 0, 60);
         Quaternion rightMoveRotate = Quaternion.Euler(0, 0, -60);
         Quaternion backMoveRotate = Quaternion.Euler(-70, 0, 0);
-
-        //ロックオン
-        [SerializeField, Tooltip("ロックオンした際に敵に向く速度")] float lockOnTrackingSpeed = 0.2f;
 
         //ブースト用
         const float BOOST_POSSIBLE_MIN = 0.2f;  //ブースト可能な最低ゲージ量
@@ -127,7 +124,7 @@ namespace Online
             baseAction = GetComponent<DroneBaseAction>();
             damageAction = GetComponent<DroneDamageAction>();
             soundAction = GetComponent<DroneSoundAction>();
-            lockOnAction = GetComponent<DroneLockOnAction>();
+            lockOnAction = GetComponent<DroneLockOnComponent>();
             radarAction = GetComponent<DroneRadarAction>();
             barrierAction = GetComponent<DroneBarrierAction>();
             itemAction = GetComponent<DroneItemAction>();
@@ -175,9 +172,7 @@ namespace Online
             }
 
             //コンポーネント初期化
-            lockOnAction.Init();
             itemAction.Init((int)ItemNum.NONE);
-
 
             //武器の初期化
             CmdCreateMainWeapon();
@@ -310,7 +305,7 @@ namespace Online
             {
                 if (!statusAction.GetIsStatus(DroneStatusAction.Status.JAMMING))
                 {
-                    lockOnAction.UseLockOn(lockOnTrackingSpeed);
+                    lockOnAction.StartLockOn();
                 }
             }
             //ロックオン解除

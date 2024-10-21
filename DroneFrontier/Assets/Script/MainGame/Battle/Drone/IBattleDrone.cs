@@ -2,6 +2,9 @@ using Offline;
 using System;
 using UnityEngine;
 
+/// <summary>
+/// バトルモードのドローンを実装するインターフェース
+/// </summary>
 public interface IBattleDrone
 {
     /// <summary>

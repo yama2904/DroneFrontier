@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 330151409864257610}
   - component: {fileID: 330151409864257605}
   m_Layer: 5
-  m_Name: LockOnImage
+  m_Name: ReticleImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -277,7 +277,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _maxHP: 100
-  lockOnTrackingSpeed: 0.2
   boostGaugeImage: {fileID: 2857361770131387079}
   boostAccele: 2.1
   maxBoostTime: 6
@@ -351,15 +350,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 985328476376835486}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e594f97b6e1a64a45acecd98f8ec3877, type: 3}
+  m_Script: {fileID: 11500000, guid: 6c080cedf6a2ab34dbaf1c1533adb528, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _camera: {fileID: 2032111343277000741}
   _reticleImage: {fileID: 330151409864257605}
-  _noLockOnColor: {r: 255, g: 255, b: 255, a: 128}
   _lockingOnColor: {r: 255, g: 0, b: 0, a: 200}
-  searchRadius: 450
-  maxDistance: 450
+  _noLockOnColor: {r: 255, g: 255, b: 255, a: 128}
+  _aimSpeed: 12
+  _lockOnRadius: 450
+  _lockOnDistance: 450
 --- !u!114 &985328476376835487
 MonoBehaviour:
   m_ObjectHideFlags: 0

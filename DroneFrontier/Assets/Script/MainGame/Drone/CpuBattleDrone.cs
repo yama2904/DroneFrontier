@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.UIElements;
 
-public class CpuBattleDrone : MonoBehaviour, IBattleDrone
+public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn
 {
     //コンポーネント用
     Transform _transform = null;
@@ -14,7 +13,7 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone
     DroneRotateComponent _rotateComponent = null;
     DroneDamageComponent damageAction = null;
     DroneSoundComponent soundAction = null;
-    Offline.CPU.DroneLockOnAction lockOnAction = null;
+    DroneLockOnComponent _lockOnComponent = null;
 
     [SerializeField] Transform cameraTransform = null;  //キャッシュ用
 
@@ -116,6 +115,16 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone
     public BaseWeapon.Weapon SubWeapon { get; set; } = BaseWeapon.Weapon.SHOTGUN;
 
     /// <summary>
+    /// ロックオン可能であるか
+    /// </summary>
+    public bool IsLockableOn { get; } = true;
+
+    /// <summary>
+    /// ロックオン不可にするオブジェクト
+    /// </summary>
+    public List<GameObject> NotLockableOnList { get; } = new List<GameObject>();
+
+    /// <summary>
     /// ドローン破壊イベント
     /// </summary>
     public event System.EventHandler DroneDestroyEvent;
@@ -134,7 +143,7 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone
         _rotateComponent = GetComponent<DroneRotateComponent>();
         damageAction = GetComponent<DroneDamageComponent>();
         soundAction = GetComponent<DroneSoundComponent>();
-        lockOnAction = GetComponent<Offline.CPU.DroneLockOnAction>();
+        _lockOnComponent = GetComponent<DroneLockOnComponent>();
         listener = GetComponent<AudioListener>();
 
         // HP初期化
@@ -151,6 +160,9 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone
         mainWeapon.SetParent(transform);
         subWeapon = BaseWeapon.CreateWeapon(this, SubWeapon, false);
         subWeapon.SetParent(transform);
+
+        // 常にロックオン処理
+        _lockOnComponent.StartLockOn();
     }
 
     private void Update()
@@ -162,13 +174,13 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone
         moveSideTimeCount += Time.deltaTime;
         if (!isDamage)
         {
-            if (lockOnAction.Target == null)
+            if (_lockOnComponent.Target == null)
             {
                 baseAction.Move(_transform.forward * atackingSpeed);
             }
             else
             {
-                Vector3 diff = lockOnAction.Target.transform.position - _transform.position;
+                Vector3 diff = _lockOnComponent.Target.transform.position - _transform.position;
                 float changeDirDistance = 300f;
                 if (!useMainWeapon)
                 {
@@ -209,7 +221,7 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone
             }
 
             //回転
-            if (isRotate && lockOnAction.Target == null)
+            if (isRotate && _lockOnComponent.Target == null)
             {
                 baseAction.RotateCamera(0.7f, 0.7f);
             }
@@ -226,7 +238,7 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone
         //攻撃されたら止まって回転
         else
         {
-            if (lockOnAction.Target == null)
+            if (_lockOnComponent.Target == null)
             {
                 if (target != null)
                 {
@@ -243,10 +255,10 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone
             }
         }
 
-        //常にロックオン処理
-        if (lockOnAction.UseLockOn(0.3f))
+        
+        // ロックオン対象がいれば攻撃
+        if (_lockOnComponent.Target != null)
         {
-            //ロックオン対象があれば攻撃
             weaponTimeCount += Time.deltaTime;
 
             //一定時間で攻撃する武器切り替え
@@ -279,7 +291,7 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone
 
             if (useMainWeapon)
             {
-                mainWeapon.Shot(lockOnAction.Target);
+                mainWeapon.Shot(_lockOnComponent.Target);
             }
             else
             {
@@ -287,7 +299,7 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone
                 shotgunStayTimeCount += Time.deltaTime;
                 if (shotgunStayTimeCount >= shotgunStayTime)
                 {
-                    subWeapon.Shot(lockOnAction.Target);
+                    subWeapon.Shot(_lockOnComponent.Target);
                 }
             }
 
@@ -348,7 +360,7 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone
     /// <param name="damage">ダメージ量</param>
     public void DamageHandler(DroneDamageComponent sender, GameObject source, float damage)
     {
-        if (lockOnAction.Target == null)
+        if (_lockOnComponent.Target == null)
         {
             isDamage = true;
             target = source.transform;
@@ -382,7 +394,7 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone
         baseAction.enabled = false;
 
         //死んだのでロックオン・レーダー解除
-        lockOnAction.StopLockOn();
+        _lockOnComponent.StopLockOn();
 
         //死亡SE再生
         soundAction.PlayOneShot(SoundManager.SE.DEATH, SoundManager.SEVolume);
@@ -501,7 +513,7 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone
         if (collision.gameObject.CompareTag(TagNameConst.CPU)) return;
         if (collision.gameObject.CompareTag(TagNameConst.JAMMING_BOT)) return;
 
-        if (lockOnAction.Target == null)
+        if (_lockOnComponent.Target == null)
         {
             StartRotate();
             rotateTimeCount = 0;
@@ -518,7 +530,7 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone
         if (collision.gameObject.CompareTag(TagNameConst.PLAYER)) return;
         if (collision.gameObject.CompareTag(TagNameConst.CPU)) return;
         if (collision.gameObject.CompareTag(TagNameConst.JAMMING_BOT)) return;
-        if (lockOnAction.Target == null) return;
+        if (_lockOnComponent.Target == null) return;
 
         if (moveSideTimeCount >= moveSideTime)
         {

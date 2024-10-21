@@ -5,8 +5,18 @@ using Mirror;
 
 namespace Online
 {
-    public class JammingBot : NetworkBehaviour
+    public class JammingBot : NetworkBehaviour, ILockableOn
     {
+        /// <summary>
+        /// ロックオン可能であるか
+        /// </summary>
+        public bool IsLockableOn { get; } = true;
+
+        /// <summary>
+        /// ロックオン不可にするオブジェクト
+        /// </summary>
+        public List<GameObject> NotLockableOnList { get; } = new List<GameObject>();
+
         [SyncVar] float HP = 30.0f;
         [SyncVar, HideInInspector] public GameObject creater = null;
 
@@ -21,24 +31,16 @@ namespace Online
             angle.y += creater.transform.localEulerAngles.y;
             t.localEulerAngles = angle;
 
-            //生成した自分のジャミングボットをプレイヤーがロックオン・照射しないように設定
+            // 生成した自分のジャミングボットをプレイヤーがロックオン・照射しないように設定
             if (creater.CompareTag(TagNameConst.PLAYER))
             {
-                creater.GetComponent<DroneLockOnAction>().SetNotLockOnObject(gameObject);
-                creater.GetComponent<DroneRadarAction>().SetNotRadarObject(gameObject);
+                NotLockableOnList.Add(creater);
             }
         }
 
         private void OnDestroy()
         {
             if (creater == null) return;
-
-            //SetNotLockOnObject、SetNotRadarObjectを解除
-            if (creater.CompareTag(TagNameConst.PLAYER))
-            {
-                creater.GetComponent<DroneLockOnAction>().UnSetNotLockOnObject(gameObject);
-                creater.GetComponent<DroneRadarAction>().UnSetNotRadarObject(gameObject);
-            }
 
             //デバッグ用
             Debug.Log("ジャミングボット破壊");

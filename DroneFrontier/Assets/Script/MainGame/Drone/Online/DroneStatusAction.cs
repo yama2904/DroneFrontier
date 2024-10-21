@@ -37,7 +37,7 @@ namespace Online
         StunScreenMask createdStunScreenMask = null;
 
         //ジャミング用
-        DroneLockOnAction lockOn = null;
+        DroneLockOnComponent lockOn = null;
         DroneRadarAction radar = null;
         int jammingSoundId = -1;
         int jammingCount = 0;
@@ -55,7 +55,7 @@ namespace Online
             baseAction = GetComponent<DroneBaseAction>();
             barrier = GetComponent<DroneBarrierAction>();
             soundAction = GetComponent<DroneSoundAction>();
-            lockOn = GetComponent<DroneLockOnAction>();
+            lockOn = GetComponent<DroneLockOnComponent>();
             radar = GetComponent<DroneRadarAction>();
             createdStunScreenMask = Instantiate(stunScreenMask);
         }

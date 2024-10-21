@@ -4,8 +4,18 @@ using UnityEngine;
 
 namespace Offline
 {
-    public class JammingBot : MonoBehaviour
+    public class JammingBot : MonoBehaviour, ILockableOn
     {
+        /// <summary>
+        /// ロックオン可能であるか
+        /// </summary>
+        public bool IsLockableOn { get; } = true;
+
+        /// <summary>
+        /// ロックオン不可にするオブジェクト
+        /// </summary>
+        public List<GameObject> NotLockableOnList { get; } = new List<GameObject>();
+
         float HP = 30.0f;
         [HideInInspector] public IBattleDrone creater = null;
 
@@ -20,23 +30,13 @@ namespace Offline
             //angle.y += creater.transform.localEulerAngles.y;
             //t.localEulerAngles = angle;
 
-            // ToDo:Player側に処理させる
-            //生成した自分のジャミングボットをプレイヤーがロックオン・照射しないように設定
-            //creater.GetComponent<DroneLockOnAction>().SetNotLockOnObject(gameObject);
-            //creater.GetComponent<DroneRadarAction>().SetNotRadarObject(gameObject);
+            // 生成した自分のジャミングボットをプレイヤーがロックオン・照射しないように設定
+            NotLockableOnList.Add(creater.GameObject);
         }
 
         private void OnDestroy()
         {
             if (creater == null) return;
-
-            // ToDo:Player側に処理させる
-            //SetNotLockOnObject、SetNotRadarObjectを解除
-            //if (creater.CompareTag(TagNameManager.PLAYER))
-            //{
-            //    creater.GetComponent<DroneLockOnAction>().UnSetNotLockOnObject(gameObject);
-            //    creater.GetComponent<DroneRadarAction>().UnSetNotRadarObject(gameObject);
-            //}
 
             //デバッグ用
             Debug.Log("ジャミングボット破壊");

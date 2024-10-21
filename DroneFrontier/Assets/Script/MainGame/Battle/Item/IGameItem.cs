@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// ゲーム中で使用可能なアイテムを実装するインターフェース
+/// </summary>
 public interface IGameItem
 {
     /// <summary>

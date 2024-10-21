@@ -22,9 +22,6 @@ namespace Offline
             //バリア用
             DroneBarrierComponent barrier = null;
 
-            //ジャミング用
-            DroneLockOnAction lockOn = null;
-
             //スピードダウン用
             DroneMoveComponent baseAction = null;
             int speedDownCount = 0;
@@ -34,7 +31,6 @@ namespace Offline
             {
                 baseAction = GetComponent<DroneMoveComponent>();
                 barrier = GetComponent<DroneBarrierComponent>();
-                lockOn = GetComponent<DroneLockOnAction>();
             }
 
             void Update()
@@ -84,9 +80,6 @@ namespace Offline
             //ジャミング
             public void SetJamming()
             {
-                if (lockOn == null) return;
-
-                lockOn.StopLockOn();
                 isStatus[(int)Status.JAMMING] = true;
             }
 

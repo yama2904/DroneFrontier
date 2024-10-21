@@ -86,7 +86,7 @@ namespace Offline
             InitSpeed = _moveSpeed;
         }
 
-        private void Update()
+        private void LateUpdate()
         {
             // 移動している方向に傾ける
             Quaternion rotate = Quaternion.identity;
