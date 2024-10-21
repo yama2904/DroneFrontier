@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
 /// ドローンステータス変更インターフェース
@@ -9,7 +10,7 @@ public interface IDroneStatus
     /// <summary>
     /// 状態変化のアイコン
     /// </summary>
-    RectTransform IconImage { get; }
+    Image IconImage { get; }
 
     /// <summary>
     /// ステータス変化実行

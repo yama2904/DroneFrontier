@@ -1,9 +1,10 @@
 using System;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class BarrierWeak : MonoBehaviour, IDroneStatus
 {
-    public RectTransform IconImage => throw new NotImplementedException();
+    public Image IconImage => throw new NotImplementedException();
 
     public event EventHandler StatusEndEvent;
 

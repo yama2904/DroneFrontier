@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SpawnItem : MonoBehaviour
 {
@@ -13,16 +14,16 @@ public class SpawnItem : MonoBehaviour
     /// </summary>
     public event SpawnItemDestroyHandler SpawnItemDestroyEvent; 
 
-    [SerializeField]
-    private RectTransform _iconImage = null;
+    [SerializeField, Tooltip("アイテム所持中に表示するアイコン")]
+    private Image _iconImage = null;
 
-    [SerializeField]
+    [SerializeField, Tooltip("スポーンさせるアイテム")]
     private GameObject _item = null;
 
     /// <summary>
     /// アイテムのアイコン
     /// </summary>
-    public RectTransform IconImage { get { return _iconImage; } }
+    public Image IconImage { get { return _iconImage; } }
 
     /// <summary>
     /// スポーンしたアイテム

@@ -8,7 +8,7 @@ public class DroneItemComponent : MonoBehaviour
     private int _maxItemNum = 2;
 
     [SerializeField, Tooltip("所持アイテムの枠画像")]
-    private RectTransform[] _itemFrameImages = null;
+    private Image[] _itemFrameImages = null;
 
     /// <summary>
     /// 所持アイテム情報
@@ -53,18 +53,20 @@ public class DroneItemComponent : MonoBehaviour
             // アイテム所持中の場合は次の枠
             if (data.Having) continue;
 
-            // アイテム枠がある場合は設定するアイテムのアイコンを表示
-            RectTransform rect = null;
-            if (data.ItemFrameTransform != null)
-            {
-                rect = Instantiate(item.IconImage);
-                rect.SetParent(data.ItemFrameTransform, false);
-            }
-
-            // リストの情報を更新
+            // アイテム情報更新
             data.Item = item.Item.GetComponent<IGameItem>();
-            data.Icon = rect?.GetComponent<Image>();
             data.Having = true;
+
+            // アイテム枠が表示されており、所持アイテムにアイコンが設定されている場合はアイコンを表示
+            if (data.ItemFrameTransform != null && item.IconImage != null)
+            {
+                // アイコン生成
+                Image icon = Instantiate(item.IconImage);
+                icon.transform.SetParent(data.ItemFrameTransform, false);
+
+                // アイテム情報に生成したアイコン設定
+                data.Icon = icon;
+            }
 
             return true;
         }
@@ -112,7 +114,7 @@ public class DroneItemComponent : MonoBehaviour
             ItemData itemData = new ItemData();
             if (_itemFrameImages.Length > i)
             {
-                itemData.ItemFrameTransform = _itemFrameImages[i];
+                itemData.ItemFrameTransform = _itemFrameImages[i].GetComponent<RectTransform>();
             }
             _itemDatas.Add(itemData);
         }

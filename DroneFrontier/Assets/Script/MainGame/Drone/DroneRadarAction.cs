@@ -6,12 +6,14 @@ using System.Linq;
 
 public class DroneRadarAction : MonoBehaviour
 {
-    [SerializeField] Camera _camera = null;
-    Transform cameraTransform = null;
+    [SerializeField, Tooltip("ドローンのカメラ")] 
+    private Camera _camera = null;
 
-    [SerializeField] Image radarMask = null;
-    GameObject enemyMarker = null;
-    GameObject itemMarker = null;
+    [SerializeField, Tooltip("レーダー中に使用するマスク")]
+    private Image _radarMask = null;
+ 
+    GameObject _enemyMarker = null;
+    GameObject _itemMarker = null;
 
     struct SearchData
     {
@@ -24,6 +26,8 @@ public class DroneRadarAction : MonoBehaviour
 
     //レーダーに照射しないオブジェクト
     List<GameObject> notRadarObjects = new List<GameObject>();
+    
+    private Transform _cameraTransform = null;
 
     const float ONE_SEARCH_TIME = 1f;
     const float TWO_SEARCH_TIME = 3;
@@ -33,12 +37,12 @@ public class DroneRadarAction : MonoBehaviour
 
     void Awake()
     {
-        cameraTransform = _camera.transform;
-        radarMask.enabled = false;
+        _cameraTransform = _camera.transform;
+        _radarMask.enabled = false;
         searchDatas.Clear();
 
-        enemyMarker = Resources.Load("EnemyMarker") as GameObject;
-        itemMarker = Resources.Load("ItemMarker") as GameObject;
+        _enemyMarker = Resources.Load("EnemyMarker") as GameObject;
+        _itemMarker = Resources.Load("ItemMarker") as GameObject;
 
         //自分を照射しない対象に入れる
         notRadarObjects.Add(gameObject);
@@ -76,7 +80,7 @@ public class DroneRadarAction : MonoBehaviour
 
     public void UseRadar()
     {
-        radarMask.enabled = true;
+        _radarMask.enabled = true;
 
         //レーダーを使用し続けた秒数に応じて照射距離が変動
         float searchLength = 0;
@@ -99,9 +103,9 @@ public class DroneRadarAction : MonoBehaviour
 
         //取得したRaycastHit配列から各RaycastHitクラスのgameObjectを抜き取ってリスト化する
         var hits = Physics.SphereCastAll(
-            cameraTransform.position,
+            _cameraTransform.position,
             searchRadius,
-            cameraTransform.forward,
+            _cameraTransform.forward,
             searchLength).Select(h => h.transform.gameObject).ToList();
 
         hits = FilterTargetObject(hits);
@@ -130,11 +134,11 @@ public class DroneRadarAction : MonoBehaviour
                 //プレイヤーかCPUなら赤い表示
                 if (hit.CompareTag(TagNameConst.PLAYER) || hit.CompareTag(TagNameConst.CPU) || hit.CompareTag(TagNameConst.JAMMING_BOT))
                 {
-                    sd.marker = Instantiate(enemyMarker).transform.GetChild(0).GetComponent<RectTransform>();
+                    sd.marker = Instantiate(_enemyMarker).transform.GetChild(0).GetComponent<RectTransform>();
                 }
                 else if (hit.CompareTag(TagNameConst.ITEM))
                 {
-                    sd.marker = Instantiate(itemMarker).transform.GetChild(0).GetComponent<RectTransform>();
+                    sd.marker = Instantiate(_itemMarker).transform.GetChild(0).GetComponent<RectTransform>();
                 }
 
                 //マーカーを移動させる
@@ -170,7 +174,7 @@ public class DroneRadarAction : MonoBehaviour
 
     public void StopRadar()
     {
-        radarMask.enabled = false;
+        _radarMask.enabled = false;
         deltaTime = 0;
 
         //マーカーを全て削除する

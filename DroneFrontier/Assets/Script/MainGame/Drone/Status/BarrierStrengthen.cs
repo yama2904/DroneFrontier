@@ -2,10 +2,11 @@ using Cysharp.Threading.Tasks;
 using Offline;
 using System;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class BarrierStrengthen : MonoBehaviour, IDroneStatus
 {
-    public RectTransform IconImage => null;
+    public Image IconImage => null;
 
     public event EventHandler StatusEndEvent;
 

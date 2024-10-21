@@ -47,7 +47,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bff4cff6972bd7842a641fcc26af27bc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _iconImage: {fileID: 7374933508992090987, guid: c010ea8af69f67742bfa72cd3e095e91,
+  _iconImage: {fileID: 968883235920325800, guid: c010ea8af69f67742bfa72cd3e095e91,
     type: 3}
   _item: {fileID: 824456889609577119, guid: f2b903147de9c594fbd08f01478554df, type: 3}
 --- !u!65 &6459834299304614198
