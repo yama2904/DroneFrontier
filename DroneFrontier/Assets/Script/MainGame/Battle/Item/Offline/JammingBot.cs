@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Offline
 {
-    public class JammingBot : MonoBehaviour, ILockableOn
+    public class JammingBot : MonoBehaviour, ILockableOn, IRadarable
     {
         /// <summary>
         /// ロックオン可能であるか
@@ -15,6 +15,12 @@ namespace Offline
         /// ロックオン不可にするオブジェクト
         /// </summary>
         public List<GameObject> NotLockableOnList { get; } = new List<GameObject>();
+
+        public IRadarable.ObjectType Type => IRadarable.ObjectType.Enemy;
+
+        public bool IsRadarable => true;
+
+        public List<GameObject> NotRadarableList { get; } = new List<GameObject>();
 
         float HP = 30.0f;
         [HideInInspector] public IBattleDrone creater = null;
@@ -32,6 +38,7 @@ namespace Offline
 
             // 生成した自分のジャミングボットをプレイヤーがロックオン・照射しないように設定
             NotLockableOnList.Add(creater.GameObject);
+            NotRadarableList.Add(creater.GameObject);
         }
 
         private void OnDestroy()

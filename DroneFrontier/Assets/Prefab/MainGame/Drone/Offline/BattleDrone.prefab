@@ -177,11 +177,11 @@ GameObject:
   - component: {fileID: 4120123392277730585}
   - component: {fileID: -4235326530564925763}
   - component: {fileID: -1792523218723476118}
-  - component: {fileID: 6158696015299256227}
-  - component: {fileID: 985328476376835487}
   - component: {fileID: 7478387226167914077}
   - component: {fileID: 1161670642716100562}
   - component: {fileID: 6264617131605083347}
+  - component: {fileID: 6158696015299256227}
+  - component: {fileID: 985328476376835487}
   - component: {fileID: 5729641378828607955}
   - component: {fileID: 7895755201372210952}
   - component: {fileID: 2039578813766978047}
@@ -341,41 +341,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ada3f5c3679c724d9117538a7d31635, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &6158696015299256227
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 985328476376835486}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6c080cedf6a2ab34dbaf1c1533adb528, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _camera: {fileID: 2032111343277000741}
-  _reticleImage: {fileID: 330151409864257605}
-  _lockingOnColor: {r: 255, g: 0, b: 0, a: 200}
-  _noLockOnColor: {r: 255, g: 255, b: 255, a: 128}
-  _aimSpeed: 12
-  _lockOnRadius: 450
-  _lockOnDistance: 450
---- !u!114 &985328476376835487
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 985328476376835486}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b6fdeda39cd4c144f91f5a7b7f5ad28b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _camera: {fileID: 2032111343277000741}
-  _radarMask: {fileID: 0}
-  searchRadius: 780
-  maxDistance: 780
 --- !u!114 &7478387226167914077
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -428,6 +393,49 @@ MonoBehaviour:
   speedDownIcon: {fileID: 6433872120169736683}
   stunScreenMask: {fileID: 3969662621950321302, guid: 8c2ea1de19e199245af77ca42744e83f,
     type: 3}
+--- !u!114 &6158696015299256227
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 985328476376835486}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c080cedf6a2ab34dbaf1c1533adb528, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _camera: {fileID: 2032111343277000741}
+  _reticleImage: {fileID: 330151409864257605}
+  _lockingOnColor: {r: 255, g: 0, b: 0, a: 200}
+  _noLockOnColor: {r: 255, g: 255, b: 255, a: 128}
+  _aimSpeed: 12
+  _lockOnRadius: 450
+  _lockOnDistance: 450
+--- !u!114 &985328476376835487
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 985328476376835486}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6fdeda39cd4c144f91f5a7b7f5ad28b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _camera: {fileID: 2032111343277000741}
+  _radarMask: {fileID: 8909501768890347307}
+  _canvas: {fileID: 2857361770926363681}
+  _enemyMarker: {fileID: 7461288145507769803, guid: 3a4fa4e669b525f42b4112e5d74b597c,
+    type: 3}
+  _itemMarker: {fileID: 4126443774036033563, guid: 21d09b0292d360f41b96e3bb170505ea,
+    type: 3}
+  _radarRadius: 300
+  _radarMinDistance: 100
+  _oneLevelTime: 1
+  _twoLevelTime: 3
+  _threeLevelTime: 7
 --- !u!95 &5729641378828607955
 Animator:
   serializedVersion: 5
@@ -2355,7 +2363,7 @@ RectTransform:
   m_GameObject: {fileID: 8909501768890347317}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.1, y: 1.1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2857361770926363681}

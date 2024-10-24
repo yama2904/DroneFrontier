@@ -95,7 +95,7 @@ public class DroneItemComponent : MonoBehaviour
         // アイコンを表示している場合は削除
         if (data.Icon != null)
         {
-            Destroy(data.Icon);
+            Destroy(data.Icon.gameObject);
         }
 
         // リストの情報を初期化

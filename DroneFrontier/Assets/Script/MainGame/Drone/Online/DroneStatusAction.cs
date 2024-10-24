@@ -38,7 +38,7 @@ namespace Online
 
         //ジャミング用
         DroneLockOnComponent lockOn = null;
-        DroneRadarAction radar = null;
+        DroneRadarComponent radar = null;
         int jammingSoundId = -1;
         int jammingCount = 0;
 
@@ -56,7 +56,7 @@ namespace Online
             barrier = GetComponent<DroneBarrierAction>();
             soundAction = GetComponent<DroneSoundAction>();
             lockOn = GetComponent<DroneLockOnComponent>();
-            radar = GetComponent<DroneRadarAction>();
+            radar = GetComponent<DroneRadarComponent>();
             createdStunScreenMask = Instantiate(stunScreenMask);
         }
 

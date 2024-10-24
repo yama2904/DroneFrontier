@@ -1,7 +1,8 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SpawnItem : MonoBehaviour
+public class SpawnItem : MonoBehaviour, IRadarable
 {
     /// <summary>
     /// スポーンアイテム消滅イベント
@@ -14,12 +15,6 @@ public class SpawnItem : MonoBehaviour
     /// </summary>
     public event SpawnItemDestroyHandler SpawnItemDestroyEvent; 
 
-    [SerializeField, Tooltip("アイテム所持中に表示するアイコン")]
-    private Image _iconImage = null;
-
-    [SerializeField, Tooltip("スポーンさせるアイテム")]
-    private GameObject _item = null;
-
     /// <summary>
     /// アイテムのアイコン
     /// </summary>
@@ -29,6 +24,18 @@ public class SpawnItem : MonoBehaviour
     /// スポーンしたアイテム
     /// </summary>
     public GameObject Item { get { return _item; } }
+
+    public IRadarable.ObjectType Type => IRadarable.ObjectType.Item;
+
+    public bool IsRadarable => true;
+
+    public List<GameObject> NotRadarableList => new List<GameObject>();
+
+    [SerializeField, Tooltip("アイテム所持中に表示するアイコン")]
+    private Image _iconImage = null;
+
+    [SerializeField, Tooltip("スポーンさせるアイテム")]
+    private GameObject _item = null;
 
     private void OnDestroy()
     {

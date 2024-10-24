@@ -12,7 +12,7 @@ public interface ILockableOn
     public bool IsLockableOn { get; }
 
     /// <summary>
-    /// 実装したオブジェクトをロックオン不可にするオブジェクト
+    /// ロックオン不可オブジェクト
     /// </summary>
     public List<GameObject> NotLockableOnList { get; }
 }

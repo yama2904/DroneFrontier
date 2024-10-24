@@ -20,7 +20,7 @@ namespace Online
         DroneDamageAction damageAction = null;
         DroneSoundAction soundAction = null;
         DroneLockOnComponent lockOnAction = null;
-        DroneRadarAction radarAction = null;
+        DroneRadarComponent radarAction = null;
         DroneBarrierAction barrierAction = null;
         DroneItemAction itemAction = null;
         DroneStatusAction statusAction = null;
@@ -125,7 +125,7 @@ namespace Online
             damageAction = GetComponent<DroneDamageAction>();
             soundAction = GetComponent<DroneSoundAction>();
             lockOnAction = GetComponent<DroneLockOnComponent>();
-            radarAction = GetComponent<DroneRadarAction>();
+            radarAction = GetComponent<DroneRadarComponent>();
             barrierAction = GetComponent<DroneBarrierAction>();
             itemAction = GetComponent<DroneItemAction>();
             statusAction = GetComponent<DroneStatusAction>();
@@ -331,7 +331,7 @@ namespace Online
                 {
                     if (!statusAction.GetIsStatus(DroneStatusAction.Status.JAMMING))
                     {
-                        radarAction.UseRadar();
+                        radarAction.StartRadar();
                     }
                 }
             }

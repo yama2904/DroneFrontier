@@ -44,7 +44,7 @@ namespace Offline
 
             //ジャミング用
             DroneLockOnComponent lockOn = null;
-            DroneRadarAction radar = null;
+            DroneRadarComponent radar = null;
             int jammingSoundId = -1;
 
             //スピードダウン用
@@ -59,7 +59,7 @@ namespace Offline
                 soundAction = GetComponent<DroneSoundComponent>();
                 barrier = GetComponent<DroneBarrierComponent>();
                 lockOn = GetComponent<DroneLockOnComponent>();
-                radar = GetComponent<DroneRadarAction>();
+                radar = GetComponent<DroneRadarComponent>();
                 createdStunScreenMask = Instantiate(stunScreenMask);
             }
 

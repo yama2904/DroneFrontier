@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn
+public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
 {
     // コンポーネント用
     Transform _transform = null;
@@ -16,7 +16,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn
     DroneRotateComponent _rotateComponent = null;
     DroneSoundComponent _soundComponent = null;
     DroneLockOnComponent _lockOnComponent = null;
-    DroneRadarAction _radarComponent = null;
+    DroneRadarComponent _radarComponent = null;
     DroneItemComponent _itemComponent = null;
     DroneStatusComponent _statusComponent = null;
 
@@ -83,6 +83,12 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn
     /// ロックオン不可にするオブジェクト
     /// </summary>
     public List<GameObject> NotLockableOnList { get; } = new List<GameObject>();
+
+    public IRadarable.ObjectType Type => IRadarable.ObjectType.Enemy;
+
+    public bool IsRadarable => true;
+
+    public List<GameObject> NotRadarableList { get; } = new List<GameObject>();
 
     [SerializeField, Tooltip("ドローンの最大HP")]
     private float _maxHP = 100f;
@@ -159,7 +165,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn
         _rotateComponent = GetComponent<DroneRotateComponent>();
         _soundComponent = GetComponent<DroneSoundComponent>();
         _lockOnComponent = GetComponent<DroneLockOnComponent>();
-        _radarComponent = GetComponent<DroneRadarAction>();
+        _radarComponent = GetComponent<DroneRadarComponent>();
         _itemComponent = GetComponent<DroneItemComponent>();
         _statusComponent = GetComponent<DroneStatusComponent>();
 
@@ -168,6 +174,10 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn
 
         // ストック数初期化
         StockNum = _maxStock;
+
+        // ロックオン・レーダー不可オブジェクトに自分を設定
+        NotLockableOnList.Add(gameObject);
+        NotRadarableList.Add(gameObject);
     }
 
     private void Start()
@@ -273,7 +283,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn
             // レーダー使用
             if (Input.GetKey(KeyCode.Q))
             {
-                _radarComponent.UseRadar();
+                _radarComponent.StartRadar();
             }
         }
         // レーダー終了

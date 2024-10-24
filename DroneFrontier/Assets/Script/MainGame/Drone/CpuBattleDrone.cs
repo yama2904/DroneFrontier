@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn
+public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
 {
     //コンポーネント用
     Transform _transform = null;
@@ -124,6 +124,12 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn
     /// </summary>
     public List<GameObject> NotLockableOnList { get; } = new List<GameObject>();
 
+    public IRadarable.ObjectType Type => IRadarable.ObjectType.Enemy;
+
+    public bool IsRadarable => true;
+
+    public List<GameObject> NotRadarableList { get; } = new List<GameObject>();
+
     /// <summary>
     /// ドローン破壊イベント
     /// </summary>
@@ -151,6 +157,9 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn
 
         // ダメージイベント設定
         damageAction.DamageEvent += DamageHandler;
+
+        // ロックオン不可オブジェクトに自分を設定
+        NotLockableOnList.Add(gameObject);
     }
 
     private void Start()
