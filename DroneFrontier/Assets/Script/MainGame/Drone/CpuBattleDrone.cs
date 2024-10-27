@@ -1,4 +1,5 @@
-﻿using Offline;
+﻿using Cysharp.Threading.Tasks;
+using Offline;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -165,10 +166,13 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
     private void Start()
     {
         //武器初期化
-        mainWeapon = BaseWeapon.CreateWeapon(this, BaseWeapon.Weapon.GATLING, false);
-        mainWeapon.SetParent(transform);
-        subWeapon = BaseWeapon.CreateWeapon(this, SubWeapon, false);
-        subWeapon.SetParent(transform);
+        UniTask.Void(async () =>
+        {
+            mainWeapon = await BaseWeapon.CreateWeapon(this, BaseWeapon.Weapon.GATLING, false);
+            mainWeapon.SetParent(transform);
+            subWeapon = await BaseWeapon.CreateWeapon(this, SubWeapon, false);
+            subWeapon.SetParent(transform);
+        });
 
         // 常にロックオン処理
         _lockOnComponent.StartLockOn();

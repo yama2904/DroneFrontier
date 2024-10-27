@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
 using UnityEngine;
 
 public class ItemSpawnManager : MonoBehaviour
@@ -14,88 +15,106 @@ public class ItemSpawnManager : MonoBehaviour
     private int _spawnNum = 1;
 
     /// <summary>
-    /// アイテムスポナー（アイテムスポーン済みの場合はtrue）
+    /// アイテムスポナーリスト
     /// </summary>
-    private Dictionary<ItemSpawner, bool> _spawners = new Dictionary<ItemSpawner, bool>();
+    private List<ItemSpawner> _spawnerList = new List<ItemSpawner>();
 
     /// <summary>
-    /// 前回スポーンからの経過時間
+    /// スポーンしたアイテムと対応するスポナー
     /// </summary>
-    float _spawnTimeCount = 0;
+    private Dictionary<SpawnItem, ItemSpawner> _spawnedMap = new Dictionary<SpawnItem, ItemSpawner>();
+
+    /// <summary>
+    /// 定期スポーン計測
+    /// </summary>
+    private float _spawnTimer = 0;
 
     private void Start()
     {
         // 各スポナーを検索して取得
-        ItemSpawner[] spawners = FindObjectsByType<ItemSpawner>(FindObjectsSortMode.None).ToArray();
+        _spawnerList = FindObjectsByType<ItemSpawner>(FindObjectsSortMode.None).ToList();
         
-        // スポナー情報保持
-        foreach (ItemSpawner spawner in spawners)
-        {
-            _spawners.Add(spawner, false);
-        }
-
         // アイテムのランダムスポーン
-        ItemSpawn(spawners, _maxSpawnNum);
+        ItemSpawn(_spawnerList, _maxSpawnNum);
     }
 
     private void Update()
     {
-        _spawnTimeCount += Time.deltaTime;
-        if (_spawnTimeCount < _spawnInterval) return;
+        _spawnTimer += Time.deltaTime;
+        if (_spawnTimer < _spawnInterval) return;
 
         // 経過時間リセット
-        _spawnTimeCount = 0;
+        _spawnTimer = 0;
+
+        // 最大数スポーンしている場合は新規にスポーンしない
+        if (_spawnedMap.Count >= _maxSpawnNum) return;
 
         // 未スポーンのスポナーを集計
         List<ItemSpawner> notSpawned = new List<ItemSpawner>();
-        lock (_spawners)
+        lock (_spawnedMap)
         {
-            foreach (ItemSpawner spawner in _spawners.Keys)
+            foreach (ItemSpawner spawner in _spawnerList)
             {
-                if (!_spawners[spawner])
+                if (!_spawnedMap.ContainsValue(spawner))
                 {
                     notSpawned.Add(spawner);
                 }
             }
-
-            if (_spawners.Count - notSpawned.Count >= _maxSpawnNum) return;
         }
 
         // スポーン実行
-        ItemSpawn(notSpawned.ToArray(), _spawnNum);
+        ItemSpawn(notSpawned, _spawnNum);
     }
 
     /// <summary>
-    /// 指定されたスポナーの中からランダムにアイテムスポーン
+    /// 指定された数のアイテムスポーン
     /// </summary>
-    /// <param name="spawners">アイテムスポーンさせるスポナー</param>
+    /// <param name="spawnerList">アイテムスポーンさせるスポナー</param>
     /// <param name="spawnNum">スポーン数</param>
-    private void ItemSpawn(ItemSpawner[] spawners, int spawnNum)
+    private void ItemSpawn(List<ItemSpawner> spawnerList, int spawnNum)
     {
-        for (int num = 0; num < spawnNum; num++)
+        // スポナーの数がスポーン数以下の場合は全てのスポナーからアイテムスポーン
+        if (spawnerList.Count <= spawnNum) 
         {
-            // 各スポナーのスポーン確率を計算
-            int maxRandom = 0;
-            List<int> percents = new List<int>();
-            foreach (ItemSpawner spawner in  spawners)
+            foreach (ItemSpawner spawner in spawnerList)
             {
-                int percent = (int)(spawner.SpawnPercent * 100);
-                percents.Add(maxRandom + percent);
-                maxRandom += percent;
+                // スポーン実行
+                SpawnItem item = spawner.Spawn();
+
+                // アイテム消滅イベント設定
+                item.SpawnItemDestroyEvent += SpawnItemDestroy;
+
+                // スポーン済みアイテムに追加
+                lock (_spawnedMap) _spawnedMap.Add(item, spawner);
             }
 
-            // スポーンアイテムをランダムに決定
-            int value = Random.Range(0, maxRandom + 1);
-            for (int i = 0; i < percents.Count; i++)
-            {
-                ItemSpawner spawner = spawners[i];
+            return;
+        }
 
-                if (value <= percents[i])
-                {
-                    spawner.SpawnItem();
-                    _spawners[spawner] = true;
-                    continue;
-                }
+        // 各スポナーからランダムにアイテムスポーン
+        int num = 0;
+        while (true)
+        {
+            foreach (ItemSpawner spawner in  spawnerList)
+            {
+                // 既にスポーン済の場合はスポーンを行わない
+                if (_spawnedMap.ContainsValue(spawner)) break;
+
+                // スポーン実行
+                SpawnItem item = spawner.Spawn();
+
+                // スポーン成功可否
+                if (item == null) continue;
+
+                // アイテム消滅イベント設定
+                item.SpawnItemDestroyEvent += SpawnItemDestroy;
+
+                // スポーン済みアイテムに追加
+                lock (_spawnedMap) _spawnedMap.Add(item, spawner);
+
+                // 指定されたスポーン数に達した場合は終了
+                num++;
+                if (num >= spawnNum) return;
             }
         }
     }
@@ -103,13 +122,16 @@ public class ItemSpawnManager : MonoBehaviour
     /// <summary>
     /// スポーンアイテム消滅イベント
     /// </summary>
-    /// <param name="spawner">消滅したアイテムのスポナー</param>
-    private void SpawnItemDestroy(ItemSpawner spawner)
+    /// <param name="item">消滅したアイテムのスポナー</param>
+    private void SpawnItemDestroy(SpawnItem item)
     {
-        // 未スポーン状態へ更新
-        lock (_spawners)
-        {
-            _spawners[spawner] = false;
-        }
+        // 消滅したアイテムのスポナー取得
+        ItemSpawner spawner = _spawnedMap[item];
+
+        // 消滅したアイテムからイベント削除
+        item.SpawnItemDestroyEvent -= SpawnItemDestroy;
+
+        // スポーン済みアイテムから削除
+        lock (_spawnedMap) _spawnedMap.Remove(item);
     }
 }

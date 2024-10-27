@@ -132,5 +132,8 @@ public class DroneSpawnManager : MonoBehaviour
 
         // イベント発火
         DroneDestroyEvent?.Invoke(drone, respawnDrone);
+
+        // 破壊されたドローンからイベントの削除
+        drone.DroneDestroyEvent -= DroneDestroy;
     }
 }

@@ -20,7 +20,7 @@ namespace Offline
         public event DamageHandler DamageEvent;
 
         [SerializeField, Tooltip("復活後の無敵時間（秒）")] 
-        private int _nonDamageableTime = 4;
+        private int _notDamageableSec = 4;
 
         [SerializeField, Tooltip("1フレームでの最大ダメージ回数")]
         private int _oneFrameMaxCount = 8;
@@ -52,10 +52,7 @@ namespace Offline
             _barrier = GetComponent<DroneBarrierComponent>();
 
             // ドローンが破壊された場合は本コンポーネントを停止
-            _drone.DroneDestroyEvent += (o, e) =>
-            {
-                enabled = false;
-            };
+            _drone.DroneDestroyEvent += DroneDestroyEvent;
         }
 
         private void LateUpdate()
@@ -68,7 +65,7 @@ namespace Offline
         {
             // 起動直後は一定時間無敵
             _damageable = false;
-            await UniTask.Delay(TimeSpan.FromSeconds(_nonDamageableTime));
+            await UniTask.Delay(TimeSpan.FromSeconds(_notDamageableSec));
             _damageable = true;
         }
 
@@ -105,6 +102,20 @@ namespace Offline
 
             // ダメージイベント発火
             DamageEvent?.Invoke(this, source, value);
+        }
+
+        /// <summary>
+        /// ドローン破壊イベント
+        /// </summary>
+        /// <param name="o">イベントオブジェクト</param>
+        /// <param name="e">イベント引数</param>
+        private void DroneDestroyEvent(object o, EventArgs e)
+        {
+            // 本コンポーネント停止
+            enabled = false;
+
+            // イベント削除
+            _drone.DroneDestroyEvent -= DroneDestroyEvent;
         }
     }
 }

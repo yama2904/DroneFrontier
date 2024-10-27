@@ -524,12 +524,12 @@ GameObject:
   - component: {fileID: 5756816350272667789}
   - component: {fileID: 2268401430616989749}
   - component: {fileID: 1387660337042471973}
-  - component: {fileID: 2690737355441408120}
   - component: {fileID: 5756816350272667790}
-  - component: {fileID: 9200962274211400824}
   - component: {fileID: 2702255915945675599}
-  - component: {fileID: 3144627419471916392}
   - component: {fileID: 1737714871206060867}
+  - component: {fileID: 5668502763316825620}
+  - component: {fileID: 9200962274211400824}
+  - component: {fileID: 2690737355441408120}
   - component: {fileID: 993888715167761601}
   - component: {fileID: 3448523090443018778}
   - component: {fileID: 6775327954476149997}
@@ -657,18 +657,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _rotateObject: {fileID: 1656250088969202853}
---- !u!114 &2690737355441408120
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5756816350272667788}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3ada3f5c3679c724d9117538a7d31635, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &5756816350272667790
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -683,25 +671,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _nonDamageableTime: 4
   _oneFrameMaxCount: 8
---- !u!114 &9200962274211400824
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5756816350272667788}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6c080cedf6a2ab34dbaf1c1533adb528, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _camera: {fileID: 6808110575809998135}
-  _reticleImage: {fileID: 0}
-  _lockingOnColor: {r: 255, g: 0, b: 0, a: 200}
-  _noLockOnColor: {r: 255, g: 255, b: 255, a: 128}
-  _aimSpeed: 12
-  _lockOnRadius: 450
-  _lockOnDistance: 450
 --- !u!114 &2702255915945675599
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -721,18 +690,6 @@ MonoBehaviour:
   _regeneValue: 5
   _resurrectBarrierTime: 15
   _resurrectBarrierHP: 10
---- !u!114 &3144627419471916392
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5756816350272667788}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 097bcd7eeec2d6c44be596f9d6817627, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1737714871206060867
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -747,6 +704,53 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _maxItemNum: 2
   _itemFrameImages: []
+--- !u!114 &5668502763316825620
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5756816350272667788}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 232d62e5cb606f949ac863af7e06a1dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  barrierWeakIcon: {fileID: 0}
+  jammingIcon: {fileID: 0}
+  speedDownIcon: {fileID: 0}
+  stunScreenMask: {fileID: 0}
+--- !u!114 &9200962274211400824
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5756816350272667788}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c080cedf6a2ab34dbaf1c1533adb528, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _camera: {fileID: 6808110575809998135}
+  _reticleImage: {fileID: 0}
+  _lockingOnColor: {r: 255, g: 0, b: 0, a: 200}
+  _noLockOnColor: {r: 255, g: 255, b: 255, a: 128}
+  _aimSpeed: 12
+  _lockOnRadius: 450
+  _lockOnDistance: 450
+--- !u!114 &2690737355441408120
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5756816350272667788}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ada3f5c3679c724d9117538a7d31635, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!95 &993888715167761601
 Animator:
   serializedVersion: 5

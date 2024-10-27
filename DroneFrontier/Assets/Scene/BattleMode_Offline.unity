@@ -1047,6 +1047,17 @@ PrefabInstance:
       propertyPath: _spawnPercent
       value: 0.2
       objectReference: {fileID: 0}
+    - target: {fileID: 2768438376175564350, guid: e3dee221c815d0644b4f2bfdb2cea55c,
+        type: 3}
+      propertyPath: _spawnItems.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 2768438376175564350, guid: e3dee221c815d0644b4f2bfdb2cea55c,
+        type: 3}
+      propertyPath: _spawnItems.Array.data[3]
+      value: 
+      objectReference: {fileID: 2271578280543455338, guid: 9c550ae90da9545429f014234ec45bda,
+        type: 3}
     - target: {fileID: 6644320004432626967, guid: e3dee221c815d0644b4f2bfdb2cea55c,
         type: 3}
       propertyPath: m_LocalPosition.x

@@ -203,6 +203,7 @@ namespace Offline
         {
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
+            _droneSpawnManager.DroneDestroyEvent -= DroneDestroy;
         }
 
         /// <summary>

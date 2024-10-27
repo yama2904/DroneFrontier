@@ -100,7 +100,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _iconImage: {fileID: 3073622848028293742, guid: d436d6d0d3f34cb4e8e145549987d99e,
     type: 3}
-  _item: {fileID: 6386083763386079933, guid: 964c7c172e15e5f4b8dca258fd8b67c1, type: 3}
+  _droneItem: {fileID: 6386083763386079933, guid: 964c7c172e15e5f4b8dca258fd8b67c1,
+    type: 3}
 --- !u!65 &337849636028339553
 BoxCollider:
   m_ObjectHideFlags: 0

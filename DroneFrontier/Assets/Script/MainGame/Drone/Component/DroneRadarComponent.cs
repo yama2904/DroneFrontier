@@ -27,13 +27,13 @@ public class DroneRadarComponent : MonoBehaviour
     private float _radarMinDistance = 100f;
 
     [SerializeField, Tooltip("1段階目の時間（秒）")]
-    private float _oneLevelTime = 1f;
+    private float _oneLevelSec = 1f;
 
     [SerializeField, Tooltip("2段階目の時間（秒）")]
-    private float _twoLevelTime = 3;
+    private float _twoLevelSec = 2;
 
     [SerializeField, Tooltip("3段階目の時間（秒）")]
-    private float _threeLevelTime = 7f;
+    private float _threeLevelSec = 3f;
 
     /// <summary>
     /// レーダー照射中オブジェクトのマーカー座標
@@ -86,22 +86,22 @@ public class DroneRadarComponent : MonoBehaviour
 
         // レーダーを使用し続けた時間に応じて照射距離が変動
         float distance = 0;
-        if (_radarTimer < _oneLevelTime)
+        if (_radarTimer < _oneLevelSec)
         {
             // レーダー開始直後は照射距離0
             return;
         }
-        else if (_radarTimer < _twoLevelTime)
+        else if (_radarTimer < _oneLevelSec + _twoLevelSec)
         {
             // 2段階目
             distance = _radarMinDistance;
         }
-        else if (_radarTimer < _threeLevelTime)
+        else if (_radarTimer < _oneLevelSec + _twoLevelSec + _threeLevelSec)
         {
             // 3段階目
             distance = _radarMinDistance * 2;
         }
-        else if (_radarTimer >= _threeLevelTime)
+        else
         {
             // 最大距離
             distance = _radarMinDistance * 3;

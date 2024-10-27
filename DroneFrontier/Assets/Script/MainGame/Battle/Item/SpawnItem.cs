@@ -21,9 +21,9 @@ public class SpawnItem : MonoBehaviour, IRadarable
     public Image IconImage { get { return _iconImage; } }
 
     /// <summary>
-    /// スポーンしたアイテム
+    /// 取得時に使用可能となるアイテム
     /// </summary>
-    public GameObject Item { get { return _item; } }
+    public GameObject DroneItem { get { return _droneItem; } }
 
     public IRadarable.ObjectType Type => IRadarable.ObjectType.Item;
 
@@ -34,8 +34,8 @@ public class SpawnItem : MonoBehaviour, IRadarable
     [SerializeField, Tooltip("アイテム所持中に表示するアイコン")]
     private Image _iconImage = null;
 
-    [SerializeField, Tooltip("スポーンさせるアイテム")]
-    private GameObject _item = null;
+    [SerializeField, Tooltip("取得時に使用可能となるアイテム")]
+    private GameObject _droneItem = null;
 
     private void OnDestroy()
     {

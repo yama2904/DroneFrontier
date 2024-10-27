@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Offline
 {
-    public class Jamming : MonoBehaviour, IGameItem
+    public class Jamming : MonoBehaviour, IDroneItem
     {
         IBattleDrone creater;
         [SerializeField, Tooltip("ジャミングボットの生存時間")] float destroyTime = 60.0f;

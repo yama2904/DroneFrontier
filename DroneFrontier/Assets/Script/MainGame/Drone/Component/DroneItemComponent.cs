@@ -23,7 +23,7 @@ public class DroneItemComponent : MonoBehaviour
         /// <summary>
         /// アイテム本体
         /// </summary>
-        public IGameItem Item { get; set; } = null;
+        public IDroneItem Item { get; set; } = null;
 
         /// <summary>
         /// アイテムアイコン
@@ -54,7 +54,7 @@ public class DroneItemComponent : MonoBehaviour
             if (data.Having) continue;
 
             // アイテム情報更新
-            data.Item = item.Item.GetComponent<IGameItem>();
+            data.Item = item.DroneItem.GetComponent<IDroneItem>();
             data.Having = true;
 
             // アイテム枠が表示されており、所持アイテムにアイコンが設定されている場合はアイコンを表示

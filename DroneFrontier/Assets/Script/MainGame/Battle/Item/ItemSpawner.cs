@@ -10,32 +10,16 @@ public class ItemSpawner : MonoBehaviour
         get { return _spawnPercent; }
     }
 
-    /// <summary>
-    /// スポーンアイテム消滅イベント
-    /// </summary>
-    /// <param name="spawner">消滅したアイテムのスポナー</param>
-    public delegate void SpawnItemDestroyHandler(ItemSpawner spawner);
-
-    /// <summary>
-    /// スポーンアイテム消滅イベント
-    /// </summary>
-    public event SpawnItemDestroyHandler SpawnItemDestroyEvent;
-
     [SerializeField, Tooltip("スポーンさせるアイテム一覧")]
-    private GameObject[] _spawnItems = null;
+    private SpawnItem[] _spawnItems = null;
 
     [SerializeField,  Tooltip("スポーン確率(0～1)")] 
     private float _spawnPercent = 0.5f;
 
     /// <summary>
-    /// スポーンさせるアイテムの各クラス
-    /// </summary>
-    private System.Type[] _spawnItemClasses = null;
-
-    /// <summary>
     /// 生成したアイテム
     /// </summary>
-    private GameObject _createdItem = null;
+    private SpawnItem _createdItem = null;
 
     /// <summary>
     /// キャッシュ用Transform
@@ -45,75 +29,34 @@ public class ItemSpawner : MonoBehaviour
     /// <summary>
     /// ランダムなアイテムをスポーンさせる
     /// </summary>
-    public void SpawnItem()
+    /// <returns>スポーンしたアイテム</returns>
+    public SpawnItem Spawn()
     {
-        // 前回スポーンしたアイテムが残っていることを考慮して削除
-        if (_createdItem != null)
-        {
-            Destroy(_createdItem);
-        }
-
         // ランダムにスポーン
         int index = Random.Range(0, _spawnItems.Length);
         _createdItem = Instantiate(_spawnItems[index], _transform);
         _createdItem.transform.SetParent(_transform);
 
-        // アイテム消去イベント設定
-        _createdItem.GetComponent<SpawnItem>().SpawnItemDestroyEvent += (item) =>
-        {
-            SpawnItemDestroyEvent?.Invoke(this);
-        };
+        // スポーンしたアイテムを返す
+        return _createdItem;
     }
 
     /// <summary>
-    /// 指定したアイテムをスポーンさせる
+    /// スポーン確率を基に成功可否を決定し、成功した場合はランダムなアイテムをスポーンさせる
     /// </summary>
-    /// <param name="itemType">スポーンさせるアイテム</param>
-    /// <returns>true:指定されたアイテムが存在する場合はtrue</returns>
-    public bool SpawnItem(System.Type itemType)
+    /// <returns>スポーンしたアイテム。失敗した場合はnull</returns>
+    public SpawnItem SpawnRandom()
     {
-        // 指定されたアイテムに合致したらスポーン
-        for (int i = 0; i < _spawnItems.Length; i++)
-        {
-            // 指定されたアイテムであるか
-            if (_spawnItemClasses[i] == itemType)
-            {
-                // 前回スポーンしたアイテムが残っていることを考慮して削除
-                if (_createdItem != null)
-                {
-                    Destroy(_createdItem);
-                }
+        // スポーン確率を基に成功可否を決定
+        if (Random.Range(0, 101) > _spawnPercent * 100) return null;
 
-                // アイテムスポーン
-                _createdItem = Instantiate(_spawnItems[i], _transform);
-                _createdItem.transform.SetParent(_transform);
-
-                // アイテム消去イベント設定
-                _createdItem.GetComponent<SpawnItem>().SpawnItemDestroyEvent += (item) =>
-                {
-                    SpawnItemDestroyEvent?.Invoke(this);
-                };
-
-                return true;
-            }
-        }
-
-        // 指定されたアイテムが存在しない
-        return false;
+        // アイテム
+        return Spawn();
     }
 
-    void Start()
+    private void Awake()
     {
         // Transformをキャッシュ保存しておく
         _transform = transform;
-
-        // 各アイテムのクラスを保持しておく
-        _spawnItemClasses = new System.Type[_spawnItems.Length];
-        for (int i = 0; i < _spawnItems.Length; i++)
-        {
-            _spawnItemClasses[i] = _spawnItems[i].GetType();
-        }
     }
-
-    void Update() { }
 }

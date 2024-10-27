@@ -8,18 +8,6 @@ using UnityEngine.UI;
 
 public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
 {
-    // コンポーネント用
-    Transform _transform = null;
-    Rigidbody _rigidbody = null;
-    Animator _animator = null;
-    DroneMoveComponent _moveComponent = null;
-    DroneRotateComponent _rotateComponent = null;
-    DroneSoundComponent _soundComponent = null;
-    DroneLockOnComponent _lockOnComponent = null;
-    DroneRadarComponent _radarComponent = null;
-    DroneItemComponent _itemComponent = null;
-    DroneStatusComponent _statusComponent = null;
-
     /// <summary>
     /// ドローンのゲームオブジェクト
     /// </summary>
@@ -108,6 +96,9 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
     [SerializeField, Tooltip("ストック数を表示するTextコンポーネント")]
     private Text _stockText = null;
 
+    [SerializeField, Tooltip("オブジェクト探索コンポーネント")]
+    private ObjectSearchComponent _searchComponent = null;
+
     // 武器
     protected enum Weapon
     {
@@ -154,6 +145,18 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
     /// </summary>
     public event EventHandler DroneDestroyEvent;
 
+    // コンポーネントキャッシュ
+    Transform _transform = null;
+    Rigidbody _rigidbody = null;
+    Animator _animator = null;
+    DroneMoveComponent _moveComponent = null;
+    DroneRotateComponent _rotateComponent = null;
+    DroneSoundComponent _soundComponent = null;
+    DroneLockOnComponent _lockOnComponent = null;
+    DroneRadarComponent _radarComponent = null;
+    DroneItemComponent _itemComponent = null;
+    DroneStatusComponent _statusComponent = null;
+
     protected void Awake()
     {
         // コンポーネントの取得
@@ -178,15 +181,21 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
         // ロックオン・レーダー不可オブジェクトに自分を設定
         NotLockableOnList.Add(gameObject);
         NotRadarableList.Add(gameObject);
+
+        // オブジェクト探索イベント設定
+        _searchComponent.ObjectStayEvent += ObjectSearchEvent;
     }
 
     private void Start()
     {
         // 武器初期化
-        mainWeapon = BaseWeapon.CreateWeapon(this, BaseWeapon.Weapon.GATLING, true);
-        mainWeapon.SetParent(transform);
-        subWeapon = BaseWeapon.CreateWeapon(this, SubWeapon, true);
-        subWeapon.SetParent(transform);
+        UniTask.Void(async () =>
+        {
+            mainWeapon = await BaseWeapon.CreateWeapon(this, BaseWeapon.Weapon.GATLING, true);
+            mainWeapon.SetParent(transform);
+            subWeapon = await BaseWeapon.CreateWeapon(this, SubWeapon, true);
+            subWeapon.SetParent(transform);
+        });
 
         // ブースト初期化
         boostGaugeImage.enabled = true;
@@ -490,6 +499,29 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
     }
 
     /// <summary>
+    /// オブジェクト探索イベント
+    /// </summary>
+    /// <param name="other">発見オブジェクト</param>
+    private void ObjectSearchEvent(Collider other)
+    {
+        // 死亡処理中は操作不可
+        if (_isDestroyFalling || _isDestroy) return;
+
+        // Eキーでアイテム取得
+        if (Input.GetKey(KeyCode.E))
+        {
+            if (other.CompareTag(TagNameConst.ITEM))
+            {
+                SpawnItem item = other.GetComponent<SpawnItem>();
+                if (_itemComponent.SetItem(item))
+                {
+                    Destroy(other.gameObject);
+                }
+            }
+        }
+    }
+
+    /// <summary>
     /// 死亡処理
     /// </summary>
     private async UniTask Destroy()
@@ -589,26 +621,6 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
         if (_itemComponent.UseItem((int)item))
         {
             _soundComponent.PlayOneShot(SoundManager.SE.USE_ITEM, SoundManager.SEVolume);
-        }
-    }
-
-
-    private void OnTriggerStay(Collider other)
-    {
-        // 死亡処理中は操作不可
-        if (_isDestroyFalling || _isDestroy) return;
-
-        // Eキーでアイテム取得
-        if (Input.GetKey(KeyCode.E))
-        {
-            if (other.CompareTag(TagNameConst.ITEM))
-            {
-                SpawnItem item = other.GetComponent<SpawnItem>();
-                if (_itemComponent.SetItem(item))
-                {
-                    Destroy(other.gameObject);
-                }
-            }
         }
     }
 }

@@ -224,6 +224,7 @@ namespace Offline
                        .Where(h => !h.transform.CompareTag(TagNameConst.BULLET))  //弾丸除外
                        .Where(h => !h.transform.CompareTag(TagNameConst.GIMMICK)) //ギミック除外
                        .Where(h => !h.transform.CompareTag(TagNameConst.JAMMING)) //ジャミングエリア除外
+                       .Where(h => !h.transform.CompareTag(TagNameConst.NOT_COLLISION))
                        .Where(h =>
                        {
                            //撃った本人は当たり判定から除外

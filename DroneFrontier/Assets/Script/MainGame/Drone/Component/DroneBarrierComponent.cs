@@ -13,6 +13,26 @@ namespace Offline
         public float HP { get; private set; }
 
         /// <summary>
+        /// バリア強化開始イベント
+        /// </summary>
+        public event EventHandler StrengthenStartEvent;
+
+        /// <summary>
+        /// バリア強化終了イベント
+        /// </summary>
+        public event EventHandler StrengthenEndEvent;
+
+        /// <summary>
+        /// バリア弱体化開始イベント
+        /// </summary>
+        public event EventHandler WeakStartEvent;
+
+        /// <summary>
+        /// バリア弱体化終了イベント
+        /// </summary>
+        public event EventHandler WeakEndEvent;
+
+        /// <summary>
         /// バリアの最大透過度
         /// </summary>
         private const float BARRIER_MAX_ALFA_COLOR = 0.5f;
@@ -24,16 +44,16 @@ namespace Offline
         private float _barrierMaxHP = 100f;
 
         [SerializeField, Tooltip("バリアが回復し始める時間（秒）")]
-        private float _regeneStartTime = 8.0f;
+        private float _regeneStartSec = 8.0f;
 
         [SerializeField, Tooltip("回復間隔（秒）")]
-        private float _regeneInterval = 1.0f;
+        private float _regeneIntervalSec = 1.0f;
 
         [SerializeField, Tooltip("回復量")]
         private float _regeneValue = 5.0f;
 
         [SerializeField, Tooltip("バリア破壊後の復活時間（秒）")]
-        private float _resurrectBarrierTime = 15.0f;
+        private float _resurrectBarrierSec = 15.0f;
 
         [SerializeField, Tooltip("バリア復活時のHP")]
         private float _resurrectBarrierHP = 10.0f;
@@ -131,7 +151,7 @@ namespace Offline
         /// <param name="damageDown">ダメージ軽減率（0～1）</param>
         /// <param name="time">強化時間（秒）</param>
         /// <returns>強化に成功した場合はtrue</returns>
-        public bool StrengthenBarrier(float damageDown, int time)
+        public bool StrengthenBarrier(float damageDown, float time)
         {
             // バリアが破壊されている場合は失敗
             if (HP <= 0) return false;
@@ -148,16 +168,22 @@ namespace Offline
             // ダメージ軽減率保存
             _strengthenValue = damageDown;
 
-            // バリアの色変更
+            // 強化時のバリアの色へ変更
             ChangeBarrierColor();
 
             // 強化終了タイマー開始
             UniTask.Void(async () =>
             {
                 await UniTask.Delay(TimeSpan.FromSeconds(time), cancellationToken: _cancel.Token);
-                _isStrengthen = false;
-                ChangeBarrierColor();
+                _isStrengthen = false;  // 強化フラグ初期化
+                ChangeBarrierColor();   // 通常時のバリアの色へ戻す
+
+                // バリア強化終了イベント発火
+                StrengthenEndEvent?.Invoke(this, EventArgs.Empty);
             });
+
+            // バリア強化開始イベント発火
+            StrengthenStartEvent?.Invoke(this, EventArgs.Empty);
 
             return true;
         }
@@ -205,7 +231,13 @@ namespace Offline
                 {
                     ResurrectBarrier(_resurrectBarrierHP);
                 }
+
+                // バリア弱体化終了イベント発火
+                WeakEndEvent?.Invoke(this, EventArgs.Empty);
             });
+
+            // バリア弱体化開始イベント発火
+            WeakStartEvent?.Invoke(this, EventArgs.Empty);
 
             return true;
         }
@@ -221,12 +253,7 @@ namespace Offline
             HP = _barrierMaxHP;
 
             // ドローンが破壊された場合は本コンポーネントを停止
-            _drone.DroneDestroyEvent += (o, e) =>
-            {
-                HP = 0;
-                ChangeBarrierColor();
-                enabled = false;
-            };
+            _drone.DroneDestroyEvent += DroneDestroyEvent;
         }
 
         private void Start()
@@ -245,7 +272,7 @@ namespace Offline
                 // 回復中の場合は一定間隔ごとに回復
                 if (_isRegening)
                 {
-                    if (_regeneTimer >= _regeneInterval)
+                    if (_regeneTimer >= _regeneIntervalSec)
                     {
                         // HP回復
                         float hp = HP + _regeneValue;
@@ -263,7 +290,7 @@ namespace Offline
                 else
                 {
                     // 回復中でない場合は回復が開始するまで待つ
-                    if (_regeneTimer >= _regeneStartTime)
+                    if (_regeneTimer >= _regeneStartSec)
                     {
                         // 回復開始
                         _isRegening = true;
@@ -275,7 +302,7 @@ namespace Offline
             // バリアが破壊されている場合はバリア復活まで待つ
             if (HP <= 0)
             {
-                if (_regeneTimer >= _resurrectBarrierTime)
+                if (_regeneTimer >= _resurrectBarrierSec)
                 {
                     // バリア復活
                     ResurrectBarrier(_resurrectBarrierHP);
@@ -320,6 +347,22 @@ namespace Offline
             {
                 _material.color = new Color(1 - value, 0, value, value * BARRIER_MAX_ALFA_COLOR);
             }
+        }
+
+        /// <summary>
+        /// ドローン破壊イベント
+        /// </summary>
+        /// <param name="o">イベントオブジェクト</param>
+        /// <param name="e">イベント引数</param>
+        private void DroneDestroyEvent(object o, EventArgs e)
+        {
+            // 本コンポーネント停止
+            HP = 0;
+            ChangeBarrierColor();
+            enabled = false;
+
+            // イベント削除
+            _drone.DroneDestroyEvent -= DroneDestroyEvent;
         }
     }
 }

@@ -33,8 +33,8 @@ namespace Online
         DroneBarrierAction barrier = null;
 
         //スタン用
-        [SerializeField] StunScreenMask stunScreenMask = null;
-        StunScreenMask createdStunScreenMask = null;
+        [SerializeField] FadeoutImage stunScreenMask = null;
+        FadeoutImage createdStunScreenMask = null;
 
         //ジャミング用
         DroneLockOnComponent lockOn = null;
@@ -72,7 +72,7 @@ namespace Online
             }
             if (createdStunScreenMask != null)
             {
-                isStatus[(int)Status.STUN] = createdStunScreenMask.IsStun;
+                //isStatus[(int)Status.STUN] = createdStunScreenMask.IsStun;
             }
         }
 
@@ -85,7 +85,7 @@ namespace Online
             barrierWeakIcon.enabled = false;
             jammingIcon.enabled = false;
             speedDownIcon.enabled = false;
-            createdStunScreenMask.UnSetStun();
+            //createdStunScreenMask.UnSetStun();
             speedDownCount = 0;
         }
 
@@ -140,7 +140,7 @@ namespace Online
         public void SetStun(float time)
         {
             if (createdStunScreenMask == null) return;
-            createdStunScreenMask.SetStun(time);
+            //createdStunScreenMask.SetStun(time);
         }
 
 

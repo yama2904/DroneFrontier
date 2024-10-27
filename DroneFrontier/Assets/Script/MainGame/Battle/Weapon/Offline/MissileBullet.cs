@@ -78,6 +78,7 @@ namespace Offline
             if (other.CompareTag(TagNameConst.ITEM)) return;
             if (other.CompareTag(TagNameConst.GIMMICK)) return;
             if (other.CompareTag(TagNameConst.JAMMING)) return;
+            if (other.CompareTag(TagNameConst.NOT_COLLISION)) return;
 
             //プレイヤーの当たり判定
             if (other.CompareTag(TagNameConst.PLAYER) || other.CompareTag(TagNameConst.CPU))

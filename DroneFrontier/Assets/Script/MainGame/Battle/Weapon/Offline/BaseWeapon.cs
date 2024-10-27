@@ -1,6 +1,8 @@
-﻿using System.Collections;
+﻿using Cysharp.Threading.Tasks;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 
 namespace Offline
 {
@@ -31,44 +33,43 @@ namespace Offline
             NONE
         }
 
-        public static BaseWeapon CreateWeapon(IBattleDrone shooter, Weapon weapon, bool isPlayer)
+        public static async UniTask<BaseWeapon> CreateWeapon(IBattleDrone shooter, Weapon weapon, bool isPlayer)
         {
-            const string FOLDER_PATH = "Weapon/Offline/";
-            string ADD_PATH = "Player/";
-            if (!isPlayer)
+            string addressKey = "";
+            switch (weapon)
             {
-                ADD_PATH = "CPU/";
+                case Weapon.SHOTGUN:
+                    addressKey = isPlayer ? "Shotgun" : "CPUShotgun";
+                    break;
+
+                case Weapon.GATLING:
+                    addressKey = "Gatling";
+                    break;
+
+                case Weapon.MISSILE:
+                    addressKey = isPlayer ? "MissileWeapon" : "CPUMissileWeapon";
+                    break;
+
+                case Weapon.LASER:
+                    addressKey = isPlayer ? "LaserWeapon" : "CPULaserWeapon";
+                    break;
+
+                default:
+                    // エラー
+                    Application.Quit();
+                    break;
             }
 
-            GameObject o = null;
-            if (weapon == Weapon.SHOTGUN)
-            {
-                //ResourcesフォルダからShotgunオブジェクトを複製してロード
-                o = Instantiate(Resources.Load(FOLDER_PATH + ADD_PATH + "Shotgun_Offline")) as GameObject;
-            }
-            else if (weapon == Weapon.GATLING)
-            {
-                //ResourcesフォルダからGatlingオブジェクトを複製してロード
-                o = Instantiate(Resources.Load(FOLDER_PATH + "Gatling_Offline")) as GameObject;
-            }
-            else if (weapon == Weapon.MISSILE)
-            {
-                //ResourcesフォルダからMissileShotオブジェクトを複製してロード
-                o = Instantiate(Resources.Load(FOLDER_PATH + ADD_PATH + "MissileWeapon_Offline")) as GameObject;
-            }
-            else if (weapon == Weapon.LASER)
-            {
-                //ResourcesフォルダからLaserオブジェクトを複製してロード
-                o = Instantiate(Resources.Load(FOLDER_PATH + ADD_PATH + "LaserWeapon_Offline")) as GameObject;
-            }
-            else
-            {
-                //エラー
-                Application.Quit();
-            }
+            // オブジェクトをロードして複製
+            var handle = Addressables.LoadAssetAsync<GameObject>(addressKey);
+            await handle;
+            BaseWeapon bw = Instantiate(handle.Result).GetComponent<BaseWeapon>();
 
-            BaseWeapon bw = o.GetComponent<BaseWeapon>();
+            // 破棄
+            Addressables.Release(handle);
+
             bw.shooter = shooter;
+
             return bw;
         }
     }

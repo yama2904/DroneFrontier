@@ -196,17 +196,11 @@ namespace Offline
                 localAngle.x = 360 - _maxCameraRotateX;
             }
             _transform.localEulerAngles = localAngle;
-            // 候補
-            //_transform.localRotation = Quaternion.Euler(localAngle);
 
             // 左右回転
             Vector3 angle = _transform.eulerAngles;
             angle.y += vertical;
             _transform.eulerAngles = angle;
-            // 候補
-            //Vector3 angle = _transform.eulerAngles;
-            //angle.y += vertical;
-            //_transform.rotation = Quaternion.Euler(angle);
         }
     }
 }
