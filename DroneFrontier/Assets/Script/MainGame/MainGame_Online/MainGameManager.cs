@@ -40,7 +40,7 @@ namespace Online
         //デバッグ用
         public static bool IsCursorLock { get; private set; } = true;
         [Header("デバッグ用")]
-        [SerializeField] protected GameModeSelectManager.GameMode debugGameMode = GameModeSelectManager.GameMode.NONE;
+        [SerializeField] protected GameModeSelectScreen.GameMode debugGameMode = GameModeSelectScreen.GameMode.NONE;
         [SerializeField] protected bool solo = false;
 
 
@@ -51,12 +51,12 @@ namespace Online
             if (isServer)
             {
                 //Managerの生成
-                if (GameModeSelectManager.Mode == GameModeSelectManager.GameMode.BATTLE)
+                if (GameModeSelectScreen.Mode == GameModeSelectScreen.GameMode.BATTLE)
                 {
                     BattleManager manager = Instantiate(battleManagerPrefab);
                     NetworkServer.Spawn(manager.gameObject);
                 }
-                else if (GameModeSelectManager.Mode == GameModeSelectManager.GameMode.RACE)
+                else if (GameModeSelectScreen.Mode == GameModeSelectScreen.GameMode.RACE)
                 {
                     RaceManager manager = Instantiate(raceManagerPrefab);
                     NetworkServer.Spawn(manager.gameObject);

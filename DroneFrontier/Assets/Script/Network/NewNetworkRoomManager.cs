@@ -31,11 +31,11 @@ public class NewNetworkRoomManager : NetworkRoomManager
         MatchingManager.Singleton.DisconnectPlayer(conn);
         if (MainGameManager.IsMainGaming)
         {
-            if (GameModeSelectManager.Mode == GameModeSelectManager.GameMode.BATTLE)
+            if (GameModeSelectScreen.Mode == GameModeSelectScreen.GameMode.BATTLE)
             {
                 BattleManager.Singleton.DisconnectPlayer(conn);
             }
-            else if(GameModeSelectManager.Mode == GameModeSelectManager.GameMode.RACE)
+            else if(GameModeSelectScreen.Mode == GameModeSelectScreen.GameMode.RACE)
             {
                 RaceManager.DisconnectPlayer(conn);
             }
@@ -104,7 +104,7 @@ public class NewNetworkRoomManager : NetworkRoomManager
         GameObject createDrone = playerPrefab;
 
         //レースモードならドローンを変える
-        if (GameModeSelectManager.Mode == GameModeSelectManager.GameMode.RACE)
+        if (GameModeSelectScreen.Mode == GameModeSelectScreen.GameMode.RACE)
         {
             createDrone = raceDrone;
         }
@@ -117,7 +117,7 @@ public class NewNetworkRoomManager : NetworkRoomManager
             player.name = MatchingManager.playerDatas[index].name;
 
             //バトルモードなら武器も設定
-            if (GameModeSelectManager.Mode == GameModeSelectManager.GameMode.BATTLE)
+            if (GameModeSelectScreen.Mode == GameModeSelectScreen.GameMode.BATTLE)
             {
                 player.GetComponent<Online.BattleDrone>().syncSetSubWeapon = (int)MatchingManager.playerDatas[index].weapon;
             }
@@ -156,7 +156,7 @@ public class NewNetworkRoomManager : NetworkRoomManager
     public override void OnRoomServerPlayersReady()
     {
         //レースモードならシーン先切り替え
-        if (GameModeSelectManager.Mode == GameModeSelectManager.GameMode.RACE)
+        if (GameModeSelectScreen.Mode == GameModeSelectScreen.GameMode.RACE)
         {
             GameplayScene = raceScene;
         }

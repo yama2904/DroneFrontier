@@ -11,19 +11,19 @@ public class HomeSceneManager : MonoBehaviour
     private GameObject _gameModeSelectUI;
 
     [SerializeField]
-    private ConfigManager _configManager;
+    private ConfigScreen _configManager;
 
     [SerializeField]
-    private HelpManager _helpManager;
+    private HelpScreen _helpManager;
 
     [SerializeField]
-    private SoloMultiSelectManager _soloMultiSelectManager;
+    private SoloMultiSelectScreen _soloMultiSelectManager;
 
     [SerializeField]
-    private WeaponSelectManager _weaponSelectManager;
+    private WeaponSelectScreen _weaponSelectManager;
 
     [SerializeField]
-    private CPUSelectManager _cpuSelectManager;
+    private CPUSelectScreen _cpuSelectManager;
 
     void Start()
     {
@@ -110,7 +110,7 @@ public class HomeSceneManager : MonoBehaviour
     /// 設定画面のボタンクリックイベント
     /// </summary>
     /// <param name="type">クリックされたボタン</param>
-    private void ClickConfigButton(ConfigManager.ButtonType type)
+    private void ClickConfigButton(ConfigScreen.ButtonType type)
     {
         _gameModeSelectUI.SetActive(true);
         _configManager.gameObject.SetActive(false);
@@ -120,7 +120,7 @@ public class HomeSceneManager : MonoBehaviour
     /// ヘルプ画面のボタンクリックイベント
     /// </summary>
     /// <param name="type">クリックされたボタン</param>
-    private void ClickHelpButton(HelpManager.ButtonType type)
+    private void ClickHelpButton(HelpScreen.ButtonType type)
     {
         _gameModeSelectUI.SetActive(true);
         _helpManager.gameObject.SetActive(false);
@@ -130,17 +130,17 @@ public class HomeSceneManager : MonoBehaviour
     /// ソロ/マルチ選択画面のボタンクリックイベント
     /// </summary>
     /// <param name="type">クリックされたボタン</param>
-    private void ClickSoloMultiButton(SoloMultiSelectManager.ButtonType type)
+    private void ClickSoloMultiButton(SoloMultiSelectScreen.ButtonType type)
     {
         // ソロモード選択
-        if (type == SoloMultiSelectManager.ButtonType.SoloMode)
+        if (type == SoloMultiSelectScreen.ButtonType.SoloMode)
         {
             _soloMultiSelectManager.gameObject.SetActive(false);
             _weaponSelectManager.gameObject.SetActive(true);
         }
 
         // 戻る選択
-        if (type == SoloMultiSelectManager.ButtonType.Back)
+        if (type == SoloMultiSelectScreen.ButtonType.Back)
         {
             _soloMultiSelectManager.gameObject.SetActive(false);
             _gameModeSelectUI.SetActive(true);
@@ -151,17 +151,17 @@ public class HomeSceneManager : MonoBehaviour
     /// 武器選択画面のボタンクリックイベント
     /// </summary>
     /// <param name="type">クリックされたボタン</param>
-    private void ClickWeaponSelectButton(WeaponSelectManager.ButtonType type)
+    private void ClickWeaponSelectButton(WeaponSelectScreen.ButtonType type)
     {
         // 決定選択
-        if (type == WeaponSelectManager.ButtonType.OK)
+        if (type == WeaponSelectScreen.ButtonType.OK)
         {
             _weaponSelectManager.gameObject.SetActive(false);
             _cpuSelectManager.gameObject.SetActive(true);
         }
 
         // 戻る選択
-        if (type == WeaponSelectManager.ButtonType.Back)
+        if (type == WeaponSelectScreen.ButtonType.Back)
         {
             _weaponSelectManager.gameObject.SetActive(false);
             _soloMultiSelectManager.gameObject.SetActive(true);
@@ -172,16 +172,16 @@ public class HomeSceneManager : MonoBehaviour
     /// CPU選択画面のボタンクリックイベント
     /// </summary>
     /// <param name="type">クリックされたボタン</param>
-    private void ClickCpuSelectButton(CPUSelectManager.ButtonType type)
+    private void ClickCpuSelectButton(CPUSelectScreen.ButtonType type)
     {
         // 決定選択
-        if (type == CPUSelectManager.ButtonType.OK)
+        if (type == CPUSelectScreen.ButtonType.OK)
         {
             SceneManager.LoadScene("BattleMode_Offline");
         }
 
         // 戻る選択
-        if (type == CPUSelectManager.ButtonType.Back)
+        if (type == CPUSelectScreen.ButtonType.Back)
         {
             _cpuSelectManager.gameObject.SetActive(false);
             _weaponSelectManager.gameObject.SetActive(true);

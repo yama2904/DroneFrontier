@@ -50,7 +50,7 @@ namespace Online
                 GetComponent<NetworkRoomPlayer>().CmdChangeReadyState(true);
             }
 
-            CmdAddPlayer(SoloMultiSelectManager.playerName);
+            CmdAddPlayer(SoloMultiSelectScreen.playerName);
         }
 
         [ServerCallback]

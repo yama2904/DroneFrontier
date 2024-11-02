@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace Offline
 {
-    public class CPUSelectManager : MonoBehaviour
+    public class CPUSelectScreen : MonoBehaviour
     {
         /// <summary>
         /// ボタン種類

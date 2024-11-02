@@ -1305,7 +1305,7 @@ GameObject:
   - component: {fileID: 6560250239415204015}
   - component: {fileID: 6460753493941090725}
   m_Layer: 0
-  m_Name: WeaponSelect
+  m_Name: WeaponSelectScreen
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

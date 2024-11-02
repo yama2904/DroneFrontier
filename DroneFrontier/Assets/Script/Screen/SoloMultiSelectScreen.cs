@@ -3,7 +3,7 @@ using Offline;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SoloMultiSelectManager : MonoBehaviour
+public class SoloMultiSelectScreen : MonoBehaviour
 {
     /// <summary>
     /// ボタン種類
@@ -58,11 +58,11 @@ public class SoloMultiSelectManager : MonoBehaviour
 
     void Update()
     {
-        if(GameModeSelectManager.Mode == GameModeSelectManager.GameMode.RACE)
+        if(GameModeSelectScreen.Mode == GameModeSelectScreen.GameMode.RACE)
         {
             soloButton.SetActive(false);
         }
-        else if (GameModeSelectManager.Mode == GameModeSelectManager.GameMode.BATTLE)
+        else if (GameModeSelectScreen.Mode == GameModeSelectScreen.GameMode.BATTLE)
         {
             soloButton.SetActive(true);
         }

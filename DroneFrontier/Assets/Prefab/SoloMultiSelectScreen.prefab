@@ -1735,7 +1735,7 @@ GameObject:
   - component: {fileID: 8743304154295578229}
   - component: {fileID: 1114219085156434267}
   m_Layer: 0
-  m_Name: SoloMultiSelect
+  m_Name: SoloMultiSelectScreen
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

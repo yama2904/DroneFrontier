@@ -17,8 +17,6 @@ public class WatchingGame : MonoBehaviour
     /// </summary>
     private int _watchingDrone = 0;
 
-    private void Start() { }
-
     private void Update()
     {
         if (_watchDrones.Count <= 0) return;

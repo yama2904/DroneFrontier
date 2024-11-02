@@ -102,7 +102,7 @@ namespace Offline
             Cursor.visible = false;
 
             // プレイヤードローンをスポーン
-            IBattleDrone spawnDrone = _droneSpawnManager.SpawnDrone("Player", WeaponSelectManager.weapon, true);
+            IBattleDrone spawnDrone = _droneSpawnManager.SpawnDrone("Player", WeaponSelectScreen.weapon, true);
             DroneData droneData = new DroneData()
             {
                 Drone = spawnDrone,

@@ -41,7 +41,7 @@ namespace Online
             if (MatchingManager.PlayerNum <= 1) return;
 
             NewNetworkDiscovery.Singleton.StopDiscovery();  //ブロードキャストを止める
-            if (GameModeSelectManager.Mode == GameModeSelectManager.GameMode.BATTLE)
+            if (GameModeSelectScreen.Mode == GameModeSelectScreen.GameMode.BATTLE)
             {
                 MatchingManager.Singleton.CreateWeaponSelectScreen();
             }

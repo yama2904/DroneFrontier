@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,6 +15,11 @@ namespace Offline
             /// </summary>
             public List<StatusChangeType> Statuses { get; private set; } = new List<StatusChangeType>();
 
+            /// <summary>
+            /// ステータス変化イベントハンドラー
+            /// </summary>
+            /// <param name="component">イベントコンポーネント</param>
+            /// <param name="status">ステータス変化オブジェクト</param>
             public delegate void StatusEventHandler(DroneStatusComponent component, IDroneStatusChange status);
 
             /// <summary>
@@ -27,19 +31,6 @@ namespace Offline
             /// ステータス変化終了イベント
             /// </summary>
             public event StatusEventHandler OnStatusEnd;
-
-            //弱体や強化などの状態
-            public enum Status
-            {
-                BARRIER_STRENGTH,   //バリア強化
-                BARRIER_WEAK,       //バリア弱体化
-                STUN,               //スタン
-                JAMMING,            //ジャミング
-                SPEED_DOWN,         //スピードダウン
-
-                NONE
-            }
-            bool[] isStatus = new bool[(int)Status.NONE];   //状態異常が付与されているか
 
             /// <summary>
             /// 状態異常アイコン幅
@@ -58,21 +49,6 @@ namespace Offline
             //アイコン
             [SerializeField] Image barrierWeakIcon = null;
             [SerializeField] Image speedDownIcon = null;
-
-            //サウンド
-            DroneSoundComponent soundAction = null;
-
-            //スピードダウン用
-            DroneMoveComponent baseAction = null;
-            int speedDownSoundId = 0;
-            int speedDownCount = 0;
-
-
-            void Start()
-            {
-                baseAction = GetComponent<DroneMoveComponent>();
-                soundAction = GetComponent<DroneSoundComponent>();
-            }
 
             /// <summary>
             /// ドローンにステータス変化を追加する
@@ -112,16 +88,11 @@ namespace Offline
                 return true;
             }
 
-            public bool GetIsStatus(Status status)
-            {
-                return isStatus[(int)status];
-            }
-
-
+            /*
             //スピードダウン
             public void SetSpeedDown(float downPercent)
             {
-                isStatus[(int)Status.SPEED_DOWN] = true;
+                //isStatus[(int)Status.SPEED_DOWN] = true;
                 baseAction.MoveSpeed *= (1 - downPercent);
                 speedDownCount++;
 
@@ -140,7 +111,7 @@ namespace Offline
                 //スピードダウンがすべて解除されたらフラグも解除
                 if (--speedDownCount <= 0)
                 {
-                    isStatus[(int)Status.SPEED_DOWN] = false;
+                    //isStatus[(int)Status.SPEED_DOWN] = false;
                 }
 
                 //アイコン非表示
@@ -149,6 +120,7 @@ namespace Offline
                 //SE停止
                 soundAction.StopLoopSE(speedDownSoundId);
             }
+            */
 
             /// <summary>
             /// ステータス変化終了イベント

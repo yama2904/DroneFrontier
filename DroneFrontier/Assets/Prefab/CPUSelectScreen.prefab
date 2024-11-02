@@ -745,7 +745,7 @@ GameObject:
   - component: {fileID: 1976513588766212355}
   - component: {fileID: 2111383883640732688}
   m_Layer: 0
-  m_Name: CPUSelect
+  m_Name: CPUSelectScreen
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

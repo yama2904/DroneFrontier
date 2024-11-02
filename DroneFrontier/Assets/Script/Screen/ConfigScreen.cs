@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class ConfigManager : MonoBehaviour
+public class ConfigScreen : MonoBehaviour
 {
     /// <summary>
     /// ボタン種類

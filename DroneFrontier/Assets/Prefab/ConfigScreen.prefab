@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2480745006125000259}
   - component: {fileID: 6983158067203767758}
   m_Layer: 0
-  m_Name: Config
+  m_Name: ConfigScreen
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -42,7 +42,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 2480745006125000258}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 840be0060bd93b648986032ff2ab845e, type: 3}
+  m_Script: {fileID: 11500000, guid: 7113eeba1fcce1e4186978906d516e63, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   BGMSlider: {fileID: 2480745007968092340}

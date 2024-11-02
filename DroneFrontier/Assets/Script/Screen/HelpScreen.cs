@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public class HelpManager : MonoBehaviour
+public class HelpScreen : MonoBehaviour
 {
     /// <summary>
     /// ボタン種類

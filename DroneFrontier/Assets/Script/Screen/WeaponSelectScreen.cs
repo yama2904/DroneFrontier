@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 namespace Offline
 {
-    public class WeaponSelectManager : MonoBehaviour
+    public class WeaponSelectScreen : MonoBehaviour
     {
         /// <summary>
         /// ボタン種類

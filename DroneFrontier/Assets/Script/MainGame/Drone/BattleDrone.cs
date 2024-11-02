@@ -266,10 +266,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
         // ロックオン使用
         if (Input.GetKey(KeyCode.LeftShift))
         {
-            if (!_statusComponent.GetIsStatus(DroneStatusComponent.Status.JAMMING))
-            {
-                _lockOnComponent.StartLockOn();
-            }
+            _lockOnComponent.StartLockOn();
         }
         // ロックオン解除
         if (Input.GetKeyUp(KeyCode.LeftShift))
@@ -281,19 +278,15 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
 
         #region Radar
 
-        // ジャミング中は処理しない
-        if (!_statusComponent.GetIsStatus(DroneStatusComponent.Status.JAMMING))
+        // レーダー音の再生
+        if (Input.GetKeyDown(KeyCode.Q))
         {
-            // レーダー音の再生
-            if (Input.GetKeyDown(KeyCode.Q))
-            {
-                _soundComponent.PlayOneShot(SoundManager.SE.RADAR, SoundManager.SEVolume);
-            }
-            // レーダー使用
-            if (Input.GetKey(KeyCode.Q))
-            {
-                _radarComponent.StartRadar();
-            }
+            _soundComponent.PlayOneShot(SoundManager.SE.RADAR, SoundManager.SEVolume);
+        }
+        // レーダー使用
+        if (Input.GetKey(KeyCode.Q))
+        {
+            _radarComponent.StartRadar();
         }
         // レーダー終了
         if (Input.GetKeyUp(KeyCode.Q))
