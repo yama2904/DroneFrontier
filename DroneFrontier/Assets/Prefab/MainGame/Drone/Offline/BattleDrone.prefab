@@ -378,11 +378,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 232d62e5cb606f949ac863af7e06a1dd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _statusIconCanvas: {fileID: 5810719151430010898}
   barrierWeakIcon: {fileID: 6433872119694324529}
-  jammingIcon: {fileID: 0}
   speedDownIcon: {fileID: 6433872120169736683}
-  stunScreenMask: {fileID: 3969662621950321302, guid: 8c2ea1de19e199245af77ca42744e83f,
-    type: 3}
 --- !u!114 &6158696015299256227
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -184,7 +184,7 @@ public class DroneRadarComponent : MonoBehaviour
             }
 
             // マーカーの親Canvas紐づけ
-            RectTransform markerTransform = marker.GetComponent<RectTransform>();
+            RectTransform markerTransform = marker.rectTransform;
             markerTransform.SetParent(_canvas);
 
             // 照射中マップに追加

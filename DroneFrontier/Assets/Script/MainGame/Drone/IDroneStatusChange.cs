@@ -15,7 +15,7 @@ public interface IDroneStatusChange
     /// <summary>
     /// 状態変化のアイコン
     /// </summary>
-    Image IconImage { get; }
+    Image IconPrefab { get; }
 
     /// <summary>
     /// ステータス変化実行

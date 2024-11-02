@@ -114,7 +114,7 @@ public class DroneItemComponent : MonoBehaviour
             ItemData itemData = new ItemData();
             if (_itemFrameImages.Length > i)
             {
-                itemData.ItemFrameTransform = _itemFrameImages[i].GetComponent<RectTransform>();
+                itemData.ItemFrameTransform = _itemFrameImages[i].rectTransform;
             }
             _itemDatas.Add(itemData);
         }

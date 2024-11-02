@@ -10,7 +10,7 @@ public class JammingStatus : IDroneStatusChange
 {
     public StatusChangeType StatusType => StatusChangeType.Jamming;
 
-    public Image IconImage { get; private set; }
+    public Image IconPrefab { get; private set; }
 
     public event EventHandler StatusEndEvent;
 
@@ -39,14 +39,23 @@ public class JammingStatus : IDroneStatusChange
     /// </summary>
     private CancellationTokenSource _cancel = new CancellationTokenSource();
 
+    /// <summary>
+    /// アイコンキャッシュ
+    /// </summary>
+    private static GameObject _cacheIconPrefab = null;
+
     public JammingStatus()
     {
-        // アイコン画像読み込み
-        Addressables.LoadAssetAsync<GameObject>("JammigUI").Completed += handle =>
+        // アイコン初回読み込み時にキャッシュへ保存
+        if (_cacheIconPrefab == null)
         {
-            IconImage = UnityEngine.Object.Instantiate(handle.Result).GetComponent<Image>();
+            var handle = Addressables.LoadAssetAsync<GameObject>("JammigUI");
+            _cacheIconPrefab = handle.WaitForCompletion();
             Addressables.Release(handle);
-        };
+        }
+
+        // キャッシュからアイコン画像取り出し
+        IconPrefab = _cacheIconPrefab.GetComponent<Image>();
     }
 
     public bool Invoke(GameObject drone, float statusSec, params object[] addParams)
@@ -89,7 +98,7 @@ public class JammingStatus : IDroneStatusChange
         // ジャミング終了タイマー停止
         _cancel.Cancel();
 
-        // アイコン破棄
-        UnityEngine.Object.Destroy(IconImage.gameObject);
+        // 終了イベント発火
+        StatusEndEvent?.Invoke(this, EventArgs.Empty);
     }
 }

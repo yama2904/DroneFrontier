@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -39,18 +41,26 @@ namespace Offline
             }
             bool[] isStatus = new bool[(int)Status.NONE];   //状態異常が付与されているか
 
+            /// <summary>
+            /// 状態異常アイコン幅
+            /// </summary>
+            private int STATUS_ICON_WIDTH = 100;
+
+            [SerializeField, Tooltip("状態異常アイコンを表示するCanvas")]
+            private RectTransform _statusIconCanvas = null;
+
+            /// <summary>
+            /// 状態異常と対応するアイコン<br/>
+            /// key:状態異常を付与したIDroneStatusChange, value:状態異常アイコンのRectTransform
+            /// </summary>
+            private OrderedDictionary _statusesIconMap = new OrderedDictionary();
+
             //アイコン
             [SerializeField] Image barrierWeakIcon = null;
-            [SerializeField] Image jammingIcon = null;
             [SerializeField] Image speedDownIcon = null;
 
             //サウンド
             DroneSoundComponent soundAction = null;
-
-            //ジャミング用
-            DroneLockOnComponent lockOn = null;
-            DroneRadarComponent radar = null;
-            int jammingSoundId = -1;
 
             //スピードダウン用
             DroneMoveComponent baseAction = null;
@@ -62,8 +72,6 @@ namespace Offline
             {
                 baseAction = GetComponent<DroneMoveComponent>();
                 soundAction = GetComponent<DroneSoundComponent>();
-                lockOn = GetComponent<DroneLockOnComponent>();
-                radar = GetComponent<DroneRadarComponent>();
             }
 
             /// <summary>
@@ -83,7 +91,20 @@ namespace Offline
                 status.StatusEndEvent += StatusEndEvent;
                 Statuses.Add(status.StatusType);
 
-                // ToDo:ステータス変化アイコンを表示
+                // ステータス変化アイコンを表示
+                Debug.Log(status.IconPrefab);
+                if (status.IconPrefab != null)
+                {
+                    Image icon = Instantiate(status.IconPrefab);
+                    RectTransform t = icon.rectTransform;
+                    t.SetParent(_statusIconCanvas, false);
+
+                    // アイコン表示位置調整
+                    t.localPosition = new Vector3(STATUS_ICON_WIDTH * _statusesIconMap.Count, t.localPosition.y, t.localPosition.z);
+
+                    // マップに追加
+                    _statusesIconMap.Add(status, t);
+                }
 
                 // ステータス変化追加イベント発火
                 OnStatusAdd?.Invoke(this, status);
@@ -94,36 +115,6 @@ namespace Offline
             public bool GetIsStatus(Status status)
             {
                 return isStatus[(int)status];
-            }
-
-
-            //ジャミング
-            public void SetJamming()
-            {
-                if (lockOn == null) return;
-                if (radar == null) return;
-
-                lockOn.StopLockOn();
-                radar.StopRadar();
-                isStatus[(int)Status.JAMMING] = true;
-
-                //SE再生
-                jammingSoundId = soundAction.PlayLoopSE(SoundManager.SE.JAMMING_NOISE, SoundManager.SEVolume);
-
-                //アイコン表示
-                jammingIcon.enabled = true;
-            }
-
-            //ジャミング解除
-            public void UnSetJamming()
-            {
-                isStatus[(int)Status.JAMMING] = false;
-
-                //SE停止
-                soundAction.StopLoopSE(jammingSoundId);
-
-                //アイコン非表示
-                jammingIcon.enabled = false;
             }
 
 
@@ -170,6 +161,20 @@ namespace Offline
 
                 // ステータスリストから除去
                 Statuses.Remove(status.StatusType);
+
+                // 状態異常アイコンを削除
+                if (_statusesIconMap.Contains(status))
+                {
+                    Destroy((_statusesIconMap[status] as RectTransform).gameObject);
+                    _statusesIconMap.Remove(status);
+
+                    // 削除した分アイコンの表示を詰める
+                    for (int i = 0; i < _statusesIconMap.Count; i++)
+                    {
+                        RectTransform t = _statusesIconMap[i] as RectTransform;
+                        t.localPosition = new Vector3(STATUS_ICON_WIDTH * i, t.localPosition.y, t.localPosition.z);
+                    }
+                }
 
                 // イベント削除
                 status.StatusEndEvent -= StatusEndEvent;

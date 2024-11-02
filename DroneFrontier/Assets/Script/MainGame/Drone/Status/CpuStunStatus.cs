@@ -7,7 +7,7 @@ public class CpuStunStatus : IDroneStatusChange
 {
     public StatusChangeType StatusType => StatusChangeType.Stun;
 
-    public Image IconImage => null;
+    public Image IconPrefab => null;
 
     public event EventHandler StatusEndEvent;
 

@@ -6,7 +6,7 @@ public class BarrierWeakStatus : IDroneStatusChange
 {
     public StatusChangeType StatusType => StatusChangeType.BarrierWeak;
 
-    public Image IconImage => throw new NotImplementedException();
+    public Image IconPrefab => throw new NotImplementedException();
 
     public event EventHandler StatusEndEvent;
 
