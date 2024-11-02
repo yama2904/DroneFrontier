@@ -1,0 +1,133 @@
+﻿using Offline.Player;
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace Offline
+{
+    public class JammingBot : MonoBehaviour, ILockableOn, IRadarable, IDamageable
+    {
+        /// <summary>
+        /// ジャミングボットの残りHP
+        /// </summary>
+        public float HP
+        {
+            get { return _hp; }
+        }
+
+        /// <summary>
+        /// ロックオン可能であるか
+        /// </summary>
+        public bool IsLockableOn { get; } = true;
+
+        /// <summary>
+        /// ロックオン不可にするオブジェクト
+        /// </summary>
+        public List<GameObject> NotLockableOnList { get; } = new List<GameObject>();
+
+        public IRadarable.ObjectType Type => IRadarable.ObjectType.Enemy;
+
+        public bool IsRadarable => true;
+
+        public List<GameObject> NotRadarableList { get; } = new List<GameObject>();
+
+        /// <summary>
+        /// ジャミングボット生成オブジェクト
+        /// </summary>
+        public GameObject Creater
+        {
+            get { return _creater; }
+            set
+            {
+                NotLockableOnList.Clear();
+                NotLockableOnList.Add(value);
+                NotRadarableList.Clear();
+                NotRadarableList.Add(value);
+
+                // 更新前のオブジェクトとの当たり判定を復活
+                Collider oldCollider = _creater?.GetComponent<Collider>();
+                if (oldCollider != null)
+                {
+                    Physics.IgnoreCollision(oldCollider, GetComponent<Collider>(), false);
+                }
+
+                // 生成者とは当たり判定を行わない
+                Collider collider = value?.GetComponent<Collider>();
+                if (collider != null)
+                {
+                    Physics.IgnoreCollision(collider, GetComponent<Collider>());
+                }
+
+                _creater = value;
+            }
+        }
+        private GameObject _creater = null;
+
+        /// <summary>
+        /// ジャミングボット破壊イベント
+        /// </summary>
+        public event EventHandler DestroyEvent;
+
+        [SerializeField]
+        private float _hp = 30.0f;
+
+        /// <summary>
+        /// 各オブジェクトに付与したジャミングステータス
+        /// </summary>
+        private Dictionary<GameObject, JammingStatus> _addedJammingStatusMap = new Dictionary<GameObject, JammingStatus>();
+
+        public void Damage(GameObject source, float value)
+        {
+            // 小数点第2以下切り捨て
+            value = Useful.Floor(value, 1);
+            _hp -= value;
+            if (_hp < 0)
+            {
+                // 破壊イベント発火してオブジェクト削除
+                DestroyEvent?.Invoke(this, EventArgs.Empty);
+                Destroy(gameObject);
+            }
+
+            Debug.Log($"{name}に{value}のダメージ 残りHP:{_hp}");
+        }
+
+        private void OnDestroy()
+        {
+            foreach (JammingStatus status in _addedJammingStatusMap.Values)
+            {
+                status.EndJamming();
+            }
+
+            //デバッグ用
+            Debug.Log("ジャミングボット破壊");
+        }
+
+        private void OnTriggerEnter(Collider other)
+        {
+            // ジャミングボットを生成したオブジェクト自身なら処理しない
+            if (other.gameObject == _creater) return;
+
+            // 既にジャミング付与済みの場合は処理しない
+            if (_addedJammingStatusMap.ContainsKey(other.gameObject)) return;
+
+            // プレイヤーかCPUのみ処理
+            string tag = other.tag;
+            if (tag != TagNameConst.PLAYER && tag != TagNameConst.CPU) return;
+
+            // ジャミングステータス付与
+            JammingStatus status = new JammingStatus();
+            other.GetComponent<DroneStatusComponent>().AddStatus(status, 9999);
+            _addedJammingStatusMap.Add(other.gameObject, status);
+        }
+
+        private void OnTriggerExit(Collider other)
+        {
+            // ジャミング解除
+            if (_addedJammingStatusMap.ContainsKey(other.gameObject))
+            {
+                _addedJammingStatusMap[other.gameObject].EndJamming();
+                _addedJammingStatusMap.Remove(other.gameObject);
+            }
+        }
+    }
+}

@@ -17,8 +17,48 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: 77a3b631f60219d4f90d070c6543a978
   m_SerializeEntries:
+  - m_GUID: 020ba08994670fc42a791716f37eb94a
+    m_Address: JammigUI
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 207208a205ab31a4fba67586f4180f2c
+    m_Address: LaserWeapon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2d84d4d2a3dee1646a24af9e5df852b4
+    m_Address: Shotgun
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 397426775ed86df4bace4abda3979ad9
+    m_Address: CPULaserWeapon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5605f4dc9579efd42afc3b6d6bb27df0
+    m_Address: Gatling
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6c21e9434747447448a8aa0e11347b4c
+    m_Address: CPUShotgun
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8c2ea1de19e199245af77ca42744e83f
     m_Address: StunMask
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ae3e1b7c5493a0746ab860ea220b8186
+    m_Address: MissileWeapon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fe30b06a9da565844a09bd48a5d1c170
+    m_Address: CPUMissileWeapon
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

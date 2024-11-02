@@ -379,7 +379,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   barrierWeakIcon: {fileID: 6433872119694324529}
-  jammingIcon: {fileID: 6433872118626349625}
+  jammingIcon: {fileID: 0}
   speedDownIcon: {fileID: 6433872120169736683}
   stunScreenMask: {fileID: 3969662621950321302, guid: 8c2ea1de19e199245af77ca42744e83f,
     type: 3}
@@ -1318,11 +1318,11 @@ RectTransform:
   - {fileID: 2857361770131387096}
   - {fileID: 2291845521006783460}
   - {fileID: 6433872119694324528}
-  - {fileID: 6433872118626349624}
   - {fileID: 6433872120169736682}
   - {fileID: 568489739739018411}
   - {fileID: 5902566705743016184}
   - {fileID: 6474015958023064013}
+  - {fileID: 5810719151430010898}
   m_Father: {fileID: 4321149827645855629}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -1779,7 +1779,7 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!1 &6433872118626349627
+--- !u!1 &5722476601775959361
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1787,23 +1787,23 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 6433872118626349624}
-  - component: {fileID: 6433872118626349630}
-  - component: {fileID: 6433872118626349625}
+  - component: {fileID: 5810719151430010898}
+  - component: {fileID: 282902723799882398}
+  - component: {fileID: 2409770430150608426}
   m_Layer: 5
-  m_Name: JammigUI
+  m_Name: StatusIcons
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!224 &6433872118626349624
+--- !u!224 &5810719151430010898
 RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6433872118626349627}
+  m_GameObject: {fileID: 5722476601775959361}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -1813,47 +1813,49 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 100, y: -102.2}
-  m_SizeDelta: {x: 100, y: 60}
+  m_AnchoredPosition: {x: 50, y: -210}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!222 &6433872118626349630
-CanvasRenderer:
+--- !u!223 &282902723799882398
+Canvas:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6433872118626349627}
-  m_CullTransparentMesh: 0
---- !u!114 &6433872118626349625
+  m_GameObject: {fileID: 5722476601775959361}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 0
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 0
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
+  m_AdditionalShaderChannelsFlag: 0
+  m_UpdateRectTransformForStandalone: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 0
+  m_TargetDisplay: 0
+--- !u!114 &2409770430150608426
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6433872118626349627}
-  m_Enabled: 0
+  m_GameObject: {fileID: 5722476601775959361}
+  m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 0
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 33be102370965814cadf368da807ffb4, type: 3}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  m_IgnoreReversedGraphics: 1
+  m_BlockingObjects: 0
+  m_BlockingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
 --- !u!1 &6433872119694324531
 GameObject:
   m_ObjectHideFlags: 0
@@ -1964,7 +1966,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 150, y: -105}
-  m_SizeDelta: {x: 110, y: 90}
+  m_SizeDelta: {x: 100, y: 90}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6433872120169736680
 CanvasRenderer:

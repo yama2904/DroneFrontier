@@ -3,8 +3,10 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CpuStunStatus : IDroneStatus
+public class CpuStunStatus : IDroneStatusChange
 {
+    public StatusChangeType StatusType => StatusChangeType.Stun;
+
     public Image IconImage => null;
 
     public event EventHandler StatusEndEvent;

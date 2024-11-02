@@ -31,6 +31,8 @@ namespace Offline
             // 投てき処理
             grenade.ThrowGrenade(drone, _throwSpeed, _impactSec, _weight, _stunSec);
 
+            Destroy(gameObject);
+
             return true;
         }
     }

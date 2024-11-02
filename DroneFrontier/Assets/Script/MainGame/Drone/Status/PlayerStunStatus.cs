@@ -4,8 +4,11 @@ using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.UI;
 
-public class PlayerStunStatus : IDroneStatus
+public class PlayerStunStatus : IDroneStatusChange
+
 {
+    public StatusChangeType StatusType => StatusChangeType.Stun;
+
     public Image IconImage => null;
 
     public event EventHandler StatusEndEvent;

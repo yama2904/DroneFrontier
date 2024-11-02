@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.Runtime.Remoting.Messaging;
 
 namespace Offline
 {
@@ -17,7 +18,7 @@ namespace Offline
         public IBattleDrone shooter = null;
         AudioSource audioSource = null;
 
-        List<GameObject> wasHitObjects = new List<GameObject>();    //ダメージを与えたオブジェクトを全て格納する
+        List<GameObject> hitedList = new List<GameObject>();    //ダメージを与えたオブジェクトを全て格納する
         const float DESTROY_TIME = 3.0f;   //生存時間
 
 
@@ -94,55 +95,23 @@ namespace Offline
 
         private void OnTriggerEnter(Collider other)
         {
-            //当たり判定を行わないオブジェクトだったら処理をしない
-            if (other.CompareTag(TagNameConst.BULLET)) return;
-            if (other.CompareTag(TagNameConst.ITEM)) return;
-            if (other.CompareTag(TagNameConst.JAMMING)) return;
-            if (other.CompareTag(TagNameConst.GIMMICK)) return;
-            if (other.CompareTag(TagNameConst.NOT_COLLISION)) return;
-
-            if (other.CompareTag(TagNameConst.PLAYER) || other.CompareTag(TagNameConst.CPU))
+            // ダメージ可能インターフェースが実装されていない場合は除外
+            IDamageable damageable = null;
+            if (!other.TryGetComponent(out damageable))
             {
-                //ミサイルを撃った本人なら処理しない
-                if (other.GetComponent<IBattleDrone>() == shooter) return;
-
-                //既にヒット済のオブジェクトはスルー
-                foreach (GameObject o in wasHitObjects)
-                {
-                    if (ReferenceEquals(other, o)) return;
-                }
-                other.GetComponent<DroneDamageComponent>().Damage(shooter.GameObject, power);
-                wasHitObjects.Add(other.gameObject);
-
-                // ToDo:CPU側に処理させる
-                //if (other.CompareTag(TagNameManager.CPU))
-                //{
-                //    other.GetComponent<CPU.BattleDrone>().StartRotate(shooter.transform);
-                //}
-
-                //デバッグ用
-                Debug.Log(other.name + "にExplosionで" + CalcPower(other.transform.position) + "ダメージ");
+                return;
             }
-            else if (other.CompareTag(TagNameConst.JAMMING_BOT))
+
+            // ミサイルを撃った本人なら処理しない
+            if (other.GetComponent<IBattleDrone>() == shooter) return;
+
+            // 既にヒット済のオブジェクトはスルー
+            foreach (GameObject o in hitedList)
             {
-                //名前省略
-                JammingBot jb = other.GetComponent<JammingBot>();
-
-                //撃った人が放ったジャミングボットなら処理しない
-                if (jb.creater == shooter) return;
-
-                //既にヒット済のオブジェクトはスルー
-                foreach (GameObject o in wasHitObjects)
-                {
-                    if (ReferenceEquals(other.gameObject, o)) return;
-                }
-                other.GetComponent<JammingBot>().Damage(power);
-                wasHitObjects.Add(other.gameObject);
-
-
-                //デバッグ用
-                Debug.Log(other.name + "にExplosionで" + CalcPower(other.transform.position) + "ダメージ");
+                if (other.gameObject == o) return;
             }
+            damageable.Damage(shooter.GameObject, power);
+            hitedList.Add(other.gameObject);
         }
     }
 }

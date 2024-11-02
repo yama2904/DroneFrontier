@@ -5,8 +5,13 @@ using UnityEngine.UI;
 /// <summary>
 /// ドローンステータス変更インターフェース
 /// </summary>
-public interface IDroneStatus
+public interface IDroneStatusChange
 {
+    /// <summary>
+    /// ステータス変化種類
+    /// </summary>
+    StatusChangeType StatusType { get; }
+
     /// <summary>
     /// 状態変化のアイコン
     /// </summary>

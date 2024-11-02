@@ -54,7 +54,7 @@ public class DroneItemComponent : MonoBehaviour
             if (data.Having) continue;
 
             // アイテム情報更新
-            data.Item = item.DroneItem.GetComponent<IDroneItem>();
+            data.Item = item.DroneItem;
             data.Having = true;
 
             // アイテム枠が表示されており、所持アイテムにアイコンが設定されている場合はアイコンを表示

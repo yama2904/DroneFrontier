@@ -157,7 +157,7 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
         HP = _maxHP;
 
         // ダメージイベント設定
-        damageAction.DamageEvent += DamageHandler;
+        damageAction.DamageEvent += DamageEvent;
 
         // ロックオン不可オブジェクトに自分を設定
         NotLockableOnList.Add(gameObject);
@@ -366,12 +366,12 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
     }
 
     /// <summary>
-    /// ダメージハンドラー
+    /// ダメージイベント
     /// </summary>
     /// <param name="sender">イベントオブジェクト</param>
     /// <param name="source">ダメージを与えたオブジェクト</param>
     /// <param name="damage">ダメージ量</param>
-    public void DamageHandler(DroneDamageComponent sender, GameObject source, float damage)
+    public void DamageEvent(DroneDamageComponent sender, GameObject source, float damage)
     {
         if (_lockOnComponent.Target == null)
         {

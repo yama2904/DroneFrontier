@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Offline
 {
-    public class DroneDamageComponent : MonoBehaviour
+    public class DroneDamageComponent : MonoBehaviour, IDamageable
     {
         /// <summary>
         /// ダメージハンドラー
@@ -94,7 +94,7 @@ namespace Offline
             {
                 // バリアが破壊されている場合はドローン本体へダメージ
                 _drone.HP -= value;
-                Debug.Log($"{_drone.Name}:ドローンに{value}のダメージ\n残りHP:{_drone.HP}");
+                Debug.Log($"{_drone.Name}:ドローンに{value}のダメージ 残りHP:{_drone.HP}");
             }
 
             // ダメージ回数加算

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
@@ -36,6 +37,11 @@ public class DroneLockOnComponent : MonoBehaviour
     /// </summary>
     private bool _startedLockOn = false;
 
+    /// <summary>
+    /// 一時的なロックオン無効の重複カウント
+    /// </summary>
+    private int _disabledCount = 0;
+
     Transform _droneTransform = null;
     Transform _cameraTransform = null;
     Transform _targetTransform = null;
@@ -45,6 +51,7 @@ public class DroneLockOnComponent : MonoBehaviour
     /// </summary>
     public void StartLockOn()
     {
+        if (!enabled) return;
         _startedLockOn = true;
     }
 
@@ -53,8 +60,36 @@ public class DroneLockOnComponent : MonoBehaviour
     /// </summary>
     public void StopLockOn()
     {
+        if (!enabled) return;
         _startedLockOn = false;
         ResetTarget();
+    }
+
+    /// <summary>
+    /// 一時的にロックオン無効を設定する
+    /// </summary>
+    public void QueueDisabled()
+    {
+        if (_disabledCount == 0)
+        {
+            StopLockOn();
+        }
+
+        _disabledCount++;
+        enabled = false;
+    }
+
+    /// <summary>
+    /// 一時的なロックオン無効を解除する。ロックオン無効が重複してる場合は無効のままとなる。
+    /// </summary>
+    public void DequeueDisabled()
+    {
+        _disabledCount--;
+        if (_disabledCount <= 0)
+        {
+            _disabledCount = 0;
+            enabled = true;
+        }
     }
 
     private void Awake()

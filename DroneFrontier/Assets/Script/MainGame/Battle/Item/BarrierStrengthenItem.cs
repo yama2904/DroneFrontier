@@ -13,7 +13,12 @@ namespace Offline
 
         public bool UseItem(GameObject drone)
         {
-            return drone.GetComponent<DroneStatusComponent>().AddStatus(new BarrierStrengthenStatus(), _strengthenSec, _damageDownPercent);
+            bool success = drone.GetComponent<DroneStatusComponent>().AddStatus(new BarrierStrengthenStatus(), _strengthenSec, _damageDownPercent);
+            if (success)
+            {
+                Destroy(gameObject);
+            }
+            return success;
         }
     }
 }

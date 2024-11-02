@@ -23,7 +23,7 @@ public class SpawnItem : MonoBehaviour, IRadarable
     /// <summary>
     /// 取得時に使用可能となるアイテム
     /// </summary>
-    public GameObject DroneItem { get { return _droneItem; } }
+    public IDroneItem DroneItem { get; private set; }
 
     public IRadarable.ObjectType Type => IRadarable.ObjectType.Item;
 
@@ -34,8 +34,13 @@ public class SpawnItem : MonoBehaviour, IRadarable
     [SerializeField, Tooltip("アイテム所持中に表示するアイコン")]
     private Image _iconImage = null;
 
-    [SerializeField, Tooltip("取得時に使用可能となるアイテム")]
+    [SerializeField, Tooltip("取得時に使用可能となるアイテム（※要IDroneItemインターフェース実装）")]
     private GameObject _droneItem = null;
+
+    private void Awake()
+    {
+        DroneItem = Instantiate(_droneItem, Vector3.zero, Quaternion.identity).GetComponent<IDroneItem>();
+    }
 
     private void OnDestroy()
     {

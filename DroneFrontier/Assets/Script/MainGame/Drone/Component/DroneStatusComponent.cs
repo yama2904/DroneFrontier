@@ -12,7 +12,19 @@ namespace Offline
             /// <summary>
             /// 変化中のステータスリスト
             /// </summary>
-            public List<IDroneStatus> Statuses { get; private set; } = new List<IDroneStatus>();
+            public List<StatusChangeType> Statuses { get; private set; } = new List<StatusChangeType>();
+
+            public delegate void StatusEventHandler(DroneStatusComponent component, IDroneStatusChange status);
+
+            /// <summary>
+            /// ステータス変化追加イベント
+            /// </summary>
+            public event StatusEventHandler OnStatusAdd;
+
+            /// <summary>
+            /// ステータス変化終了イベント
+            /// </summary>
+            public event StatusEventHandler OnStatusEnd;
 
             //弱体や強化などの状態
             public enum Status
@@ -35,13 +47,6 @@ namespace Offline
             //サウンド
             DroneSoundComponent soundAction = null;
 
-            //バリア用
-            DroneBarrierComponent barrier = null;
-
-            //スタン用
-            [SerializeField] FadeoutImage stunScreenMask = null;
-            FadeoutImage createdStunScreenMask = null;
-
             //ジャミング用
             DroneLockOnComponent lockOn = null;
             DroneRadarComponent radar = null;
@@ -57,7 +62,6 @@ namespace Offline
             {
                 baseAction = GetComponent<DroneMoveComponent>();
                 soundAction = GetComponent<DroneSoundComponent>();
-                barrier = GetComponent<DroneBarrierComponent>();
                 lockOn = GetComponent<DroneLockOnComponent>();
                 radar = GetComponent<DroneRadarComponent>();
             }
@@ -69,7 +73,7 @@ namespace Offline
             /// <param name="statusSec">ステータス変化時間（秒）</param>
             /// <param name="addParams">追加パラメータ</param>
             /// <returns>true:成功, false:失敗</returns>
-            public bool AddStatus(IDroneStatus status, float statusSec, params object[] addParams)
+            public bool AddStatus(IDroneStatusChange status, float statusSec, params object[] addParams)
             {
                 // ステータス変化実行
                 bool success = status.Invoke(gameObject, statusSec, addParams);
@@ -77,9 +81,12 @@ namespace Offline
 
                 // ステータス終了イベントを設定してリストに追加
                 status.StatusEndEvent += StatusEndEvent;
-                Statuses.Add(status);
+                Statuses.Add(status.StatusType);
 
                 // ToDo:ステータス変化アイコンを表示
+
+                // ステータス変化追加イベント発火
+                OnStatusAdd?.Invoke(this, status);
 
                 return true;
             }
@@ -159,13 +166,16 @@ namespace Offline
             /// <param name="e">イベント引数</param>
             private void StatusEndEvent(object sender, EventArgs e)
             {
-                IDroneStatus status = sender as IDroneStatus;
+                IDroneStatusChange status = sender as IDroneStatusChange;
 
                 // ステータスリストから除去
-                Statuses.Remove(status);
+                Statuses.Remove(status.StatusType);
 
                 // イベント削除
                 status.StatusEndEvent -= StatusEndEvent;
+
+                // ステータス変化終了イベント発火
+                OnStatusEnd?.Invoke(this, status);
 
                 Debug.Log("StatusEndEvent:" + sender.GetType().ToString());
             }

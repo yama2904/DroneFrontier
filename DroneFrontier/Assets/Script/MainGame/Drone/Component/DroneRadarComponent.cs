@@ -50,20 +50,60 @@ public class DroneRadarComponent : MonoBehaviour
     /// </summary>
     private bool _startedRadar = false;
 
+    /// <summary>
+    /// 一時的なロックオン無効の重複カウント
+    /// </summary>
+    private int _disabledCount = 0;
+
     private Transform _cameraTransform = null;
 
+    /// <summary>
+    /// レーダー照射開始
+    /// </summary>
     public void StartRadar()
     {
+        if (!enabled) return;
         _startedRadar = true;
         _radarMask.enabled = true;
     }
 
+    /// <summary>
+    /// レーダー照射停止
+    /// </summary>
     public void StopRadar()
     {
+        if (!enabled) return;
         _startedRadar = false;
         _radarMask.enabled = false;
         _radarTimer = 0;
         DestroyAllMarkers();
+    }
+
+    /// <summary>
+    /// 一時的にロックオン無効を設定する
+    /// </summary>
+    public void QueueDisabled()
+    {
+        if (_disabledCount == 0)
+        {
+            StopRadar();
+        }
+
+        _disabledCount++;
+        enabled = false;
+    }
+
+    /// <summary>
+    /// 一時的なロックオン無効を解除する。ロックオン無効が重複してる場合は無効のままとなる。
+    /// </summary>
+    public void DequeueDisabled()
+    {
+        _disabledCount--;
+        if (_disabledCount <= 0)
+        {
+            _disabledCount = 0;
+            enabled = true;
+        }
     }
 
     private void Awake()

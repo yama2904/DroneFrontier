@@ -181,26 +181,11 @@ namespace Offline
                     //ヒットした場所にEndオブジェクトを移動させる
                     endObjectTransform.position = hit.point;
 
-                    if (hit.transform.CompareTag(TagNameConst.PLAYER) ||
-                        hit.transform.CompareTag(TagNameConst.CPU))
+                    // ダメージ可能インターフェースが実装されている場合はダメージを与える
+                    Transform t = hit.transform;
+                    if (t.TryGetComponent(out IDamageable damageable))
                     {
-                        hit.transform.GetComponent<DroneDamageComponent>().Damage(shooter.GameObject, power);
-
-                        // CPU側に処理させる
-                        //if (hit.transform.CompareTag(TagNameManager.CPU))
-                        //{
-                        //    hit.transform.GetComponent<CPU.BattleDrone>().StartRotate(shooter.transform);
-                        //}
-
-                        //発射間隔のカウントをリセット
-                        shotTimeCount = 0;
-                    }
-                    else if (hit.transform.CompareTag(TagNameConst.JAMMING_BOT))
-                    {
-                        hit.transform.GetComponent<JammingBot>().Damage(power);
-
-                        //発射間隔のカウントをリセット
-                        shotTimeCount = 0;
+                        damageable.Damage(shooter.GameObject, power);
                     }
                 }
                 else

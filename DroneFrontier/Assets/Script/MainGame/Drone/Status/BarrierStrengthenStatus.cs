@@ -3,8 +3,10 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class BarrierStrengthenStatus : IDroneStatus
+public class BarrierStrengthenStatus : IDroneStatusChange
 {
+    public StatusChangeType StatusType => StatusChangeType.BarrierStrenghen;
+
     public Image IconImage => null;
 
     public event EventHandler StatusEndEvent;

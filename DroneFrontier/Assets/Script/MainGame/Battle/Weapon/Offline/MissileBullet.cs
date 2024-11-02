@@ -80,32 +80,12 @@ namespace Offline
             if (other.CompareTag(TagNameConst.JAMMING)) return;
             if (other.CompareTag(TagNameConst.NOT_COLLISION)) return;
 
-            //プレイヤーの当たり判定
-            if (other.CompareTag(TagNameConst.PLAYER) || other.CompareTag(TagNameConst.CPU))
+            // ダメージ可能インターフェースが実装されている場合はダメージを与える
+            if (other.TryGetComponent(out IDamageable damageable))
             {
-                //撃った本人なら処理しない
-                if (other.GetComponent<IBattleDrone>() == shooter) return;
-
-                //ダメージ処理
-                other.GetComponent<DroneDamageComponent>().Damage(shooter.GameObject, Power);
-
-                // ToDo:CPU側に処理させる
-                //if (other.CompareTag(TagNameManager.CPU))
-                //{
-                //    other.GetComponent<CPU.BattleDrone>().StartRotate(shooter.transform);
-                //}
+                damageable.Damage(shooter.GameObject, Power);
             }
-            else if (other.CompareTag(TagNameConst.JAMMING_BOT))
-            {
-                //キャッシュ用
-                JammingBot jb = other.GetComponent<JammingBot>();
 
-                //撃った人が放ったジャミングボットなら処理しない
-                if (jb.creater == shooter) return;
-
-                //ダメージ処理
-                jb.Damage(Power);
-            }
             DestroyMe();
         }
     }

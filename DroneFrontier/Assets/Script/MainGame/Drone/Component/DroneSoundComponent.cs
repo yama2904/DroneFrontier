@@ -33,11 +33,11 @@ namespace Offline
         /// </summary>
         /// <param name="se">再生するSE</param>
         /// <param name="volume">再生音量を0～1で指定（指定しない場合はSoundManagerのSE音量を使用）</param>
-        public void PlayOneShot(SoundManager.SE se, float volume = 0)
+        public void PlayOneShot(SoundManager.SE se, float volume = -1)
         {
             if (se == SoundManager.SE.NONE) return;
 
-            if (volume == 0)
+            if (volume == -1)
             {
                 volume = SoundManager.SEVolume;
             }
@@ -51,9 +51,14 @@ namespace Offline
         /// <param name="se">再生するSE</param>
         /// <param name="volume">再生音量を0～1で指定（指定しない場合はSoundManagerのSE音量を使用）</param>
         /// <returns>SE再生番号（SEを停止する際に使用）</returns>
-        public int PlayLoopSE(SoundManager.SE se, float volume)
+        public int PlayLoopSE(SoundManager.SE se, float volume = -1)
         {
             if (se == SoundManager.SE.NONE) return -1;
+
+            if (volume == -1)
+            {
+                volume = SoundManager.SEVolume;
+            }
 
             //再生可能なAudioSourceを調べる
             foreach (AudioSource audio in _loopPlayAudios)
