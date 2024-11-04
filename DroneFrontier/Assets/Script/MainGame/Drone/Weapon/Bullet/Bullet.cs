@@ -1,0 +1,99 @@
+using UnityEngine;
+
+public class Bullet : MonoBehaviour, IBullet
+{
+    public GameObject Shooter { get; private set; } = null;
+
+    /// <summary>
+    /// ダメージ量
+    /// </summary>
+    private float _damage = 0;
+
+    /// <summary>
+    /// 弾速
+    /// </summary>
+    private float _speed = 0;
+
+    /// <summary>
+    /// 追従力
+    /// </summary>
+    private float _trackingPower = 0;
+
+    /// <summary>
+    /// 追従対象
+    /// </summary>
+    private GameObject _target = null;
+
+    private Transform _transform = null;
+    private Transform _targetTransform = null;
+
+    public void Shot(GameObject shooter, float damage, float speed, float trackingPower = 0, GameObject target = null)
+    {
+        _damage = damage;
+        _speed = speed;
+        _trackingPower = trackingPower;
+        _target = target;
+        _targetTransform = Useful.IsNullOrDestroyed(target) ? null : target.transform;
+        Shooter = shooter;
+
+        // 発射元とは当たり判定を行わない
+        if (!Useful.IsNullOrDestroyed(shooter) && shooter.TryGetComponent(out Collider collider))
+        {
+            Physics.IgnoreCollision(GetComponent<Collider>(), collider);
+        }
+    }
+
+    private void Awake()
+    {
+        _transform = GetComponent<Rigidbody>().transform;
+    }
+
+    private void FixedUpdate()
+    {
+        if (_target != null)
+        {
+            // 弾丸から追従対象までのベクトル計算
+            Vector3 diff = _targetTransform.position - _transform.position;
+
+            // 弾丸から追従対象までの角度
+            float angle = Vector3.Angle(_transform.forward, diff);
+            if (angle > _trackingPower)
+            {
+                // 追従力以上の角度がある場合は修正
+                angle = _trackingPower;
+            }
+
+            // 追従方向を計算
+            Vector3 axis = Vector3.Cross(_transform.forward, diff);
+            int dirX = axis.y >= 0 ? 1 : -1;
+            int dirY = axis.x >= 0 ? 1 : -1;
+
+            // 左右の回転
+            _transform.RotateAround(_transform.position, Vector3.up, angle * dirX);
+
+            // 上下の回転
+            _transform.RotateAround(_transform.position, Vector3.right, angle * dirY);
+        }
+
+        // 移動
+        _transform.position += _transform.forward * _speed * Time.deltaTime;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        // 当たり判定を行わないオブジェクトは処理しない
+        if (other.CompareTag(TagNameConst.BULLET)) return;
+        if (other.CompareTag(TagNameConst.ITEM)) return;
+        if (other.CompareTag(TagNameConst.GIMMICK)) return;
+        if (other.CompareTag(TagNameConst.JAMMING)) return;
+        if (other.CompareTag(TagNameConst.NOT_COLLISION)) return;
+
+        // ダメージ可能インターフェースが実装されている場合はダメージを与える
+        if (other.TryGetComponent(out IDamageable damageable))
+        {
+            damageable.Damage(Shooter, _damage);
+        }
+
+        Destroy(gameObject);
+    }
+}

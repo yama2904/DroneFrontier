@@ -9,7 +9,7 @@ namespace Offline
         public class Shotgun : BaseWeapon
         {
             //ショットガンのパラメータ
-            [SerializeField] Bullet bullet = null;
+            [SerializeField] Bulletaaa bullet = null;
             [SerializeField, Tooltip("拡散力")] float angle = 4.2f;
             [SerializeField, Tooltip("拡散力のランダム値")] float angleDiff = 2.8f;
 
@@ -114,9 +114,9 @@ namespace Offline
                 Debug.Log("残り弾数: " + haveBulletNum);
             }
 
-            Bullet CreateBullet(Vector3 pos, Quaternion rotation, float angleX, float angleY, GameObject target)
+            Bulletaaa CreateBullet(Vector3 pos, Quaternion rotation, float angleX, float angleY, GameObject target)
             {
-                Bullet b = Instantiate(bullet, pos, rotation);    //弾丸の複製
+                Bulletaaa b = Instantiate(bullet, pos, rotation);    //弾丸の複製
 
                 //弾丸のパラメータ設定
                 b.Init(shooter, power, 0, speed, destroyTime, target);

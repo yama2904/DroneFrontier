@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 public class Useful
 {
@@ -20,5 +21,15 @@ public class Useful
         value = Mathf.Floor(value) / x;
 
         return value;
+    }
+
+    /// <summary>
+    /// GameObjectがnull、又はDestroy済みであるか
+    /// </summary>
+    /// <param name="obj">nullチェックオブジェクト</param>
+    /// <returns>null、又はDestroy済みの場合はtrue</returns>
+    public static bool IsNullOrDestroyed(GameObject obj)
+    {
+        return obj is null || !obj;
     }
 }

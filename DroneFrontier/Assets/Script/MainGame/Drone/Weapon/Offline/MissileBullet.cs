@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Offline
 {
-    public class MissileBullet : Bullet
+    public class MissileBullet : Bulletaaa
     {
         public GameObject Source { get; private set; } = null;
 
@@ -41,7 +41,7 @@ namespace Offline
         }
 
 
-        public override void Init(IBattleDrone drone, float power, float trackingPower, float speed, float destroyTime, GameObject target = null)
+        public override void Init(GameObject drone, float power, float trackingPower, float speed, float destroyTime, GameObject target = null)
         {
             base.Init(drone, power, trackingPower, speed, destroyTime, target);
         }
@@ -83,7 +83,7 @@ namespace Offline
             // ダメージ可能インターフェースが実装されている場合はダメージを与える
             if (other.TryGetComponent(out IDamageable damageable))
             {
-                damageable.Damage(shooter.GameObject, Power);
+                damageable.Damage(shooter, Power);
             }
 
             DestroyMe();

@@ -8,7 +8,7 @@ namespace Offline
 {
     public abstract class BaseWeapon : MonoBehaviour
     {
-        protected IBattleDrone shooter = null;  //武器の所持者
+        protected GameObject shooter = null;  //武器の所持者
         [SerializeField] protected Transform weaponLocalPos = null;
         [SerializeField] protected Transform shotPos = null;
 
@@ -33,17 +33,17 @@ namespace Offline
             NONE
         }
 
-        public static async UniTask<BaseWeapon> CreateWeapon(IBattleDrone shooter, Weapon weapon, bool isPlayer)
+        public static async UniTask<GameObject> CreateWeapon(GameObject shooter, Weapon weapon, bool isPlayer)
         {
             string addressKey = "";
             switch (weapon)
             {
                 case Weapon.SHOTGUN:
-                    addressKey = isPlayer ? "Shotgun" : "CPUShotgun";
+                    addressKey = isPlayer ? "ShotgunWeapon" : "CPUShotgun";
                     break;
 
                 case Weapon.GATLING:
-                    addressKey = "Gatling";
+                    addressKey = "GatlingWeapon";
                     break;
 
                 case Weapon.MISSILE:
@@ -63,14 +63,14 @@ namespace Offline
             // オブジェクトをロードして複製
             var handle = Addressables.LoadAssetAsync<GameObject>(addressKey);
             await handle;
-            BaseWeapon bw = Instantiate(handle.Result).GetComponent<BaseWeapon>();
+            GameObject o = Instantiate(handle.Result);
 
             // 破棄
             Addressables.Release(handle);
 
-            bw.shooter = shooter;
+            o.GetComponent<IWeapon>().Owner = shooter;
 
-            return bw;
+            return o;
         }
     }
 }

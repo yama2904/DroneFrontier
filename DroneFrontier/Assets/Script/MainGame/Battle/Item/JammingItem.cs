@@ -1,7 +1,6 @@
-﻿using Cysharp.Threading.Tasks;
-using System;
-using System.Threading;
+﻿using System;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 namespace Offline
 {
@@ -20,8 +19,8 @@ namespace Offline
         [SerializeField, Tooltip("生成するジャミングボット")] 
         private JammingBot _jammingBot = null;
 
-        [SerializeField, Tooltip("ジャミングボットの生存時間")] 
-        private float _jammingBotTime = 60.0f;
+        [SerializeField, Tooltip("ジャミングボットの生存時間（秒）")] 
+        private float _jammingBotSec = 60.0f;
 
         /// <summary>
         /// 生成したジャミングボット
@@ -32,11 +31,6 @@ namespace Offline
         /// ジャミングボットのRigidBody
         /// </summary>
         private Rigidbody _botRigidBody = null;
-
-        /// <summary>
-        /// キャンセルトークン発行クラス
-        /// </summary>
-        private CancellationTokenSource _cancel = new CancellationTokenSource();
 
         /// <summary>
         /// ジャミングボット生成直後の移動時間計測
@@ -57,23 +51,18 @@ namespace Offline
             _createdBot.DestroyEvent += JammingBotDestroy;
 
             // 時間経過でジャミングボット破壊
-            UniTask.Void(async () =>
-            {
-                await UniTask.Delay(TimeSpan.FromSeconds(_jammingBotTime), cancellationToken: _cancel.Token);
-                Destroy(_createdBot.gameObject);
-                Destroy(gameObject);
-            });
+            Destroy(_createdBot.gameObject, _jammingBotSec);
 
             return true;
         }
 
         private void FixedUpdate()
         {
-            // ジャミングボットを生成していない場合は処理しない
-            if (_createdBot == null) return;
-
             // ジャミングボットの移動が終わった場合は処理しない
             if (_botMoveTimer > BOT_MOVE_TIME) return;
+
+            // ジャミングボットを生成していない場合は処理しない
+            if (Useful.IsNullOrDestroyed(_createdBot?.gameObject)) return;
 
             _botRigidBody.AddForce(Vector3.up * BOT_MOVE_VALUE, ForceMode.Acceleration);
 
@@ -92,9 +81,6 @@ namespace Offline
         /// <param name="e">イベント引数</param>
         private void JammingBotDestroy(object o, EventArgs e)
         {
-            // 時間経過によるジャミングボット破壊を停止
-            _cancel.Cancel();
-
             // イベント削除
             _createdBot.DestroyEvent -= JammingBotDestroy;
 

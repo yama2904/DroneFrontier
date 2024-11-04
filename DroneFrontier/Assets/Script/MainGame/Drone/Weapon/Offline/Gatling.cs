@@ -1,0 +1,106 @@
+﻿using UnityEngine;
+using UnityEngine.AddressableAssets;
+
+namespace Offline
+{
+    public class Gatling : MonoBehaviour, IWeapon
+    {
+        public GameObject Owner { get; set; } = null;
+
+        public Transform ShotPosition { get; set; } = null;
+
+        public Canvas BulletUICanvas { get; set; } = null;
+
+        /// <summary>
+        /// 弾丸オブジェクトのAddressKey
+        /// </summary>
+        private const string BULLET_ADDRESS_KEY = "Bullet";
+
+        [SerializeField, Tooltip("弾丸発射座標")]
+        private Transform _shotPosition = null;
+
+        [SerializeField, Tooltip("威力")] 
+        private float _damage = 1f;
+
+        [SerializeField, Tooltip("1秒間に発射する弾数")]
+        private float _shotPerSecond = 10f;
+
+        [SerializeField, Tooltip("弾速")] 
+        private float _speed = 800f;
+
+        [SerializeField, Tooltip("弾丸の生存時間（秒）")] 
+        private float _destroySec = 1f;
+
+        [SerializeField, Tooltip("追従力")] 
+        private float _trackingPower = 3f;
+
+        /// <summary>
+        /// 弾丸プレハブ
+        /// </summary>
+        private GameObject _bulletPrefab = null;
+
+        /// <summary>
+        /// AudioSourceコンポーネント
+        /// </summary>
+        private AudioSource _audioSource = null;
+
+        /// <summary>
+        /// 発射間隔（秒）
+        /// </summary>
+        private float _shotIntervalSec = 0;
+
+        /// <summary>
+        /// 前回発射からの経過時間
+        /// </summary>
+        private float _shotTimer = 0;
+
+        public void Shot(GameObject target = null)
+        {
+            // 前回発射からの発射間隔チェック
+            if (_shotTimer < _shotIntervalSec) return;
+
+            // 弾丸発射
+            GameObject bullet = Instantiate(_bulletPrefab, ShotPosition.position, ShotPosition.rotation);
+            bullet.GetComponent<IBullet>().Shot(Owner, _damage, _speed, _trackingPower, target);
+
+            // 一定時間後弾丸削除
+            Destroy(bullet, _destroySec);
+
+            // SE再生
+            _audioSource.Play();
+
+            // 前回発射時間初期化
+            _shotTimer = 0;
+        }
+
+        private void Awake()
+        {
+            // 発射間隔計算
+            _shotIntervalSec = 1.0f / _shotPerSecond;
+            _shotTimer = _shotIntervalSec;
+
+            // コンポーネント取得
+            _audioSource = GetComponent<AudioSource>();
+            _audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.GATLING);
+            _audioSource.volume = SoundManager.SEVolume;
+
+            // 弾丸発射位置初期化
+            ShotPosition = _shotPosition;
+
+            // 弾丸オブジェクト読み込み
+            Addressables.LoadAssetAsync<GameObject>(BULLET_ADDRESS_KEY).Completed += handle =>
+            {
+                _bulletPrefab = handle.Result;
+                Addressables.Release(handle);
+            };
+        }
+
+        private void Update()
+        {
+            if (_shotTimer < _shotIntervalSec)
+            {
+                _shotTimer += Time.deltaTime;
+            }
+        }
+    }
+}

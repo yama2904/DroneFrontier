@@ -43,7 +43,7 @@ public class DroneSpawnManager : MonoBehaviour
     /// <param name="weapon">スポーンさせるドローンのサブ武器</param>
     /// <param name="isPlayer">プレイヤーであるか</param>
     /// <returns>スポーンさせたドローン</returns>
-    public IBattleDrone SpawnDrone(string name, BaseWeapon.Weapon weapon, bool isPlayer)
+    public IBattleDrone SpawnDrone(string name, WeaponType weapon, bool isPlayer)
     {
         // スポーン位置取得
         Transform spawnPos = _droneSpawnPositions[_nextSpawnIndex];
@@ -82,7 +82,7 @@ public class DroneSpawnManager : MonoBehaviour
     /// <param name="spawnPosition">スポーン位置</param>
     /// <param name="isPlayer">プレイヤーであるか</param>
     /// <returns>生成したドローン</returns>
-    private IBattleDrone CreateDrone(string name, BaseWeapon.Weapon weapon, Transform spawnPosition, bool isPlayer)
+    private IBattleDrone CreateDrone(string name, WeaponType weapon, Transform spawnPosition, bool isPlayer)
     {
         // 生成元オブジェクト選択
         GameObject drone = isPlayer ? _playerDrone : _cpuDrone;

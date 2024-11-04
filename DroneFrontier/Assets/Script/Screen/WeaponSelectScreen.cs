@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace Offline
@@ -22,18 +23,14 @@ namespace Offline
         }
 
         /// <summary>
-        /// ボタンクリックイベントハンドラ
+        /// 選択したボタン
         /// </summary>
-        /// <param name="type">クリックされたボタン</param>
-        public delegate void ButtonClickHandler(ButtonType type);
+        public ButtonType SelectedButton;
 
         /// <summary>
         /// ボタンクリックイベント
         /// </summary>
-        public event ButtonClickHandler ButtonClick;
-
-        //選択した武器
-        public static BaseWeapon.Weapon weapon { get; private set; } = BaseWeapon.Weapon.NONE;
+        public event EventHandler ButtonClick;
 
         //説明文に表示するテキスト
         const string SHOTGUN_TEXT = "射程が非常に短いが威力が高く、リキャストが短い。\nまた、攻撃中の移動速度低下がなく、ブーストが多少強化される。\n近距離特化型。";
@@ -57,47 +54,47 @@ namespace Offline
 
         void Start()
         {
-            weapon = BaseWeapon.Weapon.NONE;
+            BattleManager.PlayerWeapon = WeaponType.NONE;
             messageWindowText.text = "武器を選択してください。";
         }
 
         public void ClickShotgun()
         {
-            BaseWeapon.Weapon w = BaseWeapon.Weapon.SHOTGUN;  //名前省略
-            if (weapon == w) return;
+            WeaponType selectWeapon = WeaponType.SHOTGUN;
+            if (BattleManager.PlayerWeapon == selectWeapon) return;
 
             //SE再生
             SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
 
             messageWindowText.text = SHOTGUN_TEXT;
-            SetWeaponButtonsColor(w);
-            weapon = w;
+            SetWeaponButtonsColor(selectWeapon);
+            BattleManager.PlayerWeapon = selectWeapon;
         }
 
         public void ClickMissile()
         {
-            BaseWeapon.Weapon w = BaseWeapon.Weapon.MISSILE;  //名前省略
-            if (weapon == w) return;
+            WeaponType selectWeapon = WeaponType.MISSILE;
+            if (BattleManager.PlayerWeapon == selectWeapon) return;
 
             //SE再生
             SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
 
             messageWindowText.text = MISSILE_TEXT;
-            SetWeaponButtonsColor(w);
-            weapon = w;
+            SetWeaponButtonsColor(selectWeapon);
+            BattleManager.PlayerWeapon = selectWeapon;
         }
 
         public void ClickLaser()
         {
-            BaseWeapon.Weapon w = BaseWeapon.Weapon.LASER;  //名前省略
-            if (weapon == w) return;
+            WeaponType selectWeapon = WeaponType.LASER;
+            if (BattleManager.PlayerWeapon == selectWeapon) return;
 
             //SE再生
             SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
 
             messageWindowText.text = LASER_TEXT;
-            SetWeaponButtonsColor(w);
-            weapon = w;
+            SetWeaponButtonsColor(selectWeapon);
+            BattleManager.PlayerWeapon = selectWeapon;
         }
 
 
@@ -136,35 +133,37 @@ namespace Offline
         //決定
         public void ClickOK()
         {
-            if (weapon == BaseWeapon.Weapon.NONE) return;
+            if (BattleManager.PlayerWeapon == WeaponType.NONE) return;
 
             SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
-            ButtonClick(ButtonType.OK);
+            SelectedButton = ButtonType.OK;
+            ButtonClick(this, EventArgs.Empty);
         }
 
         public void ClickBack()
         {
             SoundManager.Play(SoundManager.SE.CANCEL);
-            ButtonClick(ButtonType.Back);
+            SelectedButton = ButtonType.Back;
+            ButtonClick(this, EventArgs.Empty);
         }
 
 
         //選択した武器のボタンの色変え
-        void SetWeaponButtonsColor(BaseWeapon.Weapon selectWeapon)
+        void SetWeaponButtonsColor(WeaponType selectWeapon)
         {
             shotgunSelectButton.image.color = notSelectButtonColor;
             missileSelectButton.image.color = notSelectButtonColor;
             laserSelectButton.image.color = notSelectButtonColor;
 
-            if (selectWeapon == BaseWeapon.Weapon.SHOTGUN)
+            if (selectWeapon == WeaponType.SHOTGUN)
             {
                 shotgunSelectButton.image.color = selectWeaponButtonColor;
             }
-            if (selectWeapon == BaseWeapon.Weapon.MISSILE)
+            if (selectWeapon == WeaponType.MISSILE)
             {
                 missileSelectButton.image.color = selectWeaponButtonColor;
             }
-            if (selectWeapon == BaseWeapon.Weapon.LASER)
+            if (selectWeapon == WeaponType.LASER)
             {
                 laserSelectButton.image.color = selectWeaponButtonColor;
             }

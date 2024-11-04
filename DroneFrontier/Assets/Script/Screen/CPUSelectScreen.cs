@@ -24,6 +24,16 @@ namespace Offline
         }
 
         /// <summary>
+        /// 選択したボタン
+        /// </summary>
+        public ButtonType SelectedButton;
+
+        /// <summary>
+        /// ボタンクリックイベント
+        /// </summary>
+        public event EventHandler ButtonClick;
+
+        /// <summary>
         /// 選択可能武器
         /// </summary>
         private enum Weapon
@@ -34,21 +44,6 @@ namespace Offline
 
             NONE
         }
-
-        #region イベント
-
-        /// <summary>
-        /// ボタンクリックイベントハンドラ
-        /// </summary>
-        /// <param name="type">クリックされたボタン</param>
-        public delegate void ButtonClickHandler(ButtonType type);
-
-        /// <summary>
-        /// ボタンクリックイベント
-        /// </summary>
-        public event ButtonClickHandler ButtonClick;
-
-        #endregion
 
         #region SerializeField
 
@@ -272,15 +267,15 @@ namespace Offline
                 switch (_cpuWeaponList[i])
                 {
                     case Weapon.SHOTGUN:
-                        cpu.Weapon = BaseWeapon.Weapon.SHOTGUN; 
+                        cpu.Weapon = WeaponType.SHOTGUN; 
                         break;
 
                     case Weapon.MISSILE:
-                        cpu.Weapon = BaseWeapon.Weapon.MISSILE;
+                        cpu.Weapon = WeaponType.MISSILE;
                         break;
 
                     case Weapon.LASER:
-                        cpu.Weapon = BaseWeapon.Weapon.LASER;
+                        cpu.Weapon = WeaponType.LASER;
                         break;
 
                     default:
@@ -291,7 +286,8 @@ namespace Offline
             }
 
             SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
-            ButtonClick(ButtonType.OK);
+            SelectedButton = ButtonType.OK;
+            ButtonClick(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -303,7 +299,8 @@ namespace Offline
             BattleManager.CpuList.Clear();
 
             SoundManager.Play(SoundManager.SE.CANCEL);
-            ButtonClick(ButtonType.Back);
+            SelectedButton = ButtonType.Back;
+            ButtonClick(this, EventArgs.Empty);
         }
 
         /// <summary>

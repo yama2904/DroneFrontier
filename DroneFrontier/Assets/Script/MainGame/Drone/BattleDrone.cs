@@ -1,6 +1,5 @@
 ﻿using Cysharp.Threading.Tasks;
 using Offline;
-using Offline.Player;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -60,7 +59,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
     /// <summary>
     /// ドローンのサブ武器
     /// </summary>
-    public BaseWeapon.Weapon SubWeapon { get; set; } = BaseWeapon.Weapon.SHOTGUN;
+    public WeaponType SubWeapon { get; set; }
 
     /// <summary>
     /// ロックオン可能であるか
@@ -99,17 +98,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
     [SerializeField, Tooltip("オブジェクト探索コンポーネント")]
     private ObjectSearchComponent _searchComponent = null;
 
-    // 武器
-    protected enum Weapon
-    {
-        MAIN,   // メイン武器
-        SUB,    // サブ武器
-
-        NONE
-    }
-    BaseWeapon mainWeapon = null;
-    BaseWeapon subWeapon = null;
-    bool[] usingWeapons = new bool[(int)Weapon.NONE];    // 使用中の武器
+    bool[] usingWeapons = new bool[(int)DroneWeaponComponent.Weapon.NONE];    // 使用中の武器
     [SerializeField, Tooltip("攻撃中の移動速度の低下率")] float atackingDownSpeed = 0.5f;   // 攻撃中の移動速度の低下率
 
     // 死亡処理用
@@ -155,7 +144,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
     DroneLockOnComponent _lockOnComponent = null;
     DroneRadarComponent _radarComponent = null;
     DroneItemComponent _itemComponent = null;
-    DroneStatusComponent _statusComponent = null;
+    DroneWeaponComponent _weaponComponent = null;
 
     protected void Awake()
     {
@@ -170,7 +159,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
         _lockOnComponent = GetComponent<DroneLockOnComponent>();
         _radarComponent = GetComponent<DroneRadarComponent>();
         _itemComponent = GetComponent<DroneItemComponent>();
-        _statusComponent = GetComponent<DroneStatusComponent>();
+        _weaponComponent = GetComponent<DroneWeaponComponent>();
 
         // HP初期化
         _hp = _maxHP;
@@ -188,21 +177,12 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
 
     private void Start()
     {
-        // 武器初期化
-        UniTask.Void(async () =>
-        {
-            mainWeapon = await BaseWeapon.CreateWeapon(this, BaseWeapon.Weapon.GATLING, true);
-            mainWeapon.SetParent(transform);
-            subWeapon = await BaseWeapon.CreateWeapon(this, SubWeapon, true);
-            subWeapon.SetParent(transform);
-        });
-
         // ブースト初期化
         boostGaugeImage.enabled = true;
         boostGaugeImage.fillAmount = 1;
 
         // ショットガンの場合はブーストを多少強化する
-        if (SubWeapon == BaseWeapon.Weapon.SHOTGUN)
+        if (SubWeapon == WeaponType.SHOTGUN)
         {
             boostAccele *= 1.2f;
             maxBoostTime *= 1.2f;
@@ -313,27 +293,29 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
         {
             // サブ武器を使用していたら撃てない
             // バグ防止用にメイン武器フラグも調べる
-            if (!usingWeapons[(int)Weapon.SUB] && !usingWeapons[(int)Weapon.MAIN])
+            if (!usingWeapons[(int)DroneWeaponComponent.Weapon.SUB] && !usingWeapons[(int)DroneWeaponComponent.Weapon.MAIN])
             {
                 // 攻撃中は速度低下
                 _moveComponent.MoveSpeed *= atackingDownSpeed;
-                usingWeapons[(int)Weapon.MAIN] = true;
+                usingWeapons[(int)DroneWeaponComponent.Weapon.MAIN] = true;
             }
         }
+
+        // メインウェポン攻撃
         if (Input.GetMouseButton(0))
         {
-            if (usingWeapons[(int)Weapon.MAIN])
+            if (usingWeapons[(int)DroneWeaponComponent.Weapon.MAIN])
             {
-                UseWeapon(Weapon.MAIN);     // メインウェポン攻撃
+                _weaponComponent.Shot(DroneWeaponComponent.Weapon.MAIN, _lockOnComponent.Target);
             }
         }
         if (Input.GetMouseButtonUp(0))
         {
             // 攻撃を止めたら速度を戻す
-            if (usingWeapons[(int)Weapon.MAIN])
+            if (usingWeapons[(int)DroneWeaponComponent.Weapon.MAIN])
             {
                 _moveComponent.MoveSpeed *= 1 / atackingDownSpeed;
-                usingWeapons[(int)Weapon.MAIN] = false;
+                usingWeapons[(int)DroneWeaponComponent.Weapon.MAIN] = false;
             }
         }
 
@@ -342,44 +324,46 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
         {
             // サブ武器を使用していたら撃てない
             // バグ防止用にサブ武器フラグも調べる
-            if (!usingWeapons[(int)Weapon.MAIN] && !usingWeapons[(int)Weapon.SUB])
+            if (!usingWeapons[(int)DroneWeaponComponent.Weapon.MAIN] && !usingWeapons[(int)DroneWeaponComponent.Weapon.SUB])
             {
-                if (SubWeapon == BaseWeapon.Weapon.MISSILE)
+                if (SubWeapon == WeaponType.MISSILE)
                 {
                     // 攻撃中は速度低下
                     _moveComponent.MoveSpeed *= atackingDownSpeed;
                 }
                 // レーザーの場合は低下率増加
-                if (SubWeapon == BaseWeapon.Weapon.LASER)
+                if (SubWeapon == WeaponType.LASER)
                 {
                     _moveComponent.MoveSpeed *= atackingDownSpeed * 0.75f;
                 }
-                usingWeapons[(int)Weapon.SUB] = true;
+                usingWeapons[(int)DroneWeaponComponent.Weapon.SUB] = true;
             }
         }
+
+        // サブウェポン攻撃
         if (Input.GetMouseButton(1))
         {
-            if (usingWeapons[(int)Weapon.SUB])
+            if (usingWeapons[(int)DroneWeaponComponent.Weapon.SUB])
             {
-                UseWeapon(Weapon.SUB);      // サブウェポン攻撃
+                _weaponComponent.Shot(DroneWeaponComponent.Weapon.SUB, _lockOnComponent.Target);
             }
         }
         if (Input.GetMouseButtonUp(1))
         {
             // 攻撃を止めたら速度を戻す
-            if (usingWeapons[(int)Weapon.SUB])
+            if (usingWeapons[(int)DroneWeaponComponent.Weapon.SUB])
             {
-                if (SubWeapon == BaseWeapon.Weapon.MISSILE)
+                if (SubWeapon == WeaponType.MISSILE)
                 {
                     // 攻撃中は速度低下
                     _moveComponent.MoveSpeed *= 1 / atackingDownSpeed;
                 }
                 // レーザーの場合は低下率増加
-                if (SubWeapon == BaseWeapon.Weapon.LASER)
+                if (SubWeapon == WeaponType.LASER)
                 {
                     _moveComponent.MoveSpeed *= 1 / (atackingDownSpeed * 0.75f);
                 }
-                usingWeapons[(int)Weapon.SUB] = false;
+                usingWeapons[(int)DroneWeaponComponent.Weapon.SUB] = false;
             }
         }
 
@@ -480,12 +464,6 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
             // ドローンを傾ける
             _rotateComponent.Rotate(deathRotate, deathRotateSpeed * Time.deltaTime);
 
-            // メイン武器を傾ける
-            mainWeapon.transform.localRotation = Quaternion.Slerp(mainWeapon.transform.localRotation, deathRotate, deathRotateSpeed * Time.deltaTime);
-
-            // サブ武器を傾ける
-            subWeapon.transform.localRotation = Quaternion.Slerp(subWeapon.transform.localRotation, deathRotate, deathRotateSpeed * Time.deltaTime);
-
             // プロペラ減速
             _animator.speed *= 0.993f;
         }
@@ -538,8 +516,6 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
 
         // ドローンの非表示
         droneObject.gameObject.SetActive(false);
-        mainWeapon.gameObject.SetActive(false);
-        subWeapon.gameObject.SetActive(false);
 
         // 当たり判定も消す
         GetComponent<Collider>().enabled = false;
@@ -553,58 +529,11 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
         // 爆破後一定時間で復活、又は観戦モード切替
         await UniTask.Delay(5000);
 
-        //// ストックが切れた場合は観戦モード
-        //if (StockNum <= 0)
-        //{
-        //    WatchingGame.StartWatchingGame();
-        //}
-        //else
-        //{
-
-
-        //    // 復活後も非表示のままとなってしまうのでドローンを再表示
-        //    droneObject.gameObject.SetActive(true);
-        //    barrierAction.BarrierObject.SetActive(true);
-        //    mainWeapon.gameObject.SetActive(true);
-        //    subWeapon.gameObject.SetActive(true);
-
-        //    // ToDo:Instantiateせずに初期化すべきか
-        //    // 復活処理
-        //    GameObject respawnDrone = Instantiate(gameObject, _initPosition, _initRotation);
-        //    respawnDrone.GetComponent<BattleDrone>().SetStockNum(StockNum - 1);
-
-        //    // 復活SE再生
-        //    respawnDrone.GetComponent<DroneSoundAction>().PlayOneShot(SoundManager.SE.RESPAWN, SoundManager.SEVolume);
-
-        //}
-
         // ドローン破壊イベント通知
         DroneDestroyEvent?.Invoke(this, EventArgs.Empty);
 
         Destroy(explosionObj);
         Destroy(gameObject);
-    }
-
-    // 攻撃処理
-    private void UseWeapon(Weapon weapon)
-    {
-        BaseWeapon bw = null;
-        if (weapon == Weapon.MAIN)
-        {
-            if (mainWeapon == null) return;
-            bw = mainWeapon.GetComponent<BaseWeapon>();
-        }
-        else if (weapon == Weapon.SUB)
-        {
-            if (subWeapon == null) return;
-            bw = subWeapon.GetComponent<BaseWeapon>();
-        }
-        else
-        {
-            return;
-        }
-
-        bw.Shot(_lockOnComponent.Target);
     }
 
     // アイテム使用

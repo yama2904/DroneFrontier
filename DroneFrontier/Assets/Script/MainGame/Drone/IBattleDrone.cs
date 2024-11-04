@@ -30,7 +30,7 @@ public interface IBattleDrone
     /// <summary>
     /// サブ武器
     /// </summary>
-    public BaseWeapon.Weapon SubWeapon { get; set; }
+    public WeaponType SubWeapon { get; set; }
 
     /// <summary>
     /// ドローン破壊イベント

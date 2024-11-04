@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,7 +8,8 @@ public class DroneLockOnComponent : MonoBehaviour
     /// <summary>
     /// ロックオン中のオブジェクト
     /// </summary>
-    public GameObject Target { get; private set; } = null;
+    public GameObject Target => Useful.IsNullOrDestroyed(_target) ? null : _target;
+    private GameObject _target = null;
 
     [SerializeField, Tooltip("ドローンのカメラ")]
     private Camera _camera = null;
@@ -177,7 +177,7 @@ public class DroneLockOnComponent : MonoBehaviour
         }
 
         // ターゲット用変数更新
-        Target = newTarget;
+        _target = newTarget;
         _targetTransform = newTarget.transform;
     }
 
@@ -219,17 +219,14 @@ public class DroneLockOnComponent : MonoBehaviour
     /// </summary>
     private void ResetTarget()
     {
-        if (Target != null)
+        // ロックオン画像の色変更
+        if (_reticleImage != null)
         {
-            // ロックオン画像の色変更
-            if (_reticleImage != null)
-            {
-                _reticleImage.color = _noLockOnColor;
-            }
-
-            // ターゲット用変数の更新
-            Target = null;
-            _targetTransform = null;
+            _reticleImage.color = _noLockOnColor;
         }
+
+        // ターゲット用変数の更新
+        _target = null;
+        _targetTransform = null;
     }
 }

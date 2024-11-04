@@ -1,5 +1,4 @@
-﻿using Cysharp.Threading.Tasks;
-using Offline;
+﻿using Offline;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -15,6 +14,7 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
     DroneDamageComponent damageAction = null;
     DroneSoundComponent soundAction = null;
     DroneLockOnComponent _lockOnComponent = null;
+    DroneWeaponComponent _weaponComponent = null;
 
     [SerializeField] Transform cameraTransform = null;  //キャッシュ用
 
@@ -34,17 +34,6 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
     Vector3 angle = Vector3.zero;
     float rotateTimeCount = CHANGE_ROTATE_TIME;
     bool isRotate = false;
-
-    //武器
-    protected enum Weapon
-    {
-        MAIN,   //メイン武器
-        SUB,    //サブ武器
-
-        NONE
-    }
-    BaseWeapon mainWeapon = null;
-    BaseWeapon subWeapon = null;
 
     float atackingSpeed = 1f;   //攻撃中の移動速度の変動用
 
@@ -113,7 +102,7 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
     /// <summary>
     /// ドローンのサブ武器
     /// </summary>
-    public BaseWeapon.Weapon SubWeapon { get; set; } = BaseWeapon.Weapon.SHOTGUN;
+    public WeaponType SubWeapon { get; set; }
 
     /// <summary>
     /// ロックオン可能であるか
@@ -152,6 +141,7 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
         soundAction = GetComponent<DroneSoundComponent>();
         _lockOnComponent = GetComponent<DroneLockOnComponent>();
         listener = GetComponent<AudioListener>();
+        _weaponComponent = GetComponent<DroneWeaponComponent>();
 
         // HP初期化
         HP = _maxHP;
@@ -165,15 +155,6 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
 
     private void Start()
     {
-        //武器初期化
-        UniTask.Void(async () =>
-        {
-            mainWeapon = await BaseWeapon.CreateWeapon(this, BaseWeapon.Weapon.GATLING, false);
-            mainWeapon.SetParent(transform);
-            subWeapon = await BaseWeapon.CreateWeapon(this, SubWeapon, false);
-            subWeapon.SetParent(transform);
-        });
-
         // 常にロックオン処理
         _lockOnComponent.StartLockOn();
     }
@@ -197,7 +178,7 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
                 float changeDirDistance = 300f;
                 if (!useMainWeapon)
                 {
-                    if (SubWeapon == BaseWeapon.Weapon.SHOTGUN)
+                    if (SubWeapon == WeaponType.SHOTGUN)
                     {
                         changeDirDistance = 30f;
                     }
@@ -278,7 +259,7 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
             if (weaponTimeCount >= weaponTime)
             {
                 weaponTimeCount = 0;
-                if (SubWeapon == BaseWeapon.Weapon.SHOTGUN)
+                if (SubWeapon == WeaponType.SHOTGUN)
                 {
                     //ショットガンを使う場合は短時間
                     if (useMainWeapon)
@@ -291,11 +272,11 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
                         weaponTime = Random.Range(8, 11);
                     }
                 }
-                if (SubWeapon == BaseWeapon.Weapon.MISSILE)
+                if (SubWeapon == WeaponType.MISSILE)
                 {
                     weaponTime = Random.Range(3, 8);
                 }
-                if (SubWeapon == BaseWeapon.Weapon.LASER)
+                if (SubWeapon == WeaponType.LASER)
                 {
                     weaponTime = Random.Range(7, 11);
                 }
@@ -304,7 +285,7 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
 
             if (useMainWeapon)
             {
-                mainWeapon.Shot(_lockOnComponent.Target);
+                _weaponComponent.Shot(DroneWeaponComponent.Weapon.MAIN, _lockOnComponent.Target);
             }
             else
             {
@@ -312,7 +293,7 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
                 shotgunStayTimeCount += Time.deltaTime;
                 if (shotgunStayTimeCount >= shotgunStayTime)
                 {
-                    subWeapon.Shot(_lockOnComponent.Target);
+                    _weaponComponent.Shot(DroneWeaponComponent.Weapon.SUB, _lockOnComponent.Target);
                 }
             }
 
@@ -323,12 +304,12 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
                 atackingSpeed = 0.5f;
             }
             //ミサイル使用中も移動速度低下
-            else if (SubWeapon == BaseWeapon.Weapon.MISSILE)
+            else if (SubWeapon == WeaponType.MISSILE)
             {
                 atackingSpeed = 0.5f;
             }
             //レーザーを使っている場合は移動速度低下の増加
-            else if (SubWeapon == BaseWeapon.Weapon.LASER)
+            else if (SubWeapon == WeaponType.LASER)
             {
                 atackingSpeed = 0.35f;
             }
@@ -351,12 +332,6 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
 
             //ドローンを傾ける
             _rotateComponent.Rotate(deathRotate, deathRotateSpeed * Time.deltaTime);
-
-            //メイン武器を傾ける
-            mainWeapon.transform.localRotation = Quaternion.Slerp(mainWeapon.transform.localRotation, deathRotate, deathRotateSpeed * Time.deltaTime);
-
-            //サブ武器を傾ける
-            subWeapon.transform.localRotation = Quaternion.Slerp(subWeapon.transform.localRotation, deathRotate, deathRotateSpeed * Time.deltaTime);
 
             //プロペラ減速
             animator.speed *= 0.993f;
@@ -421,8 +396,6 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
     {
         //ドローンの非表示
         droneObject.gameObject.SetActive(false);
-        mainWeapon.gameObject.SetActive(false);
-        subWeapon.gameObject.SetActive(false);
 
         //当たり判定も消す
         GetComponent<Collider>().enabled = false;

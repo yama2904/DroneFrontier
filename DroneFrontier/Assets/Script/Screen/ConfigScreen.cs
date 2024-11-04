@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class ConfigScreen : MonoBehaviour
@@ -15,15 +16,14 @@ public class ConfigScreen : MonoBehaviour
     }
 
     /// <summary>
-    /// ボタンクリックイベントハンドラ
+    /// 選択したボタン
     /// </summary>
-    /// <param name="type">クリックされたボタン</param>
-    public delegate void ButtonClickHandler(ButtonType type);
+    public ButtonType SelectedButton;
 
     /// <summary>
     /// ボタンクリックイベント
     /// </summary>
-    public event ButtonClickHandler ButtonClick;
+    public event EventHandler ButtonClick;
 
     //スライダーコンポーネント
     [SerializeField] Slider BGMSlider = null;
@@ -109,7 +109,8 @@ public class ConfigScreen : MonoBehaviour
     public void ClickBack()
     {
         SoundManager.Play(SoundManager.SE.CANCEL);
-        ButtonClick(ButtonType.Back);
+        SelectedButton = ButtonType.Back;
+        ButtonClick(this, EventArgs.Empty);
     }
 
     //Sliderの値をテキスト用に変換

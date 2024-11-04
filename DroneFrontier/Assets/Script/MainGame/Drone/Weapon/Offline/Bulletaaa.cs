@@ -4,11 +4,11 @@ using UnityEngine;
 
 namespace Offline
 {
-    public class Bullet : MonoBehaviour
+    public class Bulletaaa : MonoBehaviour
     {
         public float Power { get; protected set; } = 0;  //威力
 
-        protected IBattleDrone shooter = null;
+        protected GameObject shooter = null;
         protected GameObject target = null;   //誘導する対象
         protected float trackingPower = 0;    //追従力
         protected float speed = 0;            //1秒間に進む量
@@ -60,7 +60,7 @@ namespace Offline
             cacheTransform.position += cacheTransform.forward * speed * Time.deltaTime;
         }
 
-        public virtual void Init(IBattleDrone drone, float power, float trackingPower, float speed, float destroyTime, GameObject target = null)
+        public virtual void Init(GameObject drone, float power, float trackingPower, float speed, float destroyTime, GameObject target = null)
         {
             shooter = drone;
             Power = power;
@@ -73,7 +73,6 @@ namespace Offline
 
         void OnTriggerEnter(Collider other)
         {
-
             // 当たり判定を行わないオブジェクトは処理しない
             if (other.CompareTag(TagNameConst.BULLET)) return;
             if (other.CompareTag(TagNameConst.ITEM)) return;
@@ -84,7 +83,7 @@ namespace Offline
             // ダメージ可能インターフェースが実装されている場合はダメージを与える
             if (other.TryGetComponent(out IDamageable damageable))
             {
-                damageable.Damage(shooter.GameObject, Power);
+                damageable.Damage(shooter, Power);
             }
 
             Destroy(gameObject);

@@ -1,3 +1,4 @@
 TryGetComponent
 状態異常のSE
 アイテム同士で非接触判定共有
+IBattleDroneのGameObject消す

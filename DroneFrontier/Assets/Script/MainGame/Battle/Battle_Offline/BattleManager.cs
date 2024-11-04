@@ -17,13 +17,18 @@ namespace Offline
         public class CpuData
         {
             public string Name { get; set; }
-            public BaseWeapon.Weapon Weapon { get; set; } = BaseWeapon.Weapon.NONE;
+            public WeaponType Weapon { get; set; }
         }
 
         /// <summary>
         /// CPUリスト
         /// </summary>
         public static List<CpuData> CpuList = new List<CpuData>();
+
+        /// <summary>
+        /// プレイヤーのサブ武器
+        /// </summary>
+        public static WeaponType PlayerWeapon;
 
         /// <summary>
         /// アイテムを出現させるか
@@ -102,7 +107,7 @@ namespace Offline
             Cursor.visible = false;
 
             // プレイヤードローンをスポーン
-            IBattleDrone spawnDrone = _droneSpawnManager.SpawnDrone("Player", WeaponSelectScreen.weapon, true);
+            IBattleDrone spawnDrone = _droneSpawnManager.SpawnDrone("Player", PlayerWeapon, true);
             DroneData droneData = new DroneData()
             {
                 Drone = spawnDrone,

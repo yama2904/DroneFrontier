@@ -1,4 +1,5 @@
 ﻿using Offline;
+using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -109,8 +110,9 @@ public class HomeSceneManager : MonoBehaviour
     /// <summary>
     /// 設定画面のボタンクリックイベント
     /// </summary>
-    /// <param name="type">クリックされたボタン</param>
-    private void ClickConfigButton(ConfigScreen.ButtonType type)
+    /// <param name="sender">イベントオブジェクト</param>
+    /// <param name="e">イベント引数</param>
+    private void ClickConfigButton(object sender, EventArgs e)
     {
         _gameModeSelectUI.SetActive(true);
         _configManager.gameObject.SetActive(false);
@@ -119,8 +121,9 @@ public class HomeSceneManager : MonoBehaviour
     /// <summary>
     /// ヘルプ画面のボタンクリックイベント
     /// </summary>
-    /// <param name="type">クリックされたボタン</param>
-    private void ClickHelpButton(HelpScreen.ButtonType type)
+    /// <param name="sender">イベントオブジェクト</param>
+    /// <param name="e">イベント引数</param>
+    private void ClickHelpButton(object sender, EventArgs e)
     {
         _gameModeSelectUI.SetActive(true);
         _helpManager.gameObject.SetActive(false);
@@ -129,18 +132,21 @@ public class HomeSceneManager : MonoBehaviour
     /// <summary>
     /// ソロ/マルチ選択画面のボタンクリックイベント
     /// </summary>
-    /// <param name="type">クリックされたボタン</param>
-    private void ClickSoloMultiButton(SoloMultiSelectScreen.ButtonType type)
+    /// <param name="sender">イベントオブジェクト</param>
+    /// <param name="e">イベント引数</param>
+    private void ClickSoloMultiButton(object sender, EventArgs e)
     {
+        SoloMultiSelectScreen screen = sender as SoloMultiSelectScreen;
+
         // ソロモード選択
-        if (type == SoloMultiSelectScreen.ButtonType.SoloMode)
+        if (screen.SelectedButton == SoloMultiSelectScreen.ButtonType.SoloMode)
         {
             _soloMultiSelectManager.gameObject.SetActive(false);
             _weaponSelectManager.gameObject.SetActive(true);
         }
 
         // 戻る選択
-        if (type == SoloMultiSelectScreen.ButtonType.Back)
+        if (screen.SelectedButton == SoloMultiSelectScreen.ButtonType.Back)
         {
             _soloMultiSelectManager.gameObject.SetActive(false);
             _gameModeSelectUI.SetActive(true);
@@ -150,18 +156,21 @@ public class HomeSceneManager : MonoBehaviour
     /// <summary>
     /// 武器選択画面のボタンクリックイベント
     /// </summary>
-    /// <param name="type">クリックされたボタン</param>
-    private void ClickWeaponSelectButton(WeaponSelectScreen.ButtonType type)
+    /// <param name="sender">イベントオブジェクト</param>
+    /// <param name="e">イベント引数</param>
+    private void ClickWeaponSelectButton(object sender, EventArgs e)
     {
+        WeaponSelectScreen screen = sender as WeaponSelectScreen;
+
         // 決定選択
-        if (type == WeaponSelectScreen.ButtonType.OK)
+        if (screen.SelectedButton == WeaponSelectScreen.ButtonType.OK)
         {
             _weaponSelectManager.gameObject.SetActive(false);
             _cpuSelectManager.gameObject.SetActive(true);
         }
 
         // 戻る選択
-        if (type == WeaponSelectScreen.ButtonType.Back)
+        if (screen.SelectedButton == WeaponSelectScreen.ButtonType.Back)
         {
             _weaponSelectManager.gameObject.SetActive(false);
             _soloMultiSelectManager.gameObject.SetActive(true);
@@ -171,17 +180,20 @@ public class HomeSceneManager : MonoBehaviour
     /// <summary>
     /// CPU選択画面のボタンクリックイベント
     /// </summary>
-    /// <param name="type">クリックされたボタン</param>
-    private void ClickCpuSelectButton(CPUSelectScreen.ButtonType type)
+    /// <param name="sender">イベントオブジェクト</param>
+    /// <param name="e">イベント引数</param>
+    private void ClickCpuSelectButton(object sender, EventArgs e)
     {
+        CPUSelectScreen screen = sender as CPUSelectScreen;
+
         // 決定選択
-        if (type == CPUSelectScreen.ButtonType.OK)
+        if (screen.SelectedButton == CPUSelectScreen.ButtonType.OK)
         {
             SceneManager.LoadScene("BattleMode_Offline");
         }
 
         // 戻る選択
-        if (type == CPUSelectScreen.ButtonType.Back)
+        if (screen.SelectedButton == CPUSelectScreen.ButtonType.Back)
         {
             _cpuSelectManager.gameObject.SetActive(false);
             _weaponSelectManager.gameObject.SetActive(true);

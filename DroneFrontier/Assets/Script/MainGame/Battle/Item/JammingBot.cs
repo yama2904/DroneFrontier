@@ -45,15 +45,13 @@ namespace Offline
                 NotRadarableList.Add(value);
 
                 // 更新前のオブジェクトとの当たり判定を復活
-                Collider oldCollider = _creater?.GetComponent<Collider>();
-                if (oldCollider != null)
+                if (!Useful.IsNullOrDestroyed(_creater) && _creater.TryGetComponent(out Collider oldCollider))
                 {
                     Physics.IgnoreCollision(oldCollider, GetComponent<Collider>(), false);
                 }
 
                 // 生成者とは当たり判定を行わない
-                Collider collider = value?.GetComponent<Collider>();
-                if (collider != null)
+                if (!Useful.IsNullOrDestroyed(value) && value.TryGetComponent(out Collider collider))
                 {
                     Physics.IgnoreCollision(collider, GetComponent<Collider>());
                 }
@@ -83,8 +81,7 @@ namespace Offline
             _hp -= value;
             if (_hp < 0)
             {
-                // 破壊イベント発火してオブジェクト削除
-                DestroyEvent?.Invoke(this, EventArgs.Empty);
+                // してオブジェクト削除
                 Destroy(gameObject);
             }
 
@@ -97,6 +94,9 @@ namespace Offline
             {
                 status.EndJamming();
             }
+
+            // 破壊イベント発火
+            DestroyEvent?.Invoke(this, EventArgs.Empty);
 
             //デバッグ用
             Debug.Log("ジャミングボット破壊");

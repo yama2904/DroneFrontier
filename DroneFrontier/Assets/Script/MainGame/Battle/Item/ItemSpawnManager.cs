@@ -101,7 +101,7 @@ public class ItemSpawnManager : MonoBehaviour
                 if (_spawnedMap.ContainsValue(spawner)) break;
 
                 // スポーン実行
-                SpawnItem item = spawner.Spawn();
+                SpawnItem item = spawner.SpawnRandom();
 
                 // スポーン成功可否
                 if (item == null) continue;

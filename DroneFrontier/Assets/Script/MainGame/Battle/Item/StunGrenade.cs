@@ -72,8 +72,7 @@ public class StunGrenade : MonoBehaviour
         });
 
         // “Š±Ò‚Æ‚Í“–‚½‚è”»’è‚ğs‚í‚È‚¢
-        Collider collider = thrower.GetComponent<Collider>();
-        if (collider != null)
+        if (!Useful.IsNullOrDestroyed(thrower) && thrower.TryGetComponent(out Collider collider))
         {
             Physics.IgnoreCollision(collider, _grenadeObject.GetComponent<Collider>());
         }

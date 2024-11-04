@@ -9,7 +9,7 @@ namespace Offline
     {
         //パラメータ
         const float LINE_RADIUS = 0.2f;
-        IBattleDrone shooter = null;  //発射したプレイヤー
+        GameObject shooter = null;  //発射したプレイヤー
         float chargeTime = 0;      //チャージ時間
         float power = 0;           //威力
         float lineRange = 0;       //レーザーの半径
@@ -66,7 +66,7 @@ namespace Offline
         }
 
 
-        public void Init(IBattleDrone drone, float power, float size, float chargeTime, float lineRange, float hitPerSecond, bool isPlayer)
+        public void Init(GameObject drone, float power, float size, float chargeTime, float lineRange, float hitPerSecond, bool isPlayer)
         {
             shooter = drone;
             this.chargeTime = chargeTime;
@@ -185,7 +185,7 @@ namespace Offline
                     Transform t = hit.transform;
                     if (t.TryGetComponent(out IDamageable damageable))
                     {
-                        damageable.Damage(shooter.GameObject, power);
+                        damageable.Damage(shooter, power);
                     }
                 }
                 else
@@ -215,13 +215,13 @@ namespace Offline
                            //撃った本人は当たり判定から除外
                            if (h.transform.CompareTag(TagNameConst.PLAYER) || h.transform.CompareTag(TagNameConst.CPU))
                            {
-                               return h.transform.GetComponent<IBattleDrone>() != shooter;
+                               return h.transform.gameObject != shooter;
                            }
 
                            //ジャミングボットを生成したプレイヤーと撃ったプレイヤーが同じなら除外
                            if (h.transform.CompareTag(TagNameConst.JAMMING_BOT))
                            {
-                               return h.transform.GetComponent<IBattleDrone>() != shooter;
+                               return h.transform.gameObject != shooter;
                            }
                            return true;
                        })
