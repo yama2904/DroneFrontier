@@ -112,7 +112,7 @@ namespace Offline
         /// </summary>
         private Image[] _bulletUIs = null;
 
-        AudioSource _audioSource = null;
+        private AudioSource _audioSource = null;
 
         public void Shot(GameObject target = null)
         {

@@ -1,78 +1,137 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using Cysharp.Threading.Tasks;
+using System;
+using System.Threading;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 
 namespace Offline
 {
-    public class MissileBullet : Bulletaaa
+    public class MissileBullet : MonoBehaviour, IBullet
     {
-        public GameObject Source { get; private set; } = null;
+        public GameObject Shooter { get; private set; } = null;
 
-        [SerializeField] Explosion explosion = null;
-        bool isShot = false;
-        AudioSource audioSource = null;
+        /// <summary>
+        /// 着弾時間（秒）
+        /// </summary>
+        public float ExplosionSec { get; set; } = 2f;
 
-        //キャッシュ用
-        Transform cacheTransform = null;
+        /// <summary>
+        /// 爆発プレハブのAddressKey
+        /// </summary>
+        private const string EXPLOSION_ADDRESS_KEY = "Explosion";
 
+        /// <summary>
+        /// 爆発プレハブ
+        /// </summary>
+        private static Explosion _explosionPrefab = null;
 
-        protected override void Awake()
+        /// <summary>
+        /// ダメージ量
+        /// </summary>
+        private float _damage = 0;
+
+        /// <summary>
+        /// 弾速
+        /// </summary>
+        private float _speed = 0;
+
+        /// <summary>
+        /// 追従力
+        /// </summary>
+        private float _trackingPower = 0;
+
+        /// <summary>
+        /// 追従対象
+        /// </summary>
+        private GameObject _target = null;
+
+        /// <summary>
+        /// キャンセルトークン発行クラス
+        /// </summary>
+        private CancellationTokenSource _cancel = new CancellationTokenSource();
+
+        // コンポーネントキャッシュ用
+        private Transform _transform = null;
+        private Transform _targetTransform = null;
+        private AudioSource _audioSource = null;
+
+        public void Shot(GameObject shooter, float damage, float speed, float trackingPower = 0, GameObject target = null)
         {
-            base.Awake();
-            cacheTransform = GetComponent<Rigidbody>().transform;
+            _damage = damage;
+            _speed = speed;
+            _trackingPower = trackingPower;
+            _target = target;
+            _targetTransform = Useful.IsNullOrDestroyed(target) ? null : target.transform;
+            Shooter = shooter;
+
+            // 発射元とは当たり判定を行わない
+            if (!Useful.IsNullOrDestroyed(shooter) && shooter.TryGetComponent(out Collider collider))
+            {
+                Physics.IgnoreCollision(GetComponent<Collider>(), collider);
+            }
+
+            // SE再生
+            _audioSource.Play();
+
+            // 爆発タイマー設定
+            UniTask.Void(async () =>
+            {
+                await UniTask.Delay(TimeSpan.FromSeconds(ExplosionSec), cancellationToken: _cancel.Token);
+                Explosion();
+            });
         }
 
-        void Start()
+        private void Awake()
         {
-            cacheTransform.localRotation = Quaternion.Euler(90, 0, 0);
+            // コンポーネント取得
+            _transform = GetComponent<Rigidbody>().transform;
+            _audioSource = GetComponent<AudioSource>();
+            _audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.MISSILE);
 
-            audioSource = GetComponent<AudioSource>();
-            audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.MISSILE);
+            // 爆発プレハブ読み込み
+            if (_explosionPrefab == null)
+            {
+                Addressables.LoadAssetAsync<GameObject>(EXPLOSION_ADDRESS_KEY).Completed += handle =>
+                {
+                    _explosionPrefab = handle.Result.GetComponent<Explosion>();
+                    Addressables.Release(handle);
+                };
+            }
         }
 
-        protected override void FixedUpdate()
+        private void FixedUpdate()
         {
-            if (!isShot) return;
+            if (_target != null)
+            {
+                // 弾丸から追従対象までのベクトル計算
+                Vector3 diff = _targetTransform.position - _transform.position;
 
-            //90度傾けたままだと誘導がバグるので一旦直す
-            cacheTransform.Rotate(new Vector3(-90, 0, 0));
-            base.FixedUpdate();
-            cacheTransform.Rotate(new Vector3(90, 0, 0));
+                // 弾丸から追従対象までの角度
+                float angle = Vector3.Angle(_transform.forward, diff);
+                if (angle > _trackingPower)
+                {
+                    // 追従力以上の角度がある場合は修正
+                    angle = _trackingPower;
+                }
+
+                // 追従方向を計算
+                Vector3 axis = Vector3.Cross(_transform.forward, diff);
+                int dirX = axis.y >= 0 ? 1 : -1;
+                int dirY = axis.x >= 0 ? 1 : -1;
+
+                // 左右の回転
+                _transform.RotateAround(_transform.position, Vector3.up, angle * dirX);
+
+                // 上下の回転
+                _transform.RotateAround(_transform.position, Vector3.right, angle * dirY);
+            }
+
+            // 移動
+            _transform.position += _transform.forward * _speed * Time.deltaTime;
         }
 
-
-        public override void Init(GameObject drone, float power, float trackingPower, float speed, float destroyTime, GameObject target = null)
+        private void OnTriggerEnter(Collider other)
         {
-            base.Init(drone, power, trackingPower, speed, destroyTime, target);
-        }
-
-        public void Shot(GameObject target)
-        {
-            //親子付け解除
-            transform.parent = null;
-
-            //SE再生
-            audioSource.volume = SoundManager.SEVolume;
-            audioSource.Play();
-
-            Invoke(nameof(DestroyMe), destroyTime);
-            this.target = target;
-            isShot = true;
-        }
-
-
-        void DestroyMe()
-        {
-            Explosion e = Instantiate(explosion, cacheTransform.position, Quaternion.identity);
-            e.shooter = shooter;
-            Destroy(gameObject);
-        }
-
-
-        void OnTriggerEnter(Collider other)
-        {
-            if (!isShot) return;
-
             //当たり判定を行わないオブジェクトは処理しない
             if (other.CompareTag(TagNameConst.BULLET)) return;
             if (other.CompareTag(TagNameConst.ITEM)) return;
@@ -83,10 +142,26 @@ namespace Offline
             // ダメージ可能インターフェースが実装されている場合はダメージを与える
             if (other.TryGetComponent(out IDamageable damageable))
             {
-                damageable.Damage(shooter, Power);
+                damageable.Damage(Shooter, _damage);
             }
 
-            DestroyMe();
+            Explosion();
+        }
+
+        /// <summary>
+        /// 爆発
+        /// </summary>
+        private void Explosion()
+        {
+            // 爆発オブジェクト生成
+            Explosion e = Instantiate(_explosionPrefab, _transform.position, Quaternion.identity);
+            e.Shooter = Shooter;
+
+            // 爆発タイマー停止
+            _cancel.Cancel();
+
+            // ミサイル削除
+            Destroy(gameObject);
         }
     }
 }

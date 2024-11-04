@@ -1,163 +1,268 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using UnityEngine.UI;
 
 namespace Offline
 {
-    public class MissileWeapon : BaseWeapon
+    public class MissileWeapon : MonoBehaviour, IWeapon
     {
-        [SerializeField] MissileBullet missile = null;  //複製する弾丸
-        List<MissileBullet> settingBullets = new List<MissileBullet>();
-        const int USE_INDEX = 0;
-        bool setMissile = false;
+        public GameObject Owner { get; set; } = null;
 
-        //弾丸のパラメータ
-        [SerializeField, Tooltip("威力")] protected float power = 40f;
-        [SerializeField, Tooltip("リキャスト時間")] protected float recast = 10f;
-        [SerializeField, Tooltip("1秒間に発射する弾数")] protected float shotPerSecond = 0.2f;
-        [SerializeField, Tooltip("1秒間に進む距離")] float speed = 500f;
-        [SerializeField, Tooltip("射程")] float destroyTime = 2.0f;
-        [SerializeField, Tooltip("誘導力")] float trackingPower = 2.5f;
-        [SerializeField, Tooltip("ストック可能な弾数")] int maxBulletNum = 3;
-        float shotInterval = 0;     //発射間隔
-        float shotTimeCount = 0;    //時間計測用
-        float recastTimeCount = 0;  //時間計測用
-        int haveBulletNum = 0;      //残り弾数
+        public Transform ShotPosition { get; set; } = null;
 
-
-        //所持弾数のUI用
-        const float UI_POS_DIFF_X = 1.5f;
-        const float UI_POS_Y = 175f;
-        [SerializeField] Canvas UIParentCanvas = null;
-        [SerializeField] Image bulletUIBack = null;
-        [SerializeField] Image bulletUIFront = null;
-        Image[] UIs;
-
-
-        void Start()
+        public Canvas BulletUICanvas
         {
-            //パラメータの初期化
-            shotInterval = 1f / shotPerSecond;
-            shotTimeCount = shotInterval;
-            haveBulletNum = maxBulletNum;
-
-            //弾丸生成
-            CreateMissile();
-            setMissile = true;
-
-            //所持弾数のUI作成
-            UIs = new Image[maxBulletNum];
-            for (int i = 0; i < maxBulletNum; i++)
+            get
             {
-                //bulletUIBackの生成
+                return _bulletUICanvas;
+            }
+            set
+            {
+                _bulletUICanvas = value;
+
+                // 非同期で弾丸UI読み込み
+                if (_bulletUICanvas != null)
+                {
+                    LoadBulletUIAsync(_bulletUICanvas).Forget();
+                }
+            }
+        }
+        private Canvas _bulletUICanvas = null;
+
+        /// <summary>
+        /// 弾丸オブジェクトのAddressKey
+        /// </summary>
+        private const string BULLET_ADDRESS_KEY = "MissileBullet";
+
+        /// <summary>
+        /// 残弾背景UIのAddressKey
+        /// </summary>
+        private const string UI_BACK_KEY = "MissileBulletBackUI";
+
+        /// <summary>
+        /// 残弾前面UIのAddressKey
+        /// </summary>
+        private const string UI_FRONT_KEY = "MissileBulletFrontUI";
+
+        /// <summary>
+        /// 各残弾UIの縦幅
+        /// </summary>
+        private const int UI_HEIGHT = 100;
+
+        /// <summary>
+        /// 各残弾UIの横幅
+        /// </summary>
+        private const int UI_WIDTH = 50;
+
+        [SerializeField, Tooltip("表示用の装備ミサイル")]
+        private GameObject _displayMissile = null;
+
+        [SerializeField, Tooltip("弾丸発射座標")]
+        private Transform _shotPosition = null;
+
+        [SerializeField, Tooltip("威力")]
+        private float _damage = 40f;
+
+        [SerializeField, Tooltip("1秒間に発射する弾数")]
+        private float _shotPerSecond = 0.2f;
+
+        [SerializeField, Tooltip("弾速")]
+        private float _speed = 500f;
+
+        [SerializeField, Tooltip("着弾時間（秒）")]
+        private float _explosionSec = 2f;
+
+        [SerializeField, Tooltip("リキャスト時間（秒）")]
+        private float _recastSec = 10f;
+
+        [SerializeField, Tooltip("追従力")]
+        private float _trackingPower = 2.5f;
+
+        [SerializeField, Tooltip("ストック可能な弾数")]
+        private int _maxBulletNum = 3;
+
+        /// <summary>
+        /// 弾丸プレハブ
+        /// </summary>
+        private static GameObject _bulletPrefab = null;
+
+        /// <summary>
+        /// 発射間隔（秒）
+        /// </summary>
+        private float _shotIntervalSec = 0;
+
+        /// <summary>
+        /// 前回発射からの経過時間
+        /// </summary>
+        private float _shotTimer = 0;
+
+        /// <summary>
+        /// リキャスト計測
+        /// </summary>
+        private float _recastTimer = 0;
+
+        /// <summary>
+        /// 残弾数
+        /// </summary>
+        private int _hasBulletNum = 0;
+
+        /// <summary>
+        /// 各残弾UI
+        /// </summary>
+        private Image[] _bulletUIs = null;
+
+        // コンポーネントキャッシュ
+        private Transform _transform = null;
+
+        public void Shot(GameObject target = null)
+        {
+            // 発射間隔チェック
+            if (_shotTimer < _shotIntervalSec) return;
+
+            // 残弾0の場合は撃たない
+            if (_hasBulletNum <= 0) return;
+
+            // 弾丸生成
+            IBullet bullet = Instantiate(_bulletPrefab, ShotPosition.position, ShotPosition.rotation).GetComponent<IBullet>();
+            bullet.Shot(Owner, _damage, _speed, _trackingPower, target);
+            (bullet as MissileBullet).ExplosionSec = _explosionSec; // ※要検討
+
+            // 残弾UI更新
+            if (_bulletUIs != null)
+            {
+                for (int i = _hasBulletNum - 1; i < _maxBulletNum; i++)
+                {
+                    _bulletUIs[i].fillAmount = 0;
+                }
+            }
+
+            // 残弾-1
+            _hasBulletNum--;
+
+            // 前回発射時間リセット
+            _shotTimer = 0;
+
+            // 表示用ミサイルを非表示
+            _displayMissile.SetActive(false);
+        }
+
+        private void Awake()
+        {
+            // 発射間隔計算
+            _shotIntervalSec = 1.0f / _shotPerSecond;
+            _shotTimer = _shotIntervalSec;
+            _hasBulletNum = _maxBulletNum;
+
+            // コンポーネント取得
+            _transform = transform;
+
+            // プロパティ初期化
+            ShotPosition = _shotPosition;
+
+            // 弾丸オブジェクト読み込み
+            if (_bulletPrefab == null)
+            {
+                Addressables.LoadAssetAsync<GameObject>(BULLET_ADDRESS_KEY).Completed += handle =>
+                {
+                    _bulletPrefab = handle.Result;
+                    Addressables.Release(handle);
+                };
+            }
+        }
+
+        private void Update()
+        {
+            // リキャストと発射間隔のカウント
+            if (_recastTimer < _recastSec && _hasBulletNum < _maxBulletNum)
+            {
+                _recastTimer += Time.deltaTime;
+            }
+
+            if (_shotTimer < _shotIntervalSec)
+            {
+                _shotTimer += Time.deltaTime;
+            }
+        }
+
+        private void FixedUpdate()
+        {
+            // 最大弾数持っているなら処理しない
+            if (_hasBulletNum >= _maxBulletNum) return;
+
+            // リキャスト時間経過したら弾数を1個補充
+            if (_recastTimer >= _recastSec)
+            {
+                if (_bulletUIs != null)
+                {
+                    _bulletUIs[_hasBulletNum].fillAmount = 1f;
+                }
+
+                // 弾丸1個補充
+                _hasBulletNum++;
+
+                // リキャスト時間リセット
+                _recastTimer = 0;
+            }
+
+            if (_bulletUIs != null && _hasBulletNum < _maxBulletNum)
+            {
+                _bulletUIs[_hasBulletNum].fillAmount = _recastTimer / _recastSec;
+            }
+
+            // 発射可能になったらミサイル表示
+            if (_shotTimer >= _shotIntervalSec)
+            {
+                if (!_displayMissile.activeSelf)
+                {
+                    _displayMissile.SetActive(true);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 非同期で弾丸UIを読み込んで表示
+        /// </summary>
+        /// <param name="canvas">表示する弾丸UIの親Canvas</param>
+        private async UniTask LoadBulletUIAsync(Canvas canvas)
+        {
+            // 残弾UI読み込み
+            var handleBack = Addressables.LoadAssetAsync<GameObject>(UI_BACK_KEY);
+            var handleFront = Addressables.LoadAssetAsync<GameObject>(UI_FRONT_KEY);
+            await UniTask.WhenAll(handleBack.ToUniTask(), handleFront.ToUniTask());
+
+            // 残弾UI取り出し
+            RectTransform bulletUIBack = handleBack.Result.GetComponent<RectTransform>();
+            RectTransform bulletUIFront = handleFront.Result.GetComponent<RectTransform>();
+
+            // リソース解放
+            Addressables.Release(handleBack);
+            Addressables.Release(handleFront);
+
+            // 残弾UI作成
+            _bulletUIs = new Image[_maxBulletNum];
+            for (int i = 0; i < _maxBulletNum; i++)
+            {
+                // UIの配置位置計算
+                float x = UI_WIDTH * i + UI_WIDTH * 0.5f;
+                float y = UI_HEIGHT * 0.5f;
+
+                // 背景UIの生成
                 RectTransform back = Instantiate(bulletUIBack).GetComponent<RectTransform>();
-                back.SetParent(UIParentCanvas.transform);
-                back.anchoredPosition3D = new Vector3((back.sizeDelta.x * i * UI_POS_DIFF_X) + back.sizeDelta.x, UI_POS_Y, 0);
+                back.SetParent(canvas.transform);
+                back.localPosition = new Vector3(x, y, 0);
                 back.localRotation = Quaternion.identity;
 
-                //bulletUIFrontの生成
+                // 前面UIの生成
                 RectTransform front = Instantiate(bulletUIFront).GetComponent<RectTransform>();
-                front.SetParent(UIParentCanvas.transform);
-                front.anchoredPosition3D = new Vector3((front.sizeDelta.x * i * UI_POS_DIFF_X) + front.sizeDelta.x, UI_POS_Y, 0);
+                front.SetParent(canvas.transform);
+                front.localPosition = new Vector3(x, y, 0);
                 front.localRotation = Quaternion.identity;
 
-                //配列に追加
-                UIs[i] = front.GetComponent<Image>();
-                UIs[i].fillAmount = 1f;
+                // 残弾UIに追加
+                _bulletUIs[i] = front.GetComponent<Image>();
+                _bulletUIs[i].fillAmount = 1f;
             }
-        }
-
-        void Update()
-        {
-            //発射間隔のカウント
-            if (!setMissile)
-            {
-                shotTimeCount += Time.deltaTime;
-                if (shotTimeCount > shotInterval)
-                {
-                    shotTimeCount = shotInterval;
-                    if (haveBulletNum > 0)  //弾丸が残っていない場合は処理しない
-                    {
-                        CreateMissile();
-                        setMissile = true;
-                        
-                        //デバッグ用
-                        Debug.Log("ミサイル発射可能");
-                    }
-                }
-            }
-
-            //リキャスト時間経過したら弾数を1個補充
-            if (haveBulletNum < maxBulletNum)     //最大弾数持っていたら処理しない
-            {
-                recastTimeCount += Time.deltaTime;
-                if (recastTimeCount >= recast)
-                {
-                    UIs[haveBulletNum].fillAmount = 1f;
-                    haveBulletNum++;        //弾数を回復
-                    recastTimeCount = 0;    //リキャストのカウントをリセット
-
-
-                    //デバッグ用
-                    Debug.Log("ミサイルの弾丸が1回分補充されました");
-                }
-                else
-                {
-                    UIs[haveBulletNum].fillAmount = recastTimeCount / recast;
-                }
-            }
-        }
-
-        MissileBullet CreateMissile()
-        {
-            //ミサイルの生成
-            MissileBullet m = Instantiate(missile, transform);
-
-            //リストに追加
-            settingBullets.Add(m);
-            setMissile = true;
-
-            return m;
-        }
-
-        public override void Shot(GameObject target = null)
-        {
-            //前回発射して発射間隔分の時間が経過していなかったら撃たない
-            if (shotTimeCount < shotInterval) return;
-
-            //バグ防止
-            if (!setMissile) return;
-            if (settingBullets.Count <= 0) return;
-
-            //残り弾数が0だったら撃たない
-            if (haveBulletNum <= 0) return;
-
-
-            //ミサイル発射
-            settingBullets[USE_INDEX].Init(shooter, power, trackingPower, speed, destroyTime, target);
-            settingBullets[USE_INDEX].Shot(target);
-            settingBullets.RemoveAt(USE_INDEX);
-            setMissile = false;
-
-
-            //所持弾丸のUIを灰色に変える
-            for (int i = haveBulletNum - 1; i < maxBulletNum; i++)
-            {
-                UIs[i].fillAmount = 0;
-            }
-
-            //弾数を減らしてリキャスト開始
-            if (haveBulletNum == maxBulletNum)
-            {
-                recastTimeCount = 0;
-            }
-            haveBulletNum--;    //残り弾数を減らす
-            shotTimeCount = 0;  //発射間隔のカウントをリセット
-
-
-            //デバッグ用
-            Debug.Log("ミサイル発射 残り弾数: " + haveBulletNum);
         }
     }
 }
