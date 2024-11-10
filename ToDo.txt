@@ -1,5 +1,5 @@
 TryGetComponent
 状態異常のSE
 アイテム同士で非接触判定共有
-IBattleDroneのGameObject消す
 ジャミングエリアとジャミングボットが同じ判定なってる
+誘導時に前面にいない場合は誘導しない

@@ -627,6 +627,7 @@ GameObject:
   - component: {fileID: 1737714871206060867}
   - component: {fileID: 5668502763316825620}
   - component: {fileID: 9200962274211400824}
+  - component: {fileID: 5374172619177132804}
   - component: {fileID: 2690737355441408120}
   - component: {fileID: 993888715167761601}
   - component: {fileID: 3448523090443018778}
@@ -786,6 +787,7 @@ MonoBehaviour:
   _subWeaponPos: {fileID: 5926396747005579846}
   _mainShotPos: {fileID: 5059637526511615852}
   _subShotPos: {fileID: 6857131973517506341}
+  _bulletUICanvs: {fileID: 0}
 --- !u!114 &2702255915945675599
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -853,6 +855,22 @@ MonoBehaviour:
   _aimSpeed: 12
   _lockOnRadius: 450
   _lockOnDistance: 450
+--- !u!114 &5374172619177132804
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5756816350272667788}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a8acd04110f4d54a89c5d6e038a3dde, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _boostGaugeUI: {fileID: 0}
+  _boostAccele: 2.1
+  _maxBoostTime: 6
+  _maxBoostRecastTime: 8
 --- !u!114 &2690737355441408120
 MonoBehaviour:
   m_ObjectHideFlags: 0

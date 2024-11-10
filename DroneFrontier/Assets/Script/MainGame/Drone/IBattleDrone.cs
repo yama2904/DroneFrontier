@@ -7,11 +7,6 @@ using UnityEngine;
 /// </summary>
 public interface IBattleDrone
 {
-    /// <summary>
-    /// ドローンのゲームオブジェクト
-    /// </summary>
-    public GameObject GameObject { get; }
-
     // <summary>
     /// ドローンの名前
     /// </summary>

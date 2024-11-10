@@ -165,7 +165,7 @@ namespace Offline
             {
                 if (_gaugeValue < 1.0f)
                 {
-                    //ゲージを回復
+                    // ゲージを回復
                     _gaugeValue += _addGaugePerSec * Time.deltaTime;
                     if (_gaugeValue > 1f)
                     {

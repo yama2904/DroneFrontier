@@ -8,11 +8,6 @@ using UnityEngine.UI;
 public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
 {
     /// <summary>
-    /// ドローンのゲームオブジェクト
-    /// </summary>
-    public GameObject GameObject { get; private set; } = null;
-
-    /// <summary>
     /// ドローンの名前
     /// </summary>
     public string Name { get; set; } = "";
@@ -40,7 +35,6 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
             }
         }
     }
-    private float _hp = 0;
 
     /// <summary>
     /// 現在のストック数
@@ -54,7 +48,6 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
             _stockText.text = value.ToString();
         }
     }
-    private int _stockNum = 0;
 
     /// <summary>
     /// ドローンのサブ武器
@@ -77,20 +70,31 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
 
     public List<GameObject> NotRadarableList { get; } = new List<GameObject>();
 
-    [SerializeField, Tooltip("ドローンの最大HP")]
-    private float _maxHP = 100f;
+    /// <summary>
+    /// ドローン破壊イベント
+    /// </summary>
+    public event EventHandler DroneDestroyEvent;
 
-    // ブースト用
-    const float BOOST_POSSIBLE_MIN = 0.2f;  // ブースト可能な最低ゲージ量
-    [SerializeField] Image boostGaugeImage = null;   // ブーストのゲージ画像
-    [SerializeField, Tooltip("ブーストの加速度")] float boostAccele = 2.1f;  // ブーストの加速度
-    [SerializeField, Tooltip("ブースト時間")] float maxBoostTime = 6.0f;     // ブーストできる最大の時間
-    [SerializeField, Tooltip("ブーストのリキャスト時間")] float boostRecastTime = 8.0f;  // ブーストのリキャスト時間
-    int boostSoundId = -1;
-    bool isBoost = false;
+    /// <summary>
+    /// 死亡時の回転量
+    /// </summary>
+    private readonly Quaternion DEATH_ROTATE = Quaternion.Euler(28, -28, -28);
 
-    [SerializeField, Tooltip("ストック数")]
-    private int _maxStock = 3;
+    /// <summary>
+    /// 死亡時の回転速度
+    /// </summary>
+    private const float DEATH_ROTATE_SPEED = 2f;
+
+    /// <summary>
+    /// 死亡時の落下時間
+    /// </summary>
+    private const float DEATH_FALL_TIME = 2.5f;
+
+    [SerializeField, Tooltip("ドローン本体オブジェクト")]
+    private Transform _droneObject = null;
+
+    [SerializeField, Tooltip("ドローン死亡時の爆発オブジェクト")]
+    private GameObject _explosion = null;
 
     [SerializeField, Tooltip("ストック数を表示するTextコンポーネント")]
     private Text _stockText = null;
@@ -98,16 +102,16 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
     [SerializeField, Tooltip("オブジェクト探索コンポーネント")]
     private ObjectSearchComponent _searchComponent = null;
 
-    bool[] usingWeapons = new bool[(int)DroneWeaponComponent.Weapon.NONE];    // 使用中の武器
-    [SerializeField, Tooltip("攻撃中の移動速度の低下率")] float atackingDownSpeed = 0.5f;   // 攻撃中の移動速度の低下率
+    [SerializeField, Tooltip("ドローンのHP")]
+    private float _hp = 100f;
 
-    // 死亡処理用
-    [SerializeField] GameObject explosion = null;
-    [SerializeField] Transform droneObject = null;
-    Quaternion deathRotate = Quaternion.Euler(28, -28, -28);
-    float deathRotateSpeed = 2f;
-    float gravityAccele = 1f;  // 落下加速用
-    float fallTime = 2.5f;     // 死亡後の落下時間
+    [SerializeField, Tooltip("ストック数")]
+    private int _stockNum = 2;
+
+    [SerializeField, Tooltip("攻撃中の移動速度の低下率")] 
+    private float _atackingDownSpeed = 0.5f;
+
+    bool[] usingWeapons = new bool[(int)DroneWeaponComponent.Weapon.NONE];    // 使用中の武器
 
     /// <summary>
     /// 死亡落下中
@@ -119,7 +123,6 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
     /// </summary>
     bool _isDestroy = false;
 
-
     // アイテム枠
     enum ItemNum
     {
@@ -128,11 +131,6 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
 
         NONE
     }
-
-    /// <summary>
-    /// ドローン破壊イベント
-    /// </summary>
-    public event EventHandler DroneDestroyEvent;
 
     // コンポーネントキャッシュ
     Transform _transform = null;
@@ -145,11 +143,11 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
     DroneRadarComponent _radarComponent = null;
     DroneItemComponent _itemComponent = null;
     DroneWeaponComponent _weaponComponent = null;
+    DroneBoostComponent _boostComponent = null;
 
     protected void Awake()
     {
         // コンポーネントの取得
-        GameObject = gameObject;
         _rigidbody = GetComponent<Rigidbody>();
         _transform = _rigidbody.transform;
         _animator = GetComponent<Animator>();
@@ -160,12 +158,10 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
         _radarComponent = GetComponent<DroneRadarComponent>();
         _itemComponent = GetComponent<DroneItemComponent>();
         _weaponComponent = GetComponent<DroneWeaponComponent>();
+        _boostComponent = GetComponent<DroneBoostComponent>();
 
-        // HP初期化
-        _hp = _maxHP;
-
-        // ストック数初期化
-        StockNum = _maxStock;
+        // ストック数UI初期化
+        StockNum = _stockNum;
 
         // ロックオン・レーダー不可オブジェクトに自分を設定
         NotLockableOnList.Add(gameObject);
@@ -177,18 +173,13 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
 
     private void Start()
     {
-        // ブースト初期化
-        boostGaugeImage.enabled = true;
-        boostGaugeImage.fillAmount = 1;
-
         // ショットガンの場合はブーストを多少強化する
         if (SubWeapon == WeaponType.SHOTGUN)
         {
-            boostAccele *= 1.2f;
-            maxBoostTime *= 1.2f;
-            boostRecastTime *= 0.8f;
+            _boostComponent.BoostAccele *= 1.2f;
+            _boostComponent.MaxBoostTime *= 1.2f;
+            _boostComponent.MaxBoostRecastTime *= 0.8f;
         }
-
 
         // プロペラは最初から流す
         _soundComponent.PlayLoopSE(SoundManager.SE.PROPELLER, SoundManager.SEVolume);
@@ -198,8 +189,6 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
     {
         // 死亡処理中は操作不可
         if (_isDestroyFalling || _isDestroy) return;
-
-        #region Move
 
         // 前進
         if (Input.GetKey(KeyCode.W))
@@ -239,12 +228,8 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
             _moveComponent.Move(_transform.up * -1);
         }
 
-        #endregion
-
-        #region LockOn
-
         // ロックオン使用
-        if (Input.GetKey(KeyCode.LeftShift))
+        if (Input.GetKeyDown(KeyCode.LeftShift))
         {
             _lockOnComponent.StartLockOn();
         }
@@ -254,18 +239,10 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
             _lockOnComponent.StopLockOn();
         }
 
-        #endregion
-
-        #region Radar
-
-        // レーダー音の再生
+        // レーダー使用
         if (Input.GetKeyDown(KeyCode.Q))
         {
             _soundComponent.PlayOneShot(SoundManager.SE.RADAR, SoundManager.SEVolume);
-        }
-        // レーダー使用
-        if (Input.GetKey(KeyCode.Q))
-        {
             _radarComponent.StartRadar();
         }
         // レーダー終了
@@ -273,9 +250,6 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
         {
             _radarComponent.StopRadar();
         }
-
-        #endregion
-
 
         // 回転処理
         if (Cursor.lockState == CursorLockMode.Locked)
@@ -296,7 +270,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
             if (!usingWeapons[(int)DroneWeaponComponent.Weapon.SUB] && !usingWeapons[(int)DroneWeaponComponent.Weapon.MAIN])
             {
                 // 攻撃中は速度低下
-                _moveComponent.MoveSpeed *= atackingDownSpeed;
+                _moveComponent.MoveSpeed *= _atackingDownSpeed;
                 usingWeapons[(int)DroneWeaponComponent.Weapon.MAIN] = true;
             }
         }
@@ -314,7 +288,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
             // 攻撃を止めたら速度を戻す
             if (usingWeapons[(int)DroneWeaponComponent.Weapon.MAIN])
             {
-                _moveComponent.MoveSpeed *= 1 / atackingDownSpeed;
+                _moveComponent.MoveSpeed *= 1 / _atackingDownSpeed;
                 usingWeapons[(int)DroneWeaponComponent.Weapon.MAIN] = false;
             }
         }
@@ -329,12 +303,12 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
                 if (SubWeapon == WeaponType.MISSILE)
                 {
                     // 攻撃中は速度低下
-                    _moveComponent.MoveSpeed *= atackingDownSpeed;
+                    _moveComponent.MoveSpeed *= _atackingDownSpeed;
                 }
                 // レーザーの場合は低下率増加
                 if (SubWeapon == WeaponType.LASER)
                 {
-                    _moveComponent.MoveSpeed *= atackingDownSpeed * 0.75f;
+                    _moveComponent.MoveSpeed *= _atackingDownSpeed * 0.75f;
                 }
                 usingWeapons[(int)DroneWeaponComponent.Weapon.SUB] = true;
             }
@@ -356,12 +330,12 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
                 if (SubWeapon == WeaponType.MISSILE)
                 {
                     // 攻撃中は速度低下
-                    _moveComponent.MoveSpeed *= 1 / atackingDownSpeed;
+                    _moveComponent.MoveSpeed *= 1 / _atackingDownSpeed;
                 }
                 // レーザーの場合は低下率増加
                 if (SubWeapon == WeaponType.LASER)
                 {
-                    _moveComponent.MoveSpeed *= 1 / (atackingDownSpeed * 0.75f);
+                    _moveComponent.MoveSpeed *= 1 / (_atackingDownSpeed * 0.75f);
                 }
                 usingWeapons[(int)DroneWeaponComponent.Weapon.SUB] = false;
             }
@@ -369,78 +343,11 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
 
         #endregion
 
-        #region Boost
-
         // ブースト使用
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKey(KeyCode.Space))
         {
-            // ブーストが使用可能なゲージ量ならブースト使用
-            if (boostGaugeImage.fillAmount >= BOOST_POSSIBLE_MIN)
-            {
-                _moveComponent.MoveSpeed *= boostAccele;
-                isBoost = true;
-
-                // 加速音の再生
-                boostSoundId = _soundComponent.PlayLoopSE(SoundManager.SE.BOOST, SoundManager.SEVolume * 0.15f);
-
-                // デバッグ用
-                Debug.Log("ブースト使用");
-            }
+            _boostComponent.Boost();
         }
-        // ブースト使用中の処理
-        if (isBoost)
-        {
-            // キーを押し続けている間はゲージ消費
-            if (Input.GetKey(KeyCode.Space))
-            {
-                boostGaugeImage.fillAmount -= 1.0f / maxBoostTime * Time.deltaTime;
-
-                // ゲージが空になったらブースト停止
-                if (boostGaugeImage.fillAmount <= 0)
-                {
-                    boostGaugeImage.fillAmount = 0;
-
-                    _moveComponent.MoveSpeed *= 1 / boostAccele;
-                    isBoost = false;
-
-                    // ブーストSE停止
-                    _soundComponent.StopLoopSE(boostSoundId);
-
-
-                    // デバッグ用
-                    Debug.Log("ブースト終了");
-                }
-            }
-            // キーを離したらブースト停止
-            if (Input.GetKeyUp(KeyCode.Space))
-            {
-                _moveComponent.MoveSpeed *= 1 / boostAccele;
-                isBoost = false;
-
-                // ブーストSE停止
-                _soundComponent.StopLoopSE(boostSoundId);
-
-
-                // デバッグ用
-                Debug.Log("ブースト終了");
-            }
-        }
-
-        // ブースト未使用時にゲージ回復
-        if (!isBoost)
-        {
-            if (boostGaugeImage.fillAmount < 1.0f)
-            {
-                boostGaugeImage.fillAmount += 1.0f / boostRecastTime * Time.deltaTime;
-                if (boostGaugeImage.fillAmount >= 1.0f)
-                {
-                    boostGaugeImage.fillAmount = 1;
-                }
-            }
-        }
-
-        #endregion
-
 
         // アイテム使用
         if (Input.GetKeyUp(KeyCode.Alpha1))
@@ -458,11 +365,10 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
         if (_isDestroyFalling)
         {
             // 加速しながら落ちる
-            _rigidbody.AddForce(new Vector3(0, -10 * gravityAccele, 0), ForceMode.Acceleration);
-            gravityAccele += 20 * Time.deltaTime;
+            _rigidbody.AddForce(new Vector3(0, -400, 0), ForceMode.Acceleration);
 
             // ドローンを傾ける
-            _rotateComponent.Rotate(deathRotate, deathRotateSpeed * Time.deltaTime);
+            _rotateComponent.Rotate(DEATH_ROTATE, DEATH_ROTATE_SPEED * Time.deltaTime);
 
             // プロペラ減速
             _animator.speed *= 0.993f;
@@ -497,7 +403,6 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
     /// </summary>
     private async UniTask Destroy()
     {
-        gravityAccele = 1f;
         _isDestroyFalling = true;
         _isDestroy = true;
 
@@ -512,32 +417,31 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
         _soundComponent.PlayOneShot(SoundManager.SE.DEATH, SoundManager.SEVolume);
 
         // 一定時間経過してから爆破
-        await UniTask.Delay(TimeSpan.FromSeconds(fallTime));
+        await UniTask.Delay(TimeSpan.FromSeconds(DEATH_FALL_TIME));
 
         // ドローンの非表示
-        droneObject.gameObject.SetActive(false);
+        _droneObject.gameObject.SetActive(false);
 
         // 当たり判定も消す
         GetComponent<Collider>().enabled = false;
 
         // 爆破生成
-        GameObject explosionObj = Instantiate(explosion, _transform);
+        _explosion.SetActive(true);
 
-        // 落下停止
-        _isDestroyFalling = false;
+        // コンポーネント停止
+        enabled = false;
 
-        // 爆破後一定時間で復活、又は観戦モード切替
+        // 爆破後一定時間でオブジェクト破棄
         await UniTask.Delay(5000);
 
         // ドローン破壊イベント通知
         DroneDestroyEvent?.Invoke(this, EventArgs.Empty);
 
-        Destroy(explosionObj);
         Destroy(gameObject);
     }
 
     // アイテム使用
-    void UseItem(ItemNum item)
+    private void UseItem(ItemNum item)
     {
         // アイテム枠にアイテムを持っていたら使用
         if (_itemComponent.UseItem((int)item))

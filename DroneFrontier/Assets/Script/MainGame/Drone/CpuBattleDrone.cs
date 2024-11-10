@@ -61,11 +61,6 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
     bool isDamage = false;
 
     /// <summary>
-    /// ドローンのゲームオブジェクト
-    /// </summary>
-    public GameObject GameObject { get; private set; } = null;
-
-    /// <summary>
     /// ドローンの名前
     /// </summary>
     public string Name { get; set; } = "";
@@ -131,7 +126,6 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
     protected void Awake()
     {
         //コンポーネントの取得
-        GameObject = gameObject;
         _transform = transform;
         _rigidbody = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
