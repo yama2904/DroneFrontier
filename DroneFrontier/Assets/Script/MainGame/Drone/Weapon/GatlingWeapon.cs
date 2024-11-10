@@ -3,7 +3,7 @@ using UnityEngine.AddressableAssets;
 
 namespace Offline
 {
-    public class Gatling : MonoBehaviour, IWeapon
+    public class GatlingWeapon : MonoBehaviour, IWeapon
     {
         public GameObject Owner { get; set; } = null;
 

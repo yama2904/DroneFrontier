@@ -5,11 +5,15 @@ using UnityEngine.UI;
 
 namespace Offline
 {
-    public class Shotgun : MonoBehaviour, IWeapon
+    public class ShotgunWeapon : MonoBehaviour, IWeapon
     { 
         public GameObject Owner { get; set; } = null;
 
-        public Transform ShotPosition { get; set; } = null;
+        public Transform ShotPosition
+        {
+            get { return _shotPosition; }
+            set { _shotPosition = value; }
+        }
 
         public Canvas BulletUICanvas
         {
@@ -38,12 +42,12 @@ namespace Offline
         /// <summary>
         /// 残弾背景UIのAddressKey
         /// </summary>
-        private const string UI_BACK_KEY = "ShotgunBulletBackUI";
+        private const string BACK_UI_ADDRESS_KEY = "ShotgunBulletBackUI";
 
         /// <summary>
         /// 残弾前面UIのAddressKey
         /// </summary>
-        private const string UI_FRONT_KEY = "ShotgunBulletFrontUI";
+        private const string FRONT_UI_ADDRESS_KEY = "ShotgunBulletFrontUI";
 
         /// <summary>
         /// 各残弾UIの縦幅
@@ -183,9 +187,6 @@ namespace Offline
             _audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.SHOTGUN);
             _audioSource.volume = SoundManager.SEVolume;
 
-            // プロパティ初期化
-            ShotPosition = _shotPosition;
-
             // 弾丸オブジェクト読み込み
             Addressables.LoadAssetAsync<GameObject>(BULLET_ADDRESS_KEY).Completed += handle =>
             {
@@ -243,8 +244,8 @@ namespace Offline
         private async UniTask LoadBulletUIAsync(Canvas canvas)
         {
             // 残弾UI読み込み
-            var handleBack = Addressables.LoadAssetAsync<GameObject>(UI_BACK_KEY);
-            var handleFront = Addressables.LoadAssetAsync<GameObject>(UI_FRONT_KEY);
+            var handleBack = Addressables.LoadAssetAsync<GameObject>(BACK_UI_ADDRESS_KEY);
+            var handleFront = Addressables.LoadAssetAsync<GameObject>(FRONT_UI_ADDRESS_KEY);
             await UniTask.WhenAll(handleBack.ToUniTask(), handleFront.ToUniTask());
 
             // 残弾UI取り出し

@@ -17,14 +17,8 @@ namespace Offline
         /// </summary>
         public float Damage
         {
-            get
-            {
-                return _damage;
-            }
-            set
-            {
-                _damage = value;
-            }
+            get { return _damage; }
+            set { _damage = value; }
         }
 
         /// <summary>
@@ -32,14 +26,8 @@ namespace Offline
         /// </summary>
         public float ExplosionRadius
         {
-            get
-            {
-                return _explosionRadius;
-            }
-            set
-            {
-                _explosionRadius = value;
-            }
+            get { return _explosionRadius; }
+            set { _explosionRadius = value; }
         }
 
         /// <summary>
