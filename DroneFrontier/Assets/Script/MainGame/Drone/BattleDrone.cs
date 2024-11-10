@@ -7,6 +7,8 @@ using UnityEngine.UI;
 
 public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
 {
+    #region public
+
     /// <summary>
     /// ドローンの名前
     /// </summary>
@@ -75,6 +77,24 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
     /// </summary>
     public event EventHandler DroneDestroyEvent;
 
+    #endregion
+
+    /// <summary>
+    /// 所持アイテム番号
+    /// </summary>
+    private enum ItemNum
+    {
+        /// <summary>
+        /// アイテム1
+        /// </summary>
+        Item1,
+
+        /// <summary>
+        /// アイテム2
+        /// </summary>
+        Item2
+    }
+
     /// <summary>
     /// 死亡時の回転量
     /// </summary>
@@ -111,26 +131,24 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
     [SerializeField, Tooltip("攻撃中の移動速度の低下率")] 
     private float _atackingDownSpeed = 0.5f;
 
-    bool[] usingWeapons = new bool[(int)DroneWeaponComponent.Weapon.NONE];    // 使用中の武器
+    /// <summary>
+    /// メイン武器使用履歴<br/>
+    /// [0]:現在のフレーム<br/>
+    /// [1]:1フレーム前
+    /// </summary>
+    private bool[] _isMainAttacked = new bool[2];
 
     /// <summary>
-    /// 死亡落下中
+    /// サブ武器使用履歴<br/>
+    /// [0]:現在のフレーム<br/>
+    /// [1]:1フレーム前
     /// </summary>
-    bool _isDestroyFalling = false;
+    private bool[] _isSubAttacked = new bool[2];
 
     /// <summary>
     /// 死亡フラグ
     /// </summary>
-    bool _isDestroy = false;
-
-    // アイテム枠
-    enum ItemNum
-    {
-        ITEM_1,   // アイテム枠1
-        ITEM_2,   // アイテム枠2
-
-        NONE
-    }
+    private bool _isDestroy = false;
 
     // コンポーネントキャッシュ
     Transform _transform = null;
@@ -145,7 +163,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
     DroneWeaponComponent _weaponComponent = null;
     DroneBoostComponent _boostComponent = null;
 
-    protected void Awake()
+    private void Awake()
     {
         // コンポーネントの取得
         _rigidbody = GetComponent<Rigidbody>();
@@ -188,7 +206,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
     private void Update()
     {
         // 死亡処理中は操作不可
-        if (_isDestroyFalling || _isDestroy) return;
+        if (_isDestroy) return;
 
         // 前進
         if (Input.GetKey(KeyCode.W))
@@ -251,7 +269,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
             _radarComponent.StopRadar();
         }
 
-        // 回転処理
+        // マウスによるカメラ回転処理
         if (Cursor.lockState == CursorLockMode.Locked)
         {
             float x = Input.GetAxis("Mouse X") * CameraManager.ReverseX * CameraManager.CameraSpeed;
@@ -259,89 +277,41 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
             _moveComponent.RotateCamera(x, y);
         }
 
-
-        #region Weapon
-
-        // メイン武器攻撃
-        if (Input.GetMouseButtonDown(0))
+        // メイン武器攻撃（サブ武器攻撃中の場合は不可）
+        if (Input.GetMouseButton(0) && !_isSubAttacked[1])
         {
-            // サブ武器を使用していたら撃てない
-            // バグ防止用にメイン武器フラグも調べる
-            if (!usingWeapons[(int)DroneWeaponComponent.Weapon.SUB] && !usingWeapons[(int)DroneWeaponComponent.Weapon.MAIN])
+            // 攻撃中は速度低下
+            if (!_isMainAttacked[1])
             {
-                // 攻撃中は速度低下
                 _moveComponent.MoveSpeed *= _atackingDownSpeed;
-                usingWeapons[(int)DroneWeaponComponent.Weapon.MAIN] = true;
             }
+
+            _weaponComponent.Shot(DroneWeaponComponent.Weapon.MAIN, _lockOnComponent.Target);
+            _isMainAttacked[0] = true;
         }
 
-        // メインウェポン攻撃
-        if (Input.GetMouseButton(0))
+        // サブ武器攻撃（メイン武器攻撃中の場合は不可）
+        if (Input.GetMouseButton(1) && !_isMainAttacked[1])
         {
-            if (usingWeapons[(int)DroneWeaponComponent.Weapon.MAIN])
+            // 攻撃中は速度低下
+            if (!_isSubAttacked[1])
             {
-                _weaponComponent.Shot(DroneWeaponComponent.Weapon.MAIN, _lockOnComponent.Target);
-            }
-        }
-        if (Input.GetMouseButtonUp(0))
-        {
-            // 攻撃を止めたら速度を戻す
-            if (usingWeapons[(int)DroneWeaponComponent.Weapon.MAIN])
-            {
-                _moveComponent.MoveSpeed *= 1 / _atackingDownSpeed;
-                usingWeapons[(int)DroneWeaponComponent.Weapon.MAIN] = false;
-            }
-        }
+                switch (SubWeapon)
+                {
+                    case WeaponType.MISSILE:
+                        _moveComponent.MoveSpeed *= _atackingDownSpeed;
+                        break;
 
-        // サブ武器攻撃
-        if (Input.GetMouseButtonDown(1))
-        {
-            // サブ武器を使用していたら撃てない
-            // バグ防止用にサブ武器フラグも調べる
-            if (!usingWeapons[(int)DroneWeaponComponent.Weapon.MAIN] && !usingWeapons[(int)DroneWeaponComponent.Weapon.SUB])
-            {
-                if (SubWeapon == WeaponType.MISSILE)
-                {
-                    // 攻撃中は速度低下
-                    _moveComponent.MoveSpeed *= _atackingDownSpeed;
+                    case WeaponType.LASER:
+                        // レーザーの場合は低下率増加
+                        _moveComponent.MoveSpeed *= _atackingDownSpeed * 0.5f;
+                        break;
                 }
-                // レーザーの場合は低下率増加
-                if (SubWeapon == WeaponType.LASER)
-                {
-                    _moveComponent.MoveSpeed *= _atackingDownSpeed * 0.75f;
-                }
-                usingWeapons[(int)DroneWeaponComponent.Weapon.SUB] = true;
             }
-        }
 
-        // サブウェポン攻撃
-        if (Input.GetMouseButton(1))
-        {
-            if (usingWeapons[(int)DroneWeaponComponent.Weapon.SUB])
-            {
-                _weaponComponent.Shot(DroneWeaponComponent.Weapon.SUB, _lockOnComponent.Target);
-            }
+            _weaponComponent.Shot(DroneWeaponComponent.Weapon.SUB, _lockOnComponent.Target);
+            _isSubAttacked[0] = true;
         }
-        if (Input.GetMouseButtonUp(1))
-        {
-            // 攻撃を止めたら速度を戻す
-            if (usingWeapons[(int)DroneWeaponComponent.Weapon.SUB])
-            {
-                if (SubWeapon == WeaponType.MISSILE)
-                {
-                    // 攻撃中は速度低下
-                    _moveComponent.MoveSpeed *= 1 / _atackingDownSpeed;
-                }
-                // レーザーの場合は低下率増加
-                if (SubWeapon == WeaponType.LASER)
-                {
-                    _moveComponent.MoveSpeed *= 1 / (_atackingDownSpeed * 0.75f);
-                }
-                usingWeapons[(int)DroneWeaponComponent.Weapon.SUB] = false;
-            }
-        }
-
-        #endregion
 
         // ブースト使用
         if (Input.GetKey(KeyCode.Space))
@@ -352,17 +322,17 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
         // アイテム使用
         if (Input.GetKeyUp(KeyCode.Alpha1))
         {
-            UseItem(ItemNum.ITEM_1);
+            UseItem(ItemNum.Item1);
         }
         if (Input.GetKeyUp(KeyCode.Alpha2))
         {
-            UseItem(ItemNum.ITEM_2);
+            UseItem(ItemNum.Item2);
         }
     }
 
-    void FixedUpdate()
+    private void FixedUpdate()
     {
-        if (_isDestroyFalling)
+        if (_isDestroy)
         {
             // 加速しながら落ちる
             _rigidbody.AddForce(new Vector3(0, -400, 0), ForceMode.Acceleration);
@@ -375,6 +345,36 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
         }
     }
 
+    private void LateUpdate()
+    {
+        // メイン武器の攻撃を停止した場合は速度を戻す
+        if (!_isMainAttacked[0] && _isMainAttacked[1])
+        {
+            _moveComponent.MoveSpeed *= 1 / _atackingDownSpeed;
+        }
+
+        // サブ武器の攻撃を停止した場合は速度を戻す
+        if (!_isSubAttacked[0] && _isSubAttacked[1])
+        {
+            switch (SubWeapon)
+            {
+                case WeaponType.MISSILE:
+                    _moveComponent.MoveSpeed *= 1 / _atackingDownSpeed;
+                    break;
+
+                case WeaponType.LASER:
+                    _moveComponent.MoveSpeed *= 1 / (_atackingDownSpeed * 0.5f);
+                    break;
+            }
+        }
+
+        // 武器使用履歴更新
+        _isMainAttacked[1] = _isMainAttacked[0];
+        _isMainAttacked[0] = false;
+        _isSubAttacked[1] = _isSubAttacked[0];
+        _isSubAttacked[0] = false;
+    }
+
     /// <summary>
     /// オブジェクト探索イベント
     /// </summary>
@@ -382,7 +382,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
     private void ObjectSearchEvent(Collider other)
     {
         // 死亡処理中は操作不可
-        if (_isDestroyFalling || _isDestroy) return;
+        if (_isDestroy) return;
 
         // Eキーでアイテム取得
         if (Input.GetKey(KeyCode.E))
@@ -403,13 +403,13 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
     /// </summary>
     private async UniTask Destroy()
     {
-        _isDestroyFalling = true;
+        // 死亡フラグを立てる
         _isDestroy = true;
 
         // 移動コンポーネント停止
         _moveComponent.enabled = false;
 
-        // 死んだのでロックオン・レーダー解除
+        // ロックオン・レーダー解除
         _lockOnComponent.StopLockOn();
         _radarComponent.StopRadar();
 
@@ -428,7 +428,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
         // 爆破生成
         _explosion.SetActive(true);
 
-        // コンポーネント停止
+        // Update停止
         enabled = false;
 
         // 爆破後一定時間でオブジェクト破棄
@@ -437,10 +437,14 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
         // ドローン破壊イベント通知
         DroneDestroyEvent?.Invoke(this, EventArgs.Empty);
 
+        // オブジェクト破棄
         Destroy(gameObject);
     }
 
-    // アイテム使用
+    /// <summary>
+    /// 指定した番号のアイテム使用
+    /// </summary>
+    /// <param name="item">使用するアイテム番号</param>
     private void UseItem(ItemNum item)
     {
         // アイテム枠にアイテムを持っていたら使用
