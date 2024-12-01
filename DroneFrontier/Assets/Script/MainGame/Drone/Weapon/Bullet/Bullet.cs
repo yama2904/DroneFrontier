@@ -55,24 +55,28 @@ public class Bullet : MonoBehaviour, IBullet
             // ’eŠÛ‚©‚ç’Ç]‘ÎÛ‚Ü‚Å‚ÌƒxƒNƒgƒ‹ŒvZ
             Vector3 diff = _targetTransform.position - _transform.position;
 
-            // ’eŠÛ‚©‚ç’Ç]‘ÎÛ‚Ü‚Å‚ÌŠp“x
-            float angle = Vector3.Angle(_transform.forward, diff);
-            if (angle > _trackingPower)
+            // ³–Ê‚É‘ÎÛ‚ª‘¶İ‚·‚éê‡‚Ì‚İ’Ç]‚ğs‚¤
+            if (Vector3.Dot(diff, _transform.forward) > 0)
             {
-                // ’Ç]—ÍˆÈã‚ÌŠp“x‚ª‚ ‚éê‡‚ÍC³
-                angle = _trackingPower;
+                // ’eŠÛ‚©‚ç’Ç]‘ÎÛ‚Ü‚Å‚ÌŠp“x
+                float angle = Vector3.Angle(_transform.forward, diff);
+                if (angle > _trackingPower)
+                {
+                    // ’Ç]—ÍˆÈã‚ÌŠp“x‚ª‚ ‚éê‡‚ÍC³
+                    angle = _trackingPower;
+                }
+
+                // ’Ç]•ûŒü‚ğŒvZ
+                Vector3 axis = Vector3.Cross(_transform.forward, diff);
+                int dirX = axis.y >= 0 ? 1 : -1;
+                int dirY = axis.x >= 0 ? 1 : -1;
+
+                // ¶‰E‚Ì‰ñ“]
+                _transform.RotateAround(_transform.position, Vector3.up, angle * dirX);
+
+                // ã‰º‚Ì‰ñ“]
+                _transform.RotateAround(_transform.position, Vector3.right, angle * dirY);
             }
-
-            // ’Ç]•ûŒü‚ğŒvZ
-            Vector3 axis = Vector3.Cross(_transform.forward, diff);
-            int dirX = axis.y >= 0 ? 1 : -1;
-            int dirY = axis.x >= 0 ? 1 : -1;
-
-            // ¶‰E‚Ì‰ñ“]
-            _transform.RotateAround(_transform.position, Vector3.up, angle * dirX);
-
-            // ã‰º‚Ì‰ñ“]
-            _transform.RotateAround(_transform.position, Vector3.right, angle * dirY);
         }
 
         // ˆÚ“®

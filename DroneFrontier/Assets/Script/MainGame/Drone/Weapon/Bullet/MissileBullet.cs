@@ -106,24 +106,28 @@ namespace Offline
                 // 弾丸から追従対象までのベクトル計算
                 Vector3 diff = _targetTransform.position - _transform.position;
 
-                // 弾丸から追従対象までの角度
-                float angle = Vector3.Angle(_transform.forward, diff);
-                if (angle > _trackingPower)
+                // 正面に対象が存在する場合のみ追従を行う
+                if (Vector3.Dot(diff, _transform.forward) > 0)
                 {
-                    // 追従力以上の角度がある場合は修正
-                    angle = _trackingPower;
+                    // 弾丸から追従対象までの角度
+                    float angle = Vector3.Angle(_transform.forward, diff);
+                    if (angle > _trackingPower)
+                    {
+                        // 追従力以上の角度がある場合は修正
+                        angle = _trackingPower;
+                    }
+
+                    // 追従方向を計算
+                    Vector3 axis = Vector3.Cross(_transform.forward, diff);
+                    int dirX = axis.y >= 0 ? 1 : -1;
+                    int dirY = axis.x >= 0 ? 1 : -1;
+
+                    // 左右の回転
+                    _transform.RotateAround(_transform.position, Vector3.up, angle * dirX);
+
+                    // 上下の回転
+                    _transform.RotateAround(_transform.position, Vector3.right, angle * dirY);
                 }
-
-                // 追従方向を計算
-                Vector3 axis = Vector3.Cross(_transform.forward, diff);
-                int dirX = axis.y >= 0 ? 1 : -1;
-                int dirY = axis.x >= 0 ? 1 : -1;
-
-                // 左右の回転
-                _transform.RotateAround(_transform.position, Vector3.up, angle * dirX);
-
-                // 上下の回転
-                _transform.RotateAround(_transform.position, Vector3.right, angle * dirY);
             }
 
             // 移動
