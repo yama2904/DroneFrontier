@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,6 +9,16 @@ public class DroneLockOnComponent : MonoBehaviour
     /// </summary>
     public GameObject Target => Useful.IsNullOrDestroyed(_target) ? null : _target;
     private GameObject _target = null;
+
+    /// <summary>
+    /// 新規ターゲットロックオンイベント
+    /// </summary>
+    public event EventHandler OnTargetLockOn;
+
+    /// <summary>
+    /// ターゲットロックオン解除イベント
+    /// </summary>
+    public event EventHandler OnTargetUnLockOn;
 
     [SerializeField, Tooltip("ドローンのカメラ")]
     private Camera _camera = null;
@@ -113,62 +122,43 @@ public class DroneLockOnComponent : MonoBehaviour
         if (!_startedLockOn) return;
 
         // カメラの前方にあるオブジェクトを取得
-        List<GameObject> hits = Physics.SphereCastAll(
+        RaycastHit[] hits = Physics.SphereCastAll(
                                             _cameraTransform.position,
                                             _lockOnRadius,
                                             _cameraTransform.forward,
-                                            _lockOnDistance)
-                                            .Select(h => h.transform.gameObject)
-                                            .ToList();
+                                            _lockOnDistance);
 
-        // ロックオン対象取り出し
-        List<GameObject> targets = FilterTargets(hits);
+        // ロックオン中のオブジェクトが存在するかチェック
+        foreach (RaycastHit hit in hits)
+        {
+            // 存在する場合はターゲットの方へ追従して終了
+            if (Target == hit.transform.gameObject)
+            {
+                // ターゲットとの距離計算
+                Vector3 diff = _targetTransform.position - _cameraTransform.position;
 
-        // ロックオン対象がいない場合はロックオン解除
-        if (targets.Count <= 0)
+                // 追従方向
+                Quaternion rotation = Quaternion.LookRotation(diff);
+
+                // ターゲットの方へ向く
+                _droneTransform.rotation = Quaternion.Slerp(_droneTransform.rotation, rotation, _aimSpeed * Time.deltaTime);
+                return;
+            }
+        }
+
+        // ロックオン中のオブジェクトが存在しない場合は新規ロックオン先を探す
+        bool exists = FilterTarget(hits, out RaycastHit target);
+
+        // 新規ロックオン先がいない場合はロックオン解除
+        if (!exists)
         {
             ResetTarget();
             return;   
         }
 
-        // ロックオン中のターゲットが対象内に存在する場合は追従処理
-        if (Target != null && targets.Contains(Target))
-        {
-            // ターゲットとの距離計算
-            Vector3 diff = _targetTransform.position - _cameraTransform.position;
-            
-            // 追従方向
-            Quaternion rotation = Quaternion.LookRotation(diff);
-
-            // ターゲットの方へ向く
-            _droneTransform.rotation = Quaternion.Slerp(_droneTransform.rotation, rotation, _aimSpeed * Time.deltaTime);
-            return;
-        }
-
-        // 追従処理を行わない場合は新規ロックオン先を探す
-
-        // 新規ロックオン先
-        GameObject newTarget = null;
-
-        // オブジェクトとの最小距離
-        float minTargetDistance = float.MaxValue;
-
-        // 画面の中央から最も近いオブジェクトをロックオンする
-        foreach (var target in targets)
-        {
-            // ビューポートに変換
-            Vector3 targetScreenPoint = _camera.WorldToViewportPoint(target.transform.position);
-
-            // 画面の中央との距離を計算
-            float targetDistance = (new Vector2(0.5f, 0.5f) - new Vector2(targetScreenPoint.x, targetScreenPoint.y)).sqrMagnitude;
-
-            // 距離が最小だったら更新
-            if (targetDistance < minTargetDistance)
-            {
-                minTargetDistance = targetDistance;
-                newTarget = target;
-            }
-        }
+        // ターゲットを新規ロックオン先で更新
+        _target = target.transform.gameObject;
+        _targetTransform = target.transform.transform;
 
         // ロックオン画像の色変更
         if (_reticleImage != null)
@@ -176,25 +166,29 @@ public class DroneLockOnComponent : MonoBehaviour
             _reticleImage.color = _lockingOnColor;
         }
 
-        // ターゲット用変数更新
-        _target = newTarget;
-        _targetTransform = newTarget.transform;
+        // 新規ターゲットロックオンイベント発火
+        OnTargetLockOn?.Invoke(this, EventArgs.Empty);
     }
 
     /// <summary>
-    /// 指定されたオブジェクトのうちロックオン対象を取り出す
+    /// 指定されたオブジェクトのうちロックオン可能、かつカメラの中央に最も近いオブジェクトを返す
     /// </summary>
-    /// <param name="objects"></param>
-    /// <returns>ロックオン対象</returns>
-    private List<GameObject> FilterTargets(List<GameObject> objects)
+    /// <param name="hits"></param>
+    /// <param name="target"></param>
+    /// <returns>ヒット可能オブジェクトが存在しない場合はfalse</returns>
+    private bool FilterTarget(RaycastHit[] hits, out RaycastHit target)
     {
-        // 戻り値
-        List<GameObject> targets = new List<GameObject>();
+        // outパラメータ初期化
+        target = new RaycastHit();
 
-        foreach (GameObject o in objects)
+        // オブジェクトとの最小距離
+        float minDistance = float.MaxValue;
+
+        bool exists = false;
+        foreach (RaycastHit hit in hits)
         {
             // ILockableOnインターフェースを実装していない場合は除外
-            ILockableOn lockableOn = o.GetComponent<ILockableOn>();
+            ILockableOn lockableOn = hit.transform.GetComponent<ILockableOn>();
             if (lockableOn == null) continue;
 
             // ロックオン不可設定がされている場合は除外
@@ -204,14 +198,23 @@ public class DroneLockOnComponent : MonoBehaviour
             if (lockableOn.NotLockableOnList.Contains(gameObject)) continue;
 
             // 画面の一定範囲内に存在しない場合は除外
-            Vector3 screenPoint = _camera.WorldToViewportPoint(o.transform.position);
+            Vector3 screenPoint = _camera.WorldToViewportPoint(hit.transform.position);
             if (!(screenPoint.x > 0.25f && screenPoint.x < 0.75f && screenPoint.y > 0.15f && screenPoint.y < 0.85f && screenPoint.z > 0)) continue;
 
-            // リストに追加
-            targets.Add(o);
+            // 画面の中央との距離を計算
+            float hitDistance = (new Vector2(0.5f, 0.5f) - new Vector2(screenPoint.x, screenPoint.y)).sqrMagnitude;
+
+            // カメラの中央に最も近い場合ターゲット更新
+            if (hitDistance < minDistance)
+            {
+                minDistance = hitDistance;
+                target = hit;
+            }
+
+            exists = true;
         }
 
-        return targets;
+        return exists;
     }
 
     /// <summary>
@@ -219,6 +222,12 @@ public class DroneLockOnComponent : MonoBehaviour
     /// </summary>
     private void ResetTarget()
     {
+        // ターゲットロックオン解除イベント発火
+        if (Target != null)
+        {
+            OnTargetUnLockOn?.Invoke(this, EventArgs.Empty);
+        }
+
         // ロックオン画像の色変更
         if (_reticleImage != null)
         {

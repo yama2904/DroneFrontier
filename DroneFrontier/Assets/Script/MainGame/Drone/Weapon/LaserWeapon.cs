@@ -1,4 +1,5 @@
 ﻿using Cysharp.Threading.Tasks;
+using System;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.UI;
@@ -33,6 +34,10 @@ namespace Offline
             }
         }
         private Canvas _bulletUICanvas = null;
+
+        public event EventHandler OnBulletFull;
+
+        public event EventHandler OnBulletEmpty;
 
         /// <summary>
         /// 弾丸オブジェクトのAddressKey
@@ -125,6 +130,9 @@ namespace Offline
                 {
                     _gaugeValue = 0;
                     _isShooted[0] = false;
+
+                    // 残弾無しイベント発火
+                    OnBulletEmpty?.Invoke(this, EventArgs.Empty);
                 }
 
                 // UIに反映
@@ -170,6 +178,9 @@ namespace Offline
                     if (_gaugeValue > 1f)
                     {
                         _gaugeValue = 1f;
+
+                        // 全弾補充イベント発火
+                        OnBulletFull?.Invoke(this, EventArgs.Empty);
                     }
 
                     // UIに反映

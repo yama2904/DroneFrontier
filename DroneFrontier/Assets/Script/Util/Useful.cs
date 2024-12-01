@@ -1,5 +1,5 @@
-﻿using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
+﻿using System;
+using UnityEngine;
 
 public class Useful
 {
@@ -31,5 +31,21 @@ public class Useful
     public static bool IsNullOrDestroyed(GameObject obj)
     {
         return obj is null || !obj;
+    }
+
+    /// <summary>
+    /// 正規分布に基づいたランダム値を生成
+    /// </summary>
+    /// <param name="sigma">偏差値</param>
+    /// <param name="ave">平均値</param>
+    /// <param name="abs">絶対値で返すか</param>
+    /// <returns>生成したランダム値</returns>
+    public static float RandomByNormalDistribution(float sigma = 1f, float ave = 0, bool abs = true)
+    {
+        float x = UnityEngine.Random.value;
+        float y = UnityEngine.Random.value;
+        float value = sigma * (float)(Math.Sqrt(-2.0 * Math.Log(x)) * Math.Cos(2.0 * Math.PI * y)) + ave;
+        //Debug.Log($"sigma:{sigma}, ave:{ave}, value => {value}");
+        return abs ? Mathf.Abs(value) : value;
     }
 }

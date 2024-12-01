@@ -1,11 +1,9 @@
-using Cysharp.Threading.Tasks;
 using System;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.UI;
 
 public class PlayerStunStatus : IDroneStatusChange
-
 {
     public StatusChangeType StatusType => StatusChangeType.Stun;
 

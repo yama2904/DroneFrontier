@@ -22,6 +22,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 064185748d538f544b76ecd818818f7f
+    m_Address: LazerGaugeUI
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 1481f711e2e15134ba32a1634cdc51c1
     m_Address: MissileBulletFrontUI
     m_ReadOnly: 0
@@ -42,8 +47,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 397426775ed86df4bace4abda3979ad9
-    m_Address: CPULaserWeapon
+  - m_GUID: 3801fd66cf92d5c45ba8e24cf59b2b49
+    m_Address: LazerGaugeFrameUI
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -59,11 +64,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 637911ba241dc7847818b6bb7e996a42
     m_Address: MissileBullet
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 6c21e9434747447448a8aa0e11347b4c
-    m_Address: CPUShotgun
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -92,8 +92,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: fe30b06a9da565844a09bd48a5d1c170
-    m_Address: CPUMissileWeapon
+  - m_GUID: fb819132d31986f459ffa2ccafc9e8c3
+    m_Address: LaserBullet
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

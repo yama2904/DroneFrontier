@@ -25,7 +25,7 @@ public class WatchingGame : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
         {
             // カメラ深度初期化
-            _watchDrones[_watchingDrone].SetCameraDepth(0);
+            _watchDrones[_watchingDrone].Camera.depth = 0;
 
             // 次のCPU
             _watchingDrone++;
@@ -35,7 +35,7 @@ public class WatchingGame : MonoBehaviour
             }
 
             // カメラ参照設定
-            _watchDrones[_watchingDrone].SetCameraDepth(5);
+            _watchDrones[_watchingDrone].Camera.depth = 5;
         }
     }
 
@@ -47,12 +47,12 @@ public class WatchingGame : MonoBehaviour
         // 全てのドローンのカメラ深度初期化
         foreach (CpuBattleDrone drone in _watchDrones)
         {
-            drone.SetCameraDepth(0);
+            drone.Camera.depth = 0;
         }
 
         // 参照先カメラ設定
         _watchingDrone = 0;
-        _watchDrones[_watchingDrone].SetCameraDepth(5);
+        _watchDrones[_watchingDrone].Camera.depth = 5;
 
         // ドローン破壊イベント設定
         _droneSpawnManager.DroneDestroyEvent += DroneDestroy;
@@ -67,7 +67,7 @@ public class WatchingGame : MonoBehaviour
         // 全てのドローンのカメラ深度初期化
         foreach (CpuBattleDrone drone in _watchDrones)
         {
-            drone.SetCameraDepth(0);
+            drone.Camera.depth = 0;
         }
 
         // ドローン破壊イベント削除
@@ -94,12 +94,12 @@ public class WatchingGame : MonoBehaviour
             // 破壊されたドローンが現在観戦中のCPUの場合はカメラ深度調整
             if (index == _watchingDrone)
             {
-                drone.SetCameraDepth(5);
+                drone.Camera.depth = 5  ;
             }
              else
             {
                 // 観戦中CPUでない場合はカメラ深度初期化
-                drone.SetCameraDepth(0);
+                drone.Camera.depth = 0;
             }
         }
     }

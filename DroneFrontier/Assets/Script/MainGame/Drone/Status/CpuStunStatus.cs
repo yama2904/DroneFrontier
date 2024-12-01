@@ -22,6 +22,7 @@ public class CpuStunStatus : IDroneStatusChange
         {
             await UniTask.Delay(TimeSpan.FromSeconds(statusSec));
             lockon.enabled = true;
+            StatusEndEvent?.Invoke(this, EventArgs.Empty);
         });
 
         return true;

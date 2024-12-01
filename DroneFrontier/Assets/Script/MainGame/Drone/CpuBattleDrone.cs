@@ -1,64 +1,21 @@
-﻿using Offline;
+﻿using Cysharp.Threading.Tasks;
+using Offline;
+using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Threading;
 using UnityEngine;
 
 public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
 {
-    //コンポーネント用
-    Transform _transform = null;
-    Rigidbody _rigidbody = null;
-    Animator animator = null;
-    DroneMoveComponent baseAction = null;
-    DroneRotateComponent _rotateComponent = null;
-    DroneDamageComponent damageAction = null;
-    DroneSoundComponent soundAction = null;
-    DroneLockOnComponent _lockOnComponent = null;
-    DroneWeaponComponent _weaponComponent = null;
+    #region public
 
-    [SerializeField] Transform cameraTransform = null;  //キャッシュ用
-
-    [SerializeField] Camera _camera = null;
-
-    //AudioListener
-    AudioListener listener = null;
-
-    //移動
-    Vector3 moveSideDir = Vector3.zero;  //移動する方向(右か左)
-    float moveSideTime = 0;       //横移動する時間
-    float moveSideTimeCount = 0;  //時間計測
-    bool isMoveSide = false;      //横移動するか
-
-    //回転
-    const float CHANGE_ROTATE_TIME = 3f;
-    Vector3 angle = Vector3.zero;
-    float rotateTimeCount = CHANGE_ROTATE_TIME;
-    bool isRotate = false;
-
-    float atackingSpeed = 1f;   //攻撃中の移動速度の変動用
-
-    //攻撃処理
-    int weaponTime = 0;
-    float weaponTimeCount = 0;
-    bool useMainWeapon = false;
-
-    //ショットガン用
-    float shotgunStayTime = 2f;
-    float shotgunStayTimeCount = 0;
-
-
-    //死亡処理用
-    [SerializeField] GameObject explosion = null;
-    [SerializeField] Transform droneObject = null;
-    Quaternion deathRotate = Quaternion.Euler(28, -28, -28);
-    float deathRotateSpeed = 2f;
-    float gravityAccele = 1f;  //落下加速用
-    float fallTime = 5.0f;   //死亡後の落下時間
-    bool isDestroyFall = false;
-    bool isDestroy = false;
-
-    Transform target = null;
-    bool isDamage = false;
+    /// <summary>
+    /// CPUのカメラ
+    /// </summary>
+    public Camera Camera
+    {
+        get { return _camera; }
+    }
 
     /// <summary>
     /// ドローンの名前
@@ -77,22 +34,26 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
 
             if (value > 0)
             {
-                _hp = value;
+                // 小数点第2以下切り捨て
+                _hp = Useful.Floor(value, 1);
             }
             else
             {
                 // HPが0になったら破壊処理
                 _hp = 0;
-                DestroyMe();
+                Destroy().Forget();
             }
         }
     }
-    private float _hp = 0;
 
     /// <summary>
     /// 現在のストック数
     /// </summary>
-    public int StockNum { get; set; } = 0;
+    public int StockNum
+    {
+        get { return _stockNum; }
+        set { _stockNum = value; }
+    }
 
     /// <summary>
     /// ドローンのサブ武器
@@ -118,219 +79,364 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
     /// <summary>
     /// ドローン破壊イベント
     /// </summary>
-    public event System.EventHandler DroneDestroyEvent;
+    public event EventHandler DroneDestroyEvent;
 
-    [SerializeField, Tooltip("ドローンの最大HP")]
-    private float _maxHP = 100f;
+    #endregion
 
-    protected void Awake()
+    /// <summary>
+    /// 所持アイテム番号
+    /// </summary>
+    private enum ItemNum
     {
-        //コンポーネントの取得
-        _transform = transform;
+        /// <summary>
+        /// アイテム1
+        /// </summary>
+        Item1,
+
+        /// <summary>
+        /// アイテム2
+        /// </summary>
+        Item2
+    }
+
+    /// <summary>
+    /// 死亡時の回転量
+    /// </summary>
+    private readonly Quaternion DEATH_ROTATE = Quaternion.Euler(28, -28, -28);
+
+    /// <summary>
+    /// 死亡時の回転速度
+    /// </summary>
+    private const float DEATH_ROTATE_SPEED = 2f;
+
+    /// <summary>
+    /// 死亡時の落下時間
+    /// </summary>
+    private const float DEATH_FALL_TIME = 2.5f;
+
+    [SerializeField, Tooltip("ドローン本体オブジェクト")]
+    private Transform _droneObject = null;
+
+    [SerializeField, Tooltip("ドローン死亡時の爆発オブジェクト")]
+    private GameObject _explosion = null;
+
+    [SerializeField, Tooltip("オブジェクト探索コンポーネント")]
+    private ObjectSearchComponent _searchComponent = null;
+
+    [SerializeField, Tooltip("CPUのカメラ")]
+    private Camera _camera = null;
+
+    [SerializeField, Tooltip("ドローンのHP")]
+    private float _hp = 100f;
+
+    [SerializeField, Tooltip("ストック数")]
+    private int _stockNum = 2;
+
+    /// <summary>
+    /// ビットフラグで管理した移動方向（桁：DroneMoveComponent.Direction）
+    /// </summary>
+    private int _moveDir = 0;
+
+    /// <summary>
+    /// 移動中であるか
+    /// </summary>
+    private bool _isMoving = false;
+
+    /// <summary>
+    /// 回転方向<br/>
+    /// [0]:左右の回転量<br/>
+    /// [1]:上下の回転量
+    /// </summary>
+    private float[] _rotateDirs = new float[2];
+
+    /// <summary>
+    /// 攻撃中の武器
+    /// </summary>
+    private DroneWeaponComponent.Weapon _useWeapon = DroneWeaponComponent.Weapon.NONE;
+
+    /// <summary>
+    /// 移動時間計測
+    /// </summary>
+    float _moveTimer = 0;
+
+    /// <summary>
+    /// 死亡フラグ
+    /// </summary>
+    private bool _isDestroy = false;
+
+    /// <summary>
+    /// 探索キャンセルトークン発行クラス
+    /// </summary>
+    private CancellationTokenSource _searchCancel = new CancellationTokenSource();
+
+    /// <summary>
+    /// 攻撃キャンセルトークン発行クラス
+    /// </summary>
+    private CancellationTokenSource _attackCancel = new CancellationTokenSource();
+
+    /// <summary>
+    /// 移動キャンセルトークン発行クラス
+    /// </summary>
+    private CancellationTokenSource _moveCancel = new CancellationTokenSource();
+
+    // コンポーネントキャッシュ
+    Transform _transform = null;
+    Rigidbody _rigidbody = null;
+    Animator _animator = null;
+    DroneMoveComponent _moveComponent = null;
+    DroneRotateComponent _rotateComponent = null;
+    DroneDamageComponent _damageComponent = null;
+    DroneSoundComponent _soundComponent = null;
+    DroneLockOnComponent _lockOnComponent = null;
+    DroneItemComponent _itemComponent = null;
+    DroneWeaponComponent _weaponComponent = null;
+    DroneBoostComponent _boostComponent = null;
+
+    private void Awake()
+    {
+        // コンポーネントの取得
         _rigidbody = GetComponent<Rigidbody>();
-        animator = GetComponent<Animator>();
-        baseAction = GetComponent<DroneMoveComponent>();
+        _transform = _rigidbody.transform;
+        _animator = GetComponent<Animator>();
+        _moveComponent = GetComponent<DroneMoveComponent>();
         _rotateComponent = GetComponent<DroneRotateComponent>();
-        damageAction = GetComponent<DroneDamageComponent>();
-        soundAction = GetComponent<DroneSoundComponent>();
+        _damageComponent = GetComponent<DroneDamageComponent>();
+        _soundComponent = GetComponent<DroneSoundComponent>();
         _lockOnComponent = GetComponent<DroneLockOnComponent>();
-        listener = GetComponent<AudioListener>();
+        _itemComponent = GetComponent<DroneItemComponent>();
         _weaponComponent = GetComponent<DroneWeaponComponent>();
-
-        // HP初期化
-        HP = _maxHP;
-
+        _boostComponent = GetComponent<DroneBoostComponent>();
+        
         // ダメージイベント設定
-        damageAction.DamageEvent += DamageEvent;
+        _damageComponent.DamageEvent += DamageEvent;
 
-        // ロックオン不可オブジェクトに自分を設定
+        // サブ武器残弾イベント設定
+        _weaponComponent.OnBulletFull += OnBulletFull;
+        _weaponComponent.OnBulletEmpty += OnBulletEmpty;
+
+        // ロックオン・レーダー不可オブジェクトに自分を設定
         NotLockableOnList.Add(gameObject);
+        NotRadarableList.Add(gameObject);
+
+        // オブジェクト探索イベント設定
+        _searchComponent.ObjectStayEvent += ObjectSearchEvent;
     }
 
     private void Start()
     {
+        // ショットガンの場合はブーストを多少強化する
+        if (SubWeapon == WeaponType.SHOTGUN)
+        {
+            _boostComponent.BoostAccele *= 1.2f;
+            _boostComponent.MaxBoostTime *= 1.2f;
+            _boostComponent.MaxBoostRecastTime *= 0.8f;
+        }
+
+        // プロペラは最初から流す
+        _soundComponent.PlayLoopSE(SoundManager.SE.PROPELLER, SoundManager.SEVolume);
+
         // 常にロックオン処理
         _lockOnComponent.StartLockOn();
+
+        // ロックオンイベント設定
+        _lockOnComponent.OnTargetLockOn += OnTargetLockon;
+        _lockOnComponent.OnTargetUnLockOn += OnTargetUnLockon;
     }
 
     private void Update()
     {
-        //死亡処理中は操作不可
-        if (isDestroyFall || isDestroy) return;
+        // 死亡処理中は操作不可
+        if (_isDestroy) return;
 
-        //移動
-        moveSideTimeCount += Time.deltaTime;
-        if (!isDamage)
+        if (_lockOnComponent.Target == null)
         {
-            if (_lockOnComponent.Target == null)
-            {
-                baseAction.Move(_transform.forward * atackingSpeed);
-            }
-            else
-            {
-                Vector3 diff = _lockOnComponent.Target.transform.position - _transform.position;
-                float changeDirDistance = 300f;
-                if (!useMainWeapon)
-                {
-                    if (SubWeapon == WeaponType.SHOTGUN)
-                    {
-                        changeDirDistance = 30f;
-                    }
-                    else
-                    {
-                        changeDirDistance = 500f;
-                    }
-                }
+            _moveDir = BitFlagUtil.UpdateFlag(_moveDir, (int)DroneMoveComponent.Direction.Forward, true);
 
-                //敵との一定の距離内に入ると左右移動
-                if (diff.sqrMagnitude <= Mathf.Pow(changeDirDistance, 2))
+            if (_rotateDirs[0] == 0 && _rotateDirs[1] == 0)
+            {
+                // 回転量をランダムに決定
+                _rotateDirs[0] = UnityEngine.Random.Range(-1f, 1f);
+                _rotateDirs[1] = UnityEngine.Random.Range(-1f, 1f);
+
+                // 回転時間をランダムに決定
+                int rotateSec = UnityEngine.Random.Range(1, 4);
+                UniTask.Void(async () =>
                 {
-                    if (moveSideTimeCount >= moveSideTime)
-                    {
-                        StartSideMove();
-                        moveSideTimeCount = 0;
-                    }
+                    await UniTask.Delay(TimeSpan.FromSeconds(rotateSec), cancellationToken: _searchCancel.Token);
+                    _rotateDirs[0] = 0;
+                    _rotateDirs[1] = 0;
+                });
+            }
+        }
+        else
+        {
+            // 使用武器をランダムに決定
+            if (_useWeapon == DroneWeaponComponent.Weapon.NONE)
+            {
+                if (UnityEngine.Random.Range(0, 2) == 0)
+                {
+                    _useWeapon = DroneWeaponComponent.Weapon.MAIN;
                 }
-                //一定距離内にいないと直進
                 else
                 {
-                    baseAction.Move(_transform.forward * atackingSpeed);
-                    if (moveSideTimeCount >= moveSideTime)
-                    {
-                        moveSideTimeCount = moveSideTime;
-                        isMoveSide = false;
-                    }
+                    _useWeapon = DroneWeaponComponent.Weapon.SUB;
                 }
 
-                if (isMoveSide)
-                {
-                    baseAction.Move(moveSideDir * atackingSpeed);
-                }
+                // 攻撃時間をランダムに決定
+                SetWeaopnStopTimer().Forget();
             }
 
-            //回転
-            if (isRotate && _lockOnComponent.Target == null)
+            // 移動方向と移動時間をランダムに決定
+            if (!_isMoving)
             {
-                baseAction.RotateCamera(0.7f, 0.7f);
+                float moveMilSec = 0;
+                switch (UnityEngine.Random.Range(0, 5))
+                {
+                    // 左移動
+                    case 0:
+                        _moveDir = BitFlagUtil.UpdateFlag(_moveDir, (int)DroneMoveComponent.Direction.Left, true);
+                        moveMilSec = Useful.RandomByNormalDistribution(1f, 2.5f) * 1000;
+                        break;
+
+                    // 右移動
+                    case 1:
+                        _moveDir = BitFlagUtil.UpdateFlag(_moveDir, (int)DroneMoveComponent.Direction.Right, true);
+                        moveMilSec = Useful.RandomByNormalDistribution(1f, 2.5f) * 1000;
+                        break;
+
+                    // 上移動
+                    case 2:
+                        _moveDir = BitFlagUtil.UpdateFlag(_moveDir, (int)DroneMoveComponent.Direction.Up, true);
+                        moveMilSec = Useful.RandomByNormalDistribution(1f, 0.8f) * 1000;
+                        break;
+
+                    // 下移動
+                    case 3:
+                        _moveDir = BitFlagUtil.UpdateFlag(_moveDir, (int)DroneMoveComponent.Direction.Down, true);
+                        moveMilSec = Useful.RandomByNormalDistribution(1f, 0.8f) * 1000;
+                        break;
+
+                    default:
+                        _moveDir = 0;
+                        moveMilSec = Useful.RandomByNormalDistribution(1f, 1f) * 1000;
+                        break;
+                }
+
+                UniTask.Void(async () =>
+                {
+                    await UniTask.Delay(TimeSpan.FromMilliseconds(moveMilSec), cancellationToken: _moveCancel.Token);
+                    _moveDir = 0;
+                    _isMoving = false;
+                });
+
+                _isMoving = true;
+            }
+
+            // ターゲットロックオン中は一定距離まで近づくと離れる
+            float distance = SubWeapon == WeaponType.SHOTGUN ? 100f : 250f;
+            if (Vector3.Distance(_transform.position, _lockOnComponent.Target.transform.position) < distance)
+            {
+                _moveDir = BitFlagUtil.UpdateFlag(_moveDir, (int)DroneMoveComponent.Direction.Forward, false);
+                _moveDir = BitFlagUtil.UpdateFlag(_moveDir, (int)DroneMoveComponent.Direction.Backwad, true);
             }
             else
             {
-                rotateTimeCount += Time.deltaTime;
-                if (rotateTimeCount > CHANGE_ROTATE_TIME)
-                {
-                    StartRotate();
-                    rotateTimeCount = 0;
-                }
-            }
-        }
-        //攻撃されたら止まって回転
-        else
-        {
-            if (_lockOnComponent.Target == null)
-            {
-                if (target != null)
-                {
-                    Vector3 diff = target.position - cameraTransform.position;    //ターゲットとの距離
-                    Quaternion rotation = Quaternion.LookRotation(diff);  //攻撃してきた敵の方向
-
-                    //攻撃してきた敵の方向に向く
-                    _transform.rotation = Quaternion.Slerp(_transform.rotation, rotation, 0.1f);
-                }
-            }
-            else
-            {
-                isDamage = false;
+                _moveDir = BitFlagUtil.UpdateFlag(_moveDir, (int)DroneMoveComponent.Direction.Backwad, false);
             }
         }
 
-        
-        // ロックオン対象がいれば攻撃
-        if (_lockOnComponent.Target != null)
+        // アイテム使用
+        if (Input.GetKeyUp(KeyCode.Alpha1))
         {
-            weaponTimeCount += Time.deltaTime;
-
-            //一定時間で攻撃する武器切り替え
-            if (weaponTimeCount >= weaponTime)
-            {
-                weaponTimeCount = 0;
-                if (SubWeapon == WeaponType.SHOTGUN)
-                {
-                    //ショットガンを使う場合は短時間
-                    if (useMainWeapon)
-                    {
-                        weaponTime = 5;
-                        shotgunStayTimeCount = 0;
-                    }
-                    else
-                    {
-                        weaponTime = Random.Range(8, 11);
-                    }
-                }
-                if (SubWeapon == WeaponType.MISSILE)
-                {
-                    weaponTime = Random.Range(3, 8);
-                }
-                if (SubWeapon == WeaponType.LASER)
-                {
-                    weaponTime = Random.Range(7, 11);
-                }
-                useMainWeapon = !useMainWeapon;
-            }
-
-            if (useMainWeapon)
-            {
-                _weaponComponent.Shot(DroneWeaponComponent.Weapon.MAIN, _lockOnComponent.Target);
-            }
-            else
-            {
-                //ショットガンは敵に近づいてから攻撃する
-                shotgunStayTimeCount += Time.deltaTime;
-                if (shotgunStayTimeCount >= shotgunStayTime)
-                {
-                    _weaponComponent.Shot(DroneWeaponComponent.Weapon.SUB, _lockOnComponent.Target);
-                }
-            }
-
-            //攻撃中の移動速度低下の設定
-            if (useMainWeapon)
-            {
-                //ガトリング使用中は移動速度低下
-                atackingSpeed = 0.5f;
-            }
-            //ミサイル使用中も移動速度低下
-            else if (SubWeapon == WeaponType.MISSILE)
-            {
-                atackingSpeed = 0.5f;
-            }
-            //レーザーを使っている場合は移動速度低下の増加
-            else if (SubWeapon == WeaponType.LASER)
-            {
-                atackingSpeed = 0.35f;
-            }
+            UseItem(ItemNum.Item1);
         }
-        else
+        if (Input.GetKeyUp(KeyCode.Alpha2))
         {
-            weaponTimeCount = weaponTime;
-            atackingSpeed = 1f;
+            UseItem(ItemNum.Item2);
         }
     }
 
-    void FixedUpdate()
+    private void FixedUpdate()
     {
-        //死亡時落下処理
-        if (isDestroyFall)
+        if (_isDestroy)
         {
-            //加速しながら落ちる
-            _rigidbody.AddForce(new Vector3(0, -10 * gravityAccele, 0), ForceMode.Acceleration);
-            gravityAccele += 20 * Time.deltaTime;
+            // 加速しながら落ちる
+            _rigidbody.AddForce(new Vector3(0, -400, 0), ForceMode.Acceleration);
 
-            //ドローンを傾ける
-            _rotateComponent.Rotate(deathRotate, deathRotateSpeed * Time.deltaTime);
+            // ドローンを傾ける
+            _rotateComponent.Rotate(DEATH_ROTATE, DEATH_ROTATE_SPEED * Time.deltaTime);
 
-            //プロペラ減速
-            animator.speed *= 0.993f;
+            // プロペラ減速
+            _animator.speed *= 0.993f;
+        }
+    }
 
-            return;
+    private void LateUpdate()
+    {
+        // 前進
+        if (BitFlagUtil.CheckFlag(_moveDir, (int)DroneMoveComponent.Direction.Forward))
+        {
+            _moveComponent.Move(DroneMoveComponent.Direction.Forward);
+        }
+
+        // 左移動
+        if (BitFlagUtil.CheckFlag(_moveDir, (int)DroneMoveComponent.Direction.Left))
+        {
+            _moveComponent.Move(DroneMoveComponent.Direction.Left);
+        }
+
+        // 後退
+        if (BitFlagUtil.CheckFlag(_moveDir, (int)DroneMoveComponent.Direction.Backwad))
+        {
+            _moveComponent.Move(DroneMoveComponent.Direction.Backwad);
+        }
+
+        // 右移動
+        if (BitFlagUtil.CheckFlag(_moveDir, (int)DroneMoveComponent.Direction.Right))
+        {
+            _moveComponent.Move(DroneMoveComponent.Direction.Right);
+        }
+
+        // 上下移動
+        if (BitFlagUtil.CheckFlag(_moveDir, (int)DroneMoveComponent.Direction.Up))
+        {
+            _moveComponent.Move(DroneMoveComponent.Direction.Up);
+        }
+        if (BitFlagUtil.CheckFlag(_moveDir, (int)DroneMoveComponent.Direction.Down))
+        {
+            _moveComponent.Move(DroneMoveComponent.Direction.Down);
+        }
+
+        // 回転
+        _moveComponent.RotateDir(_rotateDirs[0], _rotateDirs[1]);
+
+        // 攻撃
+        if (_useWeapon != DroneWeaponComponent.Weapon.NONE)
+        {
+            _weaponComponent.Shot(_useWeapon, _lockOnComponent.Target);
+        }
+    }
+
+    /// <summary>
+    /// オブジェクト探索イベント
+    /// </summary>
+    /// <param name="other">発見オブジェクト</param>
+    private void ObjectSearchEvent(Collider other)
+    {
+        // 死亡処理中は操作不可
+        if (_isDestroy) return;
+
+        // Eキーでアイテム取得
+        if (Input.GetKey(KeyCode.E))
+        {
+            if (other.CompareTag(TagNameConst.ITEM))
+            {
+                SpawnItem item = other.GetComponent<SpawnItem>();
+                if (_itemComponent.SetItem(item))
+                {
+                    Destroy(other.gameObject);
+                }
+            }
         }
     }
 
@@ -344,178 +450,142 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
     {
         if (_lockOnComponent.Target == null)
         {
-            isDamage = true;
-            target = source.transform;
+            _transform.LookAt(source.transform);
         }
     }
-    //攻撃を受けたときに攻撃してきた敵に回転させる
-    public void StartRotate(Transform target)
+
+    /// <summary>
+    /// 全弾補充イベント
+    /// </summary>
+    /// <param name="component">DroneWeaponComponent</param>
+    /// <param name="type">イベント発火した武器の種類</param>
+    /// <param name="weapon">イベント発火した武器</param>
+    public void OnBulletFull(DroneWeaponComponent component, DroneWeaponComponent.Weapon type, IWeapon weapon)
     {
+        // サブ武器以外は何もしない
+        if (type != DroneWeaponComponent.Weapon.SUB) return;
+
+        // サブ武器攻撃へ切り替える
+        _attackCancel.Cancel();
+        _attackCancel = new CancellationTokenSource();
+        _useWeapon = DroneWeaponComponent.Weapon.SUB;
+        SetWeaopnStopTimer().Forget();
     }
 
-    //カメラの深度操作
-    public void SetCameraDepth(int depth)
+    /// <summary>
+    /// 残弾無しイベント
+    /// </summary>
+    /// <param name="component">DroneWeaponComponent</param>
+    /// <param name="type">イベント発火した武器の種類</param>
+    /// <param name="weapon">イベント発火した武器</param>
+    public void OnBulletEmpty(DroneWeaponComponent component, DroneWeaponComponent.Weapon type, IWeapon weapon)
     {
-        _camera.depth = depth;
+        // サブ武器以外は何もしない
+        if (type != DroneWeaponComponent.Weapon.SUB) return;
+
+        // メイン武器攻撃へ切り替える
+        _attackCancel.Cancel();
+        _attackCancel = new CancellationTokenSource();
+        _useWeapon = DroneWeaponComponent.Weapon.MAIN;
+        SetWeaopnStopTimer().Forget();
     }
 
-    //AudioListenerのオンオフ
-    public void SetAudioListener(bool flag)
+    /// <summary>
+    /// 新規ターゲットロックオンイベント
+    /// </summary>
+    /// <param name="sender">イベントオブジェクト</param>
+    /// <param name="e">イベント引数</param>
+    public void OnTargetLockon(object sender, EventArgs e)
     {
-        listener.enabled = flag;
+        // 索敵モード解除
+        _searchCancel.Cancel();
+
+        // 回転停止
+        _rotateDirs[0] = 0;
+        _rotateDirs[1] = 0;
     }
 
-
-    void DestroyMe()
+    /// <summary>
+    /// ターゲットロックオン解除イベント
+    /// </summary>
+    /// <param name="sender">イベントオブジェクト</param>
+    /// <param name="e">イベント引数</param>
+    public void OnTargetUnLockon(object sender, EventArgs e)
     {
-        gravityAccele = 1f;
-        isDestroyFall = true;
-        isDestroy = true;
+        // 攻撃停止
+        _attackCancel.Cancel();
+        _attackCancel = new CancellationTokenSource();
+        _useWeapon = DroneWeaponComponent.Weapon.NONE;
+
+        // 移動停止
+        _moveCancel.Cancel();
+        _moveCancel = new CancellationTokenSource();
+        _moveDir = 0;
+    }
+
+    /// <summary>
+    /// 指定した番号のアイテム使用
+    /// </summary>
+    /// <param name="item">使用するアイテム番号</param>
+    private void UseItem(ItemNum item)
+    {
+        // アイテム枠にアイテムを持っていたら使用
+        if (_itemComponent.UseItem((int)item))
+        {
+            _soundComponent.PlayOneShot(SoundManager.SE.USE_ITEM, SoundManager.SEVolume);
+        }
+    }
+
+    /// <summary>
+    /// 攻撃停止タイマーをランダムな時間で設定
+    /// </summary>
+    /// <returns></returns>
+    private async UniTask SetWeaopnStopTimer()
+    {
+        int attackSec = UnityEngine.Random.Range(5, 11);
+        await UniTask.Delay(TimeSpan.FromSeconds(attackSec), cancellationToken: _attackCancel.Token);
+        _useWeapon = DroneWeaponComponent.Weapon.NONE;
+    }
+
+    /// <summary>
+    /// 死亡処理
+    /// </summary>
+    private async UniTask Destroy()
+    {
+        // 死亡フラグを立てる
+        _isDestroy = true;
 
         // 移動コンポーネント停止
-        baseAction.enabled = false;
+        _moveComponent.enabled = false;
 
-        //死んだのでロックオン・レーダー解除
+        // ロックオン・レーダー解除
         _lockOnComponent.StopLockOn();
 
-        //死亡SE再生
-        soundAction.PlayOneShot(SoundManager.SE.DEATH, SoundManager.SEVolume);
+        // 死亡SE再生
+        _soundComponent.PlayOneShot(SoundManager.SE.DEATH, SoundManager.SEVolume);
 
-        //死亡後爆破
-        Invoke(nameof(CreateExplosion), 2.5f);
-    }
+        // 一定時間経過してから爆破
+        await UniTask.Delay(TimeSpan.FromSeconds(DEATH_FALL_TIME));
 
-    //ドローンを非表示にして爆破
-    void CreateExplosion()
-    {
-        //ドローンの非表示
-        droneObject.gameObject.SetActive(false);
+        // ドローンの非表示
+        _droneObject.gameObject.SetActive(false);
 
-        //当たり判定も消す
+        // 当たり判定も消す
         GetComponent<Collider>().enabled = false;
 
-        //爆破生成
-        Instantiate(explosion, _transform);
+        // 爆破生成
+        _explosion.SetActive(true);
 
-        //落下停止
-        isDestroyFall = false;
+        // Update停止
+        enabled = false;
 
-        //爆破後一定時間で消去
-        Destroy(gameObject, fallTime);
-    }
+        // 爆破後一定時間でオブジェクト破棄
+        await UniTask.Delay(5000);
 
-    //回転の開始
-    void StartRotate()
-    {
-        if (Random.Range(0, 2) == 0)
-        {
-            angle.x = Random.Range(-1f, 1f);
-        }
-        else
-        {
-            angle.y = Random.Range(-1f, 1f);
-        }
-        isRotate = true;
-        Invoke(nameof(StopRotate), Random.Range(2, 4));
-    }
+        // ドローン破壊イベント通知
+        DroneDestroyEvent?.Invoke(this, EventArgs.Empty);
 
-    //回転の停止
-    void StopRotate()
-    {
-        //正面に障害物があるか
-        var hits = Physics.SphereCastAll(
-                    cameraTransform.position,
-                    20f,
-                    cameraTransform.forward,
-                    100f)
-                   .Where(h => !h.transform.CompareTag(TagNameConst.ITEM))    //アイテム除外
-                   .Where(h => !h.transform.CompareTag(TagNameConst.BULLET))  //弾丸除外
-                   .Where(h => !h.transform.CompareTag(TagNameConst.GIMMICK)) //ギミック除外
-                   .Where(h => !h.transform.CompareTag(TagNameConst.JAMMING)) //ジャミングエリア除外
-                   .Where(h => !h.transform.CompareTag(TagNameConst.JAMMING_BOT)) //ジャミングボット除外
-                   .Where(h => !h.transform.CompareTag(TagNameConst.PLAYER))  //プレイヤー除外
-                   .Where(h => !h.transform.CompareTag(TagNameConst.CPU))     //CPU除外
-                   .ToList();  //リスト化
-
-        if (hits.Count > 0)
-        {
-            //障害物がある場合は再度ランダムに回転
-            StartRotate();
-            return;
-        }
-
-        angle = Vector3.zero;
-        isRotate = false;
-    }
-
-
-    //左右移動
-    void StartSideMove()
-    {
-        if (Random.Range(0, 2) == 0)
-        {
-            Quaternion leftAngle = Quaternion.Euler(0, -90, 0);
-            Vector3 left = leftAngle.normalized * _transform.forward;
-            moveSideDir = left;
-        }
-        else
-        {
-            Quaternion rightAngle = Quaternion.Euler(0, 90, 0);
-            Vector3 right = rightAngle.normalized * _transform.forward;
-            moveSideDir = right;
-        }
-
-        moveSideTime = Random.Range(2, 6);
-        isMoveSide = true;
-    }
-
-
-    //リスト内で最も距離が近いRaycastHitを返す
-    void GetNearestObject(out RaycastHit hit, List<RaycastHit> hits)
-    {
-        hit = hits[0];
-        float minTargetDistance = float.MaxValue;   //初期化
-        foreach (RaycastHit h in hits)
-        {
-            //距離が最小だったら更新
-            if (h.distance < minTargetDistance)
-            {
-                minTargetDistance = h.distance;
-                hit = h;
-            }
-        }
-    }
-
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.CompareTag(TagNameConst.PLAYER)) return;
-        if (collision.gameObject.CompareTag(TagNameConst.CPU)) return;
-        if (collision.gameObject.CompareTag(TagNameConst.JAMMING_BOT)) return;
-
-        if (_lockOnComponent.Target == null)
-        {
-            StartRotate();
-            rotateTimeCount = 0;
-        }
-        else
-        {
-            StartSideMove();
-            moveSideTimeCount = 0;
-        }
-    }
-
-    private void OnCollisionStay(Collision collision)
-    {
-        if (collision.gameObject.CompareTag(TagNameConst.PLAYER)) return;
-        if (collision.gameObject.CompareTag(TagNameConst.CPU)) return;
-        if (collision.gameObject.CompareTag(TagNameConst.JAMMING_BOT)) return;
-        if (_lockOnComponent.Target == null) return;
-
-        if (moveSideTimeCount >= moveSideTime)
-        {
-            StartSideMove();
-            moveSideTimeCount = 0;
-        }
+        // オブジェクト破棄
+        Destroy(gameObject);
     }
 }

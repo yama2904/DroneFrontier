@@ -62,8 +62,8 @@ namespace Offline
         [SerializeField, Tooltip("移動時のドローン回転速度")] 
         private float _rotateSpeed = 2f;
 
-        [SerializeField, Tooltip("上下のカメラ角度上限")] 
-        private float _maxCameraRotateX = 40f;
+        [SerializeField, Tooltip("上下の角度上限")] 
+        private float _maxRotateX = 40f;
 
         /// <summary>
         /// 移動フラグ
@@ -168,32 +168,22 @@ namespace Offline
         }
 
         /// <summary>
-        /// 指定した方向へ移動
-        /// </summary>
-        /// <param name="vec">移動する方向</param>
-        public void Move(Vector3 vec)
-        {
-            Vector3 force = vec * _moveSpeed;
-            _rigidbody.AddForce(force + (force - _rigidbody.velocity), ForceMode.Force);
-        }
-
-        /// <summary>
-        /// カメラの向きを回転
+        /// ドローンを回転させて進行方向を変える
         /// </summary>
         /// <param name="vertical">左右方向の回転量</param>
         /// <param name="horizontal">上下方向の回転量</param>
-        public void RotateCamera(float vertical, float horizontal)
+        public void RotateDir(float vertical, float horizontal)
         {
-            // 上下の角度制限をつけて上下回転を適用させる
+            // 上下の角度制限をつける
             Vector3 localAngle = _transform.localEulerAngles;
             localAngle.x += horizontal * -1;
-            if (localAngle.x > _maxCameraRotateX && localAngle.x < 180)
+            if (localAngle.x > _maxRotateX && localAngle.x < 180)
             {
-                localAngle.x = _maxCameraRotateX;
+                localAngle.x = _maxRotateX;
             }
-            if (localAngle.x < 360 - _maxCameraRotateX && localAngle.x > 180)
+            if (localAngle.x < 360 - _maxRotateX && localAngle.x > 180)
             {
-                localAngle.x = 360 - _maxCameraRotateX;
+                localAngle.x = 360 - _maxRotateX;
             }
             _transform.localEulerAngles = localAngle;
 

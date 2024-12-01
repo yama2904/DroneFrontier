@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.AddressableAssets;
 
 namespace Offline
@@ -10,6 +11,10 @@ namespace Offline
         public Transform ShotPosition { get; set; } = null;
 
         public Canvas BulletUICanvas { get; set; } = null;
+
+        public event EventHandler OnBulletFull;
+
+        public event EventHandler OnBulletEmpty;
 
         /// <summary>
         /// 弾丸オブジェクトのAddressKey

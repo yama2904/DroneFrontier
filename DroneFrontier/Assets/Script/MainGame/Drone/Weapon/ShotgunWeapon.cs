@@ -1,4 +1,5 @@
 ﻿using Cysharp.Threading.Tasks;
+using System;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.UI;
@@ -33,6 +34,10 @@ namespace Offline
             }
         }
         private Canvas _bulletUICanvas = null;
+
+        public event EventHandler OnBulletFull;
+
+        public event EventHandler OnBulletEmpty;
 
         /// <summary>
         /// 弾丸オブジェクトのAddressKey
@@ -146,9 +151,9 @@ namespace Offline
 
                     // ブレ幅設定
                     Transform t = bullet.transform;
-                    float diffX = _angle * x + Random.Range(_angleDiff * -1, _angleDiff);  // 左右の角度
+                    float diffX = _angle * x + UnityEngine.Random.Range(_angleDiff * -1, _angleDiff);  // 左右の角度
                     t.RotateAround(t.position, t.up, diffX);
-                    float diffY = _angle * y + Random.Range(_angleDiff * -1, _angleDiff);  // 上下の角度
+                    float diffY = _angle * y + UnityEngine.Random.Range(_angleDiff * -1, _angleDiff);  // 上下の角度
                     t.RotateAround(t.position, t.right, diffY);
 
                     // 一定時間後弾丸削除
@@ -173,6 +178,12 @@ namespace Offline
 
             // 前回発射時間リセット
             _shotTimer = 0;
+
+            // 残弾が無くなった場合はイベント発火
+            if (_hasBulletNum < 0)
+            {
+                OnBulletEmpty?.Invoke(this, EventArgs.Empty);
+            }
         }
 
         private void Awake()
@@ -197,25 +208,8 @@ namespace Offline
 
         private void Update()
         {
-            // リキャストと発射間隔のカウント
-            if (_recastTimer < _recastSec && _hasBulletNum < _maxBulletNum)
-            {
-                _recastTimer += Time.deltaTime;
-            }
-
-            if (_shotTimer < _shotIntervalSec)
-            {
-                _shotTimer += Time.deltaTime;
-            }
-        }
-
-        private void FixedUpdate()
-        {
-            // 最大弾数持っているなら処理しない
-            if (_hasBulletNum >= _maxBulletNum) return;
-
             // リキャスト時間経過したら弾数を1個補充
-            if (_recastTimer >= _recastSec)
+            if (_hasBulletNum < _maxBulletNum && _recastTimer >= _recastSec)
             {
                 if (_bulletUIs != null)
                 {
@@ -228,12 +222,27 @@ namespace Offline
                 // リキャスト時間リセット
                 _recastTimer = 0;
 
-                Debug.Log("ショットガンの弾丸が1回分補充されました");
+                // 全弾補充イベント
+                if (_hasBulletNum >= _maxBulletNum)
+                {
+                    OnBulletFull?.Invoke(this, EventArgs.Empty);
+                }
             }
 
+            // UIにリキャスト反映
             if (_bulletUIs != null && _hasBulletNum < _maxBulletNum)
             {
                 _bulletUIs[_hasBulletNum].fillAmount = _recastTimer / _recastSec;
+            }
+
+            // リキャストと発射間隔のカウント
+            if (_recastTimer < _recastSec && _hasBulletNum < _maxBulletNum)
+            {
+                _recastTimer += Time.deltaTime;
+            }
+            if (_shotTimer < _shotIntervalSec)
+            {
+                _shotTimer += Time.deltaTime;
             }
         }
 

@@ -204,12 +204,11 @@ namespace Offline
                 }
 
                 // レーザーの射線上にヒットした全てのオブジェクトを調べる
-                var hits = Physics.SphereCastAll(
+                RaycastHit[] hits = Physics.SphereCastAll(
                                         _transform.position,     // レーザーの発射座標
                                         _laserRadius * 0.01f,    // レーザーの半径
                                         _transform.forward,      // レーザーの正面
-                                        _laserRange)             // 射程
-                                        .ToList();
+                                        _laserRange);            // 射程
 
                 // ターゲット取得
                 bool exists = FilterTarget(hits, out RaycastHit hit);
@@ -304,7 +303,7 @@ namespace Offline
         /// <param name="hits"></param>
         /// <param name="target"></param>
         /// <returns>ヒット可能オブジェクトが存在しない場合はfalse</returns>
-        private bool FilterTarget(List<RaycastHit> hits, out RaycastHit target)
+        private bool FilterTarget(RaycastHit[] hits, out RaycastHit target)
         {
             // outパラメータ初期化
             target = new RaycastHit()

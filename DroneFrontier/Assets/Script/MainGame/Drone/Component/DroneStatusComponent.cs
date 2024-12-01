@@ -46,10 +46,6 @@ namespace Offline
             /// </summary>
             private OrderedDictionary _statusesIconMap = new OrderedDictionary();
 
-            //アイコン
-            [SerializeField] Image barrierWeakIcon = null;
-            [SerializeField] Image speedDownIcon = null;
-
             /// <summary>
             /// ドローンにステータス変化を追加する
             /// </summary>

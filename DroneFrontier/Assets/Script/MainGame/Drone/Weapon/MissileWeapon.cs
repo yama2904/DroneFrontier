@@ -1,4 +1,5 @@
 ﻿using Cysharp.Threading.Tasks;
+using System;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.UI;
@@ -33,6 +34,10 @@ namespace Offline
             }
         }
         private Canvas _bulletUICanvas = null;
+
+        public event EventHandler OnBulletFull;
+
+        public event EventHandler OnBulletEmpty;
 
         /// <summary>
         /// 弾丸オブジェクトのAddressKey
@@ -116,9 +121,6 @@ namespace Offline
         /// </summary>
         private Image[] _bulletUIs = null;
 
-        // コンポーネントキャッシュ
-        private Transform _transform = null;
-
         public void Shot(GameObject target = null)
         {
             // 発射間隔チェック
@@ -149,6 +151,12 @@ namespace Offline
 
             // 表示用ミサイルを非表示
             _displayMissile.SetActive(false);
+
+            // 残弾が無くなった場合はイベント発火
+            if (_hasBulletNum < 0)
+            {
+                OnBulletEmpty?.Invoke(this, EventArgs.Empty);
+            }
         }
 
         private void Awake()
@@ -157,9 +165,6 @@ namespace Offline
             _shotIntervalSec = 1.0f / _shotPerSecond;
             _shotTimer = _shotIntervalSec;
             _hasBulletNum = _maxBulletNum;
-
-            // コンポーネント取得
-            _transform = transform;
 
             // 弾丸オブジェクト読み込み
             if (_bulletPrefab == null)
@@ -174,25 +179,8 @@ namespace Offline
 
         private void Update()
         {
-            // リキャストと発射間隔のカウント
-            if (_recastTimer < _recastSec && _hasBulletNum < _maxBulletNum)
-            {
-                _recastTimer += Time.deltaTime;
-            }
-
-            if (_shotTimer < _shotIntervalSec)
-            {
-                _shotTimer += Time.deltaTime;
-            }
-        }
-
-        private void FixedUpdate()
-        {
-            // 最大弾数持っているなら処理しない
-            if (_hasBulletNum >= _maxBulletNum) return;
-
             // リキャスト時間経過したら弾数を1個補充
-            if (_recastTimer >= _recastSec)
+            if (_hasBulletNum < _maxBulletNum && _recastTimer >= _recastSec)
             {
                 if (_bulletUIs != null)
                 {
@@ -204,20 +192,34 @@ namespace Offline
 
                 // リキャスト時間リセット
                 _recastTimer = 0;
+
+                // 全弾補充イベント
+                if (_hasBulletNum >= _maxBulletNum)
+                {
+                    OnBulletFull?.Invoke(this, EventArgs.Empty);
+                }
             }
 
+            // UIにリキャスト反映
             if (_bulletUIs != null && _hasBulletNum < _maxBulletNum)
             {
                 _bulletUIs[_hasBulletNum].fillAmount = _recastTimer / _recastSec;
             }
 
             // 発射可能になったらミサイル表示
-            if (_shotTimer >= _shotIntervalSec)
+            if (_shotTimer >= _shotIntervalSec && !_displayMissile.activeSelf)
             {
-                if (!_displayMissile.activeSelf)
-                {
-                    _displayMissile.SetActive(true);
-                }
+                _displayMissile.SetActive(true);
+            }
+
+            // リキャストと発射間隔のカウント
+            if (_recastTimer < _recastSec)
+            {
+                _recastTimer += Time.deltaTime;
+            }
+            if (_shotTimer < _shotIntervalSec)
+            {
+                _shotTimer += Time.deltaTime;
             }
         }
 

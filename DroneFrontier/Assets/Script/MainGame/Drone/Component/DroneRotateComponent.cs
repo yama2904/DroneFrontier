@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class DroneRotateComponent : MonoBehaviour
 {
-    [SerializeField, Tooltip("移動時に回転させるオブジェクト")]
+    [SerializeField, Tooltip("回転させるオブジェクト")]
     private Transform _rotateObject = null;
 
     /// <summary>

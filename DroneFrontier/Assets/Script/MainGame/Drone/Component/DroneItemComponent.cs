@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.Remoting.Messaging;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -33,7 +34,7 @@ public class DroneItemComponent : MonoBehaviour
         /// <summary>
         /// アイテム所持中であるか
         /// </summary>
-        public bool Having { get; set; } = false;
+        public bool HasItem { get; set; } = false;
     }
 
     /// <summary>
@@ -51,11 +52,11 @@ public class DroneItemComponent : MonoBehaviour
         foreach (ItemData data in _itemDatas)
         {
             // アイテム所持中の場合は次の枠
-            if (data.Having) continue;
+            if (data.HasItem) continue;
 
             // アイテム情報更新
             data.Item = item.DroneItem;
-            data.Having = true;
+            data.HasItem = true;
 
             // アイテム枠が表示されており、所持アイテムにアイコンが設定されている場合はアイコンを表示
             if (data.ItemFrameTransform != null && item.IconImage != null)
@@ -73,6 +74,15 @@ public class DroneItemComponent : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// 指定された番号にアイテムを持っているか
+    /// </summary>
+    /// <param name="number">アイテムを持っているかチェックする番号</param>
+    /// <returns>アイテムを持っている場合はtrue</returns>
+    public bool HasItem(int number)
+    {
+        return _itemDatas[number].HasItem;
+    }
 
     /// <summary>
     /// 指定された番号のアイテム使用
@@ -84,7 +94,7 @@ public class DroneItemComponent : MonoBehaviour
         ItemData data = _itemDatas[number];
 
         // アイテムを持っていない
-        if (!data.Having) return false;
+        if (!data.HasItem) return false;
 
         // アイテム存在チェック
         if (data.Item == null) return false;
@@ -101,7 +111,7 @@ public class DroneItemComponent : MonoBehaviour
         // リストの情報を初期化
         data.Item = null;
         data.Icon = null;
-        data.Having = false;
+        data.HasItem = false;
 
         return true;
     }

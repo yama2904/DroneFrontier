@@ -128,30 +128,12 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
     [SerializeField, Tooltip("ストック数")]
     private int _stockNum = 2;
 
-    [SerializeField, Tooltip("攻撃中の移動速度の低下率")] 
-    private float _atackingDownSpeed = 0.5f;
-
-    /// <summary>
-    /// メイン武器使用履歴<br/>
-    /// [0]:現在のフレーム<br/>
-    /// [1]:1フレーム前
-    /// </summary>
-    private bool[] _isMainAttacked = new bool[2];
-
-    /// <summary>
-    /// サブ武器使用履歴<br/>
-    /// [0]:現在のフレーム<br/>
-    /// [1]:1フレーム前
-    /// </summary>
-    private bool[] _isSubAttacked = new bool[2];
-
     /// <summary>
     /// 死亡フラグ
     /// </summary>
     private bool _isDestroy = false;
 
     // コンポーネントキャッシュ
-    Transform _transform = null;
     Rigidbody _rigidbody = null;
     Animator _animator = null;
     DroneMoveComponent _moveComponent = null;
@@ -167,7 +149,6 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
     {
         // コンポーネントの取得
         _rigidbody = GetComponent<Rigidbody>();
-        _transform = _rigidbody.transform;
         _animator = GetComponent<Animator>();
         _moveComponent = GetComponent<DroneMoveComponent>();
         _rotateComponent = GetComponent<DroneRotateComponent>();
@@ -235,15 +216,22 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
         // 上下移動
         if (Input.mouseScrollDelta.y != 0)
         {
-            _moveComponent.Move(_transform.up * Input.mouseScrollDelta.y);
+            if (Input.mouseScrollDelta.y > 0)
+            {
+                _moveComponent.Move(DroneMoveComponent.Direction.Up);
+            }
+            else
+            {
+                _moveComponent.Move(DroneMoveComponent.Direction.Down);
+            }
         }
         if (Input.GetKey(KeyCode.R))
         {
-            _moveComponent.Move(_transform.up);
+            _moveComponent.Move(DroneMoveComponent.Direction.Up);
         }
         if (Input.GetKey(KeyCode.F))
         {
-            _moveComponent.Move(_transform.up * -1);
+            _moveComponent.Move(DroneMoveComponent.Direction.Down);
         }
 
         // ロックオン使用
@@ -269,48 +257,24 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
             _radarComponent.StopRadar();
         }
 
-        // マウスによるカメラ回転処理
+        // マウスによる向き変更
         if (Cursor.lockState == CursorLockMode.Locked)
         {
             float x = Input.GetAxis("Mouse X") * CameraManager.ReverseX * CameraManager.CameraSpeed;
             float y = Input.GetAxis("Mouse Y") * CameraManager.ReverseY * CameraManager.CameraSpeed;
-            _moveComponent.RotateCamera(x, y);
+            _moveComponent.RotateDir(x, y);
         }
 
         // メイン武器攻撃（サブ武器攻撃中の場合は不可）
-        if (Input.GetMouseButton(0) && !_isSubAttacked[1])
+        if (Input.GetMouseButton(0) && !_weaponComponent.ShootingSubWeapon)
         {
-            // 攻撃中は速度低下
-            if (!_isMainAttacked[1])
-            {
-                _moveComponent.MoveSpeed *= _atackingDownSpeed;
-            }
-
             _weaponComponent.Shot(DroneWeaponComponent.Weapon.MAIN, _lockOnComponent.Target);
-            _isMainAttacked[0] = true;
         }
 
         // サブ武器攻撃（メイン武器攻撃中の場合は不可）
-        if (Input.GetMouseButton(1) && !_isMainAttacked[1])
+        if (Input.GetMouseButton(1) && !_weaponComponent.ShootingMainWeapon)
         {
-            // 攻撃中は速度低下
-            if (!_isSubAttacked[1])
-            {
-                switch (SubWeapon)
-                {
-                    case WeaponType.MISSILE:
-                        _moveComponent.MoveSpeed *= _atackingDownSpeed;
-                        break;
-
-                    case WeaponType.LASER:
-                        // レーザーの場合は低下率増加
-                        _moveComponent.MoveSpeed *= _atackingDownSpeed * 0.5f;
-                        break;
-                }
-            }
-
             _weaponComponent.Shot(DroneWeaponComponent.Weapon.SUB, _lockOnComponent.Target);
-            _isSubAttacked[0] = true;
         }
 
         // ブースト使用
@@ -345,36 +309,6 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
         }
     }
 
-    private void LateUpdate()
-    {
-        // メイン武器の攻撃を停止した場合は速度を戻す
-        if (!_isMainAttacked[0] && _isMainAttacked[1])
-        {
-            _moveComponent.MoveSpeed *= 1 / _atackingDownSpeed;
-        }
-
-        // サブ武器の攻撃を停止した場合は速度を戻す
-        if (!_isSubAttacked[0] && _isSubAttacked[1])
-        {
-            switch (SubWeapon)
-            {
-                case WeaponType.MISSILE:
-                    _moveComponent.MoveSpeed *= 1 / _atackingDownSpeed;
-                    break;
-
-                case WeaponType.LASER:
-                    _moveComponent.MoveSpeed *= 1 / (_atackingDownSpeed * 0.5f);
-                    break;
-            }
-        }
-
-        // 武器使用履歴更新
-        _isMainAttacked[1] = _isMainAttacked[0];
-        _isMainAttacked[0] = false;
-        _isSubAttacked[1] = _isSubAttacked[0];
-        _isSubAttacked[0] = false;
-    }
-
     /// <summary>
     /// オブジェクト探索イベント
     /// </summary>
@@ -395,6 +329,19 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
                     Destroy(other.gameObject);
                 }
             }
+        }
+    }
+
+    /// <summary>
+    /// 指定した番号のアイテム使用
+    /// </summary>
+    /// <param name="item">使用するアイテム番号</param>
+    private void UseItem(ItemNum item)
+    {
+        // アイテム枠にアイテムを持っていたら使用
+        if (_itemComponent.UseItem((int)item))
+        {
+            _soundComponent.PlayOneShot(SoundManager.SE.USE_ITEM, SoundManager.SEVolume);
         }
     }
 
@@ -439,18 +386,5 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
 
         // オブジェクト破棄
         Destroy(gameObject);
-    }
-
-    /// <summary>
-    /// 指定した番号のアイテム使用
-    /// </summary>
-    /// <param name="item">使用するアイテム番号</param>
-    private void UseItem(ItemNum item)
-    {
-        // アイテム枠にアイテムを持っていたら使用
-        if (_itemComponent.UseItem((int)item))
-        {
-            _soundComponent.PlayOneShot(SoundManager.SE.USE_ITEM, SoundManager.SEVolume);
-        }
     }
 }
