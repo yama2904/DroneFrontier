@@ -627,6 +627,7 @@ GameObject:
   - component: {fileID: 1737714871206060867}
   - component: {fileID: 5668502763316825620}
   - component: {fileID: 9200962274211400824}
+  - component: {fileID: 3591686252403803599}
   - component: {fileID: 5374172619177132804}
   - component: {fileID: 2690737355441408120}
   - component: {fileID: 993888715167761601}
@@ -731,9 +732,6 @@ MonoBehaviour:
   _camera: {fileID: 6808110575809998135}
   _hp: 100
   _stockNum: 2
-  explosion: {fileID: 2212005194167726933, guid: 8dc076f9b5243664fa747acf0168fb56,
-    type: 3}
-  droneObject: {fileID: 1656250088969202853}
 --- !u!114 &2268401430616989749
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -839,8 +837,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _statusIconCanvas: {fileID: 0}
-  barrierWeakIcon: {fileID: 0}
-  speedDownIcon: {fileID: 0}
 --- !u!114 &9200962274211400824
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -860,6 +856,28 @@ MonoBehaviour:
   _aimSpeed: 12
   _lockOnRadius: 450
   _lockOnDistance: 450
+--- !u!114 &3591686252403803599
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5756816350272667788}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6fdeda39cd4c144f91f5a7b7f5ad28b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _camera: {fileID: 6808110575809998135}
+  _radarMask: {fileID: 0}
+  _canvas: {fileID: 0}
+  _enemyMarker: {fileID: 0}
+  _itemMarker: {fileID: 0}
+  _radarRadius: 300
+  _secPerLevel:
+  - 0
+  _distancePerLevel:
+  - 500
 --- !u!114 &5374172619177132804
 MonoBehaviour:
   m_ObjectHideFlags: 0

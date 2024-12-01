@@ -287,7 +287,6 @@ MonoBehaviour:
   _searchComponent: {fileID: 8076797654263036361}
   _hp: 100
   _stockNum: 2
-  _atackingDownSpeed: 0.5
 --- !u!114 &6715498070689482023
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -302,7 +301,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _moveSpeed: 800
   _rotateSpeed: 2
-  _maxCameraRotateX: 40
+  _maxRotateX: 40
 --- !u!114 &4120123392277730585
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -395,8 +394,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _statusIconCanvas: {fileID: 5810719151430010898}
-  barrierWeakIcon: {fileID: 0}
-  speedDownIcon: {fileID: 0}
 --- !u!114 &6158696015299256227
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -436,10 +433,17 @@ MonoBehaviour:
   _itemMarker: {fileID: 4126443774036033563, guid: 21d09b0292d360f41b96e3bb170505ea,
     type: 3}
   _radarRadius: 300
-  _radarMinDistance: 100
-  _oneLevelSec: 1
-  _twoLevelSec: 2
-  _threeLevelSec: 3
+  _secPerLevel:
+  - 1
+  - 2
+  - 3
+  - 5
+  _distancePerLevel:
+  - 0
+  - 200
+  - 500
+  - 1000
+  - 2000
 --- !u!114 &7252238213457844170
 MonoBehaviour:
   m_ObjectHideFlags: 0

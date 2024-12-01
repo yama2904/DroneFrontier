@@ -155,11 +155,6 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
     private DroneWeaponComponent.Weapon _useWeapon = DroneWeaponComponent.Weapon.NONE;
 
     /// <summary>
-    /// 移動時間計測
-    /// </summary>
-    float _moveTimer = 0;
-
-    /// <summary>
     /// 死亡フラグ
     /// </summary>
     private bool _isDestroy = false;
@@ -188,6 +183,7 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
     DroneDamageComponent _damageComponent = null;
     DroneSoundComponent _soundComponent = null;
     DroneLockOnComponent _lockOnComponent = null;
+    DroneRadarComponent _radarComponent = null;
     DroneItemComponent _itemComponent = null;
     DroneWeaponComponent _weaponComponent = null;
     DroneBoostComponent _boostComponent = null;
@@ -203,6 +199,7 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
         _damageComponent = GetComponent<DroneDamageComponent>();
         _soundComponent = GetComponent<DroneSoundComponent>();
         _lockOnComponent = GetComponent<DroneLockOnComponent>();
+        _radarComponent = GetComponent<DroneRadarComponent>();
         _itemComponent = GetComponent<DroneItemComponent>();
         _weaponComponent = GetComponent<DroneWeaponComponent>();
         _boostComponent = GetComponent<DroneBoostComponent>();
@@ -237,6 +234,9 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
 
         // 常にロックオン処理
         _lockOnComponent.StartLockOn();
+
+        // 常にレーダー処理
+        _radarComponent.StartRadar();
 
         // ロックオンイベント設定
         _lockOnComponent.OnTargetLockOn += OnTargetLockon;

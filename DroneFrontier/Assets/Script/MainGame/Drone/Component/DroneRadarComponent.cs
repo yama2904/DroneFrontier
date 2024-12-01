@@ -5,7 +5,47 @@ using UnityEngine.UI;
 
 public class DroneRadarComponent : MonoBehaviour
 {
-    [SerializeField, Tooltip("ドローンのカメラ")] 
+    /// <summary>
+    /// レーダー照射中のアイテムを返す
+    /// </summary>
+    public List<GameObject> RadaringItems
+    {
+        get
+        {
+            List<GameObject> items = new List<GameObject>();
+            foreach (GameObject key in _radaringMap.Keys)
+            {
+                if (_radaringMap[key].type == IRadarable.ObjectType.Item)
+                {
+                    items.Add(key);
+                }
+            }
+
+            return items;
+        }
+    }
+
+    /// <summary>
+    /// レーダー照射中の敵を返す
+    /// </summary>
+    public List<GameObject> RadaringEnemys
+    {
+        get
+        {
+            List<GameObject> enemys = new List<GameObject>();
+            foreach (GameObject key in _radaringMap.Keys)
+            {
+                if (_radaringMap[key].type == IRadarable.ObjectType.Enemy)
+                {
+                    enemys.Add(key);
+                }
+            }
+
+            return enemys;
+        }
+    }
+
+    [SerializeField, Tooltip("ドローンのカメラ")]
     private Camera _camera = null;
 
     [SerializeField, Tooltip("レーダー中に使用するマスク")]
@@ -19,27 +59,21 @@ public class DroneRadarComponent : MonoBehaviour
 
     [SerializeField, Tooltip("アイテムマーカー")]
     private Image _itemMarker = null;
-   
-    [SerializeField, Tooltip("レーダー範囲")] 
+
+    [SerializeField, Tooltip("レーダー照射半径")]
     private float _radarRadius = 300.0f;
 
-    [SerializeField, Tooltip("レーダー最小距離")] 
-    private float _radarMinDistance = 100f;
+    [SerializeField, Tooltip("各レベルごとの時間")]
+    private float[] _secPerLevel = null;
 
-    [SerializeField, Tooltip("1段階目の時間（秒）")]
-    private float _oneLevelSec = 1f;
-
-    [SerializeField, Tooltip("2段階目の時間（秒）")]
-    private float _twoLevelSec = 2;
-
-    [SerializeField, Tooltip("3段階目の時間（秒）")]
-    private float _threeLevelSec = 3f;
+    [SerializeField, Tooltip("各レベルごとの照射距離")]
+    private float[] _distancePerLevel = null;
 
     /// <summary>
     /// レーダー照射中オブジェクトのマーカー座標
     /// </summary>
-    private Dictionary<GameObject, (Transform target, RectTransform marker)> _radaringMap = new Dictionary<GameObject, (Transform target, RectTransform marker)>();
-    
+    private Dictionary<GameObject, (IRadarable.ObjectType type, RectTransform marker)> _radaringMap = new Dictionary<GameObject, (IRadarable.ObjectType type, RectTransform marker)>();
+
     /// <summary>
     /// レーダー照射時間計測
     /// </summary>
@@ -49,6 +83,11 @@ public class DroneRadarComponent : MonoBehaviour
     /// レーダー中であるか
     /// </summary>
     private bool _startedRadar = false;
+
+    /// <summary>
+    /// 現在のレベル
+    /// </summary>
+    private int _nowLevel = 0;
 
     /// <summary>
     /// 一時的なロックオン無効の重複カウント
@@ -64,7 +103,11 @@ public class DroneRadarComponent : MonoBehaviour
     {
         if (!enabled) return;
         _startedRadar = true;
-        _radarMask.enabled = true;
+
+        if (_radarMask != null)
+        {
+            _radarMask.enabled = true;
+        }
     }
 
     /// <summary>
@@ -73,10 +116,15 @@ public class DroneRadarComponent : MonoBehaviour
     public void StopRadar()
     {
         if (!enabled) return;
+        _nowLevel = 0;
         _startedRadar = false;
-        _radarMask.enabled = false;
         _radarTimer = 0;
         DestroyAllMarkers();
+        
+        if (_radarMask != null)
+        {
+            _radarMask.enabled = false;
+        }
     }
 
     /// <summary>
@@ -109,14 +157,25 @@ public class DroneRadarComponent : MonoBehaviour
     private void Awake()
     {
         _cameraTransform = _camera.transform;
-        _radarMask.enabled = false;
+        if (_radarMask != null)
+        {
+            _radarMask.enabled = false;
+        }
     }
 
     private void Update()
     {
         // レーダー照射時間計測
         if (!_startedRadar) return;
-        _radarTimer += Time.deltaTime;
+        if (_nowLevel < _distancePerLevel.Length - 1)
+        {
+            _radarTimer += Time.deltaTime;
+            if (_radarTimer > _secPerLevel[_nowLevel])
+            {
+                _nowLevel++;
+                _radarTimer = 0;
+            }
+        }
     }
 
     private void LateUpdate()
@@ -125,27 +184,7 @@ public class DroneRadarComponent : MonoBehaviour
         if (!_startedRadar) return;
 
         // レーダーを使用し続けた時間に応じて照射距離が変動
-        float distance = 0;
-        if (_radarTimer < _oneLevelSec)
-        {
-            // レーダー開始直後は照射距離0
-            return;
-        }
-        else if (_radarTimer < _oneLevelSec + _twoLevelSec)
-        {
-            // 2段階目
-            distance = _radarMinDistance;
-        }
-        else if (_radarTimer < _oneLevelSec + _twoLevelSec + _threeLevelSec)
-        {
-            // 3段階目
-            distance = _radarMinDistance * 2;
-        }
-        else
-        {
-            // 最大距離
-            distance = _radarMinDistance * 3;
-        }
+        float distance = _distancePerLevel[_nowLevel];
 
         // カメラの前方にあるオブジェクトを取得
         List<GameObject> hits = Physics.SphereCastAll(
@@ -171,24 +210,30 @@ public class DroneRadarComponent : MonoBehaviour
             // 既に照射中の場合はスキップ
             if (_radaringMap.ContainsKey(target)) continue;
 
-            // マーカー生成
-            Image marker = null;
+            // IRadarableインターフェース取得
             IRadarable radarable = target.GetComponent<IRadarable>();
-            if (radarable.Type == IRadarable.ObjectType.Enemy)
-            {
-                marker = Instantiate(_enemyMarker);
-            }
-            else 
-            {
-                marker = Instantiate(_itemMarker);
-            }
 
-            // マーカーの親Canvas紐づけ
-            RectTransform markerTransform = marker.rectTransform;
-            markerTransform.SetParent(_canvas);
+            // マーカー生成
+            RectTransform markerTransform = null;
+            if (_canvas != null)
+            {
+                Image marker = null;
+                if (radarable.Type == IRadarable.ObjectType.Enemy)
+                {
+                    marker = Instantiate(_enemyMarker);
+                }
+                else
+                {
+                    marker = Instantiate(_itemMarker);
+                }
+
+                // マーカーの親Canvas紐づけ
+                markerTransform = marker.rectTransform;
+                markerTransform.SetParent(_canvas);
+            }
 
             // 照射中マップに追加
-            _radaringMap.Add(target, (target.transform, markerTransform));
+            _radaringMap.Add(target, (radarable.Type, markerTransform));
         }
 
         // 照射中の全てのマーカー座標を更新
@@ -198,13 +243,19 @@ public class DroneRadarComponent : MonoBehaviour
             // レーダー対象にない場合は画面外に出て照射から外れたため削除
             if (!targets.Contains(radaring))
             {
-                Destroy(_radaringMap[radaring].marker.gameObject);
+                if (_radaringMap[radaring].marker != null)
+                {
+                    Destroy(_radaringMap[radaring].marker.gameObject);
+                }
                 _radaringMap.Remove(radaring);
                 continue;
             }
 
             // マーカー座標を更新
-            _radaringMap[radaring].marker.position = ConvertToScreenPosition(_radaringMap[radaring].target.position);
+            if (_radaringMap[radaring].marker != null)
+            {
+                _radaringMap[radaring].marker.position = ConvertToScreenPosition(radaring.transform.position);
+            }
         }
     }
 
@@ -260,9 +311,12 @@ public class DroneRadarComponent : MonoBehaviour
     /// </summary>
     private void DestroyAllMarkers()
     {
-        foreach (var target in _radaringMap.Values)
+        if (_canvas != null)
         {
-            Destroy(target.marker.gameObject);
+            foreach (var target in _radaringMap.Values)
+            {
+                Destroy(target.marker.gameObject);
+            }
         }
         _radaringMap.Clear();
     }
