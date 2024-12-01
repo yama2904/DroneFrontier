@@ -10,12 +10,11 @@ GameObject:
   m_Component:
   - component: {fileID: 6342175787228130886}
   - component: {fileID: 1484035709399646254}
-  - component: {fileID: 891946312079979420}
   - component: {fileID: 1597514520077966212}
   - component: {fileID: 8495789516920243579}
   m_Layer: 0
   m_Name: JammingBot
-  m_TagString: JammingBot
+  m_TagString: NotCollision
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -64,27 +63,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
---- !u!135 &891946312079979420
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 528843652124265974}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 0.59176815
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!135 &1597514520077966212
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -118,7 +96,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1a2fc828a104ac54dbe00c77a44b5cbe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _hp: 30
 --- !u!1 &4407835491605891049
 GameObject:
   m_ObjectHideFlags: 0
@@ -5055,10 +5032,23 @@ PrefabInstance:
       propertyPath: m_Name
       value: jamming_new _New
       objectReference: {fileID: 0}
+    - target: {fileID: -927199367670048503, guid: ecec55ba6fd6f1b4a8efa9efb7912d1e,
+        type: 3}
+      propertyPath: m_TagString
+      value: JammingBot
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: -927199367670048503, guid: ecec55ba6fd6f1b4a8efa9efb7912d1e,
+        type: 3}
+      insertIndex: 1
+      addedObject: {fileID: 2154431799981516595}
+    - targetCorrespondingSourceObject: {fileID: -927199367670048503, guid: ecec55ba6fd6f1b4a8efa9efb7912d1e,
+        type: 3}
+      insertIndex: 2
+      addedObject: {fileID: 7300464961638009260}
     - targetCorrespondingSourceObject: {fileID: 6366295588587946641, guid: ecec55ba6fd6f1b4a8efa9efb7912d1e,
         type: 3}
       insertIndex: -1
@@ -5097,3 +5087,44 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!1 &8506179132647085824 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -927199367670048503, guid: ecec55ba6fd6f1b4a8efa9efb7912d1e,
+    type: 3}
+  m_PrefabInstance: {fileID: 373211406847856137}
+  m_PrefabAsset: {fileID: 0}
+--- !u!135 &2154431799981516595
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8506179132647085824}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 0.59176815
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &7300464961638009260
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8506179132647085824}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c9e6433334682964a96713f9bca5bd22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _hp: 30
+  _jammingBot: {fileID: 528843652124265974}

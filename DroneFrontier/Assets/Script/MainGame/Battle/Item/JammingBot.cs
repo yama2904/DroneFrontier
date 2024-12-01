@@ -5,16 +5,8 @@ using UnityEngine;
 
 namespace Offline
 {
-    public class JammingBot : MonoBehaviour, ILockableOn, IRadarable, IDamageable
+    public class JammingBot : MonoBehaviour, ILockableOn, IRadarable
     {
-        /// <summary>
-        /// ジャミングボットの残りHP
-        /// </summary>
-        public float HP
-        {
-            get { return _hp; }
-        }
-
         /// <summary>
         /// ロックオン可能であるか
         /// </summary>
@@ -66,27 +58,10 @@ namespace Offline
         /// </summary>
         public event EventHandler DestroyEvent;
 
-        [SerializeField]
-        private float _hp = 30.0f;
-
         /// <summary>
         /// 各オブジェクトに付与したジャミングステータス
         /// </summary>
         private Dictionary<GameObject, JammingStatus> _addedJammingStatusMap = new Dictionary<GameObject, JammingStatus>();
-
-        public void Damage(GameObject source, float value)
-        {
-            // 小数点第2以下切り捨て
-            value = Useful.Floor(value, 1);
-            _hp -= value;
-            if (_hp < 0)
-            {
-                // してオブジェクト削除
-                Destroy(gameObject);
-            }
-
-            Debug.Log($"{name}に{value}のダメージ 残りHP:{_hp}");
-        }
 
         private void OnDestroy()
         {

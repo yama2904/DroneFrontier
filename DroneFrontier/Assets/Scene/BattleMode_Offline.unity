@@ -430,7 +430,7 @@ PrefabInstance:
     - target: {fileID: 4629807058533697132, guid: f2b903147de9c594fbd08f01478554df,
         type: 3}
       propertyPath: _jammingBotSec
-      value: 5
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 4629807058533697132, guid: f2b903147de9c594fbd08f01478554df,
         type: 3}
