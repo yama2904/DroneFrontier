@@ -1,5 +1,5 @@
-﻿using Mirror.Discovery;
-using Offline;
+﻿using Cysharp.Threading.Tasks;
+using Network;
 using System;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,14 +17,9 @@ public class SoloMultiSelectScreen : MonoBehaviour
         SoloMode,
 
         /// <summary>
-        /// 募集
+        /// マルチモード
         /// </summary>
-        Host,
-
-        /// <summary>
-        /// 参加
-        /// </summary>
-        Client,
+        MultiMode,
 
         /// <summary>
         /// 戻る
@@ -35,107 +30,230 @@ public class SoloMultiSelectScreen : MonoBehaviour
     /// <summary>
     /// 選択したボタン
     /// </summary>
-    public ButtonType SelectedButton;
+    public ButtonType SelectedButton { get; private set; }
+
+    /// <summary>
+    /// 入力したプレイヤー名
+    /// </summary>
+    public string PlayerName { get; private set; } = string.Empty;
 
     /// <summary>
     /// ボタンクリックイベント
     /// </summary>
-    public event EventHandler ButtonClick;
+    public event EventHandler OnButtonClick;
 
-    [SerializeField] GameObject inputNameObject = null;
-    [SerializeField] GameObject screenMask = null;  //名前入力中に後ろのボタンを押せないようにするため
-    [SerializeField] InputField inputField = null;
-    [SerializeField] GameObject soloButton = null;
+    [SerializeField, Tooltip("ソロボタン")]
+    private GameObject _soloButton = null;
 
-    public static string playerName = "";
+    [SerializeField, Tooltip("名前入力UIのCanvas")]
+    private Canvas _inputFieldCanvas = null;
 
-    void Start()
+    [SerializeField, Tooltip("名前入力UI")]
+    private InputField _inputField = null;
+
+    [SerializeField, Tooltip("募集ボタン")]
+    private Button _hostButton = null;
+
+    [SerializeField, Tooltip("参加ボタン")]
+    private Button _clientButton = null;
+
+    [SerializeField, Tooltip("ホスト探索中のマスク")]
+    private Image _discoverMask = null;
+
+    [SerializeField, Tooltip("エラーメッセージのCanvas")]
+    private Canvas _errMsgCanvas = null;
+
+    [SerializeField, Tooltip("エラーメッセージ表示用テキスト")]
+    private Text _errMsgText = null;
+
+    /// <summary>
+    /// ホスト探索中であるか
+    /// </summary>
+    private bool _isDiscovery = false;
+
+    /// <summary>
+    /// 通信中にエラーが発生したか
+    /// </summary>
+    private bool _isError = false;
+
+    private void Start()
     {
-        inputNameObject.SetActive(false);
-        screenMask.SetActive(false);
-        inputField.characterLimit = 10;
+        // 名前入力欄非表示
+        _inputFieldCanvas.enabled = false;
+
+        // エラーメッセージ非表示
+        _errMsgCanvas.enabled = false;
+
+        // レースモードの場合はソロボタン非表示
+        if (GameModeSelectScreen.Mode == GameModeSelectScreen.GameMode.RACE)
+        {
+            _soloButton.SetActive(false);
+        }
+        else
+        {
+            _soloButton.SetActive(true);
+        }
     }
 
-    void Update()
-    {
-        if(GameModeSelectScreen.Mode == GameModeSelectScreen.GameMode.RACE)
-        {
-            soloButton.SetActive(false);
-        }
-        else if (GameModeSelectScreen.Mode == GameModeSelectScreen.GameMode.BATTLE)
-        {
-            soloButton.SetActive(true);
-        }
-    }
-
-    //ソロ
+    /// <summary>
+    /// ソロモード選択
+    /// </summary>
     public void ClickSolo()
     {
         SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
         SelectedButton = ButtonType.SoloMode;
-        ButtonClick(this, EventArgs.Empty);
+        OnButtonClick(this, EventArgs.Empty);
     }
 
-    //マルチ
+    /// <summary>
+    /// マルチモード選択
+    /// </summary>
     public void ClickMulti()
     {
-        //SE再生
+        // SE再生
         SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
 
-        inputNameObject.SetActive(true);  //名前入力の表示
-        screenMask.SetActive(true);       //後ろのボタンを押せなくする
-        BrightnessManager.SetGameAlfa(0.7f);  //後ろを暗くする
+        // 名前入力欄表示
+        _inputFieldCanvas.enabled = true;
     }
 
-    //戻る
+    /// <summary>
+    /// 戻るボタン選択
+    /// </summary>
     public void ClickBack()
     {
         SoundManager.Play(SoundManager.SE.CANCEL);
         SelectedButton = ButtonType.Back;
-        ButtonClick(this, EventArgs.Empty);
+        OnButtonClick(this, EventArgs.Empty);
     }
 
-
-    //募集ボタン
+    /// <summary>
+    /// 募集ボタン選択
+    /// </summary>
     public void ClickHost()
     {
-        if (inputField.text != "")
+        // 名前を入力していなかったら処理しない
+        if (_inputField.text == "") return;
+
+        PlayerName = _inputField.text;
+
+        // ホストとして通信を開始
+        MyNetworkManager.Singleton.StartHost(PlayerName).Forget();
+
+        // ボタン選択イベント発火
+        SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
+        SelectedButton = ButtonType.MultiMode;
+        OnButtonClick(this, EventArgs.Empty);
+    }
+
+    /// <summary>
+    /// 参加ボタン選択
+    /// </summary>
+    public void ClickClient()
+    {
+        // 名前を入力していなかったら処理しない
+        if (_inputField.text == "") return;
+
+        PlayerName = _inputField.text;
+
+        // SE再生
+        SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
+
+        // クライアントとして通信を開始
+        UniTask.Void(async () =>
         {
-            //SE再生
-            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
+            // 通信相手発見イベント設定
+            MyNetworkManager.Singleton.OnDiscovery += OnDiscovery;
 
-            playerName = inputField.text;
+            try
+            {
+                await MyNetworkManager.Singleton.StartClient(PlayerName);
+            }
+            catch (NetworkException ex)
+            {
+                _errMsgCanvas.enabled = true;
+                _errMsgText.text = ex.Message;
+                _isError = true;
+            }
+        });
 
-            CustomNetworkDiscoveryHUD.Singleton.StartHost();
+        // 探索モード
+        ChangeDiscovery(true);
+    }
+
+    /// <summary>
+    /// 名前入力中の戻るボタン選択
+    /// </summary>
+    public void ClickBackOfInputField()
+    {
+        // SE再生
+        SoundManager.Play(SoundManager.SE.CANCEL, SoundManager.SEVolume);
+
+        // 探索中の場合は探索停止
+        if (_isDiscovery)
+        {
+            MyNetworkManager.Singleton.StopClient();
+            MyNetworkManager.Singleton.OnDiscovery -= OnDiscovery;
+
+            // 探索解除
+            ChangeDiscovery(false);
+        }
+        else
+        {
+            // 名前入力欄非表示
+            _inputFieldCanvas.enabled = false;
         }
     }
 
-    //参加ボタン
-    public void ClickClient()
+    private void Update()
     {
-        //名前を入力していなかったら処理しない
-        if (inputField.text == "") return;
+        if (_isError && Input.GetMouseButtonUp(0))
+        {
+            // SE再生
+            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
 
-        //SE再生
-        SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
+            // エラーメッセージ非表示
+            _errMsgCanvas.enabled = false;
+            _errMsgText.text = "";
+            _isError = false;
 
-        CustomNetworkDiscoveryHUD.Singleton.StartClient();  //ホストを探す
-        playerName = inputField.text;
+            // 探索解除
+            ChangeDiscovery(false);
+        }
     }
 
-
-    //名前入力中の戻る
-    public void ClickBack_InputName()
+    /// <summary>
+    /// 通信相手発見イベント
+    /// </summary>
+    /// <param name="player">通信相手のプレイヤー名</param>
+    private void OnDiscovery(string player)
     {
-        //SE再生
-        SoundManager.Play(SoundManager.SE.CANCEL, SoundManager.SEVolume);
+        // 本イベント削除
+        MyNetworkManager.Singleton.OnDiscovery -= OnDiscovery;
 
-        inputNameObject.SetActive(false);    //名前入力の非表示
-        screenMask.SetActive(false);    //後ろのボタンを押せるようにする
-        BrightnessManager.SetGameAlfa(0);   //明るさを元に戻す
+        // 探索解除
+        ChangeDiscovery(false);
 
-        //検索を止める
-        NewNetworkDiscovery.Singleton.StopDiscovery();
-        CustomNetworkDiscoveryHUD.Singleton.Init();
+        // ボタン選択イベント発火
+        SelectedButton = ButtonType.MultiMode;
+        OnButtonClick(this, EventArgs.Empty);
+    }
+
+    /// <summary>
+    /// 探索中モードの変更
+    /// </summary>
+    /// <param name="flag">探索モードONの場合はtrue</param>
+    private void ChangeDiscovery(bool flag)
+    {
+        // 各ボタンを活性に戻す
+        _inputField.enabled = !flag;
+        _hostButton.enabled = !flag;
+        _clientButton.enabled = !flag;
+
+        // 探索中マスク設定
+        _discoverMask.enabled = flag;
+
+        // 探索中フラグ初期化
+        _isDiscovery = flag;
     }
 }

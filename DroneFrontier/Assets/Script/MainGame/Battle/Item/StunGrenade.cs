@@ -108,14 +108,6 @@ public class StunGrenade : MonoBehaviour
     /// <param name="other"></param>
     private void OnTriggerEnter(Collider other)
     {
-        //特定のオブジェクトはすり抜け
-        //if (ReferenceEquals(collision.gameObject, thrower)) return;
-        //if (collision.CompareTag(TagNameConst.ITEM)) return;
-        //if (collision.CompareTag(TagNameConst.GIMMICK)) return;
-        //if (collision.CompareTag(TagNameConst.JAMMING)) return;
-        //if (collision.CompareTag(TagNameConst.BULLET)) return;
-
-
         // 投擲者の場合は処理しない
         if (other.gameObject == Thrower) return;
 

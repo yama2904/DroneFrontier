@@ -3,6 +3,7 @@ Temp
 Build
 Obj
 Logs
+bin
 .vs
 *.pidb
 *.unityproj

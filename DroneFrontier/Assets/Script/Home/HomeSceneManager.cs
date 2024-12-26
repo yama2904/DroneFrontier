@@ -1,4 +1,5 @@
-﻿using Offline;
+﻿using Network;
+using Offline;
 using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -21,33 +22,33 @@ public class HomeSceneManager : MonoBehaviour
     private SoloMultiSelectScreen _soloMultiSelectManager;
 
     [SerializeField]
+    private MatchingScreen _matchingManager;
+
+    [SerializeField]
     private WeaponSelectScreen _weaponSelectManager;
 
     [SerializeField]
     private CPUSelectScreen _cpuSelectManager;
 
-    void Start()
+    private void Start()
     {
-        //if (!isStarted)
-        //{
-        //    Instantiate(_createNetworkManager);
-        //}
-        //isStarted = true;
+        // 設定画面のボタンイベント設定
+        _configManager.OnButtonClick += OnButtonClickOfConfig;
 
-        // 設定画面の戻るボタン動作設定
-        _configManager.ButtonClick += ClickConfigButton;
-
-        // ヘルプ画面の戻るボタン動作設定
-        _helpManager.ButtonClick += ClickHelpButton;
+        // ヘルプ画面のボタンイベント設定
+        _helpManager.OnButtonClick += OnButtonClickOfHelp;
 
         // ソロ/マルチ選択画面のボタンイベント設定
-        _soloMultiSelectManager.ButtonClick += ClickSoloMultiButton;
+        _soloMultiSelectManager.OnButtonClick += OnButtonClickOfSoloMulti;
+
+        // マッチング画面のボタンイベント設定
+        _matchingManager.OnButtonClick += OnButtonClickOfMatching;
 
         // 武器選択画面のボタンイベント設定
-        _weaponSelectManager.ButtonClick += ClickWeaponSelectButton;
+        _weaponSelectManager.OnButtonClick += OnButtonClickOfWeaponSel;
 
         // CPU選択画面のボタンイベント設定
-        _cpuSelectManager.ButtonClick += ClickCpuSelectButton;
+        _cpuSelectManager.OnButtonClick += OnButtonClickOfCpuSel;
 
         // BGMが再生されていなかったら再生
         if (SoundManager.PlayingBGM != SoundManager.BGM.DRONE_UP)
@@ -66,7 +67,9 @@ public class HomeSceneManager : MonoBehaviour
 
     #region ボタンイベント
 
-    //バトルモード
+    /// <summary>
+    /// バトルモード選択
+    /// </summary>
     public void ClickBattle()
     {
         SoundManager.Play(SoundManager.SE.SELECT);
@@ -74,14 +77,18 @@ public class HomeSceneManager : MonoBehaviour
         _soloMultiSelectManager.gameObject.SetActive(true);
     }
 
-    //レースモード
+    /// <summary>
+    /// レースモード選択
+    /// </summary>
     public void ClickRace()
     {
         SoundManager.Play(SoundManager.SE.SELECT);
         BaseScreenManager.SetScreen(BaseScreenManager.Screen.SOLO_MULTI_SELECT);
     }
 
-    //設定
+    /// <summary>
+    /// 設定選択
+    /// </summary>
     public void ClickConfig()
     {
         SoundManager.Play(SoundManager.SE.SELECT);
@@ -90,7 +97,9 @@ public class HomeSceneManager : MonoBehaviour
         _configManager.gameObject.SetActive(true);
     }
 
-    //ヘルプ
+    /// <summary>
+    /// ヘルプ選択
+    /// </summary>
     public void ClickHelp()
     {
         SoundManager.Play(SoundManager.SE.SELECT);
@@ -99,7 +108,9 @@ public class HomeSceneManager : MonoBehaviour
         _helpManager.gameObject.SetActive(true);
     }
 
-    //戻る
+    /// <summary>
+    /// 戻る選択
+    /// </summary>
     public void ClickBack()
     {
         SoundManager.StopBGM();
@@ -112,7 +123,7 @@ public class HomeSceneManager : MonoBehaviour
     /// </summary>
     /// <param name="sender">イベントオブジェクト</param>
     /// <param name="e">イベント引数</param>
-    private void ClickConfigButton(object sender, EventArgs e)
+    private void OnButtonClickOfConfig(object sender, EventArgs e)
     {
         _gameModeSelectUI.SetActive(true);
         _configManager.gameObject.SetActive(false);
@@ -123,7 +134,7 @@ public class HomeSceneManager : MonoBehaviour
     /// </summary>
     /// <param name="sender">イベントオブジェクト</param>
     /// <param name="e">イベント引数</param>
-    private void ClickHelpButton(object sender, EventArgs e)
+    private void OnButtonClickOfHelp(object sender, EventArgs e)
     {
         _gameModeSelectUI.SetActive(true);
         _helpManager.gameObject.SetActive(false);
@@ -134,7 +145,7 @@ public class HomeSceneManager : MonoBehaviour
     /// </summary>
     /// <param name="sender">イベントオブジェクト</param>
     /// <param name="e">イベント引数</param>
-    private void ClickSoloMultiButton(object sender, EventArgs e)
+    private void OnButtonClickOfSoloMulti(object sender, EventArgs e)
     {
         SoloMultiSelectScreen screen = sender as SoloMultiSelectScreen;
 
@@ -143,6 +154,13 @@ public class HomeSceneManager : MonoBehaviour
         {
             _soloMultiSelectManager.gameObject.SetActive(false);
             _weaponSelectManager.gameObject.SetActive(true);
+        }
+
+        // マルチモード選択
+        if (screen.SelectedButton == SoloMultiSelectScreen.ButtonType.MultiMode)
+        {
+            _soloMultiSelectManager.gameObject.SetActive(false);
+            _matchingManager.gameObject.SetActive(true);
         }
 
         // 戻る選択
@@ -154,11 +172,35 @@ public class HomeSceneManager : MonoBehaviour
     }
 
     /// <summary>
+    /// マッチング画面のボタンクリックイベント
+    /// </summary>
+    /// <param name="sender">イベントオブジェクト</param>
+    /// <param name="e">イベント引数</param>
+    private void OnButtonClickOfMatching(object sender, EventArgs e)
+    {
+        MatchingScreen screen = sender as MatchingScreen;
+
+        // 決定選択
+        if (screen.SelectedButton == MatchingScreen.ButtonType.Ok)
+        {
+            _matchingManager.gameObject.SetActive(false);
+            // ToDo
+        }
+
+        // 戻る選択
+        if (screen.SelectedButton == MatchingScreen.ButtonType.Back)
+        {
+            _matchingManager.gameObject.SetActive(false);
+            _soloMultiSelectManager.gameObject.SetActive(true);
+        }
+    }
+
+    /// <summary>
     /// 武器選択画面のボタンクリックイベント
     /// </summary>
     /// <param name="sender">イベントオブジェクト</param>
     /// <param name="e">イベント引数</param>
-    private void ClickWeaponSelectButton(object sender, EventArgs e)
+    private void OnButtonClickOfWeaponSel(object sender, EventArgs e)
     {
         WeaponSelectScreen screen = sender as WeaponSelectScreen;
 
@@ -182,7 +224,7 @@ public class HomeSceneManager : MonoBehaviour
     /// </summary>
     /// <param name="sender">イベントオブジェクト</param>
     /// <param name="e">イベント引数</param>
-    private void ClickCpuSelectButton(object sender, EventArgs e)
+    private void OnButtonClickOfCpuSel(object sender, EventArgs e)
     {
         CPUSelectScreen screen = sender as CPUSelectScreen;
 

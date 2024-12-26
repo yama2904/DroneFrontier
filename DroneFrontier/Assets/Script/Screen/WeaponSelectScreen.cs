@@ -25,12 +25,12 @@ namespace Offline
         /// <summary>
         /// 選択したボタン
         /// </summary>
-        public ButtonType SelectedButton;
+        public ButtonType SelectedButton { get; private set; }
 
         /// <summary>
         /// ボタンクリックイベント
         /// </summary>
-        public event EventHandler ButtonClick;
+        public event EventHandler OnButtonClick;
 
         //説明文に表示するテキスト
         const string SHOTGUN_TEXT = "射程が非常に短いが威力が高く、リキャストが短い。\nまた、攻撃中の移動速度低下がなく、ブーストが多少強化される。\n近距離特化型。";
@@ -137,14 +137,14 @@ namespace Offline
 
             SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
             SelectedButton = ButtonType.OK;
-            ButtonClick(this, EventArgs.Empty);
+            OnButtonClick(this, EventArgs.Empty);
         }
 
         public void ClickBack()
         {
             SoundManager.Play(SoundManager.SE.CANCEL);
             SelectedButton = ButtonType.Back;
-            ButtonClick(this, EventArgs.Empty);
+            OnButtonClick(this, EventArgs.Empty);
         }
 
 

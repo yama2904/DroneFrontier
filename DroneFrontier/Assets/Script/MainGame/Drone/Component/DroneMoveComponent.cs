@@ -75,55 +75,6 @@ namespace Offline
         private Transform _transform = null;
         private DroneRotateComponent _rotateComponent = null;
 
-        private void Awake()
-        {
-            // コンポーネント取得
-            _rigidbody = GetComponent<Rigidbody>();
-            _transform = transform;
-            _rotateComponent = GetComponent<DroneRotateComponent>();
-
-            // 初期速度保存
-            InitSpeed = _moveSpeed;
-        }
-
-        private void LateUpdate()
-        {
-            // 移動している方向に傾ける
-            Quaternion rotate = Quaternion.identity;
-            for (int i = 0; i < _movingDirs.Length; i++)
-            {
-                // 移動フラグが立っていない場合はスキップ
-                if (!_movingDirs[i]) continue;
-
-                // 移動方向へ傾ける
-                switch ((Direction)i)
-                {
-                    case Direction.Forward:
-                        rotate *= Quaternion.Euler(25, 0, 0);
-                        break;
-
-                    case Direction.Left:
-                        rotate *= Quaternion.Euler(0, 0, 30);
-                        break;
-
-                    case Direction.Right:
-                        rotate *= Quaternion.Euler(0, 0, -30);
-                        break;
-
-                    case Direction.Backwad:
-                        rotate *= Quaternion.Euler(-35, 0, 0);
-                        break;
-                }
-            }
-            _rotateComponent.Rotate(rotate, _rotateSpeed * Time.deltaTime);
-
-            // フラグ初期化
-            for (int i = 0; i < _movingDirs.Length; i++)
-            {
-                _movingDirs[i] = false;
-            }
-        }
-
         /// <summary>
         /// 指定された方向へ移動
         /// </summary>
@@ -191,6 +142,55 @@ namespace Offline
             Vector3 angle = _transform.eulerAngles;
             angle.y += vertical;
             _transform.eulerAngles = angle;
+        }
+
+        private void Awake()
+        {
+            // コンポーネント取得
+            _rigidbody = GetComponent<Rigidbody>();
+            _transform = transform;
+            _rotateComponent = GetComponent<DroneRotateComponent>();
+
+            // 初期速度保存
+            InitSpeed = _moveSpeed;
+        }
+
+        private void LateUpdate()
+        {
+            // 移動している方向に傾ける
+            Quaternion rotate = Quaternion.identity;
+            for (int i = 0; i < _movingDirs.Length; i++)
+            {
+                // 移動フラグが立っていない場合はスキップ
+                if (!_movingDirs[i]) continue;
+
+                // 移動方向へ傾ける
+                switch ((Direction)i)
+                {
+                    case Direction.Forward:
+                        rotate *= Quaternion.Euler(25, 0, 0);
+                        break;
+
+                    case Direction.Left:
+                        rotate *= Quaternion.Euler(0, 0, 30);
+                        break;
+
+                    case Direction.Right:
+                        rotate *= Quaternion.Euler(0, 0, -30);
+                        break;
+
+                    case Direction.Backwad:
+                        rotate *= Quaternion.Euler(-35, 0, 0);
+                        break;
+                }
+            }
+            _rotateComponent.Rotate(rotate, _rotateSpeed * Time.deltaTime);
+
+            // フラグ初期化
+            for (int i = 0; i < _movingDirs.Length; i++)
+            {
+                _movingDirs[i] = false;
+            }
         }
     }
 }

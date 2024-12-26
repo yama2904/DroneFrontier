@@ -17,12 +17,12 @@ public class HelpScreen : MonoBehaviour
     /// <summary>
     /// 選択したボタン
     /// </summary>
-    public ButtonType SelectedButton;
+    public ButtonType SelectedButton { get; private set; }
 
     /// <summary>
     /// ボタンクリックイベント
     /// </summary>
-    public event EventHandler ButtonClick;
+    public event EventHandler OnButtonClick;
 
     [SerializeField] 
     private GameObject HelpBasicOperationDescription = null;
@@ -91,7 +91,7 @@ public class HelpScreen : MonoBehaviour
 
             default:
                 SelectedButton = ButtonType.Back;
-                ButtonClick(this, EventArgs.Empty);
+                OnButtonClick(this, EventArgs.Empty);
                 break;
         }
 

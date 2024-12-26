@@ -26,12 +26,12 @@ namespace Offline
         /// <summary>
         /// 選択したボタン
         /// </summary>
-        public ButtonType SelectedButton;
+        public ButtonType SelectedButton { get; private set; }
 
         /// <summary>
         /// ボタンクリックイベント
         /// </summary>
-        public event EventHandler ButtonClick;
+        public event EventHandler OnButtonClick;
 
         /// <summary>
         /// 選択可能武器
@@ -110,7 +110,7 @@ namespace Offline
         /// </summary>
         private List<Button[]> _cpuWeaponButtonList = new List<Button[]>();
 
-        void Start()
+        private void Start()
         {
             // CPU数の表示初期化
             _cpuNumText.text = INIT_CPU_NUM.ToString();
@@ -287,7 +287,7 @@ namespace Offline
 
             SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
             SelectedButton = ButtonType.OK;
-            ButtonClick(this, EventArgs.Empty);
+            OnButtonClick(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -300,7 +300,7 @@ namespace Offline
 
             SoundManager.Play(SoundManager.SE.CANCEL);
             SelectedButton = ButtonType.Back;
-            ButtonClick(this, EventArgs.Empty);
+            OnButtonClick(this, EventArgs.Empty);
         }
 
         /// <summary>

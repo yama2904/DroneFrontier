@@ -18,12 +18,12 @@ public class ConfigScreen : MonoBehaviour
     /// <summary>
     /// 選択したボタン
     /// </summary>
-    public ButtonType SelectedButton;
+    public ButtonType SelectedButton { get; private set; }
 
     /// <summary>
     /// ボタンクリックイベント
     /// </summary>
-    public event EventHandler ButtonClick;
+    public event EventHandler OnButtonClick;
 
     //スライダーコンポーネント
     [SerializeField] Slider BGMSlider = null;
@@ -110,7 +110,7 @@ public class ConfigScreen : MonoBehaviour
     {
         SoundManager.Play(SoundManager.SE.CANCEL);
         SelectedButton = ButtonType.Back;
-        ButtonClick(this, EventArgs.Empty);
+        OnButtonClick(this, EventArgs.Empty);
     }
 
     //Sliderの値をテキスト用に変換

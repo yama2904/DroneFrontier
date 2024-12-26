@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using Mirror;
+using Network;
 
 namespace Online
 {
@@ -13,9 +14,9 @@ namespace Online
         public static MatchingManager Singleton { get { return singleton; } }
 
         //生成する画像用
-        [SerializeField] MatchingScreenManager matchingScreen = null;
+        [SerializeField] MatchingScreen matchingScreen = null;
         [SerializeField] WeaponSelectManager weaponSelectScreen = null;
-        static MatchingScreenManager createMatchingScreen = null;
+        static MatchingScreen createMatchingScreen = null;
 
         //接続中のプレイヤー情報
         public class PlayerData
@@ -40,8 +41,8 @@ namespace Online
 
             //明るさの調整と画面の生成
             BrightnessManager.SetGameAlfa(0);
-            MatchingScreenManager mc = Instantiate(matchingScreen);
-            mc.Init(isServer);
+            MatchingScreen mc = Instantiate(matchingScreen);
+            //mc.Init(isServer);
             createMatchingScreen = mc;
 
             //サーバ以外は最初から準備完了フラグを立てる
@@ -50,7 +51,7 @@ namespace Online
                 GetComponent<NetworkRoomPlayer>().CmdChangeReadyState(true);
             }
 
-            CmdAddPlayer(SoloMultiSelectScreen.playerName);
+            //CmdAddPlayer(SoloMultiSelectScreen.playerName);
         }
 
         [ServerCallback]
@@ -101,7 +102,7 @@ namespace Online
         void RpcSetPlayerList(string[] names)
         {
             if (createMatchingScreen == null) return;
-            createMatchingScreen.SetPlayerList(names);
+            //createMatchingScreen.SetPlayerList(names);
         }
 
         public void Init()
