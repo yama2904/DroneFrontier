@@ -528,6 +528,9 @@ namespace Network
                     // 接続イベント発行
                     OnDiscovery?.Invoke(responsePacket.HostName);
 
+                    // Udp受信開始
+                    ReceiveUdp();
+
                     // 新規プレイヤーからの接続待機
                     TcpListener listener = new TcpListener(LOCAL_ENDPOINT);
                     listener.Start();
@@ -663,9 +666,9 @@ namespace Network
             byte[] data = packet.ConvertToPacket();
             lock (_peers)
             {
-                Parallel.ForEach(_peers.Keys, async key =>
+                Parallel.ForEach(_peers.Keys, key =>
                 {
-                    await _udpClient.SendAsync(data, data.Length, _peers[key].ep);
+                    _udpClient.Send(data, data.Length, _peers[key].ep);
                 });
             }
         }
@@ -724,7 +727,7 @@ namespace Network
                                 lock (PlayerNames) PlayerNames.Remove(player);
                             }
                         }
-                        OnDisconnect(player, isHost);
+                        OnDisconnect?.Invoke(player, isHost);
 
                         // ホストの場合は全てのクライアントと切断
                         if (isHost)
@@ -735,7 +738,7 @@ namespace Network
                                 {
                                     _peers[key].tcp.Close();
                                     _peers[key].tcp.Dispose();
-                                    OnDisconnect(key, false);
+                                    OnDisconnect?.Invoke(key, false);
                                 }
                                 _peers.Clear();
                                 lock (PlayerNames) PlayerNames.Clear();
@@ -797,6 +800,10 @@ namespace Network
                     Packet packet;
                     switch (header)
                     {
+                        case UdpHeader.Error:
+                            packet = new ErrorPacket().Parse(buf);
+                            break;
+
                         case UdpHeader.Discover:
                             packet = new DiscoverPacket().Parse(buf);
                             break;
@@ -805,10 +812,9 @@ namespace Network
                             packet = new DiscoverResponsePacket().Parse(buf);
                             break;
 
-                        case UdpHeader.Error:
-                            packet = new ErrorPacket().Parse(buf);
+                        case UdpHeader.SendMethod:
+                            packet = new SendMethodPacket().Parse(buf);
                             break;
-
                         default:
                             packet = null;
                             break;

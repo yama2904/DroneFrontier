@@ -185,6 +185,7 @@ public class HomeSceneManager : MonoBehaviour
         {
             _matchingManager.gameObject.SetActive(false);
             // ToDo
+            _weaponSelectManager.gameObject.SetActive(true);
         }
 
         // 戻る選択

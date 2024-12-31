@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Offline;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Offline
+namespace Network
 {
-    public class WeaponSelectScreen : MonoBehaviour
+    public class NetworkWeaponSelectScreen : MyNetworkBehaviour
     {
         /// <summary>
         /// ボタン種類

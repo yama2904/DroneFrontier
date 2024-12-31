@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace Network
 {
-    public class MatchingScreen : MonoBehaviour
+    public class MatchingScreen : MyNetworkBehaviour
     {
         /// <summary>
         /// ボタン種類
@@ -79,17 +79,8 @@ namespace Network
         /// </summary>
         public void ClickOk()
         {
-            // イベント削除
-            MyNetworkManager.Singleton.OnDiscovery -= OnDiscovery;
-            MyNetworkManager.Singleton.OnDisconnect -= OnDisconnect;
-
-            // 探索停止
-            MyNetworkManager.Singleton.StopDiscovery();
-
-            // ボタン選択イベント発火
-            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
-            SelectedButton = ButtonType.Ok;
-            OnButtonClick(this, EventArgs.Empty);
+            // 全クライアントへOKボタン選択イベント送信
+            SendMethod(() => ExecuteClickOk());
         }
 
         /// <summary>
@@ -237,6 +228,24 @@ namespace Network
                         break;
                 }
             }
+        }
+
+        /// <summary>
+        /// OKボタン選択イベント実行
+        /// </summary>
+        private void ExecuteClickOk()
+        {
+            // イベント削除
+            MyNetworkManager.Singleton.OnDiscovery -= OnDiscovery;
+            MyNetworkManager.Singleton.OnDisconnect -= OnDisconnect;
+
+            // 探索停止
+            MyNetworkManager.Singleton.StopDiscovery();
+
+            // ボタン選択イベント発火
+            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
+            SelectedButton = ButtonType.Ok;
+            OnButtonClick(this, EventArgs.Empty);
         }
     }
 }

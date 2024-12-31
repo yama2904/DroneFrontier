@@ -8,18 +8,23 @@ namespace Network.Udp
         None,
 
         /// <summary>
+        /// エラー
+        /// </summary>
+        Error = 1 << 0,
+
+        /// <summary>
         /// プレイヤー探索
         /// </summary>
-        Discover = 1 << 0,
+        Discover = 1 << 1,
 
         /// <summary>
         /// プレイヤー探索応答
         /// </summary>
-        DiscoverResponse = 1 << 1,
+        DiscoverResponse = 1 << 2,
 
         /// <summary>
-        /// エラー
+        /// 実行メソッド送信
         /// </summary>
-        Error = 1 << 2,
+        SendMethod = 1 << 3,
     }
 }
