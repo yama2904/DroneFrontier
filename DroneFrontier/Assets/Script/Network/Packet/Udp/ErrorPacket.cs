@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 
 namespace Network.Udp
 {
@@ -26,19 +25,15 @@ namespace Network.Udp
             ErrorCode = code;
         }
 
-        public override Packet Parse(byte[] data)
+        protected override IPacket ParseBody(byte[] body)
         {
-            // ƒ{ƒfƒB•”Žæ“¾
-            Split(data, out _, out byte[] body);
-
             ErrorCode code = (ErrorCode)BitConverter.ToInt32(body);
             return new ErrorPacket(code);
         }
 
-        public override byte[] ConvertToPacket()
+        protected override byte[] ConvertToPacketBody()
         {
-            byte[] code = BitConverter.GetBytes((int)ErrorCode);
-            return GetHeaderBytes().Concat(code).ToArray();
+            return BitConverter.GetBytes((int)ErrorCode);
         }
     }
 }

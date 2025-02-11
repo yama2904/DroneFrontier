@@ -1,4 +1,3 @@
-using Offline;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -69,10 +68,6 @@ public class DroneSpawnManager : MonoBehaviour
         // 初期スポーン位置をランダムに選択
         _nextSpawnIndex = UnityEngine.Random.Range(0, _droneSpawnPositions.Length);
     }
-
-    void Start() { }
-
-    void Update() { }
 
     /// <summary>
     /// ドローン生成

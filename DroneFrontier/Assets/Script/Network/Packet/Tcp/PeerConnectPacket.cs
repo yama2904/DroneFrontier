@@ -29,18 +29,14 @@ namespace Network.Tcp
             Name = name;
         }
 
-        public override Packet Parse(byte[] data)
+        protected override IPacket ParseBody(byte[] body)
         {
-            // ボディ部取得
-            Split(data, out _, out byte[] body);
-
             return new PeerConnectPacket(Encoding.UTF8.GetString(body));
         }
 
-        public override byte[] ConvertToPacket()
+        protected override byte[] ConvertToPacketBody()
         {
-            byte[] name = Encoding.UTF8.GetBytes(Name);
-            return GetHeaderBytes().Concat(name).ToArray();
+            return Encoding.UTF8.GetBytes(Name);
         }
     }
 }

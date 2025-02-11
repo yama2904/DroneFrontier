@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Text;
 
 namespace Network.Udp
@@ -26,11 +25,8 @@ namespace Network.Udp
             Name = name;
         }
 
-        public override Packet Parse(byte[] data)
+        protected override IPacket ParseBody(byte[] body)
         {
-            // ボディ部取得
-            Split(data, out _, out byte[] body);
-
             // プレイヤー名取得
             string name = Encoding.UTF8.GetString(body);
 
@@ -38,11 +34,10 @@ namespace Network.Udp
             return new DiscoverPacket(name);
         }
 
-        public override byte[] ConvertToPacket()
+        protected override byte[] ConvertToPacketBody()
         {
             // パラメータをバイト変換
-            byte[] name = Encoding.UTF8.GetBytes(Name);
-            return GetHeaderBytes().Concat(name).ToArray();
+            return Encoding.UTF8.GetBytes(Name);
         }
     }
 }

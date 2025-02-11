@@ -84,19 +84,19 @@ public class WatchingGame : MonoBehaviour
     /// <param name="respawnDrone">リスポーンしたドローン</param>
     private void DroneDestroy(IBattleDrone destroyDrone, IBattleDrone respawnDrone)
     {
-        if (destroyDrone is CpuBattleDrone drone)
+        if (respawnDrone is CpuBattleDrone drone)
         {
             // 破壊されたドローンをリスポーンしたドローンに入れ替える
-            int index = _watchDrones.IndexOf(drone);
+            int index = _watchDrones.IndexOf(destroyDrone as CpuBattleDrone);
             _watchDrones.RemoveAt(index);
             _watchDrones.Insert(index, drone);
 
             // 破壊されたドローンが現在観戦中のCPUの場合はカメラ深度調整
             if (index == _watchingDrone)
             {
-                drone.Camera.depth = 5  ;
+                drone.Camera.depth = 5;
             }
-             else
+            else
             {
                 // 観戦中CPUでない場合はカメラ深度初期化
                 drone.Camera.depth = 0;

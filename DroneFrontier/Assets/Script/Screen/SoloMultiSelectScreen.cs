@@ -192,7 +192,7 @@ public class SoloMultiSelectScreen : MonoBehaviour
         // 探索中の場合は探索停止
         if (_isDiscovery)
         {
-            MyNetworkManager.Singleton.StopClient();
+            MyNetworkManager.Singleton.Disconnect();
             MyNetworkManager.Singleton.OnDiscovery -= OnDiscovery;
 
             // 探索解除

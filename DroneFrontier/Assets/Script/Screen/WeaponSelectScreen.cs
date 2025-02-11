@@ -51,8 +51,12 @@ namespace Offline
         Color notSelectButtonColor = new Color(1f, 1f, 1f, 1f);  //ボタンを押してないときの色
         bool isItemOnButton = true; //アイテムオンか
 
+        /// <summary>
+        /// 選択した武器
+        /// </summary>
+        private WeaponType _selectedWeapon = WeaponType.NONE;
 
-        void Start()
+        private void Start()
         {
             BattleManager.PlayerWeapon = WeaponType.NONE;
             messageWindowText.text = "武器を選択してください。";
@@ -61,40 +65,40 @@ namespace Offline
         public void ClickShotgun()
         {
             WeaponType selectWeapon = WeaponType.SHOTGUN;
-            if (BattleManager.PlayerWeapon == selectWeapon) return;
+            if (_selectedWeapon == selectWeapon) return;
 
             //SE再生
             SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
 
             messageWindowText.text = SHOTGUN_TEXT;
             SetWeaponButtonsColor(selectWeapon);
-            BattleManager.PlayerWeapon = selectWeapon;
+            _selectedWeapon = selectWeapon;
         }
 
         public void ClickMissile()
         {
             WeaponType selectWeapon = WeaponType.MISSILE;
-            if (BattleManager.PlayerWeapon == selectWeapon) return;
+            if (_selectedWeapon == selectWeapon) return;
 
             //SE再生
             SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
 
             messageWindowText.text = MISSILE_TEXT;
             SetWeaponButtonsColor(selectWeapon);
-            BattleManager.PlayerWeapon = selectWeapon;
+            _selectedWeapon = selectWeapon;
         }
 
         public void ClickLaser()
         {
             WeaponType selectWeapon = WeaponType.LASER;
-            if (BattleManager.PlayerWeapon == selectWeapon) return;
+            if (_selectedWeapon == selectWeapon) return;
 
             //SE再生
             SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
 
             messageWindowText.text = LASER_TEXT;
             SetWeaponButtonsColor(selectWeapon);
-            BattleManager.PlayerWeapon = selectWeapon;
+            _selectedWeapon = selectWeapon;
         }
 
 
@@ -133,8 +137,9 @@ namespace Offline
         //決定
         public void ClickOK()
         {
-            if (BattleManager.PlayerWeapon == WeaponType.NONE) return;
+            if (_selectedWeapon == WeaponType.NONE) return;
 
+            BattleManager.PlayerWeapon = _selectedWeapon;
             SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
             SelectedButton = ButtonType.OK;
             OnButtonClick(this, EventArgs.Empty);

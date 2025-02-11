@@ -29,17 +29,43 @@ public class ItemSpawnManager : MonoBehaviour
     /// </summary>
     private float _spawnTimer = 0;
 
-    private void Start()
+
+    /// <summary>
+    /// アイテムスポーンが有効であるか
+    /// </summary>
+    private bool _isEnabled = false;
+
+    /// <summary>
+    /// アイテムスポーンを有効にするか指定して初期化
+    /// </summary>
+    /// <param name="enableSpawn">アイテムスポーンを有効にする場合はtrue</param>
+    public void Initialize(bool enableSpawn)
     {
-        // 各スポナーを検索して取得
-        _spawnerList = FindObjectsByType<ItemSpawner>(FindObjectsSortMode.None).ToList();
-        
-        // アイテムのランダムスポーン
-        ItemSpawn(_spawnerList, _maxSpawnNum);
+        if (enableSpawn)
+        {
+            // 各スポナーを検索して取得
+            _spawnerList = FindObjectsByType<ItemSpawner>(FindObjectsSortMode.None).ToList();
+
+            // アイテムのランダムスポーン
+            ItemSpawn(_spawnerList, _maxSpawnNum);
+
+            _isEnabled = true;
+        }
+        else
+        {
+            GameObject[] items = GameObject.FindGameObjectsWithTag(TagNameConst.ITEM_SPAWN);
+            foreach (GameObject item in items)
+            {
+                Destroy(item);
+            }
+            enabled = false;
+        }
     }
 
     private void Update()
     {
+        if (!_isEnabled) return;
+
         _spawnTimer += Time.deltaTime;
         if (_spawnTimer < _spawnInterval) return;
 

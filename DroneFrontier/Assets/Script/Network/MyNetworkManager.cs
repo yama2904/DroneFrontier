@@ -4,6 +4,8 @@ using Network.Udp;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq.Expressions;
+using System.Media;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -29,9 +31,19 @@ namespace Network
         public bool IsClient { get; private set; } = false;
 
         /// <summary>
+        /// 自分のプレイヤー名
+        /// </summary>
+        public string PlayerName { get; private set; } = string.Empty;
+
+        /// <summary>
         /// 各プレイヤー名
         /// </summary>
         public List<string> PlayerNames { get; private set; } = new List<string>();
+
+        /// <summary>
+        /// プレイヤー数
+        /// </summary>
+        public int PlayerCount => PlayerNames.Count;
 
         #region 通信相手発見イベント
 
@@ -53,9 +65,10 @@ namespace Network
         /// <summary>
         /// TCPパケット受信イベントハンドラー
         /// </summary>
+        /// <param name="name">プレイヤー名</param>
         /// <param name="header">受信したTCPパケットのヘッダ</param>
         /// <param name="packet">受信したTCPパケット</param>
-        public delegate void TcpReceiveHandle(TcpHeader header, TcpPacket packet);
+        public delegate void TcpReceiveHandle(string name, TcpHeader header, TcpPacket packet);
 
         /// <summary>
         /// TCPパケット受信イベント
@@ -69,9 +82,10 @@ namespace Network
         /// <summary>
         /// UDPパケット受信イベントハンドラー
         /// </summary>
+        /// <param name="name">プレイヤー名</param>
         /// <param name="header">受信したUDPパケットのヘッダ</param>
         /// <param name="packet">受信したUDPパケット</param>
-        public delegate void UdpReceiveHandle(UdpHeader header, UdpPacket packet);
+        public delegate void UdpReceiveHandle(string name, UdpHeader header, UdpPacket packet);
 
         /// <summary>
         /// UDPパケット受信イベント
@@ -117,7 +131,9 @@ namespace Network
         private UdpClient _udpClient = null;
 
         /// <summary>
-        /// 接続先一覧
+        /// 接続先一覧<br/>
+        /// key:プレイヤー名<br/>
+        /// value:接続先情報
         /// </summary>
         private Dictionary<string, (IPEndPoint ep, TcpClient tcp)> _peers = new Dictionary<string, (IPEndPoint ep, TcpClient tcp)>();
 
@@ -137,6 +153,9 @@ namespace Network
 
             // キャンセルトークン初期化
             _discoverCancel = new CancellationTokenSource();
+
+            // プレイヤー名保存
+            PlayerName = name;
 
             // プレイヤーリストに自分を追加
             lock (PlayerNames) PlayerNames.Add(name);
@@ -249,7 +268,7 @@ namespace Network
                     {
                         // 例外が起きた場合は想定外の不整合のため全て切断
                         Debug.LogError(ex);
-                        StopHost();
+                        Disconnect();
                         break;
                     }
                     finally
@@ -293,35 +312,6 @@ namespace Network
         }
 
         /// <summary>
-        /// ホスト停止
-        /// </summary>
-        public void StopHost()
-        {
-            // ホストフラグ初期化
-            IsHost = false;
-
-            // 探索停止
-            _discoverCancel.Cancel();
-
-            // Udp停止
-            _udpClient?.Close();
-            _udpClient?.Dispose();
-            _udpClient = null;
-
-            // 全てのクライアントと切断
-            lock (_peers)
-            {
-                foreach (string key in _peers.Keys)
-                {
-                    _peers[key].tcp.Close();
-                    _peers[key].tcp.Dispose();
-                }
-                _peers.Clear();
-                lock (PlayerNames) PlayerNames.Clear();
-            }
-        }
-
-        /// <summary>
         /// クライアントとして通信を開始
         /// </summary>
         /// <param name="name">プレイヤー名</param>
@@ -332,6 +322,9 @@ namespace Network
 
             // 探索キャンセルトークン初期化
             _discoverCancel = new CancellationTokenSource();
+
+            // プレイヤー名保存
+            PlayerName = name;
 
             // 探索キャンセル検知用タスクを事前に構築
             Task cancelCheckTask = Task.Run(async () =>
@@ -518,7 +511,7 @@ namespace Network
                     {
                         // 例外が起きた場合は想定外の不整合のため全て切断
                         Debug.LogError(ex);
-                        StopClient();
+                        Disconnect();
                         break;
                     }
 
@@ -582,7 +575,7 @@ namespace Network
                     {
                         // 例外が起きた場合は想定外の不整合のため全て切断
                         Debug.LogError(ex);
-                        StopClient();
+                        Disconnect();
                     }
                     finally
                     {
@@ -614,11 +607,12 @@ namespace Network
         }
 
         /// <summary>
-        /// クライアント停止
+        /// 通信切断
         /// </summary>
-        public void StopClient()
+        public void Disconnect()
         {
-            // クライアントフラグ初期化
+            // ホスト・クライアントフラグ初期化
+            IsHost = false;
             IsClient = false;
 
             // 探索停止
@@ -661,7 +655,7 @@ namespace Network
         /// 全ての通信相手へパケットを送信する
         /// </summary>
         /// <param name="packet">送信パケット</param>
-        public void SendAsync(Packet packet)
+        public void SendAsync(IPacket packet)
         {
             byte[] data = packet.ConvertToPacket();
             lock (_peers)
@@ -683,7 +677,7 @@ namespace Network
         /// 指定したプレイヤーからのTCP受信を開始する
         /// </summary>
         /// <param name="player">TCPの受信先プレイヤー</param>
-        /// <param name="player">受信先がホストであるか</param>
+        /// <param name="isHost">受信先がホストであるか</param>
         private void ReceiveTcp(string player, bool isHost)
         {
             TcpClient client = _peers[player].tcp;
@@ -747,22 +741,17 @@ namespace Network
                         break;
                     }
 
-                    // ヘッダを基にパケットを特定して解析
-                    TcpHeader header = TcpPacket.GetTcpHeader(buf);
-                    Packet packet;
-                    switch (header)
-                    {
-                        case TcpHeader.PeerConnect:
-                            packet = new PeerConnectPacket().Parse(buf);
-                            break;
+                    // 型名取得
+                    Type type = TcpPacket.GetTcpType(buf);
 
-                        default:
-                            packet = null;
-                            break;
-                    }
+                    // 型名を基にコンストラクタ情報を取得
+                    var constructor = type.GetConstructor(Type.EmptyTypes);
+                    var expression = Expression.Lambda<Func<IPacket>>(Expression.New(constructor)).Compile();
+                    // コンストラクタ実行
+                    IPacket packet = expression();
 
                     // イベント発火
-                    OnTcpReceive?.Invoke(header, packet as TcpPacket);
+                    OnTcpReceive?.Invoke(player, TcpPacket.GetTcpHeader(buf), packet.Parse(buf) as TcpPacket);
                 }
             });
         }
@@ -779,10 +768,22 @@ namespace Network
                     if (_udpClient == null) break;
 
                     byte[] buf = null;
+                    string sendPlayer = string.Empty;
                     try
                     {
-                        var reveive = await _udpClient.ReceiveAsync();
-                        buf = reveive.Buffer;
+                        // パケット受信
+                        var receive = await _udpClient.ReceiveAsync();
+                        buf = receive.Buffer;
+
+                        // 送信元プレイヤー名取得
+                        foreach (string key in _peers.Keys)
+                        {
+                            if (_peers[key].ep.Equals(receive.RemoteEndPoint))
+                            {
+                                sendPlayer = key;
+                                break;
+                            }
+                        }
                     }
                     catch (SocketException)
                     {
@@ -795,33 +796,17 @@ namespace Network
                         break;
                     }
 
-                    // ヘッダを基にパケットを特定して解析
-                    UdpHeader header = UdpPacket.GetUdpHeader(buf);
-                    Packet packet;
-                    switch (header)
-                    {
-                        case UdpHeader.Error:
-                            packet = new ErrorPacket().Parse(buf);
-                            break;
+                    // 型名取得
+                    Type type = UdpPacket.GetUdpType(buf);
 
-                        case UdpHeader.Discover:
-                            packet = new DiscoverPacket().Parse(buf);
-                            break;
-
-                        case UdpHeader.DiscoverResponse:
-                            packet = new DiscoverResponsePacket().Parse(buf);
-                            break;
-
-                        case UdpHeader.SendMethod:
-                            packet = new SendMethodPacket().Parse(buf);
-                            break;
-                        default:
-                            packet = null;
-                            break;
-                    }
+                    // 型名を基にコンストラクタ情報を取得
+                    var constructor = type.GetConstructor(Type.EmptyTypes);
+                    var expression = Expression.Lambda<Func<IPacket>>(Expression.New(constructor)).Compile();
+                    // コンストラクタ実行
+                    IPacket packet = expression();
 
                     // イベント発火
-                    OnUdpReceive?.Invoke(header, packet as UdpPacket);
+                    OnUdpReceive?.Invoke(sendPlayer, UdpPacket.GetUdpHeader(buf), packet.Parse(buf) as UdpPacket);
                 }
             });
         }

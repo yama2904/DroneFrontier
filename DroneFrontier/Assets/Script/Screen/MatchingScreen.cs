@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Bson;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -80,7 +81,7 @@ namespace Network
         public void ClickOk()
         {
             // 全クライアントへOKボタン選択イベント送信
-            SendMethod(() => ExecuteClickOk());
+            SendMethod(() => MatchingCompleted(DateTime.Now.Millisecond));
         }
 
         /// <summary>
@@ -92,16 +93,9 @@ namespace Network
             MyNetworkManager.Singleton.OnDiscovery -= OnDiscovery;
             MyNetworkManager.Singleton.OnDisconnect -= OnDisconnect;
 
-            // 通信停止
-            if (MyNetworkManager.Singleton.IsHost)
-            {
-                MyNetworkManager.Singleton.StopHost();
-            }
-            else
-            {
-                MyNetworkManager.Singleton.StopClient();
-            }
-
+            // 通信切断
+            MyNetworkManager.Singleton.Disconnect();
+            
             // ボタン選択イベント発火
             SoundManager.Play(SoundManager.SE.CANCEL, SoundManager.SEVolume);
             SelectedButton = ButtonType.Back;
@@ -135,7 +129,7 @@ namespace Network
             MyNetworkManager.Singleton.OnDisconnect += OnDisconnect;
 
             // ホスト、かつ参加者がいる場合は決定ボタン表示
-            if (MyNetworkManager.Singleton.IsHost && MyNetworkManager.Singleton.PlayerNames.Count >= 2)
+            if (MyNetworkManager.Singleton.IsHost && MyNetworkManager.Singleton.PlayerCount >= 2)
             {
                 _okButton.SetActive(true);
             }
@@ -169,7 +163,7 @@ namespace Network
         private void OnDisconnect(string name, bool isHost)
         {
             // ホストかつ、参加者が0人になった場合は決定ボタン非表示
-            if (MyNetworkManager.Singleton.IsHost && MyNetworkManager.Singleton.PlayerNames.Count <= 1)
+            if (MyNetworkManager.Singleton.IsHost && MyNetworkManager.Singleton.PlayerCount <= 1)
             {
                 _okButton.SetActive(false);
             }
@@ -201,7 +195,7 @@ namespace Network
             _4pText.color = _nonPlayerTextColor;
 
             // プレイヤー名更新
-            for (int i = 0; i < MyNetworkManager.Singleton.PlayerNames.Count; i++)
+            for (int i = 0; i < MyNetworkManager.Singleton.PlayerCount; i++)
             {
                 string player = MyNetworkManager.Singleton.PlayerNames[i];
 
@@ -231,9 +225,10 @@ namespace Network
         }
 
         /// <summary>
-        /// OKボタン選択イベント実行
+        /// マッチング完了
         /// </summary>
-        private void ExecuteClickOk()
+        /// <param name="seed">全プレイヤーで共有する乱数のシード値</param>
+        private void MatchingCompleted(int seed)
         {
             // イベント削除
             MyNetworkManager.Singleton.OnDiscovery -= OnDiscovery;
@@ -241,6 +236,9 @@ namespace Network
 
             // 探索停止
             MyNetworkManager.Singleton.StopDiscovery();
+
+            // シード値設定
+            UnityEngine.Random.InitState(seed);
 
             // ボタン選択イベント発火
             SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);

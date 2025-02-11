@@ -6,49 +6,52 @@ using UnityEngine.SceneManagement;
 
 public class HomeSceneManager : MonoBehaviour
 {
-    [SerializeField] 
-    private GameObject _createNetworkManager;
-
     [SerializeField]
     private GameObject _gameModeSelectUI;
 
     [SerializeField]
-    private ConfigScreen _configManager;
+    private ConfigScreen _config;
 
     [SerializeField]
-    private HelpScreen _helpManager;
+    private HelpScreen _help;
 
     [SerializeField]
-    private SoloMultiSelectScreen _soloMultiSelectManager;
+    private SoloMultiSelectScreen _soloMultiSelect;
 
     [SerializeField]
-    private MatchingScreen _matchingManager;
+    private WeaponSelectScreen _weaponSelect;
 
     [SerializeField]
-    private WeaponSelectScreen _weaponSelectManager;
+    private CPUSelectScreen _cpuSelect;
 
     [SerializeField]
-    private CPUSelectScreen _cpuSelectManager;
+    private MatchingScreen _matching;
+
+    [SerializeField]
+    private NetworkWeaponSelectScreen _networkWeaponSelect;
 
     private void Start()
     {
         // 設定画面のボタンイベント設定
-        _configManager.OnButtonClick += OnButtonClickOfConfig;
+        _config.OnButtonClick += OnButtonClickOfConfig;
 
         // ヘルプ画面のボタンイベント設定
-        _helpManager.OnButtonClick += OnButtonClickOfHelp;
+        _help.OnButtonClick += OnButtonClickOfHelp;
 
         // ソロ/マルチ選択画面のボタンイベント設定
-        _soloMultiSelectManager.OnButtonClick += OnButtonClickOfSoloMulti;
-
-        // マッチング画面のボタンイベント設定
-        _matchingManager.OnButtonClick += OnButtonClickOfMatching;
+        _soloMultiSelect.OnButtonClick += OnButtonClickOfSoloMulti;
 
         // 武器選択画面のボタンイベント設定
-        _weaponSelectManager.OnButtonClick += OnButtonClickOfWeaponSel;
+        _weaponSelect.OnButtonClick += OnButtonClickOfWeaponSel;
 
         // CPU選択画面のボタンイベント設定
-        _cpuSelectManager.OnButtonClick += OnButtonClickOfCpuSel;
+        _cpuSelect.OnButtonClick += OnButtonClickOfCpuSel;
+
+        // マッチング画面のボタンイベント設定
+        _matching.OnButtonClick += OnButtonClickOfMatching;
+
+        // マルチ用武器選択画面のボタンイベント設定
+        _networkWeaponSelect.OnButtonClick += OnButtonClickOfNetworkWeaponSel;
 
         // BGMが再生されていなかったら再生
         if (SoundManager.PlayingBGM != SoundManager.BGM.DRONE_UP)
@@ -74,7 +77,7 @@ public class HomeSceneManager : MonoBehaviour
     {
         SoundManager.Play(SoundManager.SE.SELECT);
         _gameModeSelectUI.SetActive(false);
-        _soloMultiSelectManager.gameObject.SetActive(true);
+        _soloMultiSelect.gameObject.SetActive(true);
     }
 
     /// <summary>
@@ -94,7 +97,7 @@ public class HomeSceneManager : MonoBehaviour
         SoundManager.Play(SoundManager.SE.SELECT);
 
         _gameModeSelectUI.SetActive(false);
-        _configManager.gameObject.SetActive(true);
+        _config.gameObject.SetActive(true);
     }
 
     /// <summary>
@@ -105,7 +108,7 @@ public class HomeSceneManager : MonoBehaviour
         SoundManager.Play(SoundManager.SE.SELECT);
 
         _gameModeSelectUI.SetActive(false);
-        _helpManager.gameObject.SetActive(true);
+        _help.gameObject.SetActive(true);
     }
 
     /// <summary>
@@ -126,7 +129,7 @@ public class HomeSceneManager : MonoBehaviour
     private void OnButtonClickOfConfig(object sender, EventArgs e)
     {
         _gameModeSelectUI.SetActive(true);
-        _configManager.gameObject.SetActive(false);
+        _config.gameObject.SetActive(false);
     }
 
     /// <summary>
@@ -137,7 +140,7 @@ public class HomeSceneManager : MonoBehaviour
     private void OnButtonClickOfHelp(object sender, EventArgs e)
     {
         _gameModeSelectUI.SetActive(true);
-        _helpManager.gameObject.SetActive(false);
+        _help.gameObject.SetActive(false);
     }
 
     /// <summary>
@@ -152,47 +155,22 @@ public class HomeSceneManager : MonoBehaviour
         // ソロモード選択
         if (screen.SelectedButton == SoloMultiSelectScreen.ButtonType.SoloMode)
         {
-            _soloMultiSelectManager.gameObject.SetActive(false);
-            _weaponSelectManager.gameObject.SetActive(true);
+            _soloMultiSelect.gameObject.SetActive(false);
+            _weaponSelect.gameObject.SetActive(true);
         }
 
         // マルチモード選択
         if (screen.SelectedButton == SoloMultiSelectScreen.ButtonType.MultiMode)
         {
-            _soloMultiSelectManager.gameObject.SetActive(false);
-            _matchingManager.gameObject.SetActive(true);
+            _soloMultiSelect.gameObject.SetActive(false);
+            _matching.gameObject.SetActive(true);
         }
 
         // 戻る選択
         if (screen.SelectedButton == SoloMultiSelectScreen.ButtonType.Back)
         {
-            _soloMultiSelectManager.gameObject.SetActive(false);
+            _soloMultiSelect.gameObject.SetActive(false);
             _gameModeSelectUI.SetActive(true);
-        }
-    }
-
-    /// <summary>
-    /// マッチング画面のボタンクリックイベント
-    /// </summary>
-    /// <param name="sender">イベントオブジェクト</param>
-    /// <param name="e">イベント引数</param>
-    private void OnButtonClickOfMatching(object sender, EventArgs e)
-    {
-        MatchingScreen screen = sender as MatchingScreen;
-
-        // 決定選択
-        if (screen.SelectedButton == MatchingScreen.ButtonType.Ok)
-        {
-            _matchingManager.gameObject.SetActive(false);
-            // ToDo
-            _weaponSelectManager.gameObject.SetActive(true);
-        }
-
-        // 戻る選択
-        if (screen.SelectedButton == MatchingScreen.ButtonType.Back)
-        {
-            _matchingManager.gameObject.SetActive(false);
-            _soloMultiSelectManager.gameObject.SetActive(true);
         }
     }
 
@@ -208,15 +186,15 @@ public class HomeSceneManager : MonoBehaviour
         // 決定選択
         if (screen.SelectedButton == WeaponSelectScreen.ButtonType.OK)
         {
-            _weaponSelectManager.gameObject.SetActive(false);
-            _cpuSelectManager.gameObject.SetActive(true);
+            _weaponSelect.gameObject.SetActive(false);
+            _cpuSelect.gameObject.SetActive(true);
         }
 
         // 戻る選択
         if (screen.SelectedButton == WeaponSelectScreen.ButtonType.Back)
         {
-            _weaponSelectManager.gameObject.SetActive(false);
-            _soloMultiSelectManager.gameObject.SetActive(true);
+            _weaponSelect.gameObject.SetActive(false);
+            _soloMultiSelect.gameObject.SetActive(true);
         }
     }
 
@@ -232,14 +210,61 @@ public class HomeSceneManager : MonoBehaviour
         // 決定選択
         if (screen.SelectedButton == CPUSelectScreen.ButtonType.OK)
         {
-            SceneManager.LoadScene("BattleMode_Offline");
+            SceneManager.LoadScene("BattleScene");
         }
 
         // 戻る選択
         if (screen.SelectedButton == CPUSelectScreen.ButtonType.Back)
         {
-            _cpuSelectManager.gameObject.SetActive(false);
-            _weaponSelectManager.gameObject.SetActive(true);
+            _cpuSelect.gameObject.SetActive(false);
+            _weaponSelect.gameObject.SetActive(true);
+        }
+    }
+
+    /// <summary>
+    /// マッチング画面のボタンクリックイベント
+    /// </summary>
+    /// <param name="sender">イベントオブジェクト</param>
+    /// <param name="e">イベント引数</param>
+    private void OnButtonClickOfMatching(object sender, EventArgs e)
+    {
+        MatchingScreen screen = sender as MatchingScreen;
+
+        // 決定選択
+        if (screen.SelectedButton == MatchingScreen.ButtonType.Ok)
+        {
+            _matching.gameObject.SetActive(false);
+            _networkWeaponSelect.gameObject.SetActive(true);
+        }
+
+        // 戻る選択
+        if (screen.SelectedButton == MatchingScreen.ButtonType.Back)
+        {
+            _matching.gameObject.SetActive(false);
+            _soloMultiSelect.gameObject.SetActive(true);
+        }
+    }
+
+    /// <summary>
+    /// マルチ用武器選択画面のボタンクリックイベント
+    /// </summary>
+    /// <param name="sender">イベントオブジェクト</param>
+    /// <param name="e">イベント引数</param>
+    private void OnButtonClickOfNetworkWeaponSel(object sender, EventArgs e)
+    {
+        NetworkWeaponSelectScreen screen = sender as NetworkWeaponSelectScreen;
+
+        // 決定選択
+        if (screen.SelectedButton == NetworkWeaponSelectScreen.ButtonType.Ok)
+        {
+            SceneManager.LoadScene("NetworkBattleScene");
+        }
+
+        // 戻る選択
+        if (screen.SelectedButton == NetworkWeaponSelectScreen.ButtonType.Back)
+        {
+            _networkWeaponSelect.gameObject.SetActive(false);
+            _soloMultiSelect.gameObject.SetActive(true);
         }
     }
 

@@ -12,7 +12,7 @@ EditorBuildSettings:
     path: Assets/Scene/HomeScene.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
   - enabled: 1
-    path: Assets/Scene/BattleMode_Online.unity
+    path: Assets/Scene/NetworkBattleScene.unity
     guid: 4ff1d248b9dd78f429ce8a8c750805c6
   - enabled: 1
     path: Assets/Scene/RaceModeScene.unity
@@ -21,7 +21,7 @@ EditorBuildSettings:
     path: Assets/Scene/MatchingScene.unity
     guid: b36607a4914c6b543b8c27a764950cda
   - enabled: 1
-    path: Assets/Scene/BattleMode_Offline.unity
+    path: Assets/Scene/BattleScene.unity
     guid: 9ae2e3f74aeafe643afe7295f3edc0fe
   - enabled: 1
     path: Assets/Scene/ResultScene.unity

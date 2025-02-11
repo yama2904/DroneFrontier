@@ -32,7 +32,7 @@ public class ItemSpawner : MonoBehaviour
     /// <returns>スポーンしたアイテム</returns>
     public SpawnItem Spawn()
     {
-        // ランダムにスポーン
+        // ランダムなアイテムをスポーン
         int index = Random.Range(0, _spawnItems.Length);
         _createdItem = Instantiate(_spawnItems[index], _transform);
         _createdItem.transform.SetParent(_transform);
