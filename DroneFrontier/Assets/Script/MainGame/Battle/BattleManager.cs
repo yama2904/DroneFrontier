@@ -42,7 +42,7 @@ namespace Offline
         private ItemSpawnManager _itemSpawnManager = null;
 
         [SerializeField, Tooltip("観戦モード用オブジェクト")]
-        private WatchingGame _watchingGame = null;
+        private DroneWatcher _watchingGame = null;
 
         [SerializeField, Tooltip("残り時間を表示するTextUI")]
         private Text _timeText = null;

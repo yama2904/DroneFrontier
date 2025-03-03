@@ -10,14 +10,6 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
     #region public
 
     /// <summary>
-    /// CPUのカメラ
-    /// </summary>
-    public Camera Camera
-    {
-        get { return _camera; }
-    }
-
-    /// <summary>
     /// ドローンの名前
     /// </summary>
     public string Name { get; set; } = "";
@@ -75,6 +67,20 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
     public bool IsRadarable => true;
 
     public List<GameObject> NotRadarableList { get; } = new List<GameObject>();
+
+    /// <summary>
+    /// このドローンを見るか
+    /// </summary>
+    public bool IsWatch
+    {
+        get { return _isWatch; }
+        set
+        {
+            _camera.depth = value ? 5 : 0;
+            _isWatch = value;
+        }
+    }
+    private bool _isWatch = false;
 
     /// <summary>
     /// ドローン破壊イベント

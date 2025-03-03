@@ -26,7 +26,7 @@ namespace Network.Udp
         /// <summary>
         /// オブジェクト共有ID
         /// </summary>
-        public long ObjectId { get; private set; } = -1;
+        public string ObjectId { get; private set; } = string.Empty;
 
         /// <summary>
         /// コンストラクタ
@@ -36,21 +36,29 @@ namespace Network.Udp
         /// <summary>
         /// コンストラクタ
         /// </summary>
+        /// <param name="id">オブジェクト共有ID</param>
         /// <param name="className">メソッドを持つクラス名</param>
         /// <param name="methodName">実行させるメソッド名</param>
         /// <param name="args">実行させるメソッドの引数</param>
-        /// <param name="id">オブジェクト共有ID</param>
-        public SendMethodPacket(string className, string methodName, object[] args = null, long id = -1)
+        public SendMethodPacket(string id, string className, string methodName, object[] args = null)
         {
+            ObjectId = id;
             ClassName = className;
             MethodName = methodName;
             Arguments = args == null ? new object[0] : args;
-            ObjectId = id;
         }
 
         protected override IPacket ParseBody(byte[] body)
         {
             int offset = 0;
+
+            // IDのバイト長取得
+            int idLen = BitConverter.ToInt32(body, offset);
+            offset += sizeof(int);
+
+            // ID取得
+            string id = Encoding.UTF8.GetString(body, offset, idLen);
+            offset += idLen;
 
             // クラス名のバイト長取得
             int classNameLen = BitConverter.ToInt32(body, offset);
@@ -76,16 +84,18 @@ namespace Network.Udp
             object[] args = NetworkUtil.ConvertToObject<object[]>(body.Skip(offset).Take(argsLen).ToArray());
             offset += argsLen;
 
-            // ID取得
-            long id = BitConverter.ToInt64(body, offset);
-            offset += sizeof(long);
-
             // インスタンスを作成して返す
-            return new SendMethodPacket(className, methodName, args, id);
+            return new SendMethodPacket(id, className, methodName, args);
         }
 
         protected override byte[] ConvertToPacketBody()
         {
+            // IDをバイト変換
+            byte[] idByte = Encoding.UTF8.GetBytes(ObjectId);
+
+            // IDのバイト長を取得
+            byte[] idLen = BitConverter.GetBytes(idByte.Length);
+
             // クラス名をバイト変換
             byte[] classNameByte = Encoding.UTF8.GetBytes(ClassName);
 
@@ -104,17 +114,15 @@ namespace Network.Udp
             // メソッド引数のバイト長を取得
             byte[] argsLen = BitConverter.GetBytes(argsByte.Length);
 
-            // IDをバイト変換
-            byte[] idByte = BitConverter.GetBytes(ObjectId);
-
-            // [クラス名バイト長][クラス名][メソッド名バイト長][メソッド名][メソッド引数バイト長][メソッド引数][ID]
-            return classNameLen.Concat(classNameByte)
-                               .Concat(methodNameLen)
-                               .Concat(methodNameByte)
-                               .Concat(argsLen)
-                               .Concat(argsByte)
-                               .Concat(idByte)
-                               .ToArray();
+            // [IDバイト長][ID][クラス名バイト長][クラス名][メソッド名バイト長][メソッド名][メソッド引数バイト長][メソッド引数]
+            return idLen.Concat(idByte)
+                        .Concat(classNameLen)
+                        .Concat(classNameByte)
+                        .Concat(methodNameLen)
+                        .Concat(methodNameByte)
+                        .Concat(argsLen)
+                        .Concat(argsByte)
+                        .ToArray();
         }
     }
 }

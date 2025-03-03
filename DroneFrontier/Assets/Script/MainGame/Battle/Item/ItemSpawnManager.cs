@@ -17,12 +17,12 @@ public class ItemSpawnManager : MonoBehaviour
     /// <summary>
     /// アイテムスポナーリスト
     /// </summary>
-    private List<ItemSpawner> _spawnerList = new List<ItemSpawner>();
+    private List<IItemSpawner> _spawnerList = new List<IItemSpawner>();
 
     /// <summary>
     /// スポーンしたアイテムと対応するスポナー
     /// </summary>
-    private Dictionary<SpawnItem, ItemSpawner> _spawnedMap = new Dictionary<SpawnItem, ItemSpawner>();
+    private Dictionary<SpawnItem, IItemSpawner> _spawnedMap = new Dictionary<SpawnItem, IItemSpawner>();
 
     /// <summary>
     /// 定期スポーン計測
@@ -44,7 +44,14 @@ public class ItemSpawnManager : MonoBehaviour
         if (enableSpawn)
         {
             // 各スポナーを検索して取得
-            _spawnerList = FindObjectsByType<ItemSpawner>(FindObjectsSortMode.None).ToList();
+            MonoBehaviour[] objects = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
+            foreach (MonoBehaviour obj in objects)
+            {
+                if (obj is IItemSpawner spawner)
+                {
+                    _spawnerList.Add(spawner);
+                }
+            }
 
             // アイテムのランダムスポーン
             ItemSpawn(_spawnerList, _maxSpawnNum);
@@ -76,10 +83,10 @@ public class ItemSpawnManager : MonoBehaviour
         if (_spawnedMap.Count >= _maxSpawnNum) return;
 
         // 未スポーンのスポナーを集計
-        List<ItemSpawner> notSpawned = new List<ItemSpawner>();
+        List<IItemSpawner> notSpawned = new List<IItemSpawner>();
         lock (_spawnedMap)
         {
-            foreach (ItemSpawner spawner in _spawnerList)
+            foreach (IItemSpawner spawner in _spawnerList)
             {
                 if (!_spawnedMap.ContainsValue(spawner))
                 {
@@ -97,12 +104,12 @@ public class ItemSpawnManager : MonoBehaviour
     /// </summary>
     /// <param name="spawnerList">アイテムスポーンさせるスポナー</param>
     /// <param name="spawnNum">スポーン数</param>
-    private void ItemSpawn(List<ItemSpawner> spawnerList, int spawnNum)
+    private void ItemSpawn(List<IItemSpawner> spawnerList, int spawnNum)
     {
         // スポナーの数がスポーン数以下の場合は全てのスポナーからアイテムスポーン
         if (spawnerList.Count <= spawnNum) 
         {
-            foreach (ItemSpawner spawner in spawnerList)
+            foreach (IItemSpawner spawner in spawnerList)
             {
                 // スポーン実行
                 SpawnItem item = spawner.Spawn();
@@ -121,10 +128,10 @@ public class ItemSpawnManager : MonoBehaviour
         int num = 0;
         while (true)
         {
-            foreach (ItemSpawner spawner in  spawnerList)
+            foreach (IItemSpawner spawner in  spawnerList)
             {
                 // 既にスポーン済の場合はスポーンを行わない
-                if (_spawnedMap.ContainsValue(spawner)) break;
+                if (_spawnedMap.ContainsValue(spawner)) continue;
 
                 // スポーン実行
                 SpawnItem item = spawner.SpawnRandom();
@@ -152,7 +159,7 @@ public class ItemSpawnManager : MonoBehaviour
     private void SpawnItemDestroy(SpawnItem item)
     {
         // 消滅したアイテムのスポナー取得
-        ItemSpawner spawner = _spawnedMap[item];
+        IItemSpawner spawner = _spawnedMap[item];
 
         // 消滅したアイテムからイベント削除
         item.SpawnItemDestroyEvent -= SpawnItemDestroy;

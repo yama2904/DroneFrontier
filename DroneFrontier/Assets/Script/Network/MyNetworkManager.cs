@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq.Expressions;
-using System.Media;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -18,7 +17,7 @@ namespace Network
 {
     public class MyNetworkManager : MonoBehaviour
     {
-        public static MyNetworkManager Singleton { get; private set; }
+        public static MyNetworkManager Singleton { get; private set; } = null;
 
         /// <summary>
         /// ホスト側であるか
@@ -33,7 +32,7 @@ namespace Network
         /// <summary>
         /// 自分のプレイヤー名
         /// </summary>
-        public string PlayerName { get; private set; } = string.Empty;
+        public string MyPlayerName { get; private set; } = string.Empty;
 
         /// <summary>
         /// 各プレイヤー名
@@ -135,7 +134,7 @@ namespace Network
         /// key:プレイヤー名<br/>
         /// value:接続先情報
         /// </summary>
-        private Dictionary<string, (IPEndPoint ep, TcpClient tcp)> _peers = new Dictionary<string, (IPEndPoint ep, TcpClient tcp)>();
+        private Dictionary<string, (IPEndPoint ep, TcpClient tcp, bool isHost)> _peers = new Dictionary<string, (IPEndPoint ep, TcpClient tcp, bool isHost)>();
 
         /// <summary>
         /// 探索キャンセル発行クラス
@@ -155,7 +154,7 @@ namespace Network
             _discoverCancel = new CancellationTokenSource();
 
             // プレイヤー名保存
-            PlayerName = name;
+            MyPlayerName = name;
 
             // プレイヤーリストに自分を追加
             lock (PlayerNames) PlayerNames.Add(name);
@@ -280,7 +279,7 @@ namespace Network
                     if (tcpClient == null) continue;
 
                     // 接続先クライアント保存
-                    lock (_peers) _peers.Add(receivePacket.Name, (receive.RemoteEndPoint, tcpClient));
+                    lock (_peers) _peers.Add(receivePacket.Name, (receive.RemoteEndPoint, tcpClient, false));
                     lock (PlayerNames) PlayerNames.Add(receivePacket.Name);
 
                     // 接続イベント発行
@@ -324,7 +323,7 @@ namespace Network
             _discoverCancel = new CancellationTokenSource();
 
             // プレイヤー名保存
-            PlayerName = name;
+            MyPlayerName = name;
 
             // 探索キャンセル検知用タスクを事前に構築
             Task cancelCheckTask = Task.Run(async () =>
@@ -481,7 +480,7 @@ namespace Network
                     // --- TCP接続完了チェック用のTCPパケット待機 end
 
                     // 接続先一覧にホストを追加
-                    lock (_peers) _peers.Add(responsePacket.HostName, (receive.RemoteEndPoint, tcpClient));
+                    lock (_peers) _peers.Add(responsePacket.HostName, (receive.RemoteEndPoint, tcpClient, true));
                     lock (PlayerNames) PlayerNames.Add(responsePacket.HostName);
 
                     // ホストからのTCP受信を開始する
@@ -501,7 +500,7 @@ namespace Network
                             await client.GetStream().WriteAsync(connectData, 0, connectData.Length);
 
                             // 接続先一覧に追加
-                            lock (_peers) _peers.Add(key, (ep, client));
+                            lock (_peers) _peers.Add(key, (ep, client, false));
 
                             // プレイヤーからのTCP受信開始
                             ReceiveTcp(key, false);
@@ -552,7 +551,7 @@ namespace Network
                                 PeerConnectPacket connectPacket = new PeerConnectPacket().Parse(connectBuf) as PeerConnectPacket;
 
                                 // 接続先一覧に追加
-                                lock (_peers) _peers.Add(connectPacket.Name, (client.Client.RemoteEndPoint as IPEndPoint, tcpClient));
+                                lock (_peers) _peers.Add(connectPacket.Name, (client.Client.RemoteEndPoint as IPEndPoint, tcpClient, false));
                                 lock (PlayerNames) PlayerNames.Add(connectPacket.Name);
 
                                 // 新規プレイヤーからのTCP受信開始
@@ -652,10 +651,32 @@ namespace Network
         }
 
         /// <summary>
+        /// ホストへパケットを送信する
+        /// </summary>
+        /// <param name="packet">送信パケット</param>
+        public void SendToHost(IPacket packet)
+        {
+            if (IsHost) return;
+
+            byte[] data = packet.ConvertToPacket();
+            lock (_peers)
+            {
+                foreach (string key in _peers.Keys)
+                {
+                    if (_peers[key].isHost)
+                    {
+                        _udpClient.Send(data, data.Length, _peers[key].ep);
+                        break;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// 全ての通信相手へパケットを送信する
         /// </summary>
         /// <param name="packet">送信パケット</param>
-        public void SendAsync(IPacket packet)
+        public void SendToAll(IPacket packet)
         {
             byte[] data = packet.ConvertToPacket();
             lock (_peers)

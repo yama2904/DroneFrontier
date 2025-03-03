@@ -64,7 +64,7 @@ namespace Network
         private ItemSpawnManager _itemSpawnManager = null;
 
         [SerializeField, Tooltip("観戦モード用オブジェクト")]
-        private NetworkWatchingGame _watchingGame = null;
+        private NetworkDroneWatchar _watchingGame = null;
 
         [SerializeField, Tooltip("残り時間を表示するTextUI")]
         private Text _timeText = null;
@@ -90,32 +90,78 @@ namespace Network
         /// </summary>
         private readonly object _lock = new object();
 
+        [SerializeField, Tooltip("デバッグソロモード")]
+        private bool _debug = false;
+
+        private void Awake()
+        {
+            if (_debug)
+            {
+                PlayerData player = new PlayerData()
+                {
+                    Name = "Player",
+                    Weapon = WeaponType.SHOTGUN,
+                    IsControl = true
+                };
+                PlayerList.Add(player);
+            }
+        }
+
         private async void Start()
         {
             // カーソルロック
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
 
-            // ドローンをスポーン
-            foreach (var player in PlayerList)
-            {
-                NetworkBattleDrone spawnDrone = _droneSpawnManager.SpawnDrone(player.Name, player.Weapon, player.IsControl);
-                player.Drone = spawnDrone;
-                player.StockNum = spawnDrone.StockNum;
-                player.DestroyTime = 0;
-
-                // カウントダウン終了までスクリプト無効化
-                spawnDrone.enabled = false;
-            }
-
-            // ドローン破壊イベント設定
-            _droneSpawnManager.DroneDestroyEvent += DroneDestroy;
-
-            // アイテムスポナー初期化
-            _itemSpawnManager.Initialize(IsItemSpawn);
-
             // BGM停止
             SoundManager.StopBGM();
+
+            // ドローンをスポーン
+            if (MyNetworkManager.Singleton.IsHost)
+            {
+                foreach (var player in PlayerList)
+                {
+                    NetworkBattleDrone spawnDrone = _droneSpawnManager.SpawnDrone(player.Name, player.Weapon);
+                    player.Drone = spawnDrone;
+                    player.StockNum = spawnDrone.StockNum;
+                    player.DestroyTime = 0;
+
+                    NetworkObjectSpawner.Spawn(spawnDrone);
+                }
+
+                // ドローン破壊イベント設定
+                _droneSpawnManager.DroneDestroyEvent += DroneDestroy;
+                
+                // アイテムスポナー初期化
+                _itemSpawnManager.Initialize(IsItemSpawn);
+            }
+            else
+            {
+                while (true)
+                {
+                    // ドローン検索
+                    var drones = GameObject.FindGameObjectsWithTag(TagNameConst.PLAYER).Select(x => x.GetComponent<NetworkBattleDrone>()).ToArray();
+                    
+                    // 全プレイヤー分生成されていない場合は待機
+                    if (drones.Length < MyNetworkManager.Singleton.PlayerCount)
+                    {
+                        await UniTask.Delay(100);
+                        continue;
+                    }
+
+                    foreach (var drone in drones)
+                    {
+                        PlayerData player = new PlayerData();
+                        player.Drone = drone;
+                        player.StockNum = drone.StockNum;
+                        player.DestroyTime = 0;
+                        PlayerList.Add(player);
+                    }
+                    break;
+                }
+            }
+
+            await new SyncHandler().WaitAsync();
 
             // 3秒後にカウントダウンSE再生
             await UniTask.Delay(TimeSpan.FromSeconds(3));
@@ -130,6 +176,26 @@ namespace Network
             foreach (var drone in PlayerList)
             {
                 drone.Drone.enabled = true;
+            }
+        }
+
+        private void Update()
+        {
+            // カメラロック切り替え
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                if (Cursor.lockState == CursorLockMode.None)
+                {
+                    Cursor.lockState = CursorLockMode.Locked;
+                    Cursor.visible = false;
+                    Debug.Log("カメラロック");
+                }
+                else
+                {
+                    Cursor.lockState = CursorLockMode.None;
+                    Cursor.visible = true;
+                    Debug.Log("カメラロック解除");
+                }
             }
         }
 

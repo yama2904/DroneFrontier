@@ -27,7 +27,7 @@ public class SyncHandler
     /// <param name="timeout">タイムアウト（秒）</param>
     /// <returns>同期が完了した場合はtrue</returns>
     /// <exception cref="TimeoutException">タイムアウト</exception>
-    public async UniTask WaitAsync(int timeout)
+    public async UniTask WaitAsync(int timeout = 0)
     {
         await SyncValueAsync(null, timeout);
     }
@@ -42,7 +42,7 @@ public class SyncHandler
     public async UniTask<object> SyncValueAsync(object value, int timeout = 0)
     {
         _receivedPlayers.Clear();
-        _receivedPlayers.Add(MyNetworkManager.Singleton.PlayerName);
+        _receivedPlayers.Add(MyNetworkManager.Singleton.MyPlayerName);
 
         // 同期パケット受信イベント設定
         MyNetworkManager.Singleton.OnUdpReceive += OnUdpReceiveOfSync;
@@ -56,7 +56,7 @@ public class SyncHandler
                 packet = new SyncPacket(value);
                 _syncValue = value;
             }
-            MyNetworkManager.Singleton.SendAsync(packet);
+            MyNetworkManager.Singleton.SendToAll(packet);
         }
 
         // タイムアウト計測用ストップウォッチ開始
@@ -89,7 +89,7 @@ public class SyncHandler
             // 1秒ごとにリトライ
             if (retryStopwatch.Elapsed.Seconds >= 1)
             {
-                MyNetworkManager.Singleton.SendAsync(packet);
+                MyNetworkManager.Singleton.SendToAll(packet);
                 retryStopwatch.Restart();
             }
 
@@ -130,6 +130,6 @@ public class SyncHandler
         }
 
         // 同期パケットを返す
-        MyNetworkManager.Singleton.SendAsync(packet);
+        MyNetworkManager.Singleton.SendToAll(packet);
     }
 }

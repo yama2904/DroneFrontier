@@ -133,6 +133,8 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
     /// </summary>
     private bool _isDestroy = false;
 
+    private InputData _input = new InputData();
+
     // コンポーネントキャッシュ
     Rigidbody _rigidbody = null;
     Animator _animator = null;
@@ -187,115 +189,6 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
     private void Update()
     {
         // 死亡処理中は操作不可
-        if (_isDestroy) return;
-
-        // 前進
-        if (Input.GetKey(KeyCode.W))
-        {
-            _moveComponent.Move(DroneMoveComponent.Direction.Forward);
-        }
-
-        // 左移動
-        if (Input.GetKey(KeyCode.A))
-        {
-            _moveComponent.Move(DroneMoveComponent.Direction.Left);
-        }
-
-        // 後退
-        if (Input.GetKey(KeyCode.S))
-        {
-            _moveComponent.Move(DroneMoveComponent.Direction.Backwad);
-        }
-
-        // 右移動
-        if (Input.GetKey(KeyCode.D))
-        {
-            _moveComponent.Move(DroneMoveComponent.Direction.Right);
-        }
-
-        // 上下移動
-        if (Input.mouseScrollDelta.y != 0)
-        {
-            if (Input.mouseScrollDelta.y > 0)
-            {
-                _moveComponent.Move(DroneMoveComponent.Direction.Up);
-            }
-            else
-            {
-                _moveComponent.Move(DroneMoveComponent.Direction.Down);
-            }
-        }
-        if (Input.GetKey(KeyCode.R))
-        {
-            _moveComponent.Move(DroneMoveComponent.Direction.Up);
-        }
-        if (Input.GetKey(KeyCode.F))
-        {
-            _moveComponent.Move(DroneMoveComponent.Direction.Down);
-        }
-
-        // ロックオン使用
-        if (Input.GetKeyDown(KeyCode.LeftShift))
-        {
-            _lockOnComponent.StartLockOn();
-        }
-        // ロックオン解除
-        if (Input.GetKeyUp(KeyCode.LeftShift))
-        {
-            _lockOnComponent.StopLockOn();
-        }
-
-        // レーダー使用
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            _soundComponent.PlayOneShot(SoundManager.SE.RADAR, SoundManager.SEVolume);
-            _radarComponent.StartRadar();
-        }
-        // レーダー終了
-        if (Input.GetKeyUp(KeyCode.Q))
-        {
-            _radarComponent.StopRadar();
-        }
-
-        // マウスによる向き変更
-        if (Cursor.lockState == CursorLockMode.Locked)
-        {
-            float x = Input.GetAxis("Mouse X") * CameraManager.ReverseX * CameraManager.CameraSpeed;
-            float y = Input.GetAxis("Mouse Y") * CameraManager.ReverseY * CameraManager.CameraSpeed;
-            _moveComponent.RotateDir(x, y);
-        }
-
-        // メイン武器攻撃（サブ武器攻撃中の場合は不可）
-        if (Input.GetMouseButton(0) && !_weaponComponent.ShootingSubWeapon)
-        {
-            _weaponComponent.Shot(DroneWeaponComponent.Weapon.MAIN, _lockOnComponent.Target);
-        }
-
-        // サブ武器攻撃（メイン武器攻撃中の場合は不可）
-        if (Input.GetMouseButton(1) && !_weaponComponent.ShootingMainWeapon)
-        {
-            _weaponComponent.Shot(DroneWeaponComponent.Weapon.SUB, _lockOnComponent.Target);
-        }
-
-        // ブースト使用
-        if (Input.GetKey(KeyCode.Space))
-        {
-            _boostComponent.Boost();
-        }
-
-        // アイテム使用
-        if (Input.GetKeyUp(KeyCode.Alpha1))
-        {
-            UseItem(ItemNum.Item1);
-        }
-        if (Input.GetKeyUp(KeyCode.Alpha2))
-        {
-            UseItem(ItemNum.Item2);
-        }
-    }
-
-    private void FixedUpdate()
-    {
         if (_isDestroy)
         {
             // 加速しながら落ちる
@@ -306,7 +199,114 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
 
             // プロペラ減速
             _animator.speed *= 0.993f;
+
+            return;
         }
+
+        // 入力情報更新
+        _input.UpdateInput();
+
+        // ロックオン使用
+        if (_input.DownedKeys.Contains(KeyCode.LeftShift))
+        {
+            _lockOnComponent.StartLockOn();
+        }
+        // ロックオン解除
+        if (_input.UppedKeys.Contains(KeyCode.LeftShift))
+        {
+            _lockOnComponent.StopLockOn();
+        }
+
+        // レーダー使用
+        if (_input.DownedKeys.Contains(KeyCode.Q))
+        {
+            _soundComponent.PlayOneShot(SoundManager.SE.RADAR, SoundManager.SEVolume);
+            _radarComponent.StartRadar();
+        }
+        // レーダー終了
+        if (_input.UppedKeys.Contains(KeyCode.Q))
+        {
+            _radarComponent.StopRadar();
+        }
+
+        // メイン武器攻撃（サブ武器攻撃中の場合は不可）
+        if (_input.MouseButtonL && !_weaponComponent.ShootingSubWeapon)
+        {
+            _weaponComponent.Shot(DroneWeaponComponent.Weapon.MAIN, _lockOnComponent.Target);
+        }
+
+        // サブ武器攻撃（メイン武器攻撃中の場合は不可）
+        if (_input.MouseButtonR && !_weaponComponent.ShootingMainWeapon)
+        {
+            _weaponComponent.Shot(DroneWeaponComponent.Weapon.SUB, _lockOnComponent.Target);
+        }
+
+        // ブースト使用
+        if (_input.Keys.Contains(KeyCode.Space))
+        {
+            _boostComponent.Boost();
+        }
+
+        // アイテム使用
+        if (_input.UppedKeys.Contains(KeyCode.Alpha1))
+        {
+            UseItem(ItemNum.Item1);
+        }
+        if (_input.UppedKeys.Contains(KeyCode.Alpha2))
+        {
+            UseItem(ItemNum.Item2);
+        }
+    }
+
+    private void FixedUpdate()
+    {
+        // 前進
+        if (_input.Keys.Contains(KeyCode.W))
+        {
+            _moveComponent.Move(DroneMoveComponent.Direction.Forward);
+        }
+
+        // 左移動
+        if (_input.Keys.Contains(KeyCode.A))
+        {
+            _moveComponent.Move(DroneMoveComponent.Direction.Left);
+        }
+
+        // 後退
+        if (_input.Keys.Contains(KeyCode.S))
+        {
+            _moveComponent.Move(DroneMoveComponent.Direction.Backwad);
+        }
+
+        // 右移動
+        if (_input.Keys.Contains(KeyCode.D))
+        {
+            _moveComponent.Move(DroneMoveComponent.Direction.Right);
+        }
+
+        // 上下移動
+        if (_input.MouseScrollDelta != 0)
+        {
+            if (_input.MouseScrollDelta > 0)
+            {
+                _moveComponent.Move(DroneMoveComponent.Direction.Up);
+            }
+            else
+            {
+                _moveComponent.Move(DroneMoveComponent.Direction.Down);
+            }
+        }
+        if (_input.Keys.Contains(KeyCode.R))
+        {
+            _moveComponent.Move(DroneMoveComponent.Direction.Up);
+        }
+        if (_input.Keys.Contains(KeyCode.F))
+        {
+            _moveComponent.Move(DroneMoveComponent.Direction.Down);
+        }
+
+        // マウスによる向き変更
+        _moveComponent.RotateDir(_input.MouseX, _input.MouseY);
     }
 
     /// <summary>
@@ -319,7 +319,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
         if (_isDestroy) return;
 
         // Eキーでアイテム取得
-        if (Input.GetKey(KeyCode.E))
+        if (_input.Keys.Contains(KeyCode.E))
         {
             if (other.CompareTag(TagNameConst.ITEM))
             {

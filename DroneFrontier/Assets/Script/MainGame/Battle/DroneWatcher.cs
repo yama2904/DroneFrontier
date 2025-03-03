@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class WatchingGame : MonoBehaviour
+public class DroneWatcher : MonoBehaviour
 {
     [SerializeField, Tooltip("ドローンスポーン管理オブジェクト")]
     private DroneSpawnManager _droneSpawnManager = null;
@@ -24,8 +24,7 @@ public class WatchingGame : MonoBehaviour
         // スペースキーで次のCPUへカメラ切り替え
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            // カメラ深度初期化
-            _watchDrones[_watchingDrone].Camera.depth = 0;
+            _watchDrones[_watchingDrone].IsWatch = false;
 
             // 次のCPU
             _watchingDrone++;
@@ -35,7 +34,7 @@ public class WatchingGame : MonoBehaviour
             }
 
             // カメラ参照設定
-            _watchDrones[_watchingDrone].Camera.depth = 5;
+            _watchDrones[_watchingDrone].IsWatch = true;
         }
     }
 
@@ -44,15 +43,15 @@ public class WatchingGame : MonoBehaviour
         // 試合中のCPU取得
         _watchDrones = FindObjectsByType<CpuBattleDrone>(FindObjectsSortMode.None).ToList();
 
-        // 全てのドローンのカメラ深度初期化
+        // 全てのドローンのカメラ参照初期化
         foreach (CpuBattleDrone drone in _watchDrones)
         {
-            drone.Camera.depth = 0;
+            drone.IsWatch = false;
         }
 
         // 参照先カメラ設定
         _watchingDrone = 0;
-        _watchDrones[_watchingDrone].Camera.depth = 5;
+        _watchDrones[_watchingDrone].IsWatch = true;
 
         // ドローン破壊イベント設定
         _droneSpawnManager.DroneDestroyEvent += DroneDestroy;
@@ -64,10 +63,10 @@ public class WatchingGame : MonoBehaviour
 
     private void OnDisable()
     {
-        // 全てのドローンのカメラ深度初期化
+        // 全てのドローンのカメラ参照初期化
         foreach (CpuBattleDrone drone in _watchDrones)
         {
-            drone.Camera.depth = 0;
+            drone.IsWatch = false;
         }
 
         // ドローン破壊イベント削除
@@ -91,15 +90,10 @@ public class WatchingGame : MonoBehaviour
             _watchDrones.RemoveAt(index);
             _watchDrones.Insert(index, drone);
 
-            // 破壊されたドローンが現在観戦中のCPUの場合はカメラ深度調整
+            // 破壊されたドローンが現在観戦中のCPUの場合はリスポーンしたドローンを見る
             if (index == _watchingDrone)
             {
-                drone.Camera.depth = 5;
-            }
-            else
-            {
-                // 観戦中CPUでない場合はカメラ深度初期化
-                drone.Camera.depth = 0;
+                drone.IsWatch = true;
             }
         }
     }

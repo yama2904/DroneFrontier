@@ -281,14 +281,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 59947d4ab1c667c4286beb29cb72531e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _generateId: 0
   _droneObject: {fileID: 6103758830164412855}
   _explosion: {fileID: 7268668557149609815}
   _stockText: {fileID: 7646116371101854067}
   _searchComponent: {fileID: 8076797654263036361}
+  _camera: {fileID: 2032111343277000741}
   _hp: 100
   _stockNum: 2
-  _camera: {fileID: 2032111343277000741}
 --- !u!114 &6715498070689482023
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1132,7 +1131,7 @@ AudioListener:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 985328476376835486}
-  m_Enabled: 1
+  m_Enabled: 0
 --- !u!1 &1368695806288110126
 GameObject:
   m_ObjectHideFlags: 0

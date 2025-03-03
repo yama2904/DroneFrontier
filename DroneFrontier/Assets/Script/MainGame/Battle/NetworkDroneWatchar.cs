@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Network
 {
-    public class NetworkWatchingGame : MonoBehaviour
+    public class NetworkDroneWatchar : MonoBehaviour
     {
         [SerializeField, Tooltip("ドローンスポーン管理オブジェクト")]
         private NetworkDroneSpawnManager _droneSpawnManager = null;
@@ -26,8 +26,7 @@ namespace Network
             // スペースキーで次のドローンへカメラ切り替え
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                // カメラ深度初期化
-                _watchDrones[_watchingDrone].Camera.depth = 0;
+                _watchDrones[_watchingDrone].IsWatch = false;
 
                 // 次のドローン
                 _watchingDrone++;
@@ -37,7 +36,7 @@ namespace Network
                 }
 
                 // カメラ参照設定
-                _watchDrones[_watchingDrone].Camera.depth = 5;
+                _watchDrones[_watchingDrone].IsWatch = true;
             }
         }
 
@@ -46,15 +45,15 @@ namespace Network
             // 試合中のドローン取得
             _watchDrones = FindObjectsByType<NetworkBattleDrone>(FindObjectsSortMode.None).ToList();
 
-            // 全てのドローンのカメラ深度初期化
+            // 全てのドローンのカメラ参照初期化
             foreach (NetworkBattleDrone drone in _watchDrones)
             {
-                drone.Camera.depth = 0;
+                drone.IsWatch = false;
             }
 
             // 参照先カメラ設定
             _watchingDrone = 0;
-            _watchDrones[_watchingDrone].Camera.depth = 5;
+            _watchDrones[_watchingDrone].IsWatch = true;
 
             // ドローン破壊イベント設定
             _droneSpawnManager.DroneDestroyEvent += DroneDestroy;
@@ -66,10 +65,10 @@ namespace Network
 
         private void OnDisable()
         {
-            // 全てのドローンのカメラ深度初期化
+            // 全てのドローンのカメラ参照初期化
             foreach (NetworkBattleDrone drone in _watchDrones)
             {
-                drone.Camera.depth = 0;
+                drone.IsWatch = false;
             }
 
             // ドローン破壊イベント削除
@@ -91,15 +90,10 @@ namespace Network
             _watchDrones.RemoveAt(index);
             _watchDrones.Insert(index, respawnDrone);
 
-            // 破壊されたドローンが現在観戦中のドローンの場合はカメラ深度調整
+            // 破壊されたドローンが現在観戦中のドローンの場合はリスポーンしたドローンを見る
             if (index == _watchingDrone)
             {
-                respawnDrone.Camera.depth = 5;
-            }
-            else
-            {
-                // 観戦中ドローンでない場合はカメラ深度初期化
-                respawnDrone.Camera.depth = 0;
+                respawnDrone.IsWatch = true;
             }
         }
     }

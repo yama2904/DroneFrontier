@@ -4,6 +4,7 @@ Build
 Obj
 Logs
 bin
+Log
 .vs
 *.pidb
 *.unityproj

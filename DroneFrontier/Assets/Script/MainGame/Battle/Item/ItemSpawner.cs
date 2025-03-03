@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class ItemSpawner : MonoBehaviour
+public class ItemSpawner : MonoBehaviour, IItemSpawner
 {
     /// <summary>
     /// スポーン確率（0～1）

@@ -202,7 +202,7 @@ namespace Network
             SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
 
             // 選択武器送信
-            SendMethod(() => SelectWeapon(MyNetworkManager.Singleton.PlayerName, _selectedWeapon));
+            SendMethod(() => SelectWeapon(MyNetworkManager.Singleton.MyPlayerName, _selectedWeapon));
 
             // ボタン非活性
             EnabledButtons(false);
@@ -257,7 +257,23 @@ namespace Network
             if (_selectedWeapons.Count == MyNetworkManager.Singleton.PlayerCount
                 && MyNetworkManager.Singleton.IsHost)
             {
-                SendMethod(() => StartGame(_selectedWeapons, isItemOnButton));
+                // NetworkBattleManagerにプレイヤー情報送信
+                foreach (DictionaryEntry entity in _selectedWeapons)
+                {
+                    NetworkBattleManager.PlayerData data = new NetworkBattleManager.PlayerData
+                    {
+                        Name = entity.Key as string,
+                        Weapon = (WeaponType)entity.Value,
+                        IsControl = name == MyNetworkManager.Singleton.MyPlayerName
+                    };
+                    NetworkBattleManager.PlayerList.Add(data);
+                }
+
+                // アイテム有無をBattleManagerに送信
+                NetworkBattleManager.IsItemSpawn = isItemOnButton;
+
+                // ゲーム開始
+                SendMethod(() => StartGame());
             }
         }
 
@@ -266,27 +282,10 @@ namespace Network
         /// </summary>
         /// <param name="weapons">各プレイヤーの使用武器</param>
         /// <param name="itemOn">アイテム有であるか</param>
-        private void StartGame(OrderedDictionary weapons, bool itemOn)
+        private void StartGame()
         {
             // イベント削除
             MyNetworkManager.Singleton.OnDisconnect -= OnDisconnect;
-
-            // NetworkBattleManagerにプレイヤー情報送信
-            foreach (DictionaryEntry entity in weapons)
-            {
-                string name = entity.Key as string;
-                WeaponType weapon = (WeaponType)Enum.Parse(typeof(WeaponType), entity.Value.ToString());
-                NetworkBattleManager.PlayerData data = new NetworkBattleManager.PlayerData
-                {
-                    Name = name,
-                    Weapon = weapon,
-                    IsControl = name == MyNetworkManager.Singleton.PlayerName
-                };
-                NetworkBattleManager.PlayerList.Add(data);
-            }
-
-            // アイテム有無をBattleManagerに送信
-            NetworkBattleManager.IsItemSpawn = itemOn;
 
             // 次の画面へ遷移
             SelectedButton = ButtonType.Ok;

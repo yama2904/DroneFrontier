@@ -30,6 +30,26 @@ namespace Network.Udp
         /// <summary>
         /// 実行メソッド送信
         /// </summary>
-        SendMethod = 1 << 4
+        SendMethod = 1 << 4,
+
+        /// <summary>
+        /// 入力情報
+        /// </summary>
+        Input = 1 << 5,
+
+        /// <summary>
+        /// フレームレート調整
+        /// </summary>
+        FrameRate = 1 << 6,
+
+        /// <summary>
+        /// オブジェクト生成
+        /// </summary>
+        Spawn = 1 << 7,
+
+        /// <summary>
+        /// オブジェクト削除
+        /// </summary>
+        Destroy = 1 << 8
     }
 }

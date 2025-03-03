@@ -39,15 +39,14 @@ namespace Network
         /// </summary>
         /// <param name="name">スポーンさせるドローンの名前</param>
         /// <param name="weapon">スポーンさせるドローンのサブ武器</param>
-        /// <param name="isControl">操作するドローンか</param>
         /// <returns>スポーンさせたドローン</returns>
-        public NetworkBattleDrone SpawnDrone(string name, WeaponType weapon, bool isControl)
+        public NetworkBattleDrone SpawnDrone(string name, WeaponType weapon)
         {
             // スポーン位置取得
             Transform spawnPos = _droneSpawnPositions[_nextSpawnIndex];
 
             // ドローン生成
-            NetworkBattleDrone drone = CreateDrone(name, weapon, spawnPos, isControl);
+            NetworkBattleDrone drone = CreateDrone(name, weapon, spawnPos);
 
             // スポーン位置を保存
             _initPositions.Add(drone.Name, spawnPos);
@@ -74,15 +73,13 @@ namespace Network
         /// <param name="weapon">ドローンに設定する名前</param>
         /// <param name="weapon">設定する武器</param>
         /// <param name="spawnPosition">スポーン位置</param>
-        /// <param name="isControl">操作するドローンか</param>
         /// <returns>生成したドローン</returns>
-        private NetworkBattleDrone CreateDrone(string name, WeaponType weapon, Transform spawnPosition, bool isControl)
+        private NetworkBattleDrone CreateDrone(string name, WeaponType weapon, Transform spawnPosition)
         {
-            NetworkBattleDrone createdDrone = Instantiate(_playerDrone, spawnPosition.position, spawnPosition.rotation).GetComponent<NetworkBattleDrone>();
+            NetworkBattleDrone createdDrone = Instantiate(_playerDrone, spawnPosition.position, spawnPosition.rotation);
             createdDrone.Name = name;
             createdDrone.SubWeapon = weapon;
             createdDrone.DroneDestroyEvent += DroneDestroy;
-            createdDrone.IsControl = isControl;
 
             return createdDrone;
         }
@@ -105,7 +102,7 @@ namespace Network
             if (drone.StockNum > 0)
             {
                 // リスポーン
-                respawnDrone = CreateDrone(drone.Name, drone.SubWeapon, initPos, respawnDrone.IsControl);
+                respawnDrone = CreateDrone(drone.Name, drone.SubWeapon, initPos);
 
                 // 復活SE再生
                 respawnDrone.GetComponent<DroneSoundComponent>().PlayOneShot(SoundManager.SE.RESPAWN);

@@ -1,7 +1,7 @@
 using Cysharp.Threading.Tasks;
+using Network.Udp;
 using Offline;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -83,12 +83,26 @@ namespace Network
             get { return _isControl; }
             set
             {
-                _camera.depth = 5;
+                IsWatch = value;
                 _isControl = value;
             }
         }
+        private bool _isControl = false;
 
-        public Camera Camera => _camera;
+        /// <summary>
+        /// このドローンを見るか
+        /// </summary>
+        public bool IsWatch
+        {
+            get { return _isWatch; }
+            set
+            {
+                _camera.depth = value ? 5 : 0;
+                _listener.enabled = value;
+                _isWatch = value;
+            }
+        }
+        private bool _isWatch = false;
 
         /// <summary>
         /// ドローン破壊イベント
@@ -140,11 +154,16 @@ namespace Network
         [SerializeField, Tooltip("オブジェクト探索コンポーネント")]
         private ObjectSearchComponent _searchComponent = null;
 
+        [SerializeField, Tooltip("カメラ")]
+        private Camera _camera = null;
+
         [SerializeField, Tooltip("ドローンのHP")]
         private float _hp = 100f;
 
         [SerializeField, Tooltip("ストック数")]
         private int _stockNum = 2;
+
+        private InputData _input = new InputData();
 
         /// <summary>
         /// 死亡フラグ
@@ -154,6 +173,7 @@ namespace Network
         // コンポーネントキャッシュ
         Rigidbody _rigidbody = null;
         Animator _animator = null;
+        AudioListener _listener = null;
         DroneMoveComponent _moveComponent = null;
         DroneRotateComponent _rotateComponent = null;
         DroneSoundComponent _soundComponent = null;
@@ -163,22 +183,204 @@ namespace Network
         DroneWeaponComponent _weaponComponent = null;
         DroneBoostComponent _boostComponent = null;
 
-        private bool _isControl = false;
+        public override string GetAddressKey()
+        {
+            return "NetworkBattleDrone";
+        }
 
-        [SerializeField, Tooltip("カメラ")]
-        private Camera _camera = null;
+        public override object CreateSpawnData()
+        {
+            return new Dictionary<string, object>()
+            {
+                { "Name", Name },
+                { "Weapon", SubWeapon }
+            };
+        }
+
+        public override void ImportSpawnData(object data)
+        {
+            var dic = data as Dictionary<string, object>;
+            Name = (string)dic["Name"];
+            SubWeapon = (WeaponType)Enum.ToObject(typeof(WeaponType), dic["Weapon"]);
+        }
+
+        private void Awake()
+        {
+            // コンポーネントの取得
+            _rigidbody = GetComponent<Rigidbody>();
+            _animator = GetComponent<Animator>();
+            _listener = GetComponent<AudioListener>();
+            _moveComponent = GetComponent<DroneMoveComponent>();
+            _rotateComponent = GetComponent<DroneRotateComponent>();
+            _soundComponent = GetComponent<DroneSoundComponent>();
+            _lockOnComponent = GetComponent<DroneLockOnComponent>();
+            _radarComponent = GetComponent<DroneRadarComponent>();
+            _itemComponent = GetComponent<DroneItemComponent>();
+            _weaponComponent = GetComponent<DroneWeaponComponent>();
+            _boostComponent = GetComponent<DroneBoostComponent>();
+
+            // ストック数UI初期化
+            StockNum = _stockNum;
+
+            // ロックオン・レーダー不可オブジェクトに自分を設定
+            NotLockableOnList.Add(gameObject);
+            NotRadarableList.Add(gameObject);
+
+            // オブジェクト探索イベント設定
+            _searchComponent.ObjectStayEvent += ObjectSearchEvent;
+        }
 
         private void Start()
         {
-        
+            // プレイヤー名を基に操作するか識別
+            if (Name == MyNetworkManager.Singleton.MyPlayerName)
+            {
+                IsControl = true;
+            }
+
+            // 入力情報受信イベント設定
+            if (!_isControl)
+                MyNetworkManager.Singleton.OnUdpReceive += OnReceiveUdpOfInput;
+
+            enabled = false;
         }
 
         private void Update()
         {
-        
+            // 死亡処理中は操作不可
+            if (_isDestroy)
+            {
+                // 加速しながら落ちる
+                _rigidbody.AddForce(new Vector3(0, -400, 0), ForceMode.Acceleration);
+
+                // ドローンを傾ける
+                _rotateComponent.Rotate(DEATH_ROTATE, DEATH_ROTATE_SPEED * Time.deltaTime);
+
+                // プロペラ減速
+                _animator.speed *= 0.993f;
+                
+                return;
+            }
+
+            // ロックオン使用
+            if (_input.DownedKeys.Contains(KeyCode.LeftShift))
+            {
+                _lockOnComponent.StartLockOn();
+            }
+            // ロックオン解除
+            if (_input.UppedKeys.Contains(KeyCode.LeftShift))
+            {
+                _lockOnComponent.StopLockOn();
+            }
+
+            // レーダー使用
+            if (_input.DownedKeys.Contains(KeyCode.Q))
+            {
+                _soundComponent.PlayOneShot(SoundManager.SE.RADAR, SoundManager.SEVolume);
+                _radarComponent.StartRadar();
+            }
+            // レーダー終了
+            if (_input.UppedKeys.Contains(KeyCode.Q))
+            {
+                _radarComponent.StopRadar();
+            }
+
+            // メイン武器攻撃（サブ武器攻撃中の場合は不可）
+            if (_input.MouseButtonL && !_weaponComponent.ShootingSubWeapon)
+            {
+                _weaponComponent.Shot(DroneWeaponComponent.Weapon.MAIN, _lockOnComponent.Target);
+            }
+
+            // サブ武器攻撃（メイン武器攻撃中の場合は不可）
+            if (_input.MouseButtonR && !_weaponComponent.ShootingMainWeapon)
+            {
+                _weaponComponent.Shot(DroneWeaponComponent.Weapon.SUB, _lockOnComponent.Target);
+            }
+
+            // ブースト使用
+            if (_input.Keys.Contains(KeyCode.Space))
+            {
+                _boostComponent.Boost();
+            }
+
+            // アイテム使用
+            if (_input.UppedKeys.Contains(KeyCode.Alpha1))
+            {
+                UseItem(ItemNum.Item1);
+            }
+            if (_input.UppedKeys.Contains(KeyCode.Alpha2))
+            {
+                UseItem(ItemNum.Item2);
+            }
+
+            if (_isControl)
+            {
+                // 入力情報更新
+                _input.UpdateInput();
+
+                // 入力情報送信
+                MyNetworkManager.Singleton.SendToAll(new InputPacket(_input));
+            }
         }
 
+        private void FixedUpdate()
+        {
+            // 前進
+            if (_input.Keys.Contains(KeyCode.W))
+            {
+                _moveComponent.Move(DroneMoveComponent.Direction.Forward);
+            }
 
+            // 左移動
+            if (_input.Keys.Contains(KeyCode.A))
+            {
+                _moveComponent.Move(DroneMoveComponent.Direction.Left);
+            }
+
+            // 後退
+            if (_input.Keys.Contains(KeyCode.S))
+            {
+                _moveComponent.Move(DroneMoveComponent.Direction.Backwad);
+            }
+
+            // 右移動
+            if (_input.Keys.Contains(KeyCode.D))
+            {
+                _moveComponent.Move(DroneMoveComponent.Direction.Right);
+            }
+
+            // 上下移動
+            if (_input.MouseScrollDelta != 0)
+            {
+                if (_input.MouseScrollDelta > 0)
+                {
+                    _moveComponent.Move(DroneMoveComponent.Direction.Up);
+                }
+                else
+                {
+                    _moveComponent.Move(DroneMoveComponent.Direction.Down);
+                }
+            }
+            if (_input.Keys.Contains(KeyCode.R))
+            {
+                _moveComponent.Move(DroneMoveComponent.Direction.Up);
+            }
+            if (_input.Keys.Contains(KeyCode.F))
+            {
+                _moveComponent.Move(DroneMoveComponent.Direction.Down);
+            }
+
+            // マウスによる向き変更
+            _moveComponent.RotateDir(_input.MouseX, _input.MouseY);
+        }
+
+        private void OnDestroy()
+        {
+            // イベント削除
+            _searchComponent.ObjectStayEvent -= ObjectSearchEvent;
+            if (!_isControl) 
+                MyNetworkManager.Singleton.OnUdpReceive -= OnReceiveUdpOfInput;
+        }
 
         /// <summary>
         /// オブジェクト探索イベント
@@ -190,7 +392,7 @@ namespace Network
             if (_isDestroy) return;
 
             // Eキーでアイテム取得
-            if (Input.GetKey(KeyCode.E))
+            if (_input.Keys.Contains(KeyCode.E))
             {
                 if (other.CompareTag(TagNameConst.ITEM))
                 {
@@ -201,6 +403,19 @@ namespace Network
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// 入力情報パケット受信イベント
+        /// </summary>
+        /// <param name="player">送信元プレイヤー</param>
+        /// <param name="header">受信したUDPパケットのヘッダ</param>
+        /// <param name="packet">受信したUDPパケット</param>
+        private void OnReceiveUdpOfInput(string player, UdpHeader header, UdpPacket packet)
+        {
+            if (header != UdpHeader.Input) return;
+            if (player != Name) return;
+            _input = (packet as InputPacket).Input;
         }
 
         /// <summary>

@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json.Bson;
-using System;
+﻿using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -233,6 +232,8 @@ namespace Network
             // イベント削除
             MyNetworkManager.Singleton.OnDiscovery -= OnDiscovery;
             MyNetworkManager.Singleton.OnDisconnect -= OnDisconnect;
+
+            NetworkObjectSpawner.Initialize();
 
             // 探索停止
             MyNetworkManager.Singleton.StopDiscovery();

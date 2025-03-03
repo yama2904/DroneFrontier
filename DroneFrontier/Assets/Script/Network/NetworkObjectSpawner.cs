@@ -1,4 +1,7 @@
 ﻿using Network.Udp;
+using System;
+using System.Collections.Generic;
+using UnityEngine.AddressableAssets;
 using UnityEngine;
 
 namespace Network
@@ -6,58 +9,103 @@ namespace Network
     /// <summary>
     /// 全ての通信相手とのゲームオブジェクトの生成・削除を管理するクラス
     /// </summary>
-    public class NetworkObjectSpawner : MonoBehaviour
+    public class NetworkObjectSpawner
     {
-        public static NetworkObjectSpawner Instance { get; private set; }
+        public static Dictionary<string, MyNetworkBehaviour> SpawnedObjects { get; private set; } = new Dictionary<string, MyNetworkBehaviour>();
+
+        static NetworkObjectSpawner()
+        {
+            // 受信イベント設定
+            MyNetworkManager.Singleton.OnUdpReceive += OnUdpReceive;
+        }
+
+        public static void Initialize() { }
 
         /// <summary>
-        /// オブジェクト共有ID採番値
+        /// 指定したオブジェクトを全プレイヤーに生成させる
         /// </summary>
-        private long _numberingId = 1;
+        /// <param name="obj">生成させるオブジェクト</param>
+        public static void Spawn(MyNetworkBehaviour obj)
+        {
+            // ID設定
+            obj.ObjectId = Guid.NewGuid().ToString("N");
 
-        ///// <summary>
-        ///// 指定されたオブジェクトを全プレイヤーに生成させる
-        ///// </summary>
-        ///// <returns>採番した共有オブジェクトID</returns>
-        //public void Spawn(MyNetworkBehaviour obj)
-        //{
-        //    // ID設定
-        //    long id = _numberingId++;
-        //    obj.ObjectId = id;
+            // パケット送信
+            IPacket packet = new SpawnPacket(obj);
+            MyNetworkManager.Singleton.SendToAll(packet);
 
-        //    // パケット送信
-        //    IPacket packet = new SpawnPacket(obj);
-        //    MyNetworkManager.Singleton.SendAsync(packet);
-        //}
+            // 削除イベント設定
+            obj.OnDestroyObject += OnDestroy;
 
-        //private void Awake()
-        //{
-        //    Instance = this;
+            // 生成オブジェクト一覧に追加
+            SpawnedObjects.Add(obj.ObjectId, obj);
+        }
 
-        //    // 受信イベント設定
-        //    MyNetworkManager.Singleton.OnUdpReceive += OnUdpReceive;
-        //}
+        /// <summary>
+        /// 指定したオブジェクトを全プレイヤーから削除する
+        /// </summary>
+        /// <param name="obj">削除するオブジェクト</param>
+        public static void Destroy(MyNetworkBehaviour obj)
+        {
+            MyNetworkManager.Singleton.SendToAll(new DestroyPacket(obj.ObjectId));
+            SpawnedObjects.Remove(obj.ObjectId);
+        }
 
-        //private void OnDestroy()
-        //{
-        //    // 受信イベント削除
-        //    MyNetworkManager.Singleton.OnUdpReceive -= OnUdpReceive;
-        //}
+        /// <summary>
+        /// UDPパケット受信イベント
+        /// </summary>
+        /// <param name="name">プレイヤー名</param>
+        /// <param name="header">受信したUDPパケットのヘッダ</param>
+        /// <param name="packet">受信したUDPパケット</param>
+        private static void OnUdpReceive(string name, UdpHeader header, UdpPacket packet)
+        {
+            // オブジェクト生成パケット
+            if (header == UdpHeader.Spawn)
+            {
+                SpawnPacket spawnPacket = packet as SpawnPacket;
 
-        ///// <summary>
-        ///// UDPパケット受信イベント
-        ///// </summary>
-        ///// <param name="name">プレイヤー名</param>
-        ///// <param name="header">受信したUDPパケットのヘッダ</param>
-        ///// <param name="packet">受信したUDPパケット</param>
-        //private void OnUdpReceive(string name, UdpHeader header, UdpPacket packet)
-        //{
-        //    // オブジェクト生成パケット以外は無視
-        //    if (header != UdpHeader.Spawn) return;
+                // オブジェクト生成
+                var handle = Addressables.LoadAssetAsync<GameObject>(spawnPacket.AddressKey);
+                MyNetworkBehaviour obj = handle.WaitForCompletion().GetComponent<MyNetworkBehaviour>();
+                Addressables.Release(handle);
+                MyNetworkBehaviour spawn = UnityEngine.Object.Instantiate(obj, spawnPacket.Position, spawnPacket.Rotation);
 
-        //    // オブジェクト生成
-        //    MyNetworkBehaviour obj = (packet as SpawnPacket).SpawnObject;
-        //    Instantiate(obj);
-        //}
+                // ID設定
+                spawn.ObjectId = spawnPacket.ObjectId;
+
+                // 生成データ設定
+                spawn.ImportSpawnData(spawnPacket.SpawnData);
+
+                // 削除イベント設定
+                spawn.OnDestroyObject += OnDestroy;
+
+                // 生成オブジェクト一覧に追加
+                SpawnedObjects.Add(spawn.ObjectId, spawn);
+            }
+
+            // オブジェクト削除パケット
+            if (header == UdpHeader.Destroy)
+            {
+                string id = (packet as DestroyPacket).Id;
+                
+                if (SpawnedObjects.ContainsKey(id))
+                {
+                    UnityEngine.Object.Destroy(SpawnedObjects[id]);
+                    SpawnedObjects.Remove(id);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 生成したオブジェクトの削除ベント
+        /// </summary>
+        /// <param name="sender">イベントオブジェクト</param>
+        /// <param name="args">イベント引数</param>
+        private static void OnDestroy(object sender, EventArgs args)
+        {
+            MyNetworkBehaviour obj = sender as MyNetworkBehaviour;
+            obj.OnDestroyObject -= OnDestroy;
+            Destroy(obj);
+        }
     }
 }
