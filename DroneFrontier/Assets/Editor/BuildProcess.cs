@@ -1,8 +1,6 @@
 using System.Diagnostics;
-using System.IO;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
-using UnityEngine;
 
 public class BuildProcess : IPostprocessBuildWithReport
 {

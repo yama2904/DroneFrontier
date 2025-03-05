@@ -137,9 +137,9 @@ namespace Network
             if (_currentFps > newFps)
             {
                 step = newFps - _currentFps;
-                if (Mathf.Abs(step) > _maxFrameRate)
+                if (Mathf.Abs(step) > _frameRateMaxStep)
                 {
-                    step = _maxFrameRate * -1;
+                    step = _frameRateMaxStep * -1;
                 }
             }
 

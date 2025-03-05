@@ -1,9 +1,11 @@
+using Cysharp.Threading.Tasks;
 using Network.Udp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Threading;
 using UnityEngine;
 
 namespace Network
@@ -15,10 +17,52 @@ namespace Network
         /// </summary>
         public string ObjectId { get; internal set; } = string.Empty;
 
+
+        public bool IsSyncPosition
+        {
+            get
+            {
+                return _isSyncPosition;
+            }
+            set
+            {
+                if (_isSyncPosition == value) return;
+
+                if (value)
+                {
+                    UniTask.Void(async () =>
+                    {
+                        TimeSpan interval = TimeSpan.FromSeconds(_syncInterval);
+                        while (true)
+                        {
+                            await UniTask.Delay(interval, cancellationToken: _cancel.Token);
+                            MyNetworkManager.Singleton.SendToAll(new PositionPacket(this));
+                        }
+                    });
+                }
+                else
+                {
+                    _cancel.Cancel();
+                    _cancel = new CancellationTokenSource();
+                }
+
+                _isSyncPosition = value;
+            }
+        }
+        private bool _isSyncPosition = false;
+
         /// <summary>
         /// オブジェクト削除イベント
         /// </summary>
         public event EventHandler OnDestroyObject;
+
+        [SerializeField, Tooltip("座標を同期するか")]
+        private bool _syncPosition = false;
+
+        [SerializeField, Range(0.1f, 10f), Tooltip("座標の同期間隔（秒）")]
+        private float _syncInterval = 1f;
+
+        private CancellationTokenSource _cancel = new CancellationTokenSource();
 
         /// <summary>
         /// クラス名
@@ -35,6 +79,34 @@ namespace Network
         public virtual object CreateSpawnData() { return null; }
 
         public virtual void ImportSpawnData(object data) { }
+
+        protected virtual void Awake()
+        {
+            IsSyncPosition = _syncPosition;
+
+            // クラス名取得
+            _className = GetType().Name;
+
+            // メソッド一覧取得
+            _methods = GetType().GetMethods(BindingFlags.Instance |
+                                            BindingFlags.Public |
+                                            BindingFlags.NonPublic |
+                                            BindingFlags.Static |
+                                            BindingFlags.DeclaredOnly);
+            
+            // 受信イベント設定
+            MyNetworkManager.Singleton.OnUdpReceive += OnUdpReceiveOfSendMethod;
+            MyNetworkManager.Singleton.OnUdpReceive += OnUdpReceiveOfPosition;
+        }
+
+        protected virtual void OnDestroy()
+        {
+            // 受信イベント削除
+            MyNetworkManager.Singleton.OnUdpReceive -= OnUdpReceiveOfSendMethod;
+            MyNetworkManager.Singleton.OnUdpReceive -= OnUdpReceiveOfPosition;
+
+            OnDestroyObject?.Invoke(this, EventArgs.Empty);
+        }
 
         /// <summary>
         /// 引数に渡されたメソッドを実行し、全ての通信相手にも実行させる
@@ -66,30 +138,6 @@ namespace Network
             InvokeMethod(name, args.ToArray());
         }
 
-        private void Awake()
-        {
-            // クラス名取得
-            _className = GetType().Name;
-
-            // メソッド一覧取得
-            _methods = GetType().GetMethods(BindingFlags.Instance |
-                                            BindingFlags.Public |
-                                            BindingFlags.NonPublic |
-                                            BindingFlags.Static |
-                                            BindingFlags.DeclaredOnly);
-            
-            // 受信イベント設定
-            MyNetworkManager.Singleton.OnUdpReceive += OnUdpReceiveOfSendMethod;
-        }
-
-        private void OnDestroy()
-        {
-            // 受信イベント削除
-            MyNetworkManager.Singleton.OnUdpReceive -= OnUdpReceiveOfSendMethod;
-
-            OnDestroyObject?.Invoke(this, EventArgs.Empty);
-        }
-
         /// <summary>
         /// メソッド実行パケット受信イベント
         /// </summary>
@@ -110,6 +158,31 @@ namespace Network
 
             // メソッド実行
             InvokeMethod(methodPacket.MethodName, methodPacket.Arguments);
+        }
+
+        /// <summary>
+        /// 座標同期パケット受信イベント
+        /// </summary>
+        /// <param name="name">プレイヤー名</param>
+        /// <param name="header">受信したUDPパケットのヘッダ</param>
+        /// <param name="packet">受信したUDPパケット</param>
+        private void OnUdpReceiveOfPosition(string name, UdpHeader header, UdpPacket packet)
+        {
+            // 座標同期パケット以外無視
+            if (header != UdpHeader.Position) return;
+
+            // パケット取得
+            PositionPacket posPacket = packet as PositionPacket;
+
+            // 同一オブジェクトID以外無視
+            if (posPacket.ObjectId != ObjectId) return;
+
+            // 座標適用
+            var t = transform;
+            var pos = posPacket.Position;
+            var rotate = posPacket.Rotation;
+            t.position = new Vector3(pos.x, pos.y, pos.z);
+            t.rotation = new Quaternion(rotate.x, rotate.y, rotate.z, rotate.w);
         }
 
         /// <summary>

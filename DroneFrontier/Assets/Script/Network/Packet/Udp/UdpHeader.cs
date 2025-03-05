@@ -50,6 +50,11 @@ namespace Network.Udp
         /// <summary>
         /// オブジェクト削除
         /// </summary>
-        Destroy = 1 << 8
+        Destroy = 1 << 8,
+
+        /// <summary>
+        /// 座標同期
+        /// </summary>
+        Position = 1 << 9
     }
 }

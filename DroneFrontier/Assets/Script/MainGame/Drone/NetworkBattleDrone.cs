@@ -204,8 +204,10 @@ namespace Network
             SubWeapon = (WeaponType)Enum.ToObject(typeof(WeaponType), dic["Weapon"]);
         }
 
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
+
             // コンポーネントの取得
             _rigidbody = GetComponent<Rigidbody>();
             _animator = GetComponent<Animator>();
@@ -236,6 +238,7 @@ namespace Network
             if (Name == MyNetworkManager.Singleton.MyPlayerName)
             {
                 IsControl = true;
+                IsSyncPosition = true;
             }
 
             // 入力情報受信イベント設定
@@ -374,8 +377,10 @@ namespace Network
             _moveComponent.RotateDir(_input.MouseX, _input.MouseY);
         }
 
-        private void OnDestroy()
+        protected override void OnDestroy()
         {
+            base.OnDestroy();
+
             // イベント削除
             _searchComponent.ObjectStayEvent -= ObjectSearchEvent;
             if (!_isControl) 
