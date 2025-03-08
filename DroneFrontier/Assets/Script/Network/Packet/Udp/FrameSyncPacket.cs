@@ -6,7 +6,7 @@ namespace Network.Udp
     {
         public override UdpHeader Header => UdpHeader.FrameSync;
 
-        public long SequenceId { get; private set; } = 0;
+        public float TotalSeconds { get; private set; } = 0;
 
         /// <summary>
         /// コンストラクタ
@@ -16,21 +16,21 @@ namespace Network.Udp
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        /// <param name="sequenceId">パケット連番</param>
-        public FrameSyncPacket(long sequenceId)
+        /// <param name="totalSeconds">経過時間</param>
+        public FrameSyncPacket(float totalSeconds)
         {
-            SequenceId = sequenceId;
+            TotalSeconds = totalSeconds;
         }
 
         protected override IPacket ParseBody(byte[] body)
         {
             // インスタンスを作成して返す
-            return new FrameSyncPacket(BitConverter.ToInt64(body));
+            return new FrameSyncPacket(BitConverter.ToSingle(body));
         }
 
         protected override byte[] ConvertToPacketBody()
         {
-            return BitConverter.GetBytes(SequenceId);
+            return BitConverter.GetBytes(TotalSeconds);
         }
     }
 }

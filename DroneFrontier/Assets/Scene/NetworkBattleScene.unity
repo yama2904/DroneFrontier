@@ -2151,7 +2151,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9682f9375e7750b41a8383e67eee9434, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _initFrameRate: 10
+  _initFrameRate: 60
   _minFrameRate: 10
   _maxFrameRate: 120
   _frameRateMaxStep: 10
