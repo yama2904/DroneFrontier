@@ -4,7 +4,6 @@ using Network.Udp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading;
 
 /// <summary>
 /// 同期に関する処理を行うクラス
@@ -48,12 +47,12 @@ public class SyncHandler
         MyNetworkManager.Singleton.OnUdpReceive += OnUdpReceiveOfSync;
 
         // 受信前に同期パケット送信
-        IPacket packet = new SyncPacket();
+        IPacket packet = new SimpleSyncPacket();
         if (MyNetworkManager.Singleton.IsHost)
         {
             if (value != null)
             {
-                packet = new SyncPacket(value);
+                packet = new SimpleSyncPacket(value);
                 _syncValue = value;
             }
             MyNetworkManager.Singleton.SendToAll(packet);
@@ -117,7 +116,7 @@ public class SyncHandler
     private void OnUdpReceiveOfSync(string name, UdpHeader header, UdpPacket packet)
     {
         // 同期パケット以外は無視
-        if (header != UdpHeader.Sync) return;
+        if (header != UdpHeader.SimpleSync) return;
 
         if (!_receivedPlayers.Contains(name))
         {
@@ -126,7 +125,7 @@ public class SyncHandler
 
         if (_syncValue == null)
         {
-            _syncValue = (packet as SyncPacket).Value;
+            _syncValue = (packet as SimpleSyncPacket).Value;
         }
 
         // 同期パケットを返す

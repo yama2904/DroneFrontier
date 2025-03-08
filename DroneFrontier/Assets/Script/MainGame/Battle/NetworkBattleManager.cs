@@ -93,8 +93,10 @@ namespace Network
         [SerializeField, Tooltip("デバッグソロモード")]
         private bool _debug = false;
 
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
+
             if (_debug)
             {
                 PlayerData player = new PlayerData()
@@ -202,8 +204,10 @@ namespace Network
         /// <summary>
         /// ゲーム終了時の初期化処理
         /// </summary>
-        private void OnDestroy()
+        protected override void OnDestroy()
         {
+            base.OnDestroy();
+
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
             _droneSpawnManager.DroneDestroyEvent -= DroneDestroy;

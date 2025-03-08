@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Network
 {
-    public class NetworkFrameRateAdjuster : MonoBehaviour
+    public class FrameRateAdjuster : MonoBehaviour
     {
         [SerializeField, Tooltip("初期フレームレート")]
         private int _initFrameRate = 60;

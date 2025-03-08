@@ -788,23 +788,14 @@ namespace Network
                 {
                     if (_udpClient == null) break;
 
-                    byte[] buf = null;
-                    string sendPlayer = string.Empty;
+                    byte[] buf;
+                    IPEndPoint remoteEp;
                     try
                     {
                         // パケット受信
                         var receive = await _udpClient.ReceiveAsync();
                         buf = receive.Buffer;
-
-                        // 送信元プレイヤー名取得
-                        foreach (string key in _peers.Keys)
-                        {
-                            if (_peers[key].ep.Equals(receive.RemoteEndPoint))
-                            {
-                                sendPlayer = key;
-                                break;
-                            }
-                        }
+                        remoteEp = receive.RemoteEndPoint;
                     }
                     catch (SocketException)
                     {
@@ -817,17 +808,34 @@ namespace Network
                         break;
                     }
 
-                    // 型名取得
-                    Type type = UdpPacket.GetUdpType(buf);
+                    UniTask.Void(async () =>
+                    {
+                        // 送信元プレイヤー名取得
+                        string sendPlayer = string.Empty;
+                        foreach (string key in _peers.Keys)
+                        {
+                            if (_peers[key].ep.Equals(remoteEp))
+                            {
+                                sendPlayer = key;
+                                break;
+                            }
+                        }
 
-                    // 型名を基にコンストラクタ情報を取得
-                    var constructor = type.GetConstructor(Type.EmptyTypes);
-                    var expression = Expression.Lambda<Func<IPacket>>(Expression.New(constructor)).Compile();
-                    // コンストラクタ実行
-                    IPacket packet = expression();
+                        // 型名取得
+                        Type type = UdpPacket.GetUdpType(buf);
 
-                    // イベント発火
-                    OnUdpReceive?.Invoke(sendPlayer, UdpPacket.GetUdpHeader(buf), packet.Parse(buf) as UdpPacket);
+                        // 型名を基にコンストラクタ情報を取得
+                        var constructor = type.GetConstructor(Type.EmptyTypes);
+                        var expression = Expression.Lambda<Func<IPacket>>(Expression.New(constructor)).Compile();
+                        // コンストラクタ実行
+                        IPacket packet = expression();
+
+                        // イベント発火
+                        OnUdpReceive?.Invoke(sendPlayer, UdpPacket.GetUdpHeader(buf), packet.Parse(buf) as UdpPacket);
+
+                        // UniTaskVoidのエラー回避用
+                        await UniTask.CompletedTask;
+                    });
                 }
             });
         }

@@ -15,7 +15,7 @@ namespace Network.Udp
         /// <summary>
         /// 同期
         /// </summary>
-        Sync = 1 << 1,
+        SimpleSync = 1 << 1,
 
         /// <summary>
         /// プレイヤー探索
@@ -55,6 +55,11 @@ namespace Network.Udp
         /// <summary>
         /// 座標同期
         /// </summary>
-        Position = 1 << 9
+        Position = 1 << 9,
+
+        /// <summary>
+        /// フレーム同期
+        /// </summary>
+        FrameSync = 1 << 10
     }
 }

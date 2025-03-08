@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Network
 {
-    public class NetworkDroneSpawnManager : MyNetworkBehaviour
+    public class NetworkDroneSpawnManager : MonoBehaviour
     {
         /// <summary>
         /// ドローン破壊イベント
