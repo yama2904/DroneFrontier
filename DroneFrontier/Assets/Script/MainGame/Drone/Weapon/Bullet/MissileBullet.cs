@@ -76,7 +76,7 @@ namespace Offline
             // 爆発タイマー設定
             UniTask.Void(async () =>
             {
-                await UniTask.Delay(TimeSpan.FromSeconds(ExplosionSec), cancellationToken: _cancel.Token);
+                await UniTask.Delay(TimeSpan.FromSeconds(ExplosionSec), cancellationToken: _cancel.Token, ignoreTimeScale: true);
                 Explosion();
             });
         }

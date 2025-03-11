@@ -659,17 +659,17 @@ namespace Network
             if (IsHost) return;
 
             byte[] data = packet.ConvertToPacket();
-            lock (_peers)
+            UniTask.Void(async () =>
             {
                 foreach (string key in _peers.Keys)
                 {
                     if (_peers[key].isHost)
                     {
-                        _udpClient.Send(data, data.Length, _peers[key].ep);
+                        await _udpClient.SendAsync(data, data.Length, _peers[key].ep);
                         break;
                     }
                 }
-            }
+            });
         }
 
         /// <summary>
@@ -679,13 +679,14 @@ namespace Network
         public void SendToAll(IPacket packet)
         {
             byte[] data = packet.ConvertToPacket();
-            lock (_peers)
+            UniTask.Void(async () =>
             {
-                Parallel.ForEach(_peers.Keys, key =>
+                foreach (string key in _peers.Keys)
                 {
-                    _udpClient.Send(data, data.Length, _peers[key].ep);
-                });
-            }
+                    await _udpClient.SendAsync(data, data.Length, _peers[key].ep);
+                }
+            });
+
         }
 
         private void Awake()

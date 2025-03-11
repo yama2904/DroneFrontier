@@ -56,7 +56,7 @@ namespace Network
             return Spawn();
         }
 
-        private void Awake()
+        protected override void Awake()
         {
             // Transform‚ðƒLƒƒƒbƒVƒ…•Û‘¶‚µ‚Ä‚¨‚­
             _transform = transform;

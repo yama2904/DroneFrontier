@@ -4,6 +4,7 @@ using Network.Udp;
 using System;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class NetworkDelayMonitor : MonoBehaviour
@@ -24,12 +25,12 @@ public class NetworkDelayMonitor : MonoBehaviour
         MyNetworkManager.Singleton.OnUdpReceive += OnUdpReceive;
         _stopwatch.Start();
 
-        UniTask.Void(async () =>
+        Task.Run(async () =>
         {
             TimeSpan interval = TimeSpan.FromSeconds(_maxDelaySec * 0.5);
             while (true)
             {
-                await UniTask.Delay(interval, cancellationToken: _cancel.Token);
+                await Task.Delay(interval, cancellationToken: _cancel.Token);
                 MyNetworkManager.Singleton.SendToAll(new FrameSyncPacket(TotalSeconds));
             }
         });

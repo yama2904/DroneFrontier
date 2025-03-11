@@ -67,7 +67,7 @@ public class StunGrenade : MonoBehaviour
         // ŽžŠÔŒo‰ß‚Å’…’e
         UniTask.Void(async () =>
         {
-            await UniTask.Delay(TimeSpan.FromSeconds(ImpactSec), cancellationToken: _cancel.Token);
+            await UniTask.Delay(TimeSpan.FromSeconds(ImpactSec), cancellationToken: _cancel.Token, ignoreTimeScale: true);
             DoImpact().Forget();
         });
 

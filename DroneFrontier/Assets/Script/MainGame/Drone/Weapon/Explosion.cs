@@ -66,7 +66,7 @@ namespace Offline
             // 爆発した直後に当たり判定を消す
             UniTask.Void(async () =>
             {
-                await UniTask.Delay(TimeSpan.FromMilliseconds(200));
+                await UniTask.Delay(TimeSpan.FromMilliseconds(200), ignoreTimeScale: true);
                 GetComponent<SphereCollider>().enabled = false;
             });
 

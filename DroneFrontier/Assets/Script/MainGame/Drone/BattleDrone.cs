@@ -364,7 +364,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
         _soundComponent.PlayOneShot(SoundManager.SE.DEATH, SoundManager.SEVolume);
 
         // 一定時間経過してから爆破
-        await UniTask.Delay(TimeSpan.FromSeconds(DEATH_FALL_TIME));
+        await UniTask.Delay(TimeSpan.FromSeconds(DEATH_FALL_TIME), ignoreTimeScale: true);
 
         // ドローンの非表示
         _droneObject.gameObject.SetActive(false);
