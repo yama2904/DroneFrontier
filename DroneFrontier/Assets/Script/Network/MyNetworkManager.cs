@@ -141,6 +141,9 @@ namespace Network
         /// </summary>
         private CancellationTokenSource _discoverCancel = new CancellationTokenSource();
 
+        private List<(byte[] data, IPEndPoint ep)> _receivedUdpDatas = new List<(byte[] data, IPEndPoint ep)>();
+        private List<(string name, UdpHeader header, UdpPacket packet)> _invokeUdpDatas = new List<(string name, UdpHeader header, UdpPacket packet)>();
+
         private bool _tcpReceiving = false;
         private bool _udpReceiving = false;
 
@@ -645,12 +648,16 @@ namespace Network
         public void StopDiscovery()
         {
             _discoverCancel.Cancel();
-            _udpClient.Close();
-            _udpClient.Dispose();
-            _udpClient = new UdpClient(LOCAL_ENDPOINT);
+            
+            if (!_udpReceiving)
+            {
+                _udpClient.Close();
+                _udpClient.Dispose();
+                _udpClient = new UdpClient(LOCAL_ENDPOINT);
 
-            // 受信開始
-            ReceiveUdp();
+                // 受信開始
+                ReceiveUdp();
+            }
         }
 
         /// <summary>
@@ -801,6 +808,9 @@ namespace Network
             if (_udpReceiving) return;
             _udpReceiving = true;
 
+            CheckUdpReceiveData();
+            CheckUdpInvokeData();
+
             try
             {
                 while (true)
@@ -809,36 +819,7 @@ namespace Network
 
                     // パケット受信
                     var result = await _udpClient.ReceiveAsync();
-                    byte[] buf = result.Buffer;
-                    IPEndPoint remoteEp = result.RemoteEndPoint;
-
-                    UniTask.Void(async () =>
-                    {
-                        // 送信元プレイヤー名取得
-                        string sendPlayer = string.Empty;
-                        foreach (string key in _peers.Keys)
-                        {
-                            if (_peers[key].ep.Equals(remoteEp))
-                            {
-                                sendPlayer = key;
-                                break;
-                            }
-                        }
-
-                        // 型名取得
-                        Type type = UdpPacket.GetUdpType(buf);
-
-                        // 型名を基にコンストラクタ情報を取得
-                        var constructor = type.GetConstructor(Type.EmptyTypes);
-                        var expression = Expression.Lambda<Func<IPacket>>(Expression.New(constructor)).Compile();
-                        // コンストラクタ実行
-                        IPacket packet = expression();
-
-                        // イベント発火
-                        OnUdpReceive?.Invoke(sendPlayer, UdpPacket.GetUdpHeader(buf), packet.Parse(buf) as UdpPacket);
-
-                        await UniTask.CompletedTask;
-                    });
+                    _receivedUdpDatas.Add((result.Buffer, result.RemoteEndPoint));
                 }
             }
             catch (SocketException)
@@ -852,6 +833,59 @@ namespace Network
             finally
             {
                 _udpReceiving = false;
+            }
+        }
+
+        private async void CheckUdpReceiveData()
+        {
+            while (true)
+            {
+                if (!_udpReceiving) break;
+                if (_receivedUdpDatas.Count > 0)
+                {
+                    var data = _receivedUdpDatas[0];
+                    _receivedUdpDatas.RemoveAt(0);
+
+                    // 送信元プレイヤー名取得
+                    string sendPlayer = string.Empty;
+                    foreach (string key in _peers.Keys)
+                    {
+                        if (_peers[key].ep.Equals(data.ep))
+                        {
+                            sendPlayer = key;
+                            break;
+                        }
+                    }
+
+                    // 型名取得
+                    Type type = UdpPacket.GetUdpType(data.data);
+
+                    // 型名を基にコンストラクタ情報を取得
+                    var constructor = type.GetConstructor(Type.EmptyTypes);
+                    var expression = Expression.Lambda<Func<IPacket>>(Expression.New(constructor)).Compile();
+                    // コンストラクタ実行
+                    IPacket packet = expression();
+
+                    _invokeUdpDatas.Add((sendPlayer, UdpPacket.GetUdpHeader(data.data), packet.Parse(data.data) as UdpPacket));
+                }
+
+                await Task.Delay(1).ConfigureAwait(false);
+            }
+        }
+
+        private async void CheckUdpInvokeData()
+        {
+            while (true)
+            {
+                if (!_udpReceiving) break;
+                if (_invokeUdpDatas.Count > 0)
+                {
+                    var data = _invokeUdpDatas[0];
+                    _invokeUdpDatas.RemoveAt(0);
+                    OnUdpReceive?.Invoke(data.name, data.header, data.packet);
+                }
+
+                await UniTask.Delay(1, ignoreTimeScale: true);
             }
         }
 
