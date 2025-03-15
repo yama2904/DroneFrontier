@@ -19,7 +19,7 @@ MonoBehaviour:
     width: 1977.6
     height: 1108.8
   m_ShowMode: 4
-  m_Title: "\u30B2\u30FC\u30E0"
+  m_Title: "\u30B3\u30F3\u30BD\u30FC\u30EB"
   m_RootView: {fileID: 2}
   m_MinSize: {x: 875, y: 300}
   m_MaxSize: {x: 10000, y: 10000}
@@ -327,7 +327,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets/Scene
+    - Assets/Script
     m_Globs: []
     m_OriginalText: 
     m_ImportLogFlags: 0
@@ -335,16 +335,16 @@ MonoBehaviour:
   m_ViewMode: 1
   m_StartGridSize: 64
   m_LastFolders:
-  - Assets/Scene
+  - Assets/Script
   m_LastFoldersGridSize: -1
   m_LastProjectPath: C:\SourceCode\Unity\DroneFrontier\DroneFrontier
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
-    scrollPos: {x: 0, y: 185.39996}
-    m_SelectedIDs: a6590000
-    m_LastClickedID: 22950
-    m_ExpandedIDs: 000000000e59000010590000125900001459000016590000185900001a5900001c5900001e59000020590000225900002459000026590000a859000000ca9a3bffffff7f
+    scrollPos: {x: 0, y: 202.19995}
+    m_SelectedIDs: a8590000
+    m_LastClickedID: 22952
+    m_ExpandedIDs: 000000000e59000010590000125900001459000016590000185900001a5900001c5900001e5900002059000022590000245900002659000000ca9a3bffffff7f
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -397,8 +397,8 @@ MonoBehaviour:
       m_Icon: {fileID: 0}
       m_ResourceFile: 
   m_ListAreaState:
-    m_SelectedInstanceIDs: 
-    m_LastClickedInstanceID: 0
+    m_SelectedInstanceIDs: dc100000
+    m_LastClickedInstanceID: 4316
     m_HadKeyboardFocusLastEvent: 1
     m_ExpandedInstanceIDs: c6230000ca970000888d0000e480000000000000
     m_RenameOverlay:
@@ -466,9 +466,9 @@ MonoBehaviour:
   m_SceneHierarchy:
     m_TreeViewState:
       scrollPos: {x: 0, y: 0}
-      m_SelectedIDs: 
+      m_SelectedIDs: dc100000
       m_LastClickedID: 0
-      m_ExpandedIDs: 58c5fdffb2c5fdffeec7fdffece1fdfff0e1fdff1417feffea32fefffc38feff4839feff963bfeff2058feffae58feffd692feff3093feff7495feff7aaffeff86affeffb2e4feff9000ffffaa06fffffe06ffff0608ffff7a24ffff30fbffff
+      m_ExpandedIDs: a4d2ffff9eefffff30fbffff
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 

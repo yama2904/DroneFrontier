@@ -322,7 +322,8 @@ namespace Network
                 _input.UpdateInput();
 
                 // “ü—Íî•ñ‘—M
-                MyNetworkManager.Singleton.SendToAll(new InputPacket(_input));
+                if (!NetworkDelayMonitor.IsPause)
+                    MyNetworkManager.Singleton.SendToAll(new InputPacket(_input));
             }
         }
 

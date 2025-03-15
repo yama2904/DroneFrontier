@@ -1,4 +1,3 @@
-using Cysharp.Threading.Tasks;
 using Network;
 using Network.Udp;
 using System;
@@ -9,6 +8,8 @@ using UnityEngine;
 
 public class NetworkDelayMonitor : MonoBehaviour
 {
+    public static bool IsPause { get; private set; } = false;
+
     public float TotalSeconds => (float)_stopwatch.Elapsed.TotalSeconds;
 
     [SerializeField, Tooltip("ãñóeÇ∑ÇÈíxâÑéûä‘ÅiïbÅj")]
@@ -65,6 +66,7 @@ public class NetworkDelayMonitor : MonoBehaviour
                 _delayPlayer = name;
                 Time.timeScale = 0;
                 _stopwatch.Stop();
+                IsPause = true;
             }
 
             DebugLogger.OutLog($"ÅúTotalSeconds:{TotalSeconds}");
@@ -81,6 +83,7 @@ public class NetworkDelayMonitor : MonoBehaviour
                 _delayPlayer = null;
                 Time.timeScale = 1;
                 _stopwatch.Start();
+                IsPause = false;
             }
 
             DebugLogger.OutLog($"ÅöTotalSeconds:{TotalSeconds}");

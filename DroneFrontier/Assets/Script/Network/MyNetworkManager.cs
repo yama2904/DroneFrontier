@@ -141,6 +141,9 @@ namespace Network
         /// </summary>
         private CancellationTokenSource _discoverCancel = new CancellationTokenSource();
 
+        private bool _tcpReceiving = false;
+        private bool _udpReceiving = false;
+
         /// <summary>
         /// ホストとして通信を開始
         /// </summary>
@@ -200,7 +203,7 @@ namespace Network
                     }
 
                     // --- クライアントへ返信 start
-                    
+
                     // 接続済みクライアントの名前とIPアドレスを構築
                     Dictionary<string, string> clientAdrs = new Dictionary<string, string>();
                     lock (_peers)
@@ -214,7 +217,7 @@ namespace Network
                     // 自分の名前と各クライアントの情報を格納して返信
                     byte[] responseData = new DiscoverResponsePacket(name, clientAdrs).ConvertToPacket();
                     await _udpClient.SendAsync(responseData, responseData.Length, receive.RemoteEndPoint);
-                    
+
                     // --- クライアントへ返信 end
 
                     // クライアントからのTCP待機
@@ -685,8 +688,13 @@ namespace Network
                 {
                     await _udpClient.SendAsync(data, data.Length, _peers[key].ep);
                 }
-            });
 
+                // ###Debug###
+                if (packet is FrameSyncPacket sync)
+                {
+                    DebugLogger.OutLog($"◆Send:{sync.TotalSeconds}");
+                }
+            });
         }
 
         private void Awake()
@@ -702,78 +710,81 @@ namespace Network
         /// <param name="isHost">受信先がホストであるか</param>
         private void ReceiveTcp(string player, bool isHost)
         {
+            if (_tcpReceiving) return;
+            _tcpReceiving = true;
+
             TcpClient client = _peers[player].tcp;
             UniTask.Void(async () =>
             {
-                while (true)
+                try
                 {
-                    // Tcp受信待機
-                    byte[] buf = new byte[2048];
-                    int size = 0;
-                    try
+                    while (true)
                     {
-                        size = await client.GetStream().ReadAsync(buf, 0, buf.Length);
-                    }
-                    catch (SocketException)
-                    {
-                        // 切断
-                        break;
-                    }
-                    catch (ObjectDisposedException)
-                    {
-                        // 切断
-                        break;
-                    }
-                    catch (IOException)
-                    {
-                        // 切断
-                        break;
-                    }
+                        // Tcp受信待機
+                        byte[] buf = new byte[2048];
+                        int size = await client.GetStream().ReadAsync(buf, 0, buf.Length);
 
-                    // 切断チェック
-                    if (size == 0)
-                    {
-                        lock (_peers)
-                        {
-                            if (_peers.ContainsKey(player))
-                            {
-                                client.Close();
-                                client.Dispose();
-                                _peers.Remove(player);
-                                lock (PlayerNames) PlayerNames.Remove(player);
-                            }
-                        }
-                        OnDisconnect?.Invoke(player, isHost);
-
-                        // ホストの場合は全てのクライアントと切断
-                        if (isHost)
+                        // 切断チェック
+                        if (size == 0)
                         {
                             lock (_peers)
                             {
-                                foreach (string key in _peers.Keys)
+                                if (_peers.ContainsKey(player))
                                 {
-                                    _peers[key].tcp.Close();
-                                    _peers[key].tcp.Dispose();
-                                    OnDisconnect?.Invoke(key, false);
+                                    client.Close();
+                                    client.Dispose();
+                                    _peers.Remove(player);
+                                    lock (PlayerNames) PlayerNames.Remove(player);
                                 }
-                                _peers.Clear();
-                                lock (PlayerNames) PlayerNames.Clear();
                             }
+                            OnDisconnect?.Invoke(player, isHost);
+
+                            // ホストの場合は全てのクライアントと切断
+                            if (isHost)
+                            {
+                                lock (_peers)
+                                {
+                                    foreach (string key in _peers.Keys)
+                                    {
+                                        _peers[key].tcp.Close();
+                                        _peers[key].tcp.Dispose();
+                                        OnDisconnect?.Invoke(key, false);
+                                    }
+                                    _peers.Clear();
+                                    lock (PlayerNames) PlayerNames.Clear();
+                                }
+                            }
+                            break;
                         }
-                        break;
+
+                        // 型名取得
+                        Type type = TcpPacket.GetTcpType(buf);
+
+                        // 型名を基にコンストラクタ情報を取得
+                        var constructor = type.GetConstructor(Type.EmptyTypes);
+                        var expression = Expression.Lambda<Func<IPacket>>(Expression.New(constructor)).Compile();
+                        // コンストラクタ実行
+                        IPacket packet = expression();
+
+                        // イベント発火
+                        OnTcpReceive?.Invoke(player, TcpPacket.GetTcpHeader(buf), packet.Parse(buf) as TcpPacket);
                     }
-
-                    // 型名取得
-                    Type type = TcpPacket.GetTcpType(buf);
-
-                    // 型名を基にコンストラクタ情報を取得
-                    var constructor = type.GetConstructor(Type.EmptyTypes);
-                    var expression = Expression.Lambda<Func<IPacket>>(Expression.New(constructor)).Compile();
-                    // コンストラクタ実行
-                    IPacket packet = expression();
-
-                    // イベント発火
-                    OnTcpReceive?.Invoke(player, TcpPacket.GetTcpHeader(buf), packet.Parse(buf) as TcpPacket);
+                }
+                catch (SocketException)
+                {
+                    // 切断
+                }
+                catch (ObjectDisposedException)
+                {
+                    // 切断
+                }
+                catch (IOException)
+                {
+                    // 切断
+                }
+                finally
+                {
+                    _tcpReceiving = false;
                 }
             });
         }
@@ -783,60 +794,62 @@ namespace Network
         /// </summary>
         private void ReceiveUdp()
         {
+            if (_udpReceiving) return;
+            _udpReceiving = true;
+
             UniTask.Void(async () =>
             {
-                while (true)
+                try
                 {
-                    if (_udpClient == null) break;
-
-                    byte[] buf;
-                    IPEndPoint remoteEp;
-                    try
+                    while (true)
                     {
+                        if (_udpClient == null) break;
+
                         // パケット受信
                         var receive = await _udpClient.ReceiveAsync();
-                        buf = receive.Buffer;
-                        remoteEp = receive.RemoteEndPoint;
-                    }
-                    catch (SocketException)
-                    {
-                        // 切断
-                        break;
-                    }
-                    catch (ObjectDisposedException)
-                    {
-                        // 切断
-                        break;
-                    }
+                        byte[] buf = receive.Buffer;
+                        IPEndPoint remoteEp = receive.RemoteEndPoint;
 
-                    UniTask.Void(async () =>
-                    {
-                        // 送信元プレイヤー名取得
-                        string sendPlayer = string.Empty;
-                        foreach (string key in _peers.Keys)
+                        UniTask.Void(async () =>
                         {
-                            if (_peers[key].ep.Equals(remoteEp))
+                            // 送信元プレイヤー名取得
+                            string sendPlayer = string.Empty;
+                            foreach (string key in _peers.Keys)
                             {
-                                sendPlayer = key;
-                                break;
+                                if (_peers[key].ep.Equals(remoteEp))
+                                {
+                                    sendPlayer = key;
+                                    break;
+                                }
                             }
-                        }
 
-                        // 型名取得
-                        Type type = UdpPacket.GetUdpType(buf);
+                            // 型名取得
+                            Type type = UdpPacket.GetUdpType(buf);
 
-                        // 型名を基にコンストラクタ情報を取得
-                        var constructor = type.GetConstructor(Type.EmptyTypes);
-                        var expression = Expression.Lambda<Func<IPacket>>(Expression.New(constructor)).Compile();
-                        // コンストラクタ実行
-                        IPacket packet = expression();
+                            // 型名を基にコンストラクタ情報を取得
+                            var constructor = type.GetConstructor(Type.EmptyTypes);
+                            var expression = Expression.Lambda<Func<IPacket>>(Expression.New(constructor)).Compile();
+                            // コンストラクタ実行
+                            IPacket packet = expression();
 
-                        // イベント発火
-                        OnUdpReceive?.Invoke(sendPlayer, UdpPacket.GetUdpHeader(buf), packet.Parse(buf) as UdpPacket);
+                            // イベント発火
+                            OnUdpReceive?.Invoke(sendPlayer, UdpPacket.GetUdpHeader(buf), packet.Parse(buf) as UdpPacket);
 
-                        // UniTaskVoidのエラー回避用
-                        await UniTask.CompletedTask;
-                    });
+                            await UniTask.CompletedTask;
+                        });
+                    }
+                }
+                catch (SocketException)
+                {
+                    // 切断
+                }
+                catch (ObjectDisposedException)
+                {
+                    // 切断
+                }
+                finally
+                {
+                    _udpReceiving = false;
                 }
             });
         }
@@ -859,7 +872,7 @@ namespace Network
                     }
                 }
             }
-           
+
             return addresses;
         }
     }
