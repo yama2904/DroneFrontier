@@ -2133,7 +2133,7 @@ GameObject:
   - component: {fileID: 1288167925}
   - component: {fileID: 1288167924}
   m_Layer: 0
-  m_Name: FrameRateAdjuster
+  m_Name: QualityAdjuster
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2151,11 +2151,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9682f9375e7750b41a8383e67eee9434, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _initFrameRate: 60
-  _minFrameRate: 10
-  _maxFrameRate: 120
-  _frameRateMaxStep: 10
   _checkInterval: 1
+  _qualityDownFps: 30
+  _qualityUpFps: 100
+  _qualityChangeSec: 5
 --- !u!4 &1288167925
 Transform:
   m_ObjectHideFlags: 0

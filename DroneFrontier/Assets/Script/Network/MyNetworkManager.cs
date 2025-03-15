@@ -668,10 +668,12 @@ namespace Network
                 {
                     if (_peers[key].isHost)
                     {
-                        await _udpClient.SendAsync(data, data.Length, _peers[key].ep);
+                        _udpClient.Send(data, data.Length, _peers[key].ep);
                         break;
                     }
                 }
+
+                await UniTask.CompletedTask;
             });
         }
 
@@ -686,7 +688,7 @@ namespace Network
             {
                 foreach (string key in _peers.Keys)
                 {
-                    await _udpClient.SendAsync(data, data.Length, _peers[key].ep);
+                    _udpClient.Send(data, data.Length, _peers[key].ep);
                 }
 
                 // ###Debug###
@@ -694,6 +696,8 @@ namespace Network
                 {
                     DebugLogger.OutLog($"◆Send:{sync.TotalSeconds}");
                 }
+
+                await UniTask.CompletedTask;
             });
         }
 
@@ -792,66 +796,63 @@ namespace Network
         /// <summary>
         /// UDP受信を開始する
         /// </summary>
-        private void ReceiveUdp()
+        private async void ReceiveUdp()
         {
             if (_udpReceiving) return;
             _udpReceiving = true;
 
-            UniTask.Void(async () =>
+            try
             {
-                try
+                while (true)
                 {
-                    while (true)
+                    if (_udpClient == null) break;
+
+                    // パケット受信
+                    var result = await _udpClient.ReceiveAsync();
+                    byte[] buf = result.Buffer;
+                    IPEndPoint remoteEp = result.RemoteEndPoint;
+
+                    UniTask.Void(async () =>
                     {
-                        if (_udpClient == null) break;
-
-                        // パケット受信
-                        var receive = await _udpClient.ReceiveAsync();
-                        byte[] buf = receive.Buffer;
-                        IPEndPoint remoteEp = receive.RemoteEndPoint;
-
-                        UniTask.Void(async () =>
+                        // 送信元プレイヤー名取得
+                        string sendPlayer = string.Empty;
+                        foreach (string key in _peers.Keys)
                         {
-                            // 送信元プレイヤー名取得
-                            string sendPlayer = string.Empty;
-                            foreach (string key in _peers.Keys)
+                            if (_peers[key].ep.Equals(remoteEp))
                             {
-                                if (_peers[key].ep.Equals(remoteEp))
-                                {
-                                    sendPlayer = key;
-                                    break;
-                                }
+                                sendPlayer = key;
+                                break;
                             }
+                        }
 
-                            // 型名取得
-                            Type type = UdpPacket.GetUdpType(buf);
+                        // 型名取得
+                        Type type = UdpPacket.GetUdpType(buf);
 
-                            // 型名を基にコンストラクタ情報を取得
-                            var constructor = type.GetConstructor(Type.EmptyTypes);
-                            var expression = Expression.Lambda<Func<IPacket>>(Expression.New(constructor)).Compile();
-                            // コンストラクタ実行
-                            IPacket packet = expression();
+                        // 型名を基にコンストラクタ情報を取得
+                        var constructor = type.GetConstructor(Type.EmptyTypes);
+                        var expression = Expression.Lambda<Func<IPacket>>(Expression.New(constructor)).Compile();
+                        // コンストラクタ実行
+                        IPacket packet = expression();
 
-                            // イベント発火
-                            OnUdpReceive?.Invoke(sendPlayer, UdpPacket.GetUdpHeader(buf), packet.Parse(buf) as UdpPacket);
+                        // イベント発火
+                        OnUdpReceive?.Invoke(sendPlayer, UdpPacket.GetUdpHeader(buf), packet.Parse(buf) as UdpPacket);
 
-                            await UniTask.CompletedTask;
-                        });
-                    }
+                        await UniTask.CompletedTask;
+                    });
                 }
-                catch (SocketException)
-                {
-                    // 切断
-                }
-                catch (ObjectDisposedException)
-                {
-                    // 切断
-                }
-                finally
-                {
-                    _udpReceiving = false;
-                }
-            });
+            }
+            catch (SocketException)
+            {
+                // 切断
+            }
+            catch (ObjectDisposedException)
+            {
+                // 切断
+            }
+            finally
+            {
+                _udpReceiving = false;
+            }
         }
 
         /// <summary>

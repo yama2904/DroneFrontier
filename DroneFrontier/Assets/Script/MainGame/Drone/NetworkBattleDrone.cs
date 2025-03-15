@@ -320,10 +320,6 @@ namespace Network
             {
                 // 入力情報更新
                 _input.UpdateInput();
-
-                // 入力情報送信
-                if (!NetworkDelayMonitor.IsPause)
-                    MyNetworkManager.Singleton.SendToAll(new InputPacket(_input));
             }
         }
 
@@ -376,6 +372,11 @@ namespace Network
 
             // マウスによる向き変更
             _moveComponent.RotateDir(_input.MouseX, _input.MouseY);
+
+            if (_isControl)
+            {
+                MyNetworkManager.Singleton.SendToAll(new InputPacket(_input));
+            }
         }
 
         protected override void OnDestroy()
