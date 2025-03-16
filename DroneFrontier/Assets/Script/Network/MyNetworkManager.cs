@@ -814,9 +814,9 @@ namespace Network
             var semaphore = new SemaphoreSlim(1, 1);
             ParallelOptions options = new ParallelOptions()
             {
-                MaxDegreeOfParallelism = 5
+                MaxDegreeOfParallelism = 3
             };
-            Parallel.For(0, 5, async i =>
+            Parallel.For(0, 3, async i =>
             {
                 try
                 {
@@ -826,7 +826,7 @@ namespace Network
 
                         // パケット受信
                         await semaphore.WaitAsync();
-                        var result = await _udpClient.ReceiveAsync();
+                        var result = await _udpClient.ReceiveAsync().ConfigureAwait(false);
                         semaphore.Release();
                         
                         // 受信データをキューに追加
