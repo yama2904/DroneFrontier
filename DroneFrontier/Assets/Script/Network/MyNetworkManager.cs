@@ -714,6 +714,11 @@ namespace Network
             DontDestroyOnLoad(gameObject);
         }
 
+        private void OnDestroy()
+        {
+            Disconnect();
+        }
+
         /// <summary>
         /// 指定したプレイヤーからのTCP受信を開始する
         /// </summary>
