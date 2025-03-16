@@ -1,7 +1,9 @@
 using Cysharp.Threading.Tasks;
+using kcp2k;
 using Network.Tcp;
 using Network.Udp;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq.Expressions;
@@ -91,6 +93,11 @@ namespace Network
         /// </summary>
         public event UdpReceiveHandle OnUdpReceive;
 
+        /// <summary>
+        /// UDPパケット受信イベント
+        /// </summary>
+        public event UdpReceiveHandle OnUdpReceiveOnMainThread;
+
         #endregion
 
         #region プレイヤー切断イベント
@@ -141,8 +148,8 @@ namespace Network
         /// </summary>
         private CancellationTokenSource _discoverCancel = new CancellationTokenSource();
 
-        private List<(byte[] data, IPEndPoint ep)> _receivedUdpDatas = new List<(byte[] data, IPEndPoint ep)>();
-        private List<(string name, UdpHeader header, UdpPacket packet)> _invokeUdpDatas = new List<(string name, UdpHeader header, UdpPacket packet)>();
+        private ConcurrentQueue<(byte[] data, IPEndPoint ep)> _receivedUdpQueue = new ConcurrentQueue<(byte[] data, IPEndPoint ep)>();
+        private ConcurrentQueue<(string name, UdpHeader header, UdpPacket packet)> _invokeUdpQueue = new ConcurrentQueue<(string name, UdpHeader header, UdpPacket packet)>();
 
         private bool _tcpReceiving = false;
         private bool _udpReceiving = false;
@@ -648,7 +655,7 @@ namespace Network
         public void StopDiscovery()
         {
             _discoverCancel.Cancel();
-            
+
             if (!_udpReceiving)
             {
                 _udpClient.Close();
@@ -810,7 +817,6 @@ namespace Network
 
             CheckUdpReceiveData();
             CheckUdpInvokeData();
-
             try
             {
                 while (true)
@@ -819,7 +825,7 @@ namespace Network
 
                     // パケット受信
                     var result = await _udpClient.ReceiveAsync();
-                    _receivedUdpDatas.Add((result.Buffer, result.RemoteEndPoint));
+                    _receivedUdpQueue.Enqueue((result.Buffer, result.RemoteEndPoint));
                 }
             }
             catch (SocketException)
@@ -841,32 +847,39 @@ namespace Network
             while (true)
             {
                 if (!_udpReceiving) break;
-                if (_receivedUdpDatas.Count > 0)
+                if (_receivedUdpQueue.Count > 0)
                 {
-                    var data = _receivedUdpDatas[0];
-                    _receivedUdpDatas.RemoveAt(0);
-
-                    // 送信元プレイヤー名取得
-                    string sendPlayer = string.Empty;
-                    foreach (string key in _peers.Keys)
+                    while (_receivedUdpQueue.TryDequeue(out var data))
                     {
-                        if (_peers[key].ep.Equals(data.ep))
+                        // 送信元プレイヤー名取得
+                        string sendPlayer = string.Empty;
+                        foreach (string key in _peers.Keys)
                         {
-                            sendPlayer = key;
-                            break;
+                            if (_peers[key].ep.Equals(data.ep))
+                            {
+                                sendPlayer = key;
+                                break;
+                            }
                         }
+
+                        // 型名取得
+                        Type type = UdpPacket.GetUdpType(data.data);
+
+                        // 型名を基にコンストラクタ情報を取得
+                        var constructor = type.GetConstructor(Type.EmptyTypes);
+                        var expression = Expression.Lambda<Func<IPacket>>(Expression.New(constructor)).Compile();
+                        // コンストラクタ実行
+                        IPacket packet = expression();
+
+                        UdpHeader header = UdpPacket.GetUdpHeader(data.data);
+                        UdpPacket udpPacket = packet.Parse(data.data) as UdpPacket;
+                        _invokeUdpQueue.Enqueue((sendPlayer, header, udpPacket));
+                        UniTask.Void(async () =>
+                        {
+                            OnUdpReceive?.Invoke(sendPlayer, header, udpPacket);
+                            await UniTask.CompletedTask;
+                        });
                     }
-
-                    // 型名取得
-                    Type type = UdpPacket.GetUdpType(data.data);
-
-                    // 型名を基にコンストラクタ情報を取得
-                    var constructor = type.GetConstructor(Type.EmptyTypes);
-                    var expression = Expression.Lambda<Func<IPacket>>(Expression.New(constructor)).Compile();
-                    // コンストラクタ実行
-                    IPacket packet = expression();
-
-                    _invokeUdpDatas.Add((sendPlayer, UdpPacket.GetUdpHeader(data.data), packet.Parse(data.data) as UdpPacket));
                 }
 
                 await Task.Delay(1).ConfigureAwait(false);
@@ -878,11 +891,12 @@ namespace Network
             while (true)
             {
                 if (!_udpReceiving) break;
-                if (_invokeUdpDatas.Count > 0)
+                if (_invokeUdpQueue.Count > 0)
                 {
-                    var data = _invokeUdpDatas[0];
-                    _invokeUdpDatas.RemoveAt(0);
-                    OnUdpReceive?.Invoke(data.name, data.header, data.packet);
+                    while (_invokeUdpQueue.TryDequeue(out var data))
+                    {
+                        OnUdpReceiveOnMainThread?.Invoke(data.name, data.header, data.packet);
+                    }
                 }
 
                 await UniTask.Delay(1, ignoreTimeScale: true);

@@ -23,7 +23,7 @@ public class NetworkDelayMonitor : MonoBehaviour
 
     private void Start()
     {
-        MyNetworkManager.Singleton.OnUdpReceive += OnUdpReceive;
+        MyNetworkManager.Singleton.OnUdpReceiveOnMainThread += OnUdpReceive;
         _stopwatch.Start();
 
         Task.Run(async () =>
@@ -39,7 +39,7 @@ public class NetworkDelayMonitor : MonoBehaviour
 
     private void OnDestroy()
     {
-        MyNetworkManager.Singleton.OnUdpReceive -= OnUdpReceive;
+        MyNetworkManager.Singleton.OnUdpReceiveOnMainThread -= OnUdpReceive;
         _cancel.Cancel();
     }
 

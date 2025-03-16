@@ -95,15 +95,15 @@ namespace Network
                                             BindingFlags.DeclaredOnly);
             
             // 受信イベント設定
-            MyNetworkManager.Singleton.OnUdpReceive += OnUdpReceiveOfSendMethod;
-            MyNetworkManager.Singleton.OnUdpReceive += OnUdpReceiveOfPosition;
+            MyNetworkManager.Singleton.OnUdpReceiveOnMainThread += OnUdpReceiveOfSendMethod;
+            MyNetworkManager.Singleton.OnUdpReceiveOnMainThread += OnUdpReceiveOfPosition;
         }
 
         protected virtual void OnDestroy()
         {
             // 受信イベント削除
-            MyNetworkManager.Singleton.OnUdpReceive -= OnUdpReceiveOfSendMethod;
-            MyNetworkManager.Singleton.OnUdpReceive -= OnUdpReceiveOfPosition;
+            MyNetworkManager.Singleton.OnUdpReceiveOnMainThread -= OnUdpReceiveOfSendMethod;
+            MyNetworkManager.Singleton.OnUdpReceiveOnMainThread -= OnUdpReceiveOfPosition;
 
             OnDestroyObject?.Invoke(this, EventArgs.Empty);
         }

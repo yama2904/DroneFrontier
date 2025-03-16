@@ -16,7 +16,7 @@ namespace Network
         static NetworkObjectSpawner()
         {
             // 受信イベント設定
-            MyNetworkManager.Singleton.OnUdpReceive += OnUdpReceive;
+            MyNetworkManager.Singleton.OnUdpReceiveOnMainThread += OnUdpReceive;
         }
 
         public static void Initialize() { }
