@@ -1,5 +1,4 @@
 using Cysharp.Threading.Tasks;
-using kcp2k;
 using Network.Tcp;
 using Network.Udp;
 using System;
@@ -705,12 +704,6 @@ namespace Network
                     _udpClient.Send(data, data.Length, _peers[key].ep);
                 }
 
-                // ###Debug###
-                if (packet is FrameSyncPacket sync)
-                {
-                    DebugLogger.OutLog($"◆Send:{sync.TotalSeconds}");
-                }
-
                 await UniTask.CompletedTask;
             });
         }
@@ -810,36 +803,49 @@ namespace Network
         /// <summary>
         /// UDP受信を開始する
         /// </summary>
-        private async void ReceiveUdp()
+        private void ReceiveUdp()
         {
             if (_udpReceiving) return;
             _udpReceiving = true;
 
             CheckUdpReceiveData();
             CheckUdpInvokeData();
-            try
-            {
-                while (true)
-                {
-                    if (_udpClient == null) break;
 
-                    // パケット受信
-                    var result = await _udpClient.ReceiveAsync();
-                    _receivedUdpQueue.Enqueue((result.Buffer, result.RemoteEndPoint));
+            var semaphore = new SemaphoreSlim(1, 1);
+            ParallelOptions options = new ParallelOptions()
+            {
+                MaxDegreeOfParallelism = 5
+            };
+            Parallel.For(0, 5, async i =>
+            {
+                try
+                {
+                    while (true)
+                    {
+                        if (_udpClient == null) break;
+
+                        // パケット受信
+                        await semaphore.WaitAsync();
+                        var result = await _udpClient.ReceiveAsync();
+                        semaphore.Release();
+                        
+                        // 受信データをキューに追加
+                        _receivedUdpQueue.Enqueue((result.Buffer, result.RemoteEndPoint));
+                    }
                 }
-            }
-            catch (SocketException)
-            {
-                // 切断
-            }
-            catch (ObjectDisposedException)
-            {
-                // 切断
-            }
-            finally
-            {
-                _udpReceiving = false;
-            }
+                catch (SocketException)
+                {
+                    // 切断
+                }
+                catch (ObjectDisposedException)
+                {
+                    // 切断
+                }
+                finally
+                {
+                    _udpReceiving = false;
+                }
+            });
         }
 
         private async void CheckUdpReceiveData()

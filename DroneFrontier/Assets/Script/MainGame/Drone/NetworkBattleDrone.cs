@@ -241,9 +241,15 @@ namespace Network
                 IsSyncPosition = true;
             }
 
-            // 入力情報受信イベント設定
+            // 他プレイヤーの場合
             if (!_isControl)
+            {
+                // 入力情報受信イベント設定
                 MyNetworkManager.Singleton.OnUdpReceive += OnReceiveUdpOfInput;
+
+                // 補間をオフにしないと瞬間移動する
+                _rigidbody.interpolation = RigidbodyInterpolation.None;
+            }
 
             enabled = false;
         }

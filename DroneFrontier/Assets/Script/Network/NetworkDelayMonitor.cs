@@ -68,9 +68,6 @@ public class NetworkDelayMonitor : MonoBehaviour
                 _stopwatch.Stop();
                 IsPause = true;
             }
-
-            DebugLogger.OutLog($"ÅúTotalSeconds:{TotalSeconds}");
-            DebugLogger.OutLog($"Åúsec:{sec}");
         }
         else
         {
@@ -85,9 +82,6 @@ public class NetworkDelayMonitor : MonoBehaviour
                 _stopwatch.Start();
                 IsPause = false;
             }
-
-            DebugLogger.OutLog($"ÅöTotalSeconds:{TotalSeconds}");
-            DebugLogger.OutLog($"Åösec:{sec}");
         }
     }
 }
