@@ -2,7 +2,6 @@
 using System;
 using System.Threading;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
 
 namespace Offline
 {
@@ -15,15 +14,8 @@ namespace Offline
         /// </summary>
         public float ExplosionSec { get; set; } = 2f;
 
-        /// <summary>
-        /// 爆発プレハブのAddressKey
-        /// </summary>
-        private const string EXPLOSION_ADDRESS_KEY = "Explosion";
-
-        /// <summary>
-        /// 爆発プレハブ
-        /// </summary>
-        private static Explosion _explosionPrefab = null;
+        [SerializeField, Tooltip("爆発オブジェクト")]
+        private Explosion _explosion = null;
 
         /// <summary>
         /// ダメージ量
@@ -87,16 +79,6 @@ namespace Offline
             _transform = GetComponent<Rigidbody>().transform;
             _audioSource = GetComponent<AudioSource>();
             _audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.MISSILE);
-
-            // 爆発プレハブ読み込み
-            if (_explosionPrefab == null)
-            {
-                Addressables.LoadAssetAsync<GameObject>(EXPLOSION_ADDRESS_KEY).Completed += handle =>
-                {
-                    _explosionPrefab = handle.Result.GetComponent<Explosion>();
-                    Addressables.Release(handle);
-                };
-            }
         }
 
         private void FixedUpdate()
@@ -158,7 +140,7 @@ namespace Offline
         private void Explosion()
         {
             // 爆発オブジェクト生成
-            Explosion e = Instantiate(_explosionPrefab, _transform.position, Quaternion.identity);
+            Explosion e = Instantiate(_explosion, _transform.position, Quaternion.identity);
             e.Shooter = Shooter;
 
             // 爆発タイマー停止

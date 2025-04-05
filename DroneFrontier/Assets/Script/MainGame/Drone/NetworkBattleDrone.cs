@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 namespace Network
 {
-    public class NetworkBattleDrone : MyNetworkBehaviour, IBattleDrone
+    public class NetworkBattleDrone : MyNetworkBehaviour, IBattleDrone, ILockableOn, IRadarable
     {
         #region public
 
@@ -244,6 +244,12 @@ namespace Network
             // 他プレイヤーの場合
             if (!_isControl)
             {
+                // UI非表示
+                _lockOnComponent.HideReticle = true;
+                _itemComponent.HideItemUI = true;
+                _weaponComponent.HideBulletUI = true;
+                _boostComponent.HideGaugeUI = true;
+
                 // 入力情報受信イベント設定
                 MyNetworkManager.Singleton.OnUdpReceive += OnReceiveUdpOfInput;
 
@@ -282,16 +288,19 @@ namespace Network
                 _lockOnComponent.StopLockOn();
             }
 
-            // レーダー使用
-            if (_input.DownedKeys.Contains(KeyCode.Q))
+            if (_isControl)
             {
-                _soundComponent.PlayOneShot(SoundManager.SE.RADAR, SoundManager.SEVolume);
-                _radarComponent.StartRadar();
-            }
-            // レーダー終了
-            if (_input.UppedKeys.Contains(KeyCode.Q))
-            {
-                _radarComponent.StopRadar();
+                // レーダー使用
+                if (_input.DownedKeys.Contains(KeyCode.Q))
+                {
+                    _soundComponent.PlayOneShot(SoundManager.SE.RADAR, SoundManager.SEVolume);
+                    _radarComponent.StartRadar();
+                }
+                // レーダー終了
+                if (_input.UppedKeys.Contains(KeyCode.Q))
+                {
+                    _radarComponent.StopRadar();
+                }
             }
 
             // メイン武器攻撃（サブ武器攻撃中の場合は不可）

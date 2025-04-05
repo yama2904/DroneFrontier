@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
 
 namespace Offline
 {
@@ -16,10 +15,8 @@ namespace Offline
 
         public event EventHandler OnBulletEmpty;
 
-        /// <summary>
-        /// 弾丸オブジェクトのAddressKey
-        /// </summary>
-        private const string BULLET_ADDRESS_KEY = "Bullet";
+        [SerializeField, Tooltip("弾丸")]
+        private GameObject _bullet = null;
 
         [SerializeField, Tooltip("弾丸発射座標")]
         private Transform _shotPosition = null;
@@ -38,11 +35,6 @@ namespace Offline
 
         [SerializeField, Tooltip("追従力")] 
         private float _trackingPower = 3f;
-
-        /// <summary>
-        /// 弾丸プレハブ
-        /// </summary>
-        private GameObject _bulletPrefab = null;
 
         /// <summary>
         /// AudioSourceコンポーネント
@@ -65,7 +57,7 @@ namespace Offline
             if (_shotTimer < _shotIntervalSec) return;
 
             // 弾丸発射
-            GameObject bullet = Instantiate(_bulletPrefab, ShotPosition.position, ShotPosition.rotation);
+            GameObject bullet = Instantiate(_bullet, ShotPosition.position, ShotPosition.rotation);
             bullet.GetComponent<IBullet>().Shot(Owner, _damage, _speed, _trackingPower, target);
 
             // 一定時間後弾丸削除
@@ -91,13 +83,6 @@ namespace Offline
 
             // 弾丸発射位置初期化
             ShotPosition = _shotPosition;
-
-            // 弾丸オブジェクト読み込み
-            Addressables.LoadAssetAsync<GameObject>(BULLET_ADDRESS_KEY).Completed += handle =>
-            {
-                _bulletPrefab = handle.Result;
-                Addressables.Release(handle);
-            };
         }
 
         private void Update()

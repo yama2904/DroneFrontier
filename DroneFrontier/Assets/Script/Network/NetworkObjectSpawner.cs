@@ -57,7 +57,7 @@ namespace Network
         /// <param name="name">プレイヤー名</param>
         /// <param name="header">受信したUDPパケットのヘッダ</param>
         /// <param name="packet">受信したUDPパケット</param>
-        private static void OnUdpReceive(string name, UdpHeader header, UdpPacket packet)
+        private static async void OnUdpReceive(string name, UdpHeader header, UdpPacket packet)
         {
             // オブジェクト生成パケット
             if (header == UdpHeader.Spawn)
@@ -65,10 +65,8 @@ namespace Network
                 SpawnPacket spawnPacket = packet as SpawnPacket;
 
                 // オブジェクト生成
-                var handle = Addressables.LoadAssetAsync<GameObject>(spawnPacket.AddressKey);
-                MyNetworkBehaviour obj = handle.WaitForCompletion().GetComponent<MyNetworkBehaviour>();
-                Addressables.Release(handle);
-                MyNetworkBehaviour spawn = UnityEngine.Object.Instantiate(obj, spawnPacket.Position, spawnPacket.Rotation);
+                GameObject obj = await Addressables.InstantiateAsync(spawnPacket.AddressKey, spawnPacket.Position, spawnPacket.Rotation).Task;
+                MyNetworkBehaviour spawn = obj.GetComponent<MyNetworkBehaviour>();
 
                 // ID設定
                 spawn.ObjectId = spawnPacket.ObjectId;

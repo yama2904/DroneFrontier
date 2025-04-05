@@ -40,11 +40,6 @@ namespace Offline
         public event EventHandler OnBulletEmpty;
 
         /// <summary>
-        /// 弾丸オブジェクトのAddressKey
-        /// </summary>
-        private const string BULLET_ADDRESS_KEY = "LaserBullet";
-
-        /// <summary>
         /// レーザーゲージUIのAddressKey
         /// </summary>
         private const string GAUGE_UI_ADDRESS_KEY = "LazerGaugeUI";
@@ -58,6 +53,9 @@ namespace Offline
         /// 発射可能な最低ゲージ量
         /// </summary>
         private const float SHOOTABLE_MIN_GAUGE = 0.2f;
+
+        [SerializeField, Tooltip("弾丸")]
+        private LaserBullet _bullet = null;
 
         [SerializeField, Tooltip("レーザー発射座標")]
         private Transform _shotPosition = null;
@@ -73,11 +71,6 @@ namespace Offline
 
         [SerializeField, Tooltip("レーザーが敵を追う速度")]
         private float _trackingPower = 0.01f;
-
-        /// <summary>
-        /// 発射する弾丸
-        /// </summary>
-        private LaserBullet _bullet = null;
 
         /// <summary>
         /// レーザーゲージを表示するUI
@@ -148,21 +141,6 @@ namespace Offline
             // 1秒ごとのゲージ消費/回復量を事前に計算
             _useGaugePerSec = 1 / _maxShotTime;
             _addGaugePerSec = 1 / _maxRecastTime;
-
-            // 弾丸オブジェクト読み込み
-            Addressables.LoadAssetAsync<GameObject>(BULLET_ADDRESS_KEY).Completed += handle =>
-            {
-                // 弾丸生成
-                GameObject bullet = Instantiate(handle.Result, ShotPosition);
-                bullet.transform.localPosition = ShotPosition.localPosition;
-                bullet.transform.localRotation = ShotPosition.localRotation;
-
-                // コンポーネント取得
-                _bullet = bullet.GetComponent<LaserBullet>();
-
-                // リソース解放
-                Addressables.Release(handle);
-            };
         }
 
 

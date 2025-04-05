@@ -47,6 +47,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 65ae7d1d121d14546b02892764ea7b78, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _bullet: {fileID: 8694931832901377729, guid: a5a64a02c0e218e459be32483421c537, type: 3}
   _shotPosition: {fileID: 9184297372474888498}
   _angle: 3
   _angleDiff: 2

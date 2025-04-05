@@ -148,7 +148,7 @@ PrefabInstance:
     - target: {fileID: -927199367670048503, guid: 668fd1822a1131542b9717d3452cbc26,
         type: 3}
       propertyPath: m_Name
-      value: Gatling_Offline
+      value: GatlingWeapon
       objectReference: {fileID: 0}
     - target: {fileID: -927199367670048503, guid: 668fd1822a1131542b9717d3452cbc26,
         type: 3}

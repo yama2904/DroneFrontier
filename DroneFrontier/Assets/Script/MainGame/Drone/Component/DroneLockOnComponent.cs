@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,6 +10,23 @@ public class DroneLockOnComponent : MonoBehaviour
     /// </summary>
     public GameObject Target => Useful.IsNullOrDestroyed(_target) ? null : _target;
     private GameObject _target = null;
+
+    /// <summary>
+    /// レティクルを非表示にするか
+    /// </summary>
+    public bool HideReticle
+    {
+        get { return _hideReticle; }
+        set
+        {
+            if (_reticleImage != null)
+            {
+                _reticleImage.enabled = !value;
+            }
+            _hideReticle = value;
+        }
+    }
+    private bool _hideReticle = false;
 
     /// <summary>
     /// 新規ターゲットロックオンイベント

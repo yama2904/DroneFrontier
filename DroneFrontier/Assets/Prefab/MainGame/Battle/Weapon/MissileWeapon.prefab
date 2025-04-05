@@ -78,6 +78,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32f6ceefb29189b489d37678ce65a00a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _bullet: {fileID: 7685176673457542688, guid: 637911ba241dc7847818b6bb7e996a42, type: 3}
   _displayMissile: {fileID: 4454148018901715728}
   _shotPosition: {fileID: 2867096622288785274}
   _damage: 40

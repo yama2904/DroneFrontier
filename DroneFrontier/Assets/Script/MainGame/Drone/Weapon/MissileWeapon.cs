@@ -40,11 +40,6 @@ namespace Offline
         public event EventHandler OnBulletEmpty;
 
         /// <summary>
-        /// 弾丸オブジェクトのAddressKey
-        /// </summary>
-        private const string BULLET_ADDRESS_KEY = "MissileBullet";
-
-        /// <summary>
         /// 残弾背景UIのAddressKey
         /// </summary>
         private const string BACK_UI_ADDRESS_KEY = "MissileBulletBackUI";
@@ -63,6 +58,9 @@ namespace Offline
         /// 各残弾UIの横幅
         /// </summary>
         private const int UI_WIDTH = 50;
+
+        [SerializeField, Tooltip("弾丸")]
+        private GameObject _bullet = null;
 
         [SerializeField, Tooltip("表示用の装備ミサイル")]
         private GameObject _displayMissile = null;
@@ -90,11 +88,6 @@ namespace Offline
 
         [SerializeField, Tooltip("ストック可能な弾数")]
         private int _maxBulletNum = 3;
-
-        /// <summary>
-        /// 弾丸プレハブ
-        /// </summary>
-        private static GameObject _bulletPrefab = null;
 
         /// <summary>
         /// 発射間隔（秒）
@@ -130,7 +123,7 @@ namespace Offline
             if (_hasBulletNum <= 0) return;
 
             // 弾丸生成
-            IBullet bullet = Instantiate(_bulletPrefab, ShotPosition.position, ShotPosition.rotation).GetComponent<IBullet>();
+            IBullet bullet = Instantiate(_bullet, ShotPosition.position, ShotPosition.rotation).GetComponent<IBullet>();
             bullet.Shot(Owner, _damage, _speed, _trackingPower, target);
             (bullet as MissileBullet).ExplosionSec = _explosionSec; // ※要検討
 
@@ -165,16 +158,6 @@ namespace Offline
             _shotIntervalSec = 1.0f / _shotPerSecond;
             _shotTimer = _shotIntervalSec;
             _hasBulletNum = _maxBulletNum;
-
-            // 弾丸オブジェクト読み込み
-            if (_bulletPrefab == null)
-            {
-                Addressables.LoadAssetAsync<GameObject>(BULLET_ADDRESS_KEY).Completed += handle =>
-                {
-                    _bulletPrefab = handle.Result;
-                    Addressables.Release(handle);
-                };
-            }
         }
 
         private void Update()
@@ -238,10 +221,6 @@ namespace Offline
             RectTransform bulletUIBack = handleBack.Result.GetComponent<RectTransform>();
             RectTransform bulletUIFront = handleFront.Result.GetComponent<RectTransform>();
 
-            // リソース解放
-            Addressables.Release(handleBack);
-            Addressables.Release(handleFront);
-
             // 残弾UI作成
             _bulletUIs = new Image[_maxBulletNum];
             for (int i = 0; i < _maxBulletNum; i++)
@@ -266,6 +245,10 @@ namespace Offline
                 _bulletUIs[i] = front.GetComponent<Image>();
                 _bulletUIs[i].fillAmount = 1f;
             }
+
+            // リソース解放
+            Addressables.Release(handleBack);
+            Addressables.Release(handleFront);
         }
     }
 }

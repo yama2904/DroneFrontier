@@ -23,13 +23,7 @@ public class BitFlagUtil
     /// <returns>更新後のビットフラグ</returns>
     public static int UpdateFlag(int flag, int digits, bool value)
     {
-        if (value)
-        {
-            return flag |= 1 << digits;
-        }
-        else
-        {
-            return flag &= ~(1 << digits);
-        }
+        // digits桁目を0にクリアする + valueがtrueの場合にdigits桁目を1にする
+        return (flag & ~(1 << digits)) | (value ? 1 : 0 << digits);
     }
 }

@@ -49,9 +49,10 @@ public class WeaponCreater
         // 武器オブジェクト読み込み
         var handle = Addressables.LoadAssetAsync<GameObject>(addressKey);
         GameObject prefab = handle.WaitForCompletion();
+        GameObject obj = Object.Instantiate(prefab);
         Addressables.Release(handle);
 
         // 読み込んだ武器オブジェクト返却
-        return Object.Instantiate(prefab);
+        return obj;
     }
 }
