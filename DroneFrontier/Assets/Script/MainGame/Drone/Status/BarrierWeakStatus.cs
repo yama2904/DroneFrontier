@@ -6,9 +6,12 @@ public class BarrierWeakStatus : IDroneStatusChange
 {
     public StatusChangeType StatusType => StatusChangeType.BarrierWeak;
 
-    public Image IconPrefab => throw new NotImplementedException();
-
     public event EventHandler StatusEndEvent;
+
+    public Image InstantiateIcon()
+    {
+        throw new NotImplementedException();
+    }
 
     public bool Invoke(GameObject drone, float statusSec, params object[] addParams)
     {

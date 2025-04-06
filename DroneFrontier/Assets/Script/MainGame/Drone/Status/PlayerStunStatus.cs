@@ -7,20 +7,22 @@ public class PlayerStunStatus : IDroneStatusChange
 {
     public StatusChangeType StatusType => StatusChangeType.Stun;
 
-    public Image IconPrefab => null;
-
     public event EventHandler StatusEndEvent;
 
     private FadeoutImage _createdMask;
 
+    public Image InstantiateIcon()
+    {
+        return null;
+    }
+
     public bool Invoke(GameObject drone, float statusSec, params object[] addParams)
     {
-        Addressables.LoadAssetAsync<GameObject>("StunMask").Completed += handle =>
+        Addressables.InstantiateAsync("StunMask").Completed += handle =>
         {
-            _createdMask = UnityEngine.Object.Instantiate(handle.Result).GetComponent<FadeoutImage>();
+            _createdMask = handle.Result.GetComponent<FadeoutImage>();
             _createdMask.FadeoutSec = statusSec;
             _createdMask.FadeoutEndEvent += FadeoutEndEvent;
-            Addressables.Release(handle);
         };
         return true;
     }

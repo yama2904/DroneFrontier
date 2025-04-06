@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using System;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,9 +14,10 @@ public interface IDroneStatusChange
     StatusChangeType StatusType { get; }
 
     /// <summary>
-    /// 状態変化のアイコン
+    /// 状態異常アイコン生成
     /// </summary>
-    Image IconPrefab { get; }
+    /// <returns></returns>
+    Image InstantiateIcon();
 
     /// <summary>
     /// ステータス変化実行

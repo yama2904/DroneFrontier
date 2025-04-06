@@ -34,16 +34,16 @@ namespace Offline
                     float y = UI_HEIGHT * 0.5f;
 
                     // 背景UIの生成
-                    RectTransform back = Instantiate(_bulletBackUI).GetComponent<RectTransform>();
-                    back.SetParent(_bulletUICanvas.transform);
-                    back.localPosition = new Vector3(x, y, 0);
-                    back.localRotation = Quaternion.identity;
+                    Image back = Instantiate(_bulletBackUI);
+                    back.transform.SetParent(_bulletUICanvas.transform);
+                    back.transform.localPosition = new Vector3(x, y, 0);
+                    back.transform.localRotation = Quaternion.identity;
 
                     // 前面UIの生成
-                    RectTransform front = Instantiate(_bulletFrontUI).GetComponent<RectTransform>();
-                    front.SetParent(_bulletUICanvas.transform);
-                    front.localPosition = new Vector3(x, y, 0);
-                    front.localRotation = Quaternion.identity;
+                    Image front = Instantiate(_bulletFrontUI);
+                    front.transform.SetParent(_bulletUICanvas.transform);
+                    front.transform.localPosition = new Vector3(x, y, 0);
+                    front.transform.localRotation = Quaternion.identity;
 
                     // 残弾UIに追加
                     _bulletUIs[i] = front.GetComponent<Image>();

@@ -7,11 +7,14 @@ public class BarrierStrengthenStatus : IDroneStatusChange
 {
     public StatusChangeType StatusType => StatusChangeType.BarrierStrenghen;
 
-    public Image IconPrefab => null;
-
     public event EventHandler StatusEndEvent;
 
     private DroneBarrierComponent _barrier = null;
+
+    public Image InstantiateIcon()
+    {
+        return null;
+    }
 
     public bool Invoke(GameObject drone, float statusSec, params object[] addParams)
     {

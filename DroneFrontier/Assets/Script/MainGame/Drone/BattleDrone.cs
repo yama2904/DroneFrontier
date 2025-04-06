@@ -175,7 +175,6 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
         _weaponComponent = GetComponent<DroneWeaponComponent>();
         _boostComponent = GetComponent<DroneBoostComponent>();
 
-
         // ストック数UI初期化
         StockNum = _stockNum;
 

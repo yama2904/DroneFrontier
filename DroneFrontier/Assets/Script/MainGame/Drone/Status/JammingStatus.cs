@@ -9,8 +9,6 @@ public class JammingStatus : IDroneStatusChange
 {
     public StatusChangeType StatusType => StatusChangeType.Jamming;
 
-    public Image IconPrefab { get; private set; }
-
     public event EventHandler StatusEndEvent;
 
     /// <summary>
@@ -38,23 +36,9 @@ public class JammingStatus : IDroneStatusChange
     /// </summary>
     private CancellationTokenSource _cancel = new CancellationTokenSource();
 
-    /// <summary>
-    /// アイコンキャッシュ
-    /// </summary>
-    private static GameObject _cacheIconPrefab = null;
-
-    public JammingStatus()
+    public Image InstantiateIcon()
     {
-        // アイコン初回読み込み時にキャッシュへ保存
-        if (_cacheIconPrefab == null)
-        {
-            var handle = Addressables.LoadAssetAsync<GameObject>("JammigUI");
-            _cacheIconPrefab = handle.WaitForCompletion();
-            Addressables.Release(handle);
-        }
-
-        // キャッシュからアイコン画像取り出し
-        IconPrefab = _cacheIconPrefab.GetComponent<Image>();
+        return Addressables.InstantiateAsync("JammigUI").WaitForCompletion().GetComponent<Image>();
     }
 
     public bool Invoke(GameObject drone, float statusSec, params object[] addParams)

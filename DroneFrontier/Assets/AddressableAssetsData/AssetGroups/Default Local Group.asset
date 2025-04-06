@@ -17,11 +17,6 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: 77a3b631f60219d4f90d070c6543a978
   m_SerializeEntries:
-  - m_GUID: 020ba08994670fc42a791716f37eb94a
-    m_Address: JammigUI
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 207208a205ab31a4fba67586f4180f2c
     m_Address: LaserWeapon
     m_ReadOnly: 0

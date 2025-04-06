@@ -2025,7 +2025,6 @@ GameObject:
   m_Component:
   - component: {fileID: 19832076650291286}
   - component: {fileID: 969262399878152283}
-  - component: {fileID: 6249079555693101483}
   m_Layer: 5
   m_Name: BulletUIs
   m_TagString: Untagged
@@ -2075,23 +2074,6 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
---- !u!114 &6249079555693101483
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6079382015686947666}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_IgnoreReversedGraphics: 1
-  m_BlockingObjects: 0
-  m_BlockingMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
 --- !u!1 &6517234487248981587
 GameObject:
   m_ObjectHideFlags: 0

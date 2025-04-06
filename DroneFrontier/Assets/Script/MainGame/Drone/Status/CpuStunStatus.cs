@@ -7,9 +7,12 @@ public class CpuStunStatus : IDroneStatusChange
 {
     public StatusChangeType StatusType => StatusChangeType.Stun;
 
-    public Image IconPrefab => null;
-
     public event EventHandler StatusEndEvent;
+
+    public Image InstantiateIcon()
+    {
+        return null;
+    }
 
     public bool Invoke(GameObject drone, float statusSec, params object[] addParams)
     {

@@ -66,10 +66,10 @@ namespace Offline
                 Statuses.Add(status.StatusType);
 
                 // ステータス変化アイコンを表示
-                Debug.Log(status.IconPrefab);
-                if (status.IconPrefab != null)
+                Image icon = status.InstantiateIcon();
+                Debug.Log(icon);
+                if (icon != null)
                 {
-                    Image icon = Instantiate(status.IconPrefab);
                     RectTransform t = icon.rectTransform;
                     t.SetParent(_statusIconCanvas, false);
 
