@@ -1,7 +1,5 @@
-﻿using Cysharp.Threading.Tasks;
-using System;
+﻿using System;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
 using UnityEngine.UI;
 
 namespace Offline
@@ -25,11 +23,31 @@ namespace Offline
             set
             {
                 _bulletUICanvas = value;
+                if (_bulletUICanvas == null) return;
 
-                // 非同期で弾丸UI読み込み
-                if (_bulletUICanvas != null)
+                // 残弾UI作成
+                _bulletUIs = new Image[_maxBulletNum];
+                for (int i = 0; i < _maxBulletNum; i++)
                 {
-                    LoadBulletUIAsync(_bulletUICanvas).Forget();
+                    // UIの配置位置計算
+                    float x = UI_WIDTH * i + UI_WIDTH * 0.5f;
+                    float y = UI_HEIGHT * 0.5f;
+
+                    // 背景UIの生成
+                    RectTransform back = Instantiate(_bulletBackUI).GetComponent<RectTransform>();
+                    back.SetParent(_bulletUICanvas.transform);
+                    back.localPosition = new Vector3(x, y, 0);
+                    back.localRotation = Quaternion.identity;
+
+                    // 前面UIの生成
+                    RectTransform front = Instantiate(_bulletFrontUI).GetComponent<RectTransform>();
+                    front.SetParent(_bulletUICanvas.transform);
+                    front.localPosition = new Vector3(x, y, 0);
+                    front.localRotation = Quaternion.identity;
+
+                    // 残弾UIに追加
+                    _bulletUIs[i] = front.GetComponent<Image>();
+                    _bulletUIs[i].fillAmount = 1f;
                 }
             }
         }
@@ -38,16 +56,6 @@ namespace Offline
         public event EventHandler OnBulletFull;
 
         public event EventHandler OnBulletEmpty;
-
-        /// <summary>
-        /// 残弾背景UIのAddressKey
-        /// </summary>
-        private const string BACK_UI_ADDRESS_KEY = "ShotgunBulletBackUI";
-
-        /// <summary>
-        /// 残弾前面UIのAddressKey
-        /// </summary>
-        private const string FRONT_UI_ADDRESS_KEY = "ShotgunBulletFrontUI";
 
         /// <summary>
         /// 各残弾UIの縦幅
@@ -61,6 +69,12 @@ namespace Offline
 
         [SerializeField, Tooltip("弾丸")]
         private GameObject _bullet = null;
+
+        [SerializeField, Tooltip("残弾UI（前面）")]
+        private Image _bulletFrontUI = null;
+
+        [SerializeField, Tooltip("残弾UI（背面）")]
+        private Image _bulletBackUI = null;
 
         [SerializeField, Tooltip("弾丸発射座標")]
         private Transform _shotPosition = null;
@@ -230,51 +244,6 @@ namespace Offline
             {
                 _shotTimer += Time.deltaTime;
             }
-        }
-
-        /// <summary>
-        /// 非同期で弾丸UIを読み込んで表示
-        /// </summary>
-        /// <param name="canvas">表示する弾丸UIの親Canvas</param>
-        private async UniTask LoadBulletUIAsync(Canvas canvas)
-        {
-            // 残弾UI読み込み
-            var handleBack = Addressables.LoadAssetAsync<GameObject>(BACK_UI_ADDRESS_KEY);
-            var handleFront = Addressables.LoadAssetAsync<GameObject>(FRONT_UI_ADDRESS_KEY);
-            await UniTask.WhenAll(handleBack.ToUniTask(), handleFront.ToUniTask());
-
-            // 残弾UI取り出し
-            RectTransform bulletUIBack = handleBack.Result.GetComponent<RectTransform>();
-            RectTransform bulletUIFront = handleFront.Result.GetComponent<RectTransform>();
-
-            // 残弾UI作成
-            _bulletUIs = new Image[_maxBulletNum];
-            for (int i = 0; i < _maxBulletNum; i++)
-            {
-                // UIの配置位置計算
-                float x = UI_WIDTH * i + UI_WIDTH * 0.5f;
-                float y = UI_HEIGHT * 0.5f;
-
-                // 背景UIの生成
-                RectTransform back = Instantiate(bulletUIBack).GetComponent<RectTransform>();
-                back.SetParent(canvas.transform);
-                back.localPosition = new Vector3(x, y, 0);
-                back.localRotation = Quaternion.identity;
-
-                // 前面UIの生成
-                RectTransform front = Instantiate(bulletUIFront).GetComponent<RectTransform>();
-                front.SetParent(canvas.transform);
-                front.localPosition = new Vector3(x, y, 0);
-                front.localRotation = Quaternion.identity;
-
-                // 残弾UIに追加
-                _bulletUIs[i] = front.GetComponent<Image>();
-                _bulletUIs[i].fillAmount = 1f;
-            }
-
-            // リソース解放
-            Addressables.Release(handleBack);
-            Addressables.Release(handleFront);
         }
     }
 }

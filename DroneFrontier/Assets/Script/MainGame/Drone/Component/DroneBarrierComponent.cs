@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Offline
 {
-    public class DroneBarrierComponent : MonoBehaviour
+    public class DroneBarrierComponent : MonoBehaviour, IDroneComponent
     {
         /// <summary>
         /// バリアの残りHP
@@ -102,6 +102,11 @@ namespace Offline
         /// ドローンのSE再生用コンポーネント
         /// </summary>
         DroneSoundComponent _soundComponent = null;
+
+        public void Initialize() 
+        {
+            ChangeBarrierColor();
+        }
 
         /// <summary>
         /// バリアにダメージを与える
@@ -254,11 +259,6 @@ namespace Offline
 
             // ドローンが破壊された場合は本コンポーネントを停止
             _drone.DroneDestroyEvent += DroneDestroyEvent;
-        }
-
-        private void Start()
-        {
-            ChangeBarrierColor();
         }
 
         private void Update()

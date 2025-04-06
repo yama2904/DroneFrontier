@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(AudioSource))]
-public class DroneSoundComponent : MonoBehaviour
+public class DroneSoundComponent : MonoBehaviour, IDroneComponent
 {
     /// <summary>
     /// 1回きりのSE再生用AudioSource
@@ -25,6 +25,8 @@ public class DroneSoundComponent : MonoBehaviour
     /// SE再生番号採番値
     /// </summary>
     private int _numberingSeNumber = 0;
+
+    public void Initialize() { }
 
     /// <summary>
     /// ループせずにSE再生用

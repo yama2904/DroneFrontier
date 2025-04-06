@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class DroneRadarComponent : MonoBehaviour
+public class DroneRadarComponent : MonoBehaviour, IDroneComponent
 {
     /// <summary>
     /// レーダー照射中のアイテムを返す
@@ -95,6 +95,8 @@ public class DroneRadarComponent : MonoBehaviour
     private int _disabledCount = 0;
 
     private Transform _cameraTransform = null;
+
+    public void Initialize() { }
 
     /// <summary>
     /// レーダー照射開始

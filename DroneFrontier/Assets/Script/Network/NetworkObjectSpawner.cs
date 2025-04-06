@@ -19,7 +19,10 @@ namespace Network
             MyNetworkManager.Singleton.OnUdpReceiveOnMainThread += OnUdpReceive;
         }
 
-        public static void Initialize() { }
+        public static void Initialize() 
+        {
+            // ゲーム開始時に呼び出させてstaticコンストラクタを呼ばせる
+        }
 
         /// <summary>
         /// 指定したオブジェクトを全プレイヤーに生成させる
@@ -77,6 +80,9 @@ namespace Network
                 // 削除イベント設定
                 spawn.OnDestroyObject += OnDestroy;
 
+                // 初期化
+                spawn.Initialize();
+
                 // 生成オブジェクト一覧に追加
                 SpawnedObjects.Add(spawn.ObjectId, spawn);
             }
@@ -85,9 +91,9 @@ namespace Network
             if (header == UdpHeader.Destroy)
             {
                 string id = (packet as DestroyPacket).Id;
-                
                 if (SpawnedObjects.ContainsKey(id))
                 {
+                    SpawnedObjects[id].OnDestroyObject -= OnDestroy;
                     UnityEngine.Object.Destroy(SpawnedObjects[id]);
                     SpawnedObjects.Remove(id);
                 }
@@ -101,8 +107,13 @@ namespace Network
         /// <param name="args">イベント引数</param>
         private static void OnDestroy(object sender, EventArgs args)
         {
+            // 削除オブジェクト取得
             MyNetworkBehaviour obj = sender as MyNetworkBehaviour;
+
+            // 削除イベント除去
             obj.OnDestroyObject -= OnDestroy;
+
+            // 全プレイヤーに削除を知らせる
             Destroy(obj);
         }
     }

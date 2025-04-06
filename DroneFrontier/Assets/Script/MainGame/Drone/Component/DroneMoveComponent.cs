@@ -2,7 +2,7 @@
 
 namespace Offline
 {
-    public class DroneMoveComponent : MonoBehaviour
+    public class DroneMoveComponent : MonoBehaviour, IDroneComponent
     {
         public enum Direction
         {
@@ -74,6 +74,8 @@ namespace Offline
         private Rigidbody _rigidbody = null;
         private Transform _transform = null;
         private DroneRotateComponent _rotateComponent = null;
+
+        public void Initialize() { }
 
         /// <summary>
         /// 指定された方向へ移動

@@ -1,7 +1,7 @@
 using Offline;
 using UnityEngine;
 
-public class DroneWeaponComponent : MonoBehaviour
+public class DroneWeaponComponent : MonoBehaviour, IDroneComponent
 {
     public enum Weapon
     {
@@ -117,6 +117,45 @@ public class DroneWeaponComponent : MonoBehaviour
     // コンポーネントキャッシュ
     DroneMoveComponent _moveComponent = null;
 
+    public void Initialize() 
+    {
+        // メイン武器読み込み
+        GameObject mainWeapon = WeaponCreater.CreateWeapon(WeaponType.GATLING);
+        mainWeapon.transform.SetParent(_mainWeaponPos, false);
+        MainWeapon = mainWeapon.GetComponent<IWeapon>();
+        MainWeapon.Owner = gameObject;
+        MainWeapon.ShotPosition = _mainShotPos;
+        MainWeapon.OnBulletFull += (o, e) =>
+        {
+            OnBulletFull?.Invoke(this, Weapon.MAIN, MainWeapon);
+        };
+        MainWeapon.OnBulletEmpty += (o, e) =>
+        {
+            OnBulletEmpty?.Invoke(this, Weapon.MAIN, MainWeapon);
+        };
+
+        // サブ武器読み込み
+        _subWeaponType = GetComponent<IBattleDrone>().SubWeapon;
+        GameObject subWeapon = WeaponCreater.CreateWeapon(_subWeaponType);
+        subWeapon.transform.SetParent(_subWeaponPos, false);
+        SubWeapon = subWeapon.GetComponent<IWeapon>();
+        SubWeapon.Owner = gameObject;
+        SubWeapon.ShotPosition = _subShotPos;
+        SubWeapon.BulletUICanvas = HideBulletUI ? null : _bulletUICanvs;
+        SubWeapon.OnBulletFull += (o, e) =>
+        {
+            OnBulletFull?.Invoke(this, Weapon.SUB, SubWeapon);
+        };
+        SubWeapon.OnBulletEmpty += (o, e) =>
+        {
+            OnBulletEmpty?.Invoke(this, Weapon.SUB, SubWeapon);
+        };
+
+        // 攻撃中のスピード低下率設定
+        MainSpeedDownPer = SPEED_DOWN_PER;
+        SubSpeedDownPer = _subWeaponType == WeaponType.LASER ? LASER_SPEED_DOWN_PER : SPEED_DOWN_PER;
+    }
+
     /// <summary>
     /// 武器を使用して弾丸発射
     /// </summary>
@@ -158,45 +197,6 @@ public class DroneWeaponComponent : MonoBehaviour
     private void Awake()
     {
         _moveComponent = GetComponent<DroneMoveComponent>();
-    }
-
-    private void Start()
-    {
-        // メイン武器読み込み
-        GameObject mainWeapon = WeaponCreater.CreateWeapon(WeaponType.GATLING);
-        mainWeapon.transform.SetParent(_mainWeaponPos, false);
-        MainWeapon = mainWeapon.GetComponent<IWeapon>();
-        MainWeapon.Owner = gameObject;
-        MainWeapon.ShotPosition = _mainShotPos;
-        MainWeapon.OnBulletFull += (o, e) =>
-        {
-            OnBulletFull?.Invoke(this, Weapon.MAIN, MainWeapon);
-        };
-        MainWeapon.OnBulletEmpty += (o, e) =>
-        {
-            OnBulletEmpty?.Invoke(this, Weapon.MAIN, MainWeapon);
-        };
-
-        // サブ武器読み込み
-        _subWeaponType = GetComponent<IBattleDrone>().SubWeapon;
-        GameObject subWeapon = WeaponCreater.CreateWeapon(_subWeaponType);
-        subWeapon.transform.SetParent(_subWeaponPos, false);
-        SubWeapon = subWeapon.GetComponent<IWeapon>();
-        SubWeapon.Owner = gameObject;
-        SubWeapon.ShotPosition = _subShotPos;
-        SubWeapon.BulletUICanvas = HideBulletUI ? null : _bulletUICanvs;
-        SubWeapon.OnBulletFull += (o, e) =>
-        {
-            OnBulletFull?.Invoke(this, Weapon.SUB, SubWeapon);
-        };
-        SubWeapon.OnBulletEmpty += (o, e) =>
-        {
-            OnBulletEmpty?.Invoke(this, Weapon.SUB, SubWeapon);
-        };
-
-        // 攻撃中のスピード低下率設定
-        MainSpeedDownPer = SPEED_DOWN_PER;
-        SubSpeedDownPer = _subWeaponType == WeaponType.LASER ? LASER_SPEED_DOWN_PER : SPEED_DOWN_PER;
     }
 
     private void LateUpdate()

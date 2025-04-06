@@ -204,23 +204,8 @@ namespace Network
             SubWeapon = (WeaponType)Enum.ToObject(typeof(WeaponType), dic["Weapon"]);
         }
 
-        protected override void Awake()
+        public override void Initialize()
         {
-            base.Awake();
-
-            // コンポーネントの取得
-            _rigidbody = GetComponent<Rigidbody>();
-            _animator = GetComponent<Animator>();
-            _listener = GetComponent<AudioListener>();
-            _moveComponent = GetComponent<DroneMoveComponent>();
-            _rotateComponent = GetComponent<DroneRotateComponent>();
-            _soundComponent = GetComponent<DroneSoundComponent>();
-            _lockOnComponent = GetComponent<DroneLockOnComponent>();
-            _radarComponent = GetComponent<DroneRadarComponent>();
-            _itemComponent = GetComponent<DroneItemComponent>();
-            _weaponComponent = GetComponent<DroneWeaponComponent>();
-            _boostComponent = GetComponent<DroneBoostComponent>();
-
             // ストック数UI初期化
             StockNum = _stockNum;
 
@@ -230,10 +215,7 @@ namespace Network
 
             // オブジェクト探索イベント設定
             _searchComponent.ObjectStayEvent += ObjectSearchEvent;
-        }
 
-        private void Start()
-        {
             // プレイヤー名を基に操作するか識別
             if (Name == MyNetworkManager.Singleton.MyPlayerName)
             {
@@ -257,7 +239,35 @@ namespace Network
                 _rigidbody.interpolation = RigidbodyInterpolation.None;
             }
 
+            // コンポーネント初期化
+            _moveComponent.Initialize();
+            _rotateComponent.Initialize();
+            _soundComponent.Initialize();
+            _lockOnComponent.Initialize();
+            _radarComponent.Initialize();
+            _itemComponent.Initialize();
+            _weaponComponent.Initialize();
+            _boostComponent.Initialize();
+            GetComponent<DroneBarrierComponent>().Initialize();
+        }
+
+        protected override void Awake()
+        {
+            base.Awake();
             enabled = false;
+
+            // コンポーネントの取得
+            _rigidbody = GetComponent<Rigidbody>();
+            _animator = GetComponent<Animator>();
+            _listener = GetComponent<AudioListener>();
+            _moveComponent = GetComponent<DroneMoveComponent>();
+            _rotateComponent = GetComponent<DroneRotateComponent>();
+            _soundComponent = GetComponent<DroneSoundComponent>();
+            _lockOnComponent = GetComponent<DroneLockOnComponent>();
+            _radarComponent = GetComponent<DroneRadarComponent>();
+            _itemComponent = GetComponent<DroneItemComponent>();
+            _weaponComponent = GetComponent<DroneWeaponComponent>();
+            _boostComponent = GetComponent<DroneBoostComponent>();
         }
 
         private void Update()

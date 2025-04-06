@@ -1,9 +1,11 @@
 using UnityEngine;
 
-public class DroneRotateComponent : MonoBehaviour
+public class DroneRotateComponent : MonoBehaviour, IDroneComponent
 {
     [SerializeField, Tooltip("回転させるオブジェクト")]
     private Transform _rotateObject = null;
+
+    public void Initialize() { }
 
     /// <summary>
     /// 指定した角度と回転量でドローンを回転

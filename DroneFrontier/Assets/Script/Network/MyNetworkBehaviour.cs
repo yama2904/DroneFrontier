@@ -80,6 +80,8 @@ namespace Network
 
         public virtual void ImportSpawnData(object data) { }
 
+        public virtual void Initialize() { }
+
         protected virtual void Awake()
         {
             IsSyncPosition = _syncPosition;

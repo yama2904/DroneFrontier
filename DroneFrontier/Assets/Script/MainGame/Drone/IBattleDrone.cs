@@ -26,6 +26,11 @@ public interface IBattleDrone
     public WeaponType SubWeapon { get; set; }
 
     /// <summary>
+    /// 初期化
+    /// </summary>
+    public void Initialize();
+
+    /// <summary>
     /// ドローン破壊イベント
     /// </summary>
     public event EventHandler DroneDestroyEvent;

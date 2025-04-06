@@ -79,6 +79,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _bullet: {fileID: 7685176673457542688, guid: 637911ba241dc7847818b6bb7e996a42, type: 3}
+  _bulletFrontUI: {fileID: 8245827784580695089, guid: 1481f711e2e15134ba32a1634cdc51c1,
+    type: 3}
+  _bulletBackUI: {fileID: 804041731371029093, guid: c3b934424d7f24d4fb8095d99bdf9988,
+    type: 3}
   _displayMissile: {fileID: 4454148018901715728}
   _shotPosition: {fileID: 2867096622288785274}
   _damage: 40

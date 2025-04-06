@@ -8,7 +8,7 @@ namespace Offline
 {
     namespace Player
     {
-        public class DroneStatusComponent : MonoBehaviour
+        public class DroneStatusComponent : MonoBehaviour, IDroneComponent
         {
             /// <summary>
             /// 変化中のステータスリスト
@@ -45,6 +45,8 @@ namespace Offline
             /// key:状態異常を付与したIDroneStatusChange, value:状態異常アイコンのRectTransform
             /// </summary>
             private OrderedDictionary _statusesIconMap = new OrderedDictionary();
+
+            public void Initialize() { }
 
             /// <summary>
             /// ドローンにステータス変化を追加する

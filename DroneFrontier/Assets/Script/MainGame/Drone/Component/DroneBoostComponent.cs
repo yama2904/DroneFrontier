@@ -2,7 +2,7 @@ using Offline;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class DroneBoostComponent : MonoBehaviour
+public class DroneBoostComponent : MonoBehaviour, IDroneComponent
 {
     /// <summary>
     /// ブーストの加速度
@@ -106,6 +106,8 @@ public class DroneBoostComponent : MonoBehaviour
     // コンポーネントキャッシュ
     private DroneMoveComponent _moveComponent = null;
     private DroneSoundComponent _soundComponent;
+
+    public void Initialize() { }
 
     public void Boost()
     {

@@ -147,6 +147,20 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
     DroneWeaponComponent _weaponComponent = null;
     DroneBoostComponent _boostComponent = null;
 
+    public void Initialize()
+    {
+        // コンポーネント初期化
+        _moveComponent.Initialize();
+        _rotateComponent.Initialize();
+        _soundComponent.Initialize();
+        _lockOnComponent.Initialize();
+        _radarComponent.Initialize();
+        _itemComponent.Initialize();
+        _weaponComponent.Initialize();
+        _boostComponent.Initialize();
+        GetComponent<DroneBarrierComponent>().Initialize();
+    }
+
     private void Awake()
     {
         // コンポーネントの取得
@@ -160,6 +174,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
         _itemComponent = GetComponent<DroneItemComponent>();
         _weaponComponent = GetComponent<DroneWeaponComponent>();
         _boostComponent = GetComponent<DroneBoostComponent>();
+
 
         // ストック数UI初期化
         StockNum = _stockNum;

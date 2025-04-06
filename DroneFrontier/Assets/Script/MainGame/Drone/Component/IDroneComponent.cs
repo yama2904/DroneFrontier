@@ -1,0 +1,4 @@
+interface IDroneComponent
+{
+    void Initialize();
+}

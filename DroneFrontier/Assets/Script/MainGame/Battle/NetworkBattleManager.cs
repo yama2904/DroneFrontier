@@ -124,6 +124,7 @@ namespace Network
                 foreach (var player in PlayerList)
                 {
                     NetworkBattleDrone spawnDrone = _droneSpawnManager.SpawnDrone(player.Name, player.Weapon);
+                    spawnDrone.Initialize();
                     player.Drone = spawnDrone;
                     player.StockNum = spawnDrone.StockNum;
                     player.DestroyTime = 0;

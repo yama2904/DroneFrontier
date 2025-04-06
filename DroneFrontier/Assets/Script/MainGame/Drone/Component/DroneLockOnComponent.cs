@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class DroneLockOnComponent : MonoBehaviour
+public class DroneLockOnComponent : MonoBehaviour, IDroneComponent
 {
     /// <summary>
     /// ロックオン中のオブジェクト
@@ -73,6 +72,15 @@ public class DroneLockOnComponent : MonoBehaviour
     Transform _cameraTransform = null;
     Transform _targetTransform = null;
 
+    public void Initialize() 
+    {
+        // 非ロックオン状態でレティクル初期化
+        if (_reticleImage != null)
+        {
+            _reticleImage.color = _noLockOnColor;
+        }
+    }
+
     /// <summary>
     /// ロックオン開始
     /// </summary>
@@ -123,15 +131,6 @@ public class DroneLockOnComponent : MonoBehaviour
     {
         _droneTransform = transform;
         _cameraTransform = _camera.transform;
-    }
-
-    private void Start()
-    {
-        // 非ロックオン状態でレティクル初期化
-        if (_reticleImage != null)
-        {
-            _reticleImage.color = _noLockOnColor;
-        }
     }
 
     private void LateUpdate()

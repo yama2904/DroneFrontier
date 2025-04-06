@@ -22,16 +22,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 064185748d538f544b76ecd818818f7f
-    m_Address: LazerGaugeUI
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 1481f711e2e15134ba32a1634cdc51c1
-    m_Address: MissileBulletFrontUI
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 207208a205ab31a4fba67586f4180f2c
     m_Address: LaserWeapon
     m_ReadOnly: 0
@@ -42,28 +32,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 3801fd66cf92d5c45ba8e24cf59b2b49
-    m_Address: LazerGaugeFrameUI
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5605f4dc9579efd42afc3b6d6bb27df0
     m_Address: GatlingWeapon
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 5f9c17bf46fb006448280160efa89794
-    m_Address: ShotgunBulletBackUI
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8c2ea1de19e199245af77ca42744e83f
     m_Address: StunMask
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 9b472144f567c41438221ab5211689b8
-    m_Address: ShotgunBulletFrontUI
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -74,11 +49,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c185333b265c4c944b3a763f2d9c61e5
     m_Address: NetworkBattleDrone
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: c3b934424d7f24d4fb8095d99bdf9988
-    m_Address: MissileBulletBackUI
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

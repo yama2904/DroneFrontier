@@ -108,6 +108,7 @@ namespace Offline
 
             // プレイヤードローンをスポーン
             IBattleDrone spawnDrone = _droneSpawnManager.SpawnDrone("Player", PlayerWeapon, true);
+            spawnDrone.Initialize();
             DroneData droneData = new DroneData()
             {
                 Drone = spawnDrone,
@@ -123,6 +124,7 @@ namespace Offline
             foreach (CpuData cpu in CpuList)
             {
                 spawnDrone = _droneSpawnManager.SpawnDrone(cpu.Name, cpu.Weapon, false);
+                spawnDrone.Initialize();
                 droneData = new DroneData()
                 {
                     Drone = spawnDrone,

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Offline
 {
-    public class DroneDamageComponent : MonoBehaviour, IDamageable
+    public class DroneDamageComponent : MonoBehaviour, IDamageable, IDroneComponent
     {
         /// <summary>
         /// ダメージハンドラー
@@ -45,29 +45,7 @@ namespace Offline
         /// </summary>
         private int _damageCount = 0;
 
-        private void Awake()
-        {
-            // コンポーネント取得
-            _drone = GetComponent<IBattleDrone>();
-            _barrier = GetComponent<DroneBarrierComponent>();
-
-            // ドローンが破壊された場合は本コンポーネントを停止
-            _drone.DroneDestroyEvent += DroneDestroyEvent;
-        }
-
-        private void LateUpdate()
-        {
-            // ダメージ回数リセット
-            _damageCount = 0;
-        }
-
-        private async void OnEnable()
-        {
-            // 起動直後は一定時間無敵
-            _damageable = false;
-            await UniTask.Delay(TimeSpan.FromSeconds(_notDamageableSec));
-            _damageable = true;
-        }
+        public void Initialize() { }
 
         /// <summary>
         /// ドローンへダメージを与える
@@ -102,6 +80,30 @@ namespace Offline
 
             // ダメージイベント発火
             DamageEvent?.Invoke(this, source, value);
+        }
+
+        private void Awake()
+        {
+            // コンポーネント取得
+            _drone = GetComponent<IBattleDrone>();
+            _barrier = GetComponent<DroneBarrierComponent>();
+
+            // ドローンが破壊された場合は本コンポーネントを停止
+            _drone.DroneDestroyEvent += DroneDestroyEvent;
+        }
+
+        private void LateUpdate()
+        {
+            // ダメージ回数リセット
+            _damageCount = 0;
+        }
+
+        private async void OnEnable()
+        {
+            // 起動直後は一定時間無敵
+            _damageable = false;
+            await UniTask.Delay(TimeSpan.FromSeconds(_notDamageableSec));
+            _damageable = true;
         }
 
         /// <summary>

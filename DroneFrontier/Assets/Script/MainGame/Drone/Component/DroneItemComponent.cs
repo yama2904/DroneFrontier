@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class DroneItemComponent : MonoBehaviour
+public class DroneItemComponent : MonoBehaviour, IDroneComponent
 {
     /// <summary>
     /// アイテムUIを非表示にするか
@@ -60,6 +60,8 @@ public class DroneItemComponent : MonoBehaviour
     /// 各アイテム情報
     /// </summary>
     private List<ItemData> _itemDatas = new List<ItemData>();
+
+    public void Initialize() { }
 
     /// <summary>
     /// 所持アイテムを設定

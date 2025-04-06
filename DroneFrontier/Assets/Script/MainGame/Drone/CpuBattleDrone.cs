@@ -194,6 +194,20 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
     DroneWeaponComponent _weaponComponent = null;
     DroneBoostComponent _boostComponent = null;
 
+    public void Initialize()
+    {
+        // コンポーネント初期化
+        _moveComponent.Initialize();
+        _rotateComponent.Initialize();
+        _soundComponent.Initialize();
+        _lockOnComponent.Initialize();
+        _radarComponent.Initialize();
+        _itemComponent.Initialize();
+        _weaponComponent.Initialize();
+        _boostComponent.Initialize();
+        GetComponent<DroneBarrierComponent>().Initialize();
+    }
+
     private void Awake()
     {
         // コンポーネントの取得

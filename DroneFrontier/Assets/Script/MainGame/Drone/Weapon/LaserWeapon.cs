@@ -1,7 +1,5 @@
-﻿using Cysharp.Threading.Tasks;
-using System;
+﻿using System;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
 using UnityEngine.UI;
 
 namespace Offline
@@ -25,12 +23,18 @@ namespace Offline
             set
             {
                 _bulletUICanvas = value;
+                if (_bulletUICanvas == null) return;
 
-                // 非同期で弾丸UI読み込み
-                if (_bulletUICanvas != null)
-                {
-                    LoadBulletUIAsync(_bulletUICanvas).Forget();
-                }
+                // レーザーゲージUI生成
+                _laserGaugeUI = Instantiate(_bulletGaugeUI);
+                Image gaugeFrameUI = Instantiate(_bulletFrameUI);
+
+                // Canvasを親に設定
+                _laserGaugeUI.transform.SetParent(_bulletUICanvas.transform, false);
+                gaugeFrameUI.transform.SetParent(_bulletUICanvas.transform, false);
+
+                // レーザーゲージ量をUIに反映
+                _laserGaugeUI.fillAmount = _gaugeValue;
             }
         }
         private Canvas _bulletUICanvas = null;
@@ -40,22 +44,18 @@ namespace Offline
         public event EventHandler OnBulletEmpty;
 
         /// <summary>
-        /// レーザーゲージUIのAddressKey
-        /// </summary>
-        private const string GAUGE_UI_ADDRESS_KEY = "LazerGaugeUI";
-
-        /// <summary>
-        /// レーザーゲージ枠UIのAddressKey
-        /// </summary>
-        private const string GAUGE_FRAME_UI_ADDRESS_KEY = "LazerGaugeFrameUI";
-
-        /// <summary>
         /// 発射可能な最低ゲージ量
         /// </summary>
         private const float SHOOTABLE_MIN_GAUGE = 0.2f;
 
         [SerializeField, Tooltip("弾丸")]
         private LaserBullet _bullet = null;
+
+        [SerializeField, Tooltip("残弾UI（前面）")]
+        private Image _bulletGaugeUI = null;
+
+        [SerializeField, Tooltip("残弾UI（背面）")]
+        private Image _bulletFrameUI = null;
 
         [SerializeField, Tooltip("レーザー発射座標")]
         private Transform _shotPosition = null;
@@ -172,33 +172,6 @@ namespace Offline
             // Shotメソッド呼び出し履歴更新
             _isShooted[1] = _isShooted[0];
             _isShooted[0] = false;
-        }
-
-        /// <summary>
-        /// 非同期で弾丸UIを読み込んで表示
-        /// </summary>
-        /// <param name="canvas">表示する弾丸UIの親Canvas</param>
-        private async UniTask LoadBulletUIAsync(Canvas canvas)
-        {
-            // レーザーゲージUI読み込み
-            var handleGauge = Addressables.LoadAssetAsync<GameObject>(GAUGE_UI_ADDRESS_KEY);
-            var handleGaugeFrame = Addressables.LoadAssetAsync<GameObject>(GAUGE_FRAME_UI_ADDRESS_KEY);
-            await UniTask.WhenAll(handleGauge.ToUniTask(), handleGaugeFrame.ToUniTask());
-
-            // レーザーゲージUI生成
-            _laserGaugeUI = Instantiate(handleGauge.Result).GetComponent<Image>();
-            GameObject gaugeFrameUI = Instantiate(handleGaugeFrame.Result);
-
-            // リソース解放
-            Addressables.Release(handleGauge);
-            Addressables.Release(handleGaugeFrame);
-
-            // Canvasを親に設定
-            _laserGaugeUI.transform.SetParent(canvas.transform, false);
-            gaugeFrameUI.transform.SetParent(canvas.transform, false);
-
-            // レーザーゲージ量をUIに反映
-            _laserGaugeUI.fillAmount = _gaugeValue;
         }
     }
 }

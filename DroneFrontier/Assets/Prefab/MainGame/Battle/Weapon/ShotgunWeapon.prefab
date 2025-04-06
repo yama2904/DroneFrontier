@@ -48,6 +48,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _bullet: {fileID: 8694931832901377729, guid: a5a64a02c0e218e459be32483421c537, type: 3}
+  _bulletFrontUI: {fileID: 3221533431256951952, guid: 9b472144f567c41438221ab5211689b8,
+    type: 3}
+  _bulletBackUI: {fileID: 4532149927091886137, guid: 5f9c17bf46fb006448280160efa89794,
+    type: 3}
   _shotPosition: {fileID: 9184297372474888498}
   _angle: 3
   _angleDiff: 2
