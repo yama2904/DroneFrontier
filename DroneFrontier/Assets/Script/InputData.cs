@@ -17,11 +17,13 @@ public class InputData
     {
     }
 
-    public InputData(List<KeyCode> keys, List<KeyCode> downedKeys, List<KeyCode> uppedKeys, float mouseX, float mouseY, float scroll)
+    public InputData(List<KeyCode> keys, List<KeyCode> downedKeys, List<KeyCode> uppedKeys, bool mouseBtnL, bool mouseBtnR, float mouseX, float mouseY, float scroll)
     {
         Keys = keys;
         DownedKeys = downedKeys;
         UppedKeys = uppedKeys;
+        MouseButtonL = mouseBtnL;
+        MouseButtonR = mouseBtnR;
         MouseX = mouseX;
         MouseY = mouseY;
         MouseScrollDelta = scroll;

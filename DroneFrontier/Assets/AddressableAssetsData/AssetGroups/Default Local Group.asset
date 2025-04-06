@@ -32,11 +32,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8c2ea1de19e199245af77ca42744e83f
-    m_Address: StunMask
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ae3e1b7c5493a0746ab860ea220b8186
     m_Address: MissileWeapon
     m_ReadOnly: 0

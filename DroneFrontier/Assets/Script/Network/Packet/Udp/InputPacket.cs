@@ -61,6 +61,14 @@ namespace Network.Udp
                 offset += sizeof(short);
             }
 
+            // マウス左クリック
+            bool mouseBtnL = BitConverter.ToBoolean(body, offset);
+            offset += sizeof(bool);
+
+            // マウス右クリック
+            bool mouseBtnR = BitConverter.ToBoolean(body, offset);
+            offset += sizeof(bool);
+
             // X軸マウス移動量取得
             float mouseX = BitConverter.ToSingle(body, offset);
             offset += sizeof(float);
@@ -74,7 +82,7 @@ namespace Network.Udp
             offset += sizeof(float);
 
             // インスタンスを作成して返す
-            InputData input = new InputData(keys, downedKeys, uppedKeys, mouseX, mouseY, scroll);
+            InputData input = new InputData(keys, downedKeys, uppedKeys, mouseBtnL, mouseBtnR, mouseX, mouseY, scroll);
             return new InputPacket(input);
         }
 
@@ -110,6 +118,10 @@ namespace Network.Udp
                 uppedKeys = uppedKeys.Concat(BitConverter.GetBytes((short)key)).ToArray();
             }
 
+            // マウスクリック
+            byte[] mouseBtnL = BitConverter.GetBytes(Input.MouseButtonL);
+            byte[] mouseBtnR = BitConverter.GetBytes(Input.MouseButtonR);
+
             // マウス移動
             byte[] mouseX = BitConverter.GetBytes(Input.MouseX);
             byte[] mouseY = BitConverter.GetBytes(Input.MouseY);
@@ -122,6 +134,8 @@ namespace Network.Udp
                             .Concat(downedKeys)
                             .Concat(uppedCount)
                             .Concat(uppedKeys)
+                            .Concat(mouseBtnL)
+                            .Concat(mouseBtnR)
                             .Concat(mouseX)
                             .Concat(mouseY)
                             .Concat(scroll)
