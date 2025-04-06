@@ -67,7 +67,6 @@ namespace Offline
 
                 // ステータス変化アイコンを表示
                 Image icon = status.InstantiateIcon();
-                Debug.Log(icon);
                 if (icon != null)
                 {
                     RectTransform t = icon.rectTransform;

@@ -1,4 +1,4 @@
-interface IDroneComponent
+public interface IDroneComponent
 {
     void Initialize();
 }

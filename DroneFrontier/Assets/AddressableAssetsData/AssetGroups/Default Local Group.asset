@@ -17,8 +17,18 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: 77a3b631f60219d4f90d070c6543a978
   m_SerializeEntries:
+  - m_GUID: 020ba08994670fc42a791716f37eb94a
+    m_Address: JammigUI
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 207208a205ab31a4fba67586f4180f2c
     m_Address: LaserWeapon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2bdfeffbaad7c4a4dad06059b234f84e
+    m_Address: NetworkSpawnStunGrenade
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -27,8 +37,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 52b578acb9298404d85417da13e71509
+    m_Address: NetworkSpawnJammingBot
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5605f4dc9579efd42afc3b6d6bb27df0
     m_Address: GatlingWeapon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8c2ea1de19e199245af77ca42744e83f
+    m_Address: StunMask
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -39,6 +59,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c185333b265c4c944b3a763f2d9c61e5
     m_Address: NetworkBattleDrone
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f54898de3a1cb7048afd04e02f34308e
+    m_Address: NetworkSpawnBarrier
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

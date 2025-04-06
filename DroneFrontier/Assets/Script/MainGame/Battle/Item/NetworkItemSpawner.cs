@@ -13,7 +13,7 @@ namespace Network
         }
 
         [SerializeField, Tooltip("スポーンさせるアイテム一覧")]
-        private SpawnItem[] _spawnItems = null;
+        private NetworkSpawnItem[] _spawnItems = null;
 
         [SerializeField, Tooltip("スポーン確率(0～1)")]
         private float _spawnPercent = 0.5f;
@@ -21,7 +21,7 @@ namespace Network
         /// <summary>
         /// 生成したアイテム
         /// </summary>
-        private SpawnItem _createdItem = null;
+        private NetworkSpawnItem _createdItem = null;
 
         /// <summary>
         /// キャッシュ用Transform
@@ -32,12 +32,15 @@ namespace Network
         /// ランダムなアイテムをスポーンさせる
         /// </summary>
         /// <returns>スポーンしたアイテム</returns>
-        public SpawnItem Spawn()
+        public ISpawnItem Spawn()
         {
             // ランダムなアイテムをスポーン
             int index = Random.Range(0, _spawnItems.Length);
             _createdItem = Instantiate(_spawnItems[index], _transform);
             _createdItem.transform.SetParent(_transform);
+
+            // 全クライアントにスポーンさせる
+            NetworkObjectSpawner.Spawn(_createdItem);
 
             // スポーンしたアイテムを返す
             return _createdItem;
@@ -47,7 +50,7 @@ namespace Network
         /// スポーン確率を基に成功可否を決定し、成功した場合はランダムなアイテムをスポーンさせる
         /// </summary>
         /// <returns>スポーンしたアイテム。失敗した場合はnull</returns>
-        public SpawnItem SpawnRandom()
+        public ISpawnItem SpawnRandom()
         {
             // スポーン確率を基に成功可否を決定
             if (Random.Range(0, 101) > _spawnPercent * 100) return null;

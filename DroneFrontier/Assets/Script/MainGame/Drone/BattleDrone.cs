@@ -337,7 +337,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
         {
             if (other.CompareTag(TagNameConst.ITEM))
             {
-                SpawnItem item = other.GetComponent<SpawnItem>();
+                ISpawnItem item = other.GetComponent<ISpawnItem>();
                 if (_itemComponent.SetItem(item))
                 {
                     Destroy(other.gameObject);

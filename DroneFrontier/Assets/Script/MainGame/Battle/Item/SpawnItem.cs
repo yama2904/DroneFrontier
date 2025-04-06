@@ -1,24 +1,14 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SpawnItem : MonoBehaviour, IRadarable
+public class SpawnItem : MonoBehaviour, ISpawnItem, IRadarable
 {
     /// <summary>
     /// スポーンアイテム消滅イベント
     /// </summary>
-    /// <param name="item">消滅したスポーンアイテム</param>
-    public delegate void SpawnItemDestroyHandler(SpawnItem item);
-
-    /// <summary>
-    /// スポーンアイテム消滅イベント
-    /// </summary>
-    public event SpawnItemDestroyHandler SpawnItemDestroyEvent; 
-
-    /// <summary>
-    /// アイテムのアイコン
-    /// </summary>
-    public Image IconImage { get { return _iconImage; } }
+    public event EventHandler SpawnItemDestroyEvent;
 
     /// <summary>
     /// 取得時に使用可能となるアイテム
@@ -37,6 +27,11 @@ public class SpawnItem : MonoBehaviour, IRadarable
     [SerializeField, Tooltip("取得時に使用可能となるアイテム（※要IDroneItemインターフェース実装）")]
     private GameObject _droneItem = null;
 
+    public Image InstantiateIcon()
+    {
+        return Instantiate(_iconImage);
+    }
+
     private void Awake()
     {
         DroneItem = Instantiate(_droneItem, Vector3.zero, Quaternion.identity).GetComponent<IDroneItem>();
@@ -44,6 +39,6 @@ public class SpawnItem : MonoBehaviour, IRadarable
 
     private void OnDestroy()
     {
-        SpawnItemDestroyEvent?.Invoke(this);
+        SpawnItemDestroyEvent?.Invoke(this, EventArgs.Empty);
     }
 }

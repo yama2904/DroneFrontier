@@ -1,6 +1,5 @@
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using UnityEditor;
 using UnityEngine;
 
 public class ItemSpawnManager : MonoBehaviour
@@ -22,7 +21,7 @@ public class ItemSpawnManager : MonoBehaviour
     /// <summary>
     /// スポーンしたアイテムと対応するスポナー
     /// </summary>
-    private Dictionary<SpawnItem, IItemSpawner> _spawnedMap = new Dictionary<SpawnItem, IItemSpawner>();
+    private Dictionary<ISpawnItem, IItemSpawner> _spawnedMap = new Dictionary<ISpawnItem, IItemSpawner>();
 
     /// <summary>
     /// 定期スポーン計測
@@ -112,7 +111,7 @@ public class ItemSpawnManager : MonoBehaviour
             foreach (IItemSpawner spawner in spawnerList)
             {
                 // スポーン実行
-                SpawnItem item = spawner.Spawn();
+                ISpawnItem item = spawner.Spawn();
 
                 // アイテム消滅イベント設定
                 item.SpawnItemDestroyEvent += SpawnItemDestroy;
@@ -134,7 +133,7 @@ public class ItemSpawnManager : MonoBehaviour
                 if (_spawnedMap.ContainsValue(spawner)) continue;
 
                 // スポーン実行
-                SpawnItem item = spawner.SpawnRandom();
+                ISpawnItem item = spawner.SpawnRandom();
 
                 // スポーン成功可否
                 if (item == null) continue;
@@ -156,8 +155,11 @@ public class ItemSpawnManager : MonoBehaviour
     /// スポーンアイテム消滅イベント
     /// </summary>
     /// <param name="item">消滅したアイテムのスポナー</param>
-    private void SpawnItemDestroy(SpawnItem item)
+    private void SpawnItemDestroy(object sender, EventArgs e)
     {
+        // アイテム取得
+        ISpawnItem item = sender as ISpawnItem;
+
         // 消滅したアイテムのスポナー取得
         IItemSpawner spawner = _spawnedMap[item];
 

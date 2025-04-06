@@ -30,7 +30,7 @@ public class ItemSpawner : MonoBehaviour, IItemSpawner
     /// ランダムなアイテムをスポーンさせる
     /// </summary>
     /// <returns>スポーンしたアイテム</returns>
-    public SpawnItem Spawn()
+    public ISpawnItem Spawn()
     {
         // ランダムなアイテムをスポーン
         int index = Random.Range(0, _spawnItems.Length);
@@ -45,7 +45,7 @@ public class ItemSpawner : MonoBehaviour, IItemSpawner
     /// スポーン確率を基に成功可否を決定し、成功した場合はランダムなアイテムをスポーンさせる
     /// </summary>
     /// <returns>スポーンしたアイテム。失敗した場合はnull</returns>
-    public SpawnItem SpawnRandom()
+    public ISpawnItem SpawnRandom()
     {
         // スポーン確率を基に成功可否を決定
         if (Random.Range(0, 101) > _spawnPercent * 100) return null;
