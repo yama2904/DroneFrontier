@@ -180,7 +180,7 @@ public class NewNetworkRoomManager : NetworkRoomManager
         if (!MainGameManager.IsMainGaming)
         {
             //SEの再生
-            SoundManager.Play(SoundManager.SE.CANCEL, SoundManager.SEVolume);
+            SoundManager.Play(SoundManager.SE.Cancel, SoundManager.MasterSEVolume);
         }
         else
         {

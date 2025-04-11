@@ -156,7 +156,7 @@ namespace Online
             isStatus[(int)Status.JAMMING] = true;
 
             //SE再生
-            jammingSoundId = soundAction.PlayLoopSE(SoundManager.SE.JAMMING_NOISE, SoundManager.SEVolume);
+            jammingSoundId = soundAction.PlayLoopSE(SoundManager.SE.JammingNoise, SoundManager.MasterSEVolume);
 
             //アイコン表示
             jammingIcon.enabled = true;
@@ -189,7 +189,7 @@ namespace Online
             speedDownIcon.enabled = true;
 
             //SE再生
-            speedDownSoundId = soundAction.PlayLoopSE(SoundManager.SE.MAGNETIC_AREA, SoundManager.SEVolume);
+            speedDownSoundId = soundAction.PlayLoopSE(SoundManager.SE.MagneticArea, SoundManager.MasterSEVolume);
         }
 
         //スピードダウン解除

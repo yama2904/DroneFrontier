@@ -31,7 +31,7 @@ public class ResultSceneManager : MonoBehaviour
     public void SelectEnd()
     {
         // SE再生
-        SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
+        SoundManager.Play(SoundManager.SE.Select, SoundManager.MasterSEVolume);
 
         // ホーム画面に戻る
         SceneManager.LoadScene("HomeScene");

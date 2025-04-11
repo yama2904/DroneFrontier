@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace Offline
 {
-    public class WeaponSelectScreen : MonoBehaviour
+    public class WeaponSelectScreen : MonoBehaviour, IScreen
     {
         /// <summary>
         /// ボタン種類
@@ -56,7 +56,9 @@ namespace Offline
         /// </summary>
         private WeaponType _selectedWeapon = WeaponType.NONE;
 
-        private void Start()
+
+
+        public void Initialize() 
         {
             BattleManager.PlayerWeapon = WeaponType.NONE;
             messageWindowText.text = "武器を選択してください。";
@@ -68,7 +70,7 @@ namespace Offline
             if (_selectedWeapon == selectWeapon) return;
 
             //SE再生
-            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
+            SoundManager.Play(SoundManager.SE.Select, SoundManager.MasterSEVolume);
 
             messageWindowText.text = SHOTGUN_TEXT;
             SetWeaponButtonsColor(selectWeapon);
@@ -81,7 +83,7 @@ namespace Offline
             if (_selectedWeapon == selectWeapon) return;
 
             //SE再生
-            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
+            SoundManager.Play(SoundManager.SE.Select, SoundManager.MasterSEVolume);
 
             messageWindowText.text = MISSILE_TEXT;
             SetWeaponButtonsColor(selectWeapon);
@@ -94,7 +96,7 @@ namespace Offline
             if (_selectedWeapon == selectWeapon) return;
 
             //SE再生
-            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
+            SoundManager.Play(SoundManager.SE.Select, SoundManager.MasterSEVolume);
 
             messageWindowText.text = LASER_TEXT;
             SetWeaponButtonsColor(selectWeapon);
@@ -108,7 +110,7 @@ namespace Offline
             if (!isItemOnButton)
             {
                 //SE再生
-                SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
+                SoundManager.Play(SoundManager.SE.Select, SoundManager.MasterSEVolume);
 
                 BattleManager.IsItemSpawn = true;
                 itemOnButton.image.color = selectItemButtonColor;
@@ -124,7 +126,7 @@ namespace Offline
             if (isItemOnButton)
             {
                 //SE再生
-                SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
+                SoundManager.Play(SoundManager.SE.Select, SoundManager.MasterSEVolume);
 
                 BattleManager.IsItemSpawn = false;
                 itemOnButton.image.color = notSelectButtonColor;
@@ -140,14 +142,14 @@ namespace Offline
             if (_selectedWeapon == WeaponType.NONE) return;
 
             BattleManager.PlayerWeapon = _selectedWeapon;
-            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
+            SoundManager.Play(SoundManager.SE.Select, SoundManager.MasterSEVolume);
             SelectedButton = ButtonType.OK;
             OnButtonClick(this, EventArgs.Empty);
         }
 
         public void ClickBack()
         {
-            SoundManager.Play(SoundManager.SE.CANCEL);
+            SoundManager.Play(SoundManager.SE.Cancel);
             SelectedButton = ButtonType.Back;
             OnButtonClick(this, EventArgs.Empty);
         }

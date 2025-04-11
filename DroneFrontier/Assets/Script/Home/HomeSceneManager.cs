@@ -32,6 +32,15 @@ public class HomeSceneManager : MonoBehaviour
 
     private void Start()
     {
+        // 画面初期化
+        _config.Initialize();
+        _help.Initialize();
+        _soloMultiSelect.Initialize();
+        _weaponSelect.Initialize();
+        _cpuSelect.Initialize();
+        _matching.Initialize();
+        _networkWeaponSelect.Initialize();
+
         // 設定画面のボタンイベント設定
         _config.OnButtonClick += OnButtonClickOfConfig;
 
@@ -54,9 +63,9 @@ public class HomeSceneManager : MonoBehaviour
         _networkWeaponSelect.OnButtonClick += OnButtonClickOfNetworkWeaponSel;
 
         // BGMが再生されていなかったら再生
-        if (SoundManager.PlayingBGM != SoundManager.BGM.DRONE_UP)
+        if (SoundManager.PlayingBGM != SoundManager.BGM.Home)
         {
-            SoundManager.Play(SoundManager.BGM.DRONE_UP, SoundManager.BGMVolume * 0.8f);
+            SoundManager.Play(SoundManager.BGM.Home, SoundManager.MasterBGMVolume * 0.8f);
         }
     }
 
@@ -75,7 +84,7 @@ public class HomeSceneManager : MonoBehaviour
     /// </summary>
     public void ClickBattle()
     {
-        SoundManager.Play(SoundManager.SE.SELECT);
+        SoundManager.Play(SoundManager.SE.Select);
         _gameModeSelectUI.SetActive(false);
         _soloMultiSelect.gameObject.SetActive(true);
     }
@@ -85,7 +94,7 @@ public class HomeSceneManager : MonoBehaviour
     /// </summary>
     public void ClickRace()
     {
-        SoundManager.Play(SoundManager.SE.SELECT);
+        SoundManager.Play(SoundManager.SE.Select);
         BaseScreenManager.SetScreen(BaseScreenManager.Screen.SOLO_MULTI_SELECT);
     }
 
@@ -94,7 +103,7 @@ public class HomeSceneManager : MonoBehaviour
     /// </summary>
     public void ClickConfig()
     {
-        SoundManager.Play(SoundManager.SE.SELECT);
+        SoundManager.Play(SoundManager.SE.Select);
 
         _gameModeSelectUI.SetActive(false);
         _config.gameObject.SetActive(true);
@@ -105,7 +114,7 @@ public class HomeSceneManager : MonoBehaviour
     /// </summary>
     public void ClickHelp()
     {
-        SoundManager.Play(SoundManager.SE.SELECT);
+        SoundManager.Play(SoundManager.SE.Select);
 
         _gameModeSelectUI.SetActive(false);
         _help.gameObject.SetActive(true);
@@ -117,7 +126,7 @@ public class HomeSceneManager : MonoBehaviour
     public void ClickBack()
     {
         SoundManager.StopBGM();
-        SoundManager.Play(SoundManager.SE.CANCEL);
+        SoundManager.Play(SoundManager.SE.Cancel);
         SceneManager.LoadScene("TitleScene");
     }
 

@@ -13,14 +13,14 @@ public class BrightnessManager : MonoBehaviour
     private const float BLUE = 0;
 
     /// <summary>
+    /// 明るさの初期値
+    /// </summary>
+    private const float INIT_BRIGHTNESS = 1f;
+
+    /// <summary>
     /// 明るさ調整用画像
     /// </summary>
     private static Image _maskImage = null;
-
-    /// <summary>
-    /// 現在の明るさ
-    /// </summary>
-    private static float _brightness = 1;
 
     /// <summary>
     /// フェードイン/フェードアウト時の毎フレーム明るさ増減量
@@ -58,11 +58,12 @@ public class BrightnessManager : MonoBehaviour
             ApplyImageColor();
         }
     }
+    private static float _brightness = INIT_BRIGHTNESS;
 
     /// <summary>
     /// フェードインを開始して徐々に明るくする
     /// </summary>
-    /// <param name="fadeSec">最大の明るさになるまでに時間（秒）</param>
+    /// <param name="fadeSec">最大の明るさになるまでの時間（秒）</param>
     public static void FadeIn(float fadeSec)
     {
         if (_isFadeOut)
@@ -76,7 +77,7 @@ public class BrightnessManager : MonoBehaviour
     /// <summary>
     /// フェードアウトを開始して徐々に暗くする
     /// </summary>
-    /// <param name="fadeSec">最大の暗さになるまでに時間（秒）</param>
+    /// <param name="fadeSec">最大の暗さになるまでの時間（秒）</param>
     public static void FadeOut(float fadeSec)
     {
         if (_isFadeIn)

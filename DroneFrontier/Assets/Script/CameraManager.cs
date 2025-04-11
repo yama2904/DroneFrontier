@@ -2,6 +2,11 @@
 
 public class CameraManager : MonoBehaviour
 {
+    /// <summary>
+    /// カメラ感度の初期値
+    /// </summary>
+    private const float INIT_CAMERA_SPEED = 0.5f;
+
     public static int ReverseX { get; private set; } = 1;
     public static int ReverseY { get; private set; } = 1;
 
@@ -27,7 +32,7 @@ public class CameraManager : MonoBehaviour
             }
         }
     }
-    private static float _cameraSpeed = 1f;
+    private static float _cameraSpeed = INIT_CAMERA_SPEED;
 
     /// <summary>
     /// リバースモードの設定

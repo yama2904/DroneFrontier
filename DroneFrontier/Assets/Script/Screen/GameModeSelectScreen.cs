@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class GameModeSelectScreen : MonoBehaviour
+public class GameModeSelectScreen : MonoBehaviour, IScreen
 {
     //ゲームモード
     public enum GameMode
@@ -11,4 +11,6 @@ public class GameModeSelectScreen : MonoBehaviour
         NONE
     }
     public static GameMode Mode { get; set; } = GameMode.NONE;  //選んだゲームモード
+
+    public void Initialize() { }
 }

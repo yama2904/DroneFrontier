@@ -23,7 +23,7 @@ namespace Online
             cacheTransform.localRotation = Quaternion.Euler(90, 0, 0);
 
             audioSource = GetComponent<AudioSource>();
-            audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.MISSILE);
+            audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.Missile);
         }
 
         void Start() { }
@@ -113,7 +113,7 @@ namespace Online
         [ClientRpc]
         void RpcPlaySE()
         {
-            audioSource.volume = SoundManager.SEVolume;
+            audioSource.volume = SoundManager.MasterSEVolume;
             audioSource.Play();
         }
 

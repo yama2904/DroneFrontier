@@ -148,11 +148,11 @@ namespace Offline
 
             // 3秒後にカウントダウンSE再生
             await UniTask.Delay(TimeSpan.FromSeconds(3));
-            SoundManager.Play(SoundManager.SE.START_COUNT_DOWN_D, SoundManager.SEVolume);
+            SoundManager.Play(SoundManager.SE.StartCountDownD, SoundManager.MasterSEVolume);
 
             // カウントダウンSE終了後にゲーム開始
             await UniTask.Delay(TimeSpan.FromSeconds(4.5));
-            SoundManager.Play(SoundManager.BGM.LOOP, SoundManager.BGMVolume * 0.4f);
+            SoundManager.Play(SoundManager.BGM.Loop, SoundManager.MasterBGMVolume * 0.4f);
             StartCountDown().Forget();
 
             // 各ドローンのスクリプト有効化
@@ -298,7 +298,7 @@ namespace Offline
             _finishAnimator.SetBool("SetFinish", true);
 
             // ゲーム終了SE再生
-            SoundManager.Play(SoundManager.SE.FINISH, SoundManager.SEVolume);
+            SoundManager.Play(SoundManager.SE.Finish, SoundManager.MasterSEVolume);
 
             // [残ストック数 DESC, 破壊された時間 DESC]でソートしてランキング設定
             string[] ranking = _droneDatas.OrderByDescending(x => x.Value.StockNum)

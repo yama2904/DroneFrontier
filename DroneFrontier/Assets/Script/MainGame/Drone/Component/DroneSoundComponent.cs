@@ -35,11 +35,11 @@ public class DroneSoundComponent : MonoBehaviour, IDroneComponent
     /// <param name="volume">再生音量を0～1で指定（指定しない場合はSoundManagerのSE音量を使用）</param>
     public void PlayOneShot(SoundManager.SE se, float volume = -1)
     {
-        if (se == SoundManager.SE.NONE) return;
+        if (se == SoundManager.SE.None) return;
 
         if (volume == -1)
         {
-            volume = SoundManager.SEVolume;
+            volume = SoundManager.MasterSEVolume;
         }
         _oneShotAudio.PlayOneShot(SoundManager.GetAudioClip(se), volume);
     }
@@ -53,11 +53,11 @@ public class DroneSoundComponent : MonoBehaviour, IDroneComponent
     /// <returns>SE再生番号（SEを停止する際に使用）</returns>
     public int PlayLoopSE(SoundManager.SE se, float volume = -1)
     {
-        if (se == SoundManager.SE.NONE) return -1;
+        if (se == SoundManager.SE.None) return -1;
 
         if (volume == -1)
         {
-            volume = SoundManager.SEVolume;
+            volume = SoundManager.MasterSEVolume;
         }
 
         //再生可能なAudioSourceを調べる

@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace Network
 {
-    public class MatchingScreen : MyNetworkBehaviour
+    public class MatchingScreen : MyNetworkBehaviour, IScreen
     {
         /// <summary>
         /// ボタン種類
@@ -96,7 +96,7 @@ namespace Network
             MyNetworkManager.Singleton.Disconnect();
             
             // ボタン選択イベント発火
-            SoundManager.Play(SoundManager.SE.CANCEL, SoundManager.SEVolume);
+            SoundManager.Play(SoundManager.SE.Cancel, SoundManager.MasterSEVolume);
             SelectedButton = ButtonType.Back;
             OnButtonClick(this, EventArgs.Empty);
         }
@@ -106,7 +106,7 @@ namespace Network
             if (_isError && Input.GetMouseButtonUp(0))
             {
                 // SE再生
-                SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
+                SoundManager.Play(SoundManager.SE.Select, SoundManager.MasterSEVolume);
 
                 // エラーメッセージ非表示
                 _errMsgCanvas.enabled = false;
@@ -242,7 +242,7 @@ namespace Network
             UnityEngine.Random.InitState(seed);
 
             // ボタン選択イベント発火
-            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
+            SoundManager.Play(SoundManager.SE.Select, SoundManager.MasterSEVolume);
             SelectedButton = ButtonType.Ok;
             OnButtonClick(this, EventArgs.Empty);
         }

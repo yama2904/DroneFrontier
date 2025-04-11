@@ -78,8 +78,8 @@ namespace Offline
 
             // 爆発SE再生
             AudioSource audio = GetComponent<AudioSource>();
-            audio.clip = SoundManager.GetAudioClip(SoundManager.SE.EXPLOSION_MISSILE);
-            audio.volume = SoundManager.SEVolume;
+            audio.clip = SoundManager.GetAudioClip(SoundManager.SE.ExplosionMissile);
+            audio.volume = SoundManager.MasterSEVolume;
             audio.time = 0.2f;
             audio.Play();
 

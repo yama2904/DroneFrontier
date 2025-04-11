@@ -55,7 +55,7 @@ namespace Online
             if (weapon == w) return;
 
             //SE再生
-            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
+            SoundManager.Play(SoundManager.SE.Select, SoundManager.MasterSEVolume);
 
             messageWindowText.text = SHOTGUN_TEXT;
             SetWeaponButtonsColor(w);
@@ -68,7 +68,7 @@ namespace Online
             if (weapon == w) return;
 
             //SE再生
-            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
+            SoundManager.Play(SoundManager.SE.Select, SoundManager.MasterSEVolume);
 
             messageWindowText.text = MISSILE_TEXT;
             SetWeaponButtonsColor(w);
@@ -81,7 +81,7 @@ namespace Online
             if (weapon == w) return;
 
             //SE再生
-            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
+            SoundManager.Play(SoundManager.SE.Select, SoundManager.MasterSEVolume);
 
             messageWindowText.text = LASER_TEXT;
             SetWeaponButtonsColor(w);
@@ -95,7 +95,7 @@ namespace Online
             if (weapon == BaseWeapon.Weapon.NONE) return;
 
             //SE再生
-            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
+            SoundManager.Play(SoundManager.SE.Select, SoundManager.MasterSEVolume);
 
             //選択した武器の情報を送る
             MatchingManager.Singleton.CmdSetWeapon((int)weapon);
@@ -119,7 +119,7 @@ namespace Online
             if (!isItemOnButton)
             {
                 //SE再生
-                SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
+                SoundManager.Play(SoundManager.SE.Select, SoundManager.MasterSEVolume);
 
                 BattleManager.IsItemSpawn = true;
                 itemOnButton.image.color = selectItemButtonColor;
@@ -135,7 +135,7 @@ namespace Online
             if (isItemOnButton)
             {
                 //SE再生
-                SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
+                SoundManager.Play(SoundManager.SE.Select, SoundManager.MasterSEVolume);
 
                 BattleManager.IsItemSpawn = false;
                 itemOnButton.image.color = notSelectButtonColor;

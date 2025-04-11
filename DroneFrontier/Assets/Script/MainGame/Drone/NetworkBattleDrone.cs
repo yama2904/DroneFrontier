@@ -314,7 +314,7 @@ namespace Network
                 // レーダー使用
                 if (_input.DownedKeys.Contains(KeyCode.Q))
                 {
-                    _soundComponent.PlayOneShot(SoundManager.SE.RADAR, SoundManager.SEVolume);
+                    _soundComponent.PlayOneShot(SoundManager.SE.Radar, SoundManager.MasterSEVolume);
                     _radarComponent.StartRadar();
                 }
                 // レーダー終了
@@ -528,7 +528,7 @@ namespace Network
             // アイテム枠にアイテムを持っていたら使用
             if (_itemComponent.UseItem((int)item))
             {
-                _soundComponent.PlayOneShot(SoundManager.SE.USE_ITEM, SoundManager.SEVolume);
+                _soundComponent.PlayOneShot(SoundManager.SE.UseItem, SoundManager.MasterSEVolume);
             }
         }
 
@@ -548,7 +548,7 @@ namespace Network
             _radarComponent.StopRadar();
 
             // 死亡SE再生
-            _soundComponent.PlayOneShot(SoundManager.SE.DEATH, SoundManager.SEVolume);
+            _soundComponent.PlayOneShot(SoundManager.SE.Death, SoundManager.MasterSEVolume);
 
             // 一定時間経過してから爆破
             await UniTask.Delay(TimeSpan.FromSeconds(DEATH_FALL_TIME), ignoreTimeScale: true);

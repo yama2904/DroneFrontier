@@ -162,7 +162,7 @@ namespace Online
         [ClientRpc]
         public void RpcPlayStartCountDown()
         {
-            SoundManager.Play(SoundManager.SE.START_COUNT_DOWN_D, SoundManager.SEVolume);
+            SoundManager.Play(SoundManager.SE.StartCountDownD, SoundManager.MasterSEVolume);
             Invoke(nameof(SetStartFlagTrue), 4.5f);
         }
 
@@ -209,7 +209,7 @@ namespace Online
         void SetStartFlagTrue()
         {
             StartFlag = true;
-            SoundManager.Play(SoundManager.BGM.LOOP, SoundManager.BGMVolume * 0.4f);
+            SoundManager.Play(SoundManager.BGM.Loop, SoundManager.MasterBGMVolume * 0.4f);
         }
 
         [ClientRpc]
@@ -221,7 +221,7 @@ namespace Online
         [ClientRpc]
         void RpcPlayFinishSE()
         {
-            SoundManager.Play(SoundManager.SE.FINISH, SoundManager.SEVolume);
+            SoundManager.Play(SoundManager.SE.Finish, SoundManager.MasterSEVolume);
         }
 
         //アニメーターの再生

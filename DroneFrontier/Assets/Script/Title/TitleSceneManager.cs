@@ -5,7 +5,7 @@ public class TitleSceneManager : MonoBehaviour
 {
     void Start()
     {
-        SoundManager.Play(SoundManager.BGM.DRONE_UP, SoundManager.BGMVolume * 0.8f);
+        SoundManager.Play(SoundManager.BGM.Home, SoundManager.MasterBGMVolume * 0.8f);
     }
 
    void Update()
@@ -13,7 +13,7 @@ public class TitleSceneManager : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             //SE再生
-            SoundManager.Play(SoundManager.SE.SELECT);
+            SoundManager.Play(SoundManager.SE.Select);
 
             SceneManager.LoadScene("HomeScene");
         }

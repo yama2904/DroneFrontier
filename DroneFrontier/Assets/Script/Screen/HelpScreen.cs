@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public class HelpScreen : MonoBehaviour
+public class HelpScreen : MonoBehaviour, IScreen
 {
     /// <summary>
     /// ボタン種類
@@ -43,10 +43,12 @@ public class HelpScreen : MonoBehaviour
     }
     Help selectHelp = Help.NONE;
 
+    public void Initialize() { }
+
     //基本操作
     public void ClickBasicOperation()
     {
-        SoundManager.Play(SoundManager.SE.SELECT);
+        SoundManager.Play(SoundManager.SE.Select);
 
         HelpBasicOperationDescription.SetActive(true);
         selectHelp = Help.BASIC;
@@ -55,7 +57,7 @@ public class HelpScreen : MonoBehaviour
     //バトルモード
     public void ClickBattleModeHelp()
     {
-        SoundManager.Play(SoundManager.SE.SELECT);
+        SoundManager.Play(SoundManager.SE.Select);
 
         HelpBattleModeDescription.SetActive(true);
         selectHelp = Help.BATTLE;
@@ -64,7 +66,7 @@ public class HelpScreen : MonoBehaviour
     //レースモード
     public void ClickRaceModeHelp()
     {
-        SoundManager.Play(SoundManager.SE.SELECT);
+        SoundManager.Play(SoundManager.SE.Select);
 
         HelpRaceModeDescription.SetActive(true);
         selectHelp = Help.RACE;
@@ -73,7 +75,7 @@ public class HelpScreen : MonoBehaviour
     //戻る
     public void ClickBack()
     {
-        SoundManager.Play(SoundManager.SE.CANCEL);
+        SoundManager.Play(SoundManager.SE.Cancel);
 
         switch (selectHelp)
         {

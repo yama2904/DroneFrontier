@@ -113,7 +113,7 @@ public class DroneSpawnManager : MonoBehaviour
                 respawnDrone = CreateDrone(drone.Name, drone.SubWeapon, initPos, true);
 
                 // •œŠˆSEÄ¶
-                SoundManager.Play(SoundManager.SE.RESPAWN);
+                SoundManager.Play(SoundManager.SE.Respawn);
             }
             else
             {

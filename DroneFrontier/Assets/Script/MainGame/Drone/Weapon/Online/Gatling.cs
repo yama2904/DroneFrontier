@@ -24,7 +24,7 @@ namespace Online
         {
             base.OnStartClient();
             audioSource = GetComponent<AudioSource>();
-            audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.GATLING);
+            audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.Gatling);
         }
 
         void Start()
@@ -78,7 +78,7 @@ namespace Online
         [ClientRpc]
         void RpcPlaySE()
         {
-            audioSource.volume = SoundManager.SEVolume;
+            audioSource.volume = SoundManager.MasterSEVolume;
             audioSource.Play();
         }
     }

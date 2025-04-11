@@ -55,7 +55,7 @@ public class JammingStatus : IDroneStatusChange
         // ジャミングSE再生
         if (_sound != null)
         {
-            _seId = _sound.PlayLoopSE(SoundManager.SE.JAMMING_NOISE);
+            _seId = _sound.PlayLoopSE(SoundManager.SE.JammingNoise);
         }
 
         // ジャミング終了タイマー設定

@@ -393,9 +393,9 @@ namespace Online
             if (flag)
             {
                 charge.Play();
-                audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.BEAM_CAHRGE);
+                audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.BeamChange);
                 audioSource.time = 0.2f;
-                audioSource.volume = SoundManager.SEVolume * 0.15f;
+                audioSource.volume = SoundManager.MasterSEVolume * 0.15f;
                 audioSource.Play();
             }
             else
@@ -451,8 +451,8 @@ namespace Online
             }
 
             //レーザー音の再生
-            audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.BEAM);
-            audioSource.volume = SoundManager.SEVolume * 0.05f;
+            audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.Beam);
+            audioSource.volume = SoundManager.MasterSEVolume * 0.05f;
             audioSource.loop = true;
             audioSource.Play();
         }

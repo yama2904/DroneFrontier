@@ -47,12 +47,12 @@ namespace Online
 
             //AudioSourceの初期化
             audios = GetComponents<AudioSource>();
-            audios[(int)SE.Boost].clip = SoundManager.GetAudioClip(SoundManager.SE.BOOST);
-            audios[(int)SE.PROPELLER].clip = SoundManager.GetAudioClip(SoundManager.SE.PROPELLER);
-            audios[(int)SE.WALL_STUN].clip = SoundManager.GetAudioClip(SoundManager.SE.WALL_STUN);
+            audios[(int)SE.Boost].clip = SoundManager.GetAudioClip(SoundManager.SE.Boost);
+            audios[(int)SE.PROPELLER].clip = SoundManager.GetAudioClip(SoundManager.SE.Propeller);
+            audios[(int)SE.WALL_STUN].clip = SoundManager.GetAudioClip(SoundManager.SE.WallStun);
 
             //プロペラは延々流す
-            PlaySE((int)SE.PROPELLER, SoundManager.SEVolume, true);
+            PlaySE((int)SE.PROPELLER, SoundManager.MasterSEVolume, true);
         }
 
         public override void OnStartLocalPlayer()
@@ -192,7 +192,7 @@ namespace Online
                 {
                     baseAction.ModifySpeed(boostAccele);
                     isBoost = true;
-                    PlaySE((int)SE.Boost, SoundManager.SEVolume * 0.15f, true);    //加速音の再生
+                    PlaySE((int)SE.Boost, SoundManager.MasterSEVolume * 0.15f, true);    //加速音の再生
 
 
                     //デバッグ用

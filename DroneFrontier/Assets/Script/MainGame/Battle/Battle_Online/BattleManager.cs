@@ -163,7 +163,7 @@ namespace Online
                             destroyDrone.destroyTime = Time.time;
 
                             //リスポーンSEの再生
-                            p.GetComponent<DroneSoundAction>().RpcPlayOneShotSEAllClient(SoundManager.SE.RESPAWN, SoundManager.SEVolume);
+                            p.GetComponent<DroneSoundAction>().RpcPlayOneShotSEAllClient(SoundManager.SE.Respawn, SoundManager.MasterSEVolume);
 
                             //残機UIの変更
                             TargetSetStockText(destroyDrone.conn, destroyDrone.stock.ToString());

@@ -199,7 +199,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
         }
 
         // プロペラは最初から流す
-        _soundComponent.PlayLoopSE(SoundManager.SE.PROPELLER, SoundManager.SEVolume);
+        _soundComponent.PlayLoopSE(SoundManager.SE.Propeller, SoundManager.MasterSEVolume);
     }
 
     private void Update()
@@ -236,7 +236,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
         // レーダー使用
         if (_input.DownedKeys.Contains(KeyCode.Q))
         {
-            _soundComponent.PlayOneShot(SoundManager.SE.RADAR, SoundManager.SEVolume);
+            _soundComponent.PlayOneShot(SoundManager.SE.Radar, SoundManager.MasterSEVolume);
             _radarComponent.StartRadar();
         }
         // レーダー終了
@@ -362,7 +362,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
         // アイテム枠にアイテムを持っていたら使用
         if (_itemComponent.UseItem((int)item))
         {
-            _soundComponent.PlayOneShot(SoundManager.SE.USE_ITEM, SoundManager.SEVolume);
+            _soundComponent.PlayOneShot(SoundManager.SE.UseItem, SoundManager.MasterSEVolume);
         }
     }
 
@@ -382,7 +382,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
         _radarComponent.StopRadar();
 
         // 死亡SE再生
-        _soundComponent.PlayOneShot(SoundManager.SE.DEATH, SoundManager.SEVolume);
+        _soundComponent.PlayOneShot(SoundManager.SE.Death, SoundManager.MasterSEVolume);
 
         // 一定時間経過してから爆破
         await UniTask.Delay(TimeSpan.FromSeconds(DEATH_FALL_TIME), ignoreTimeScale: true);

@@ -42,7 +42,7 @@ namespace Online
         public void PlayOneShot(SoundManager.SE se, float volume)
         {
             //バグ防止
-            if (se == SoundManager.SE.NONE) return;
+            if (se == SoundManager.SE.None) return;
 
             oneShotAudio.PlayOneShot(SoundManager.GetAudioClip(se), volume);
         }
@@ -50,7 +50,7 @@ namespace Online
         public int PlayLoopSE(SoundManager.SE se, float volume)
         {
             //バグ防止
-            if (se == SoundManager.SE.NONE) return -1;
+            if (se == SoundManager.SE.None) return -1;
 
             //再生可能なAudioSourceを調べる
             for (int i = 0; i < loopAudioDatas.Length; i++)

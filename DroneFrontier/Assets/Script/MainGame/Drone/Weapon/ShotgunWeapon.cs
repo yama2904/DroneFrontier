@@ -202,8 +202,8 @@ namespace Offline
 
             // コンポーネント取得
             _audioSource = GetComponent<AudioSource>();
-            _audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.SHOTGUN);
-            _audioSource.volume = SoundManager.SEVolume;
+            _audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.Shotgun);
+            _audioSource.volume = SoundManager.MasterSEVolume;
         }
 
         private void Update()

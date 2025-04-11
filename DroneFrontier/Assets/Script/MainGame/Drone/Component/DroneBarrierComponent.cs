@@ -130,13 +130,13 @@ namespace Offline
             // HPが残っている場合はダメージSE再生
             if (HP > 0)
             {
-                _soundComponent.PlayOneShot(SoundManager.SE.BARRIER_DAMAGE, SoundManager.SEVolume * 0.7f);
+                _soundComponent.PlayOneShot(SoundManager.SE.BarrierDamage, SoundManager.MasterSEVolume * 0.7f);
             }
             else
             {
                 // 破壊された場合はバリア破壊SE
                 HP = 0;
-                _soundComponent.PlayOneShot(SoundManager.SE.DESTROY_BARRIER, SoundManager.SEVolume);
+                _soundComponent.PlayOneShot(SoundManager.SE.DestroyBarrier, SoundManager.MasterSEVolume);
                 Debug.Log($"{_drone.Name}:バリア破壊");
             }
 

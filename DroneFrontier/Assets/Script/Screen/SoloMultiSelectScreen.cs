@@ -4,7 +4,7 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SoloMultiSelectScreen : MonoBehaviour
+public class SoloMultiSelectScreen : MonoBehaviour, IScreen
 {
     /// <summary>
     /// ボタン種類
@@ -76,7 +76,7 @@ public class SoloMultiSelectScreen : MonoBehaviour
     /// </summary>
     private bool _isError = false;
 
-    private void Start()
+    public void Initialize() 
     {
         // 名前入力欄非表示
         _inputFieldCanvas.enabled = false;
@@ -100,7 +100,7 @@ public class SoloMultiSelectScreen : MonoBehaviour
     /// </summary>
     public void ClickSolo()
     {
-        SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
+        SoundManager.Play(SoundManager.SE.Select, SoundManager.MasterSEVolume);
         SelectedButton = ButtonType.SoloMode;
         OnButtonClick(this, EventArgs.Empty);
     }
@@ -111,7 +111,7 @@ public class SoloMultiSelectScreen : MonoBehaviour
     public void ClickMulti()
     {
         // SE再生
-        SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
+        SoundManager.Play(SoundManager.SE.Select, SoundManager.MasterSEVolume);
 
         // 名前入力欄表示
         _inputFieldCanvas.enabled = true;
@@ -122,7 +122,7 @@ public class SoloMultiSelectScreen : MonoBehaviour
     /// </summary>
     public void ClickBack()
     {
-        SoundManager.Play(SoundManager.SE.CANCEL);
+        SoundManager.Play(SoundManager.SE.Cancel);
         SelectedButton = ButtonType.Back;
         OnButtonClick(this, EventArgs.Empty);
     }
@@ -141,7 +141,7 @@ public class SoloMultiSelectScreen : MonoBehaviour
         MyNetworkManager.Singleton.StartHost(PlayerName).Forget();
 
         // ボタン選択イベント発火
-        SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
+        SoundManager.Play(SoundManager.SE.Select, SoundManager.MasterSEVolume);
         SelectedButton = ButtonType.MultiMode;
         OnButtonClick(this, EventArgs.Empty);
     }
@@ -157,7 +157,7 @@ public class SoloMultiSelectScreen : MonoBehaviour
         PlayerName = _inputField.text;
 
         // SE再生
-        SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
+        SoundManager.Play(SoundManager.SE.Select, SoundManager.MasterSEVolume);
 
         // クライアントとして通信を開始
         UniTask.Void(async () =>
@@ -187,7 +187,7 @@ public class SoloMultiSelectScreen : MonoBehaviour
     public void ClickBackOfInputField()
     {
         // SE再生
-        SoundManager.Play(SoundManager.SE.CANCEL, SoundManager.SEVolume);
+        SoundManager.Play(SoundManager.SE.Cancel, SoundManager.MasterSEVolume);
 
         // 探索中の場合は探索停止
         if (_isDiscovery)
@@ -210,7 +210,7 @@ public class SoloMultiSelectScreen : MonoBehaviour
         if (_isError && Input.GetMouseButtonUp(0))
         {
             // SE再生
-            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
+            SoundManager.Play(SoundManager.SE.Select, SoundManager.MasterSEVolume);
 
             // エラーメッセージ非表示
             _errMsgCanvas.enabled = false;

@@ -78,8 +78,8 @@ namespace Offline
 
             // コンポーネント取得
             _audioSource = GetComponent<AudioSource>();
-            _audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.GATLING);
-            _audioSource.volume = SoundManager.SEVolume;
+            _audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.Gatling);
+            _audioSource.volume = SoundManager.MasterSEVolume;
 
             // 弾丸発射位置初期化
             ShotPosition = _shotPosition;

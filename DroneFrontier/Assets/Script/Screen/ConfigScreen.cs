@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ConfigScreen : MonoBehaviour
+public class ConfigScreen : MonoBehaviour, IScreen
 {
     /// <summary>
     /// ボタン種類
@@ -37,7 +37,6 @@ public class ConfigScreen : MonoBehaviour
     [SerializeField, Tooltip("カメラ感度調整スライダー")]
     private Slider _cameraSlider = null;
 
-    //スライダーの値を表示するテキスト
     [SerializeField, Tooltip("BGM音量表示テキスト")]
     private Text _bgmValueText = null;
 
@@ -51,11 +50,29 @@ public class ConfigScreen : MonoBehaviour
     private Text _cameraValueText = null;
 
     /// <summary>
+    /// 設定初期化
+    /// </summary>
+    public void Initialize()
+    {
+        // Sliderの値の設定
+        _bgmSlider.value = SoundManager.MasterBGMVolume;
+        _seSlider.value = SoundManager.MasterSEVolume;
+        _brightnessSlider.value = BrightnessManager.Brightness;
+        _cameraSlider.value = CameraManager.CameraSpeed;
+
+        // Textの設定
+        _bgmValueText.text = ConvertToText(_bgmSlider.value);
+        _seValueText.text = ConvertToText(_seSlider.value);
+        _brightnessValueText.text = ConvertToText(_brightnessSlider.value);
+        _cameraValueText.text = ConvertToText(_cameraSlider.value);
+    }
+
+    /// <summary>
     /// BGM調整
     /// </summary>
     public void MoveSliderBGM()
     {
-        SoundManager.BGMVolume = _bgmSlider.value;
+        SoundManager.MasterBGMVolume = _bgmSlider.value;
         _bgmValueText.text = ConvertToText(_bgmSlider.value);
     }
 
@@ -64,7 +81,7 @@ public class ConfigScreen : MonoBehaviour
     /// </summary>
     public void MoveSliderSE()
     {
-        SoundManager.SEVolume = _seSlider.value;
+        SoundManager.MasterSEVolume = _seSlider.value;
         _seValueText.text = ConvertToText(_seSlider.value);
     }
 
@@ -92,7 +109,7 @@ public class ConfigScreen : MonoBehaviour
     public void ClickInitialize()
     {
         Initialize();
-        SoundManager.Play(SoundManager.SE.SELECT);
+        SoundManager.Play(SoundManager.SE.Select);
     }
 
     /// <summary>
@@ -100,38 +117,9 @@ public class ConfigScreen : MonoBehaviour
     /// </summary>
     public void ClickBack()
     {
-        SoundManager.Play(SoundManager.SE.CANCEL);
+        SoundManager.Play(SoundManager.SE.Cancel);
         SelectedButton = ButtonType.Back;
         OnButtonClick(this, EventArgs.Empty);
-    }
-
-    private void Start()
-    {
-        Initialize();
-    }
-
-    /// <summary>
-    /// 設定初期化
-    /// </summary>
-    private void Initialize()
-    {
-        // 初期化
-        SoundManager.BGMVolume = 0.5f;
-        SoundManager.SEVolume = 0.5f;
-        BrightnessManager.Brightness = 1f;
-        CameraManager.CameraSpeed = 0.5f;
-
-        // Sliderの値の設定
-        _bgmSlider.value = SoundManager.BGMVolume;
-        _seSlider.value = SoundManager.SEVolume;
-        _brightnessSlider.value = BrightnessManager.Brightness;
-        _cameraSlider.value = CameraManager.CameraSpeed;
-
-        // Textの設定
-        _bgmValueText.text = ConvertToText(_bgmSlider.value);
-        _seValueText.text = ConvertToText(_seSlider.value);
-        _brightnessValueText.text = ConvertToText(_brightnessSlider.value);
-        _cameraValueText.text = ConvertToText(_cameraSlider.value);
     }
 
     /// <summary>

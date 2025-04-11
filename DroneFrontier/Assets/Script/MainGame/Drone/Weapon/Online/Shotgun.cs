@@ -40,8 +40,8 @@ namespace Online
         {
             base.OnStartClient();
             audioSource = GetComponent<AudioSource>();
-            audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.SHOTGUN);
-            audioSource.volume = SoundManager.SEVolume;
+            audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.Shotgun);
+            audioSource.volume = SoundManager.MasterSEVolume;
         }
 
         void Start()

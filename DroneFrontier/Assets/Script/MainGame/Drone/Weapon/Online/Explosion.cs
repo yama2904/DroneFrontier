@@ -24,8 +24,8 @@ namespace Online
         {
             base.OnStartClient();
             audioSource = GetComponent<AudioSource>();
-            audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.EXPLOSION_MISSILE);
-            audioSource.volume = SoundManager.SEVolume;
+            audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.ExplosionMissile);
+            audioSource.volume = SoundManager.MasterSEVolume;
             audioSource.time = 0.2f;
             audioSource.Play();
         }

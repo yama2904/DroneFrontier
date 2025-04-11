@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace Network
 {
-    public class NetworkWeaponSelectScreen : MyNetworkBehaviour
+    public class NetworkWeaponSelectScreen : MyNetworkBehaviour, IScreen
     {
         /// <summary>
         /// ボタン種類
@@ -92,7 +92,7 @@ namespace Network
             if (_isError && Input.GetMouseButtonUp(0))
             {
                 // SE再生
-                SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
+                SoundManager.Play(SoundManager.SE.Select, SoundManager.MasterSEVolume);
 
                 // エラーメッセージ非表示
                 _errMsgCanvas.enabled = false;
@@ -127,7 +127,7 @@ namespace Network
             if (_selectedWeapon == selectWeapon) return;
 
             // SE再生
-            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
+            SoundManager.Play(SoundManager.SE.Select, SoundManager.MasterSEVolume);
 
             _descriptionText.text = SHOTGUN_TEXT;
             SetWeaponButtonsColor(selectWeapon);
@@ -140,7 +140,7 @@ namespace Network
             if (_selectedWeapon == selectWeapon) return;
 
             //SE再生
-            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
+            SoundManager.Play(SoundManager.SE.Select, SoundManager.MasterSEVolume);
 
             _descriptionText.text = MISSILE_TEXT;
             SetWeaponButtonsColor(selectWeapon);
@@ -153,7 +153,7 @@ namespace Network
             if (_selectedWeapon == selectWeapon) return;
 
             //SE再生
-            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
+            SoundManager.Play(SoundManager.SE.Select, SoundManager.MasterSEVolume);
 
             _descriptionText.text = LASER_TEXT;
             SetWeaponButtonsColor(selectWeapon);
@@ -167,7 +167,7 @@ namespace Network
             if (!isItemOnButton)
             {
                 //SE再生
-                SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
+                SoundManager.Play(SoundManager.SE.Select, SoundManager.MasterSEVolume);
 
                 //BattleManager.IsItemSpawn = true;
                 _itemOnButton.image.color = selectItemButtonColor;
@@ -183,7 +183,7 @@ namespace Network
             if (isItemOnButton)
             {
                 //SE再生
-                SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
+                SoundManager.Play(SoundManager.SE.Select, SoundManager.MasterSEVolume);
 
                 //BattleManager.IsItemSpawn = false;
                 _itemOnButton.image.color = notSelectButtonColor;
@@ -199,7 +199,7 @@ namespace Network
             if (_selectedWeapon == WeaponType.NONE) return;
 
             // SE再生
-            SoundManager.Play(SoundManager.SE.SELECT, SoundManager.SEVolume);
+            SoundManager.Play(SoundManager.SE.Select, SoundManager.MasterSEVolume);
 
             // 選択武器送信
             SendMethod(() => SelectWeapon(MyNetworkManager.Singleton.MyPlayerName, _selectedWeapon));
