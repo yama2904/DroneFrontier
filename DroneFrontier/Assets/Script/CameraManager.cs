@@ -2,13 +2,8 @@
 
 public class CameraManager : MonoBehaviour
 {
-    /// <summary>
-    /// 設定したカメラ感度の調整用倍率
-    /// </summary>
-    private const float CAMERA_SPEED_SCALE = 4f;
-
-    public static short ReverseX { get; private set; } = 1;
-    public static short ReverseY { get; private set; } = 1;
+    public static int ReverseX { get; private set; } = 1;
+    public static int ReverseY { get; private set; } = 1;
 
     /// <summary>
     /// カメラ感度
@@ -34,34 +29,19 @@ public class CameraManager : MonoBehaviour
     }
     private static float _cameraSpeed = 1f;
 
-    void Start()
-    {
-        DontDestroyOnLoad(gameObject);
-    }
-
-    //カメラをリバースモードにするならtrue
-    //ノーマルモードはfalse
-    //引数1がx軸
-    //引数2がy軸
-    //デフォルトはノーマル
+    /// <summary>
+    /// リバースモードの設定
+    /// </summary>
+    /// <param name="x">X軸</param>
+    /// <param name="y">Y軸</param>
     public static void ReverseCamera(bool x, bool y)
     {
-        if (x)
-        {
-            ReverseX = -1;
-        }
-        else
-        {
-            ReverseX = 1;
-        }
+        ReverseX = x ? -1 : 1;
+        ReverseY = y ? -1 : 1;
+    }
 
-        if (y)
-        {
-            ReverseY = -1;
-        }
-        else
-        {
-            ReverseY = 1;
-        }
+    private void Start()
+    {
+        DontDestroyOnLoad(gameObject);
     }
 }
