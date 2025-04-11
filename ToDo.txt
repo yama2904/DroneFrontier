@@ -1,2 +1,1 @@
-マッチング画面のSetGameAlfaを画面側でImage使うように変える
 BrightnessManagerとか見直し

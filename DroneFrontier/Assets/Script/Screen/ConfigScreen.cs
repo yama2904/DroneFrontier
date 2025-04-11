@@ -37,21 +37,6 @@ public class ConfigScreen : MonoBehaviour
     [SerializeField] Text BrightnessValueText = null;
     [SerializeField] Text CameraValueText = null;
 
-    void Start()
-    {
-        //Sliderの値の設定
-        BGMSlider.value = SoundManager.BGMVolume;
-        SESlider.value = SoundManager.SEVolume;
-        BrightnessSlider.value = 1.0f - BrightnessManager.Brightness;
-        CameraSlider.value = CameraManager.CameraSpeed;
-
-        //Textの設定
-        BGMValueText.text = valueToText(BGMSlider.value);
-        SEValueText.text = valueToText(SESlider.value);
-        BrightnessValueText.text = valueToText(BrightnessSlider.value);
-        CameraValueText.text = valueToText(CameraSlider.value);
-    }
-
     //BGM調整
     public void MoveSliderBGM()
     {
@@ -69,7 +54,7 @@ public class ConfigScreen : MonoBehaviour
     //明るさ調整
     public void MoveSliderBrightness()
     {
-        BrightnessManager.Brightness = 1.0f - BrightnessSlider.value;
+        BrightnessManager.Brightness = BrightnessSlider.value;
         BrightnessValueText.text = valueToText(BrightnessSlider.value);
     }
 
@@ -81,26 +66,9 @@ public class ConfigScreen : MonoBehaviour
     }
 
     //設定初期化
-    public void ClickInitialization()
+    public void ClickInitialize()
     {
-        // 初期化
-        SoundManager.BGMVolume = 0.5f;
-        SoundManager.SEVolume = 0.5f;
-        BrightnessManager.Brightness = 0;
-        CameraManager.CameraSpeed = 0.5f;
-
-        // Sliderの値の設定
-        BGMSlider.value = SoundManager.BGMVolume;
-        SESlider.value = SoundManager.SEVolume;
-        BrightnessSlider.value = 1.0f - BrightnessManager.Brightness;
-        CameraSlider.value = CameraManager.CameraSpeed;
-
-        // Textの設定
-        BGMValueText.text = valueToText(BGMSlider.value);
-        SEValueText.text = valueToText(SESlider.value);
-        BrightnessValueText.text = valueToText(BrightnessSlider.value);
-        CameraValueText.text = valueToText(CameraSlider.value);
-        
+        Initialize();
         SoundManager.Play(SoundManager.SE.SELECT);
     }
 
@@ -113,8 +81,34 @@ public class ConfigScreen : MonoBehaviour
         OnButtonClick(this, EventArgs.Empty);
     }
 
+    private void Start()
+    {
+        Initialize();
+    }
+
+    private void Initialize()
+    {
+        // 初期化
+        SoundManager.BGMVolume = 0.5f;
+        SoundManager.SEVolume = 0.5f;
+        BrightnessManager.Brightness = 1f;
+        CameraManager.CameraSpeed = 0.5f;
+
+        // Sliderの値の設定
+        BGMSlider.value = SoundManager.BGMVolume;
+        SESlider.value = SoundManager.SEVolume;
+        BrightnessSlider.value = BrightnessManager.Brightness;
+        CameraSlider.value = CameraManager.CameraSpeed;
+
+        // Textの設定
+        BGMValueText.text = valueToText(BGMSlider.value);
+        SEValueText.text = valueToText(SESlider.value);
+        BrightnessValueText.text = valueToText(BrightnessSlider.value);
+        CameraValueText.text = valueToText(CameraSlider.value);
+    }
+
     //Sliderの値をテキスト用に変換
-    string valueToText(float value)
+    private string valueToText(float value)
     {
         return (value * 100).ToString("F0");
     }

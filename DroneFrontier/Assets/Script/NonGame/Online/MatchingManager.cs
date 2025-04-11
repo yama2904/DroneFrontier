@@ -40,7 +40,7 @@ namespace Online
             singleton = this;
 
             //明るさの調整と画面の生成
-            BrightnessManager.SetGameAlfa(0);
+            //BrightnessManager.SetGameAlfa(0);
             MatchingScreen mc = Instantiate(matchingScreen);
             //mc.Init(isServer);
             createMatchingScreen = mc;

@@ -2508,8 +2508,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 6983158067203767758}
-        m_TargetAssemblyTypeName: ConfigManager, Assembly-CSharp
-        m_MethodName: ClickInitialization
+        m_TargetAssemblyTypeName: ConfigScreen, Assembly-CSharp
+        m_MethodName: ClickInitialize
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

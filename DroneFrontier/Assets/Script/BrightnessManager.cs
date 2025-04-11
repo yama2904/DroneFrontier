@@ -3,155 +3,140 @@ using UnityEngine.UI;
 
 public class BrightnessManager : MonoBehaviour
 {
-    //最も暗い画面のアルファ値
-    const float MAX_ALFA = 200.0f / 255.0f;
+    /// <summary>
+    /// 明るさの最小値
+    /// </summary>
+    private const float MIN_BRIGHTNESS = 200.0f / 255.0f;
 
-    //黒
-    const float RED = 0;
-    const float GREEN = 0;
-    const float BLUE = 0;
+    private const float RED = 0;
+    private const float GREEN = 0;
+    private const float BLUE = 0;
 
-    static Image screenMaskImage = null;
-    static float _brightness = 0;      //ゲーム全体の画面の明るさ
-    static float gameAlfa = 0;      //ゲームの演出の方の画面の明るさ
+    /// <summary>
+    /// 明るさ調整用画像
+    /// </summary>
+    private static Image _maskImage = null;
 
-    static float fadeAlfa = 0;      //フェードイン・フェードアウトの1フレームのアルファ値の変化量
-    static float deltaTime = 0;     //static関数で使えるようにTime.deltaTimeを代入する変数
-    static bool isFadeIn = false;   //フェードインするか
-    static bool isFadeOut = false;  //フェードアウトするか
+    /// <summary>
+    /// 現在の明るさ
+    /// </summary>
+    private static float _brightness = 1;
 
-    void Awake()
-    {
-        DontDestroyOnLoad(gameObject);
+    /// <summary>
+    /// フェードイン/フェードアウト時の毎フレーム明るさ増減量
+    /// </summary>
+    private static float _fadeValue = 0;
 
-        screenMaskImage = transform.Find("Canvas/Panel").GetComponent<Image>();
-        screenMaskImage.color = new Color(RED, GREEN, BLUE, AddAlfa(gameAlfa));
-    }
+    /// <summary>
+    /// フェードイン中であるか
+    /// </summary>
+    private static bool _isFadeIn = false;
 
-    void Update()
-    {
-        //フェードイン
-        if (isFadeIn)
-        {
-            gameAlfa -= fadeAlfa;
-            screenMaskImage.color = new Color(RED, GREEN, BLUE, AddAlfa(gameAlfa));
-            if (AddAlfa(gameAlfa) <= _brightness * MAX_ALFA)
-            {
-                gameAlfa = 0;
-                isFadeIn = false;
-                fadeAlfa = 0;
-            }
-        }
+    /// <summary>
+    /// フェードアウト中であるか
+    /// </summary>
+    private static bool _isFadeOut = false;
 
-        //フェードアウト
-        if (isFadeOut)
-        {
-            gameAlfa += fadeAlfa;
-            screenMaskImage.color = new Color(RED, GREEN, BLUE, AddAlfa(gameAlfa));
-            if (gameAlfa >= 1.0f)
-            {
-                gameAlfa = 1.0f;
-                isFadeOut = false;
-                fadeAlfa = 0;
-            }
-        }
-        deltaTime = Time.deltaTime;
-    }
-
-    //ゲーム全体の画面の明るさ
+    /// <summary>
+    /// 明るさを0～1で調整<br/>
+    /// 0→1へ近づくほど明るくなる
+    /// </summary>
     public static float Brightness
     {
         get { return _brightness; }
         set
         {
-            float a = value;
-            if(a < 0)
+            _brightness = value;
+            if(value < 0)
             {
-                a = 0;
+                _brightness = 0;
             }
-            if(a > 1.0f)
+            if(value > 1f)
             {
-                a = 1.0f;
+                _brightness = 1f;
             }
-            _brightness = a;
-            screenMaskImage.color = new Color(RED, GREEN, BLUE, AddAlfa(gameAlfa));
+            ApplyImageColor();
         }
     }
 
-    //画面の明るさを0～1で設定
-    //ゲームの演出での明るさ変更など
-    public static void SetGameAlfa(float x)
+    /// <summary>
+    /// フェードインを開始して徐々に明るくする
+    /// </summary>
+    /// <param name="fadeSec">最大の明るさになるまでに時間（秒）</param>
+    public static void FadeIn(float fadeSec)
     {
-        if (x < 0)
+        if (_isFadeOut)
         {
-            x = 0;
+            _isFadeOut = false;
         }
-        if (x > 1)
-        {
-            x = 1;
-        }
-        gameAlfa = x;
-        screenMaskImage.color = new Color(RED, GREEN, BLUE, AddAlfa(gameAlfa));
+        _isFadeIn = true;
+        _fadeValue = (Time.fixedDeltaTime / fadeSec) * (1 - _brightness);
     }
 
-    //SetGameAlfaで設定した明るさを取得
-    public static float GetGameAlfa()
+    /// <summary>
+    /// フェードアウトを開始して徐々に暗くする
+    /// </summary>
+    /// <param name="fadeSec">最大の暗さになるまでに時間（秒）</param>
+    public static void FadeOut(float fadeSec)
     {
-        return gameAlfa;
+        if (_isFadeIn)
+        {
+            _isFadeIn = false;
+        }
+        _isFadeOut = true;
+        _fadeValue = (Time.fixedDeltaTime / fadeSec) * _brightness;
     }
 
-    /*
-     SoundManager同様どう頑張っても指定したtimeより数秒長く
-     フェード処理が行われてしまいます
-     Debu.Logで確認しないと気付かない感じなので多分大丈夫
-     */
-
-    //フェードイン(徐々に明るくする)
-    //timeは最大の明るさになるまでの時間
-    public static void FadeIn(float time)
+    /// <summary>
+    /// フェードイン/フェードアウトを停止
+    /// </summary>
+    public static void StopFadeInOut()
     {
-        if (isFadeOut)
-        {
-            isFadeOut = false;
-        }
-        isFadeIn = true;
-        float diff = gameAlfa;    //今の明るさと最大の明るさの差
-        fadeAlfa = (deltaTime / time) * diff;
+        _isFadeIn = false;
+        _isFadeOut = false;
+        _fadeValue = 0;
     }
 
-    //フェードアウト(徐々に暗くする)
-    //timeは真っ暗になるまでの時間
-    public static void FadeOut(float time)
+    private void Awake()
     {
-        if (isFadeIn)
-        {
-            isFadeIn = false;
-        }
-        isFadeOut = true;
-        float diff = 1.0f - gameAlfa;    //今の明るさと最小の明るさの差
-        fadeAlfa = (deltaTime / time) * diff;
+        DontDestroyOnLoad(gameObject);
+
+        _maskImage = transform.Find("Canvas/Panel").GetComponent<Image>();
+        ApplyImageColor();
     }
 
-    //フェードイン・フェードアウトを途中で止めて画面の明るさをそのままにする
-    public static void FadeStop()
+    private void FixedUpdate()
     {
-        isFadeIn = false;
-        isFadeOut = false;
-        fadeAlfa = 0;
+        if (!_isFadeIn && !_isFadeOut) return;
+
+        // フェードイン
+        if (_isFadeIn)
+        {
+            Brightness += _fadeValue;
+            if (Brightness == 1)
+            {
+                _isFadeIn = false;
+            }
+        }
+
+        // フェードアウト
+        if (_isFadeOut)
+        {
+            Brightness -= _fadeValue;
+            if (Brightness == 0)
+            {
+                _isFadeOut = false;
+            }
+        }
+
+        ApplyImageColor();
     }
 
-    //baseAlfaとgameAlgaを合わせた最終的な画面の明るさを取得
-    private static float AddAlfa(float alfa)
+    /// <summary>
+    /// 指定した明るさを画像に適用する
+    /// </summary>
+    private static void ApplyImageColor()
     {
-        float a = 1.0f - (1.0f - (_brightness * MAX_ALFA)) * (1.0f - alfa);
-        if (a < 0)
-        {
-            a = 0;
-        }
-        if (a > 1.0f)
-        {
-            a = 1.0f;
-        }
-        return a;
+        _maskImage.color = new Color(RED, GREEN, BLUE, (1 - Brightness) * MIN_BRIGHTNESS);
     }
 }
