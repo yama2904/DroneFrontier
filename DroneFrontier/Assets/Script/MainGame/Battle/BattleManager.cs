@@ -213,7 +213,7 @@ namespace Offline
                     await UniTask.Delay(TimeSpan.FromSeconds(60), cancellationToken: _cancelToken.Token);
 
                     _timeText.enabled = true;
-                    _timeText.text = "残 り " + time + " 分";
+                    _timeText.text = $"残 り {time} 分";
 
                     // 4秒後に非表示
                     UniTask.Void(async () =>
@@ -228,7 +228,7 @@ namespace Offline
                 _timeText.enabled = true;
                 for (int i = 10; i > 0; i--)
                 {
-                    _timeText.text = "残 り " + i + " 秒";
+                    _timeText.text = $"残 り {i} 秒";
                     await UniTask.Delay(TimeSpan.FromSeconds(1), cancellationToken: _cancelToken.Token);
                 }
 

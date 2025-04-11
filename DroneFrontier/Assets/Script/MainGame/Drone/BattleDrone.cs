@@ -8,6 +8,11 @@ using UnityEngine.UI;
 
 public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
 {
+    /// <summary>
+    /// 死亡時の落下時間
+    /// </summary>
+    private const float DEATH_FALL_TIME = 2.5f;
+
     #region public
 
     /// <summary>
@@ -96,21 +101,6 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
         Item2
     }
 
-    /// <summary>
-    /// 死亡時の回転量
-    /// </summary>
-    private readonly Quaternion DEATH_ROTATE = Quaternion.Euler(28, -28, -28);
-
-    /// <summary>
-    /// 死亡時の回転速度
-    /// </summary>
-    private const float DEATH_ROTATE_SPEED = 2f;
-
-    /// <summary>
-    /// 死亡時の落下時間
-    /// </summary>
-    private const float DEATH_FALL_TIME = 2.5f;
-
     [SerializeField, Tooltip("ドローン本体オブジェクト")]
     private Transform _droneObject = null;
 
@@ -130,11 +120,14 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
     private int _stockNum = 2;
 
     /// <summary>
+    /// 入力情報
+    /// </summary>
+    private InputData _input = new InputData();
+
+    /// <summary>
     /// 死亡フラグ
     /// </summary>
     private bool _isDestroy = false;
-
-    private InputData _input = new InputData();
 
     // コンポーネントキャッシュ
     Rigidbody _rigidbody = null;
@@ -211,7 +204,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
             _rigidbody.AddForce(new Vector3(0, -400, 0), ForceMode.Acceleration);
 
             // ドローンを傾ける
-            _rotateComponent.Rotate(DEATH_ROTATE, DEATH_ROTATE_SPEED * Time.deltaTime);
+            _rotateComponent.Rotate(Quaternion.Euler(28, -28, -28), 2 * Time.deltaTime);
 
             // プロペラ減速
             _animator.speed *= 0.993f;

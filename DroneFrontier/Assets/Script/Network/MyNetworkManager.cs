@@ -18,6 +18,21 @@ namespace Network
 {
     public class MyNetworkManager : MonoBehaviour
     {
+        /// <summary>
+        /// 使用するポート番号
+        /// </summary>
+        private const int PORT = 5556;
+
+        /// <summary>
+        /// 最大クライアント数
+        /// </summary>
+        private const int MAX_CLIENT_NUM = 3;
+
+        /// <summary>
+        /// ローカルエンドポイント
+        /// </summary>
+        private readonly IPEndPoint LOCAL_ENDPOINT = new IPEndPoint(IPAddress.Any, PORT);
+
         public static MyNetworkManager Singleton { get; private set; } = null;
 
         /// <summary>
@@ -114,21 +129,6 @@ namespace Network
         public event DisconnectHandle OnDisconnect;
 
         #endregion
-
-        /// <summary>
-        /// 使用するポート番号
-        /// </summary>
-        private const int PORT = 5556;
-
-        /// <summary>
-        /// 最大クライアント数
-        /// </summary>
-        private const int MAX_CLIENT_NUM = 3;
-
-        /// <summary>
-        /// ローカルエンドポイント
-        /// </summary>
-        private readonly IPEndPoint LOCAL_ENDPOINT = new IPEndPoint(IPAddress.Any, PORT);
 
         /// <summary>
         /// UDP管理クラス

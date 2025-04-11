@@ -11,6 +11,11 @@ namespace Network
 {
     public class NetworkBattleDrone : MyNetworkBehaviour, IBattleDrone, ILockableOn, IRadarable
     {
+        /// <summary>
+        /// 死亡時の落下時間
+        /// </summary>
+        private const float DEATH_FALL_TIME = 2.5f;
+
         #region public
 
         /// <summary>
@@ -128,21 +133,6 @@ namespace Network
             Item2
         }
 
-        /// <summary>
-        /// 死亡時の回転量
-        /// </summary>
-        private readonly Quaternion DEATH_ROTATE = Quaternion.Euler(28, -28, -28);
-
-        /// <summary>
-        /// 死亡時の回転速度
-        /// </summary>
-        private const float DEATH_ROTATE_SPEED = 2f;
-
-        /// <summary>
-        /// 死亡時の落下時間
-        /// </summary>
-        private const float DEATH_FALL_TIME = 2.5f;
-
         [SerializeField, Tooltip("ドローン本体オブジェクト")]
         private Transform _droneObject = null;
 
@@ -164,6 +154,9 @@ namespace Network
         [SerializeField, Tooltip("ストック数")]
         private int _stockNum = 2;
 
+        /// <summary>
+        /// 入力情報
+        /// </summary>
         private InputData _input = new InputData();
 
         /// <summary>
@@ -281,7 +274,7 @@ namespace Network
                 _rigidbody.AddForce(new Vector3(0, -400, 0), ForceMode.Acceleration);
 
                 // ドローンを傾ける
-                _rotateComponent.Rotate(DEATH_ROTATE, DEATH_ROTATE_SPEED * Time.deltaTime);
+                _rotateComponent.Rotate(Quaternion.Euler(28, -28, -28), 2 * Time.deltaTime);
 
                 // プロペラ減速
                 _animator.speed *= 0.993f;

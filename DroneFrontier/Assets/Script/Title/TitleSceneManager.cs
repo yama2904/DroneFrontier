@@ -3,12 +3,12 @@ using UnityEngine.SceneManagement;
 
 public class TitleSceneManager : MonoBehaviour
 {
-    void Start()
+    private void Start()
     {
         SoundManager.Play(SoundManager.BGM.Home, SoundManager.MasterBGMVolume * 0.8f);
     }
 
-   void Update()
+    private void Update()
     {
         if (Input.GetMouseButtonDown(0))
         {
