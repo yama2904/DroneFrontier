@@ -25,55 +25,79 @@ public class ConfigScreen : MonoBehaviour
     /// </summary>
     public event EventHandler OnButtonClick;
 
-    //スライダーコンポーネント
-    [SerializeField] Slider BGMSlider = null;
-    [SerializeField] Slider SESlider = null;
-    [SerializeField] Slider BrightnessSlider = null;
-    [SerializeField] Slider CameraSlider = null;
+    [SerializeField, Tooltip("BGM調整スライダー")]
+    private Slider _bgmSlider = null;
+
+    [SerializeField, Tooltip("SE調整スライダー")]
+    private Slider _seSlider = null;
+
+    [SerializeField, Tooltip("明るさ調整スライダー")]
+    private Slider _brightnessSlider = null;
+
+    [SerializeField, Tooltip("カメラ感度調整スライダー")]
+    private Slider _cameraSlider = null;
 
     //スライダーの値を表示するテキスト
-    [SerializeField] Text BGMValueText = null;
-    [SerializeField] Text SEValueText = null;
-    [SerializeField] Text BrightnessValueText = null;
-    [SerializeField] Text CameraValueText = null;
+    [SerializeField, Tooltip("BGM音量表示テキスト")]
+    private Text _bgmValueText = null;
 
-    //BGM調整
+    [SerializeField, Tooltip("SE音量表示テキスト")]
+    private Text _seValueText = null;
+
+    [SerializeField, Tooltip("明るさ表示テキスト")]
+    private Text _brightnessValueText = null;
+
+    [SerializeField, Tooltip("カメラ感度表示テキスト")]
+    private Text _cameraValueText = null;
+
+    /// <summary>
+    /// BGM調整
+    /// </summary>
     public void MoveSliderBGM()
     {
-        SoundManager.BGMVolume = BGMSlider.value;
-        BGMValueText.text = valueToText(BGMSlider.value);
+        SoundManager.BGMVolume = _bgmSlider.value;
+        _bgmValueText.text = ConvertToText(_bgmSlider.value);
     }
 
-    //SE調整
+    /// <summary>
+    /// SE調整
+    /// </summary>
     public void MoveSliderSE()
     {
-        SoundManager.SEVolume = SESlider.value;
-        SEValueText.text = valueToText(SESlider.value);
+        SoundManager.SEVolume = _seSlider.value;
+        _seValueText.text = ConvertToText(_seSlider.value);
     }
 
-    //明るさ調整
+    /// <summary>
+    /// 明るさ調整
+    /// </summary>
     public void MoveSliderBrightness()
     {
-        BrightnessManager.Brightness = BrightnessSlider.value;
-        BrightnessValueText.text = valueToText(BrightnessSlider.value);
+        BrightnessManager.Brightness = _brightnessSlider.value;
+        _brightnessValueText.text = ConvertToText(_brightnessSlider.value);
     }
 
-    //カメラ感度調整
+    /// <summary>
+    /// カメラ感度調整
+    /// </summary>
     public void MoveSliderCamera()
     {
-        CameraManager.CameraSpeed = CameraSlider.value;
-        CameraValueText.text = valueToText(CameraSlider.value);
+        CameraManager.CameraSpeed = _cameraSlider.value;
+        _cameraValueText.text = ConvertToText(_cameraSlider.value);
     }
 
-    //設定初期化
+    /// <summary>
+    /// 設定初期化ボタン選択
+    /// </summary>
     public void ClickInitialize()
     {
         Initialize();
         SoundManager.Play(SoundManager.SE.SELECT);
     }
 
-
-    //戻る
+    /// <summary>
+    /// 戻るボタン選択
+    /// </summary>
     public void ClickBack()
     {
         SoundManager.Play(SoundManager.SE.CANCEL);
@@ -86,6 +110,9 @@ public class ConfigScreen : MonoBehaviour
         Initialize();
     }
 
+    /// <summary>
+    /// 設定初期化
+    /// </summary>
     private void Initialize()
     {
         // 初期化
@@ -95,20 +122,24 @@ public class ConfigScreen : MonoBehaviour
         CameraManager.CameraSpeed = 0.5f;
 
         // Sliderの値の設定
-        BGMSlider.value = SoundManager.BGMVolume;
-        SESlider.value = SoundManager.SEVolume;
-        BrightnessSlider.value = BrightnessManager.Brightness;
-        CameraSlider.value = CameraManager.CameraSpeed;
+        _bgmSlider.value = SoundManager.BGMVolume;
+        _seSlider.value = SoundManager.SEVolume;
+        _brightnessSlider.value = BrightnessManager.Brightness;
+        _cameraSlider.value = CameraManager.CameraSpeed;
 
         // Textの設定
-        BGMValueText.text = valueToText(BGMSlider.value);
-        SEValueText.text = valueToText(SESlider.value);
-        BrightnessValueText.text = valueToText(BrightnessSlider.value);
-        CameraValueText.text = valueToText(CameraSlider.value);
+        _bgmValueText.text = ConvertToText(_bgmSlider.value);
+        _seValueText.text = ConvertToText(_seSlider.value);
+        _brightnessValueText.text = ConvertToText(_brightnessSlider.value);
+        _cameraValueText.text = ConvertToText(_cameraSlider.value);
     }
 
-    //Sliderの値をテキスト用に変換
-    private string valueToText(float value)
+    /// <summary>
+    /// 設定値を表示用テキストへ変換
+    /// </summary>
+    /// <param name="value">変換する設定値</param>
+    /// <returns>変換後のテキスト</returns>
+    private string ConvertToText(float value)
     {
         return (value * 100).ToString("F0");
     }

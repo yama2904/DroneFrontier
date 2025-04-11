@@ -45,14 +45,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7113eeba1fcce1e4186978906d516e63, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BGMSlider: {fileID: 2480745007968092340}
-  SESlider: {fileID: 2480745006716460448}
-  BrightnessSlider: {fileID: 2480745007966714321}
-  CameraSlider: {fileID: 2480745007008914065}
-  BGMValueText: {fileID: 2480745007952465368}
-  SEValueText: {fileID: 2480745006469506547}
-  BrightnessValueText: {fileID: 2480745007944471980}
-  CameraValueText: {fileID: 2480745007485979720}
+  _bgmSlider: {fileID: 2480745007968092340}
+  _seSlider: {fileID: 2480745006716460448}
+  _brightnessSlider: {fileID: 2480745007966714321}
+  _cameraSlider: {fileID: 2480745007008914065}
+  _bgmValueText: {fileID: 2480745007952465368}
+  _seValueText: {fileID: 2480745006469506547}
+  _brightnessValueText: {fileID: 2480745007944471980}
+  _cameraValueText: {fileID: 2480745007485979720}
 --- !u!1 &2480745006125120145
 GameObject:
   m_ObjectHideFlags: 0
@@ -2399,7 +2399,7 @@ GameObject:
   - component: {fileID: 2480745007699718753}
   - component: {fileID: 2480745007699718752}
   m_Layer: 5
-  m_Name: InitSetting
+  m_Name: BtnInitialize
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
