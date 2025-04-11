@@ -3,7 +3,6 @@ using Network;
 using Offline.Player;
 using System;
 using System.Threading;
-using UnityEditorInternal;
 using UnityEngine;
 
 public class StunGrenade : MonoBehaviour

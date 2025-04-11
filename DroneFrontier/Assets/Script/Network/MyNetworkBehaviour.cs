@@ -32,7 +32,7 @@ namespace Network
                 {
                     UniTask.Void(async () =>
                     {
-                        TimeSpan interval = TimeSpan.FromSeconds(_syncInterval);
+                        TimeSpan interval = TimeSpan.FromSeconds(SyncInterval);
                         while (true)
                         {
                             await UniTask.Delay(interval, cancellationToken: _cancel.Token);
@@ -51,6 +51,18 @@ namespace Network
         }
         private bool _isSyncPosition = false;
 
+        public float SyncInterval
+        {
+            get => _syncInterval;
+            set => _syncInterval = value;
+        }
+
+        public float SyncPositionDistance
+        {
+            get => _syncPositionDistance;
+            set => _syncPositionDistance = value;
+        }
+
         /// <summary>
         /// オブジェクト削除イベント
         /// </summary>
@@ -61,6 +73,9 @@ namespace Network
 
         [SerializeField, Range(0.1f, 10f), Tooltip("座標の同期間隔（秒）")]
         private float _syncInterval = 1f;
+
+        [SerializeField, Tooltip("座標同期のトリガーとなる座標ズレ量")]
+        private float _syncPositionDistance = 20f;
 
         private CancellationTokenSource _cancel = new CancellationTokenSource();
 
@@ -183,8 +198,11 @@ namespace Network
             var t = transform;
             var pos = posPacket.Position;
             var rotate = posPacket.Rotation;
-            t.position = new Vector3(pos.x, pos.y, pos.z);
-            t.rotation = new Quaternion(rotate.x, rotate.y, rotate.z, rotate.w);
+            if (Vector3.Distance(t.position, pos) >= _syncPositionDistance)
+            {
+                t.position = new Vector3(pos.x, pos.y, pos.z);
+                t.rotation = new Quaternion(rotate.x, rotate.y, rotate.z, rotate.w);
+            }
         }
 
         /// <summary>
