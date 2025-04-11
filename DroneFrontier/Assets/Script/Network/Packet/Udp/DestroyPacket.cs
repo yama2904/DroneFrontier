@@ -33,7 +33,7 @@ namespace Network.Udp
 
         protected override byte[] ConvertToPacketBody()
         {
-            return NetworkUtil.ConvertToByteArray(Encoding.UTF8.GetBytes(Id));
+            return Encoding.UTF8.GetBytes(Id);
         }
     }
 }

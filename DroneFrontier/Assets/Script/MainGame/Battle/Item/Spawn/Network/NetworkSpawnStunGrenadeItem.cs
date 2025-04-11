@@ -30,6 +30,7 @@ namespace Network
 
         protected override void OnDestroy()
         {
+            base.OnDestroy();
             SpawnItemDestroyEvent?.Invoke(this, EventArgs.Empty);
         }
     }

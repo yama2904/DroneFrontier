@@ -3,6 +3,7 @@ using Network;
 using Offline.Player;
 using System;
 using System.Threading;
+using UnityEditorInternal;
 using UnityEngine;
 
 public class StunGrenade : MonoBehaviour
@@ -127,21 +128,22 @@ public class StunGrenade : MonoBehaviour
 
         if (other.CompareTag(TagNameConst.PLAYER))
         {
-            if (other.TryGetComponent<NetworkBattleDrone>(out var component))
+            if (other.TryGetComponent<BattleDrone>(out var component))
             {
-                other.GetComponent<DroneStatusComponent>().AddStatus(new StunStatus(), StunSec, component.IsControl); 
+                other.GetComponent<DroneStatusComponent>().AddStatus(new StunStatus(), StunSec, true);
             }
             else
             {
-                other.GetComponent<DroneStatusComponent>().AddStatus(new StunStatus(), StunSec, true); 
+                if (other.GetComponent<NetworkBattleDrone>().IsControl)
+                {
+                    other.GetComponent<DroneStatusComponent>().AddStatus(new StunStatus(), StunSec, true);
+                }
             }
-            return;
         }
 
         if (other.CompareTag(TagNameConst.CPU))
         {
             other.GetComponent<DroneStatusComponent>().AddStatus(new StunStatus(), StunSec * 0.5f, false);
-            return;
         }
     }
 

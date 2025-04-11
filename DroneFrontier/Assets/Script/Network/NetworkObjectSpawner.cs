@@ -94,7 +94,7 @@ namespace Network
                 if (SpawnedObjects.ContainsKey(id))
                 {
                     SpawnedObjects[id].OnDestroyObject -= OnDestroy;
-                    UnityEngine.Object.Destroy(SpawnedObjects[id]);
+                    UnityEngine.Object.Destroy(SpawnedObjects[id].gameObject);
                     SpawnedObjects.Remove(id);
                 }
             }

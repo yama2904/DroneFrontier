@@ -60,6 +60,6 @@ public class StunStatus : IDroneStatusChange
 
         // イベント削除してオブジェクト破棄
         _createdMask.FadeoutEndEvent -= FadeoutEndEvent;
-        UnityEngine.Object.Destroy(_createdMask);
+        UnityEngine.Object.Destroy(_createdMask.gameObject);
     }
 }
