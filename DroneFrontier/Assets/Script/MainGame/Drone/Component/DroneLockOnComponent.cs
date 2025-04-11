@@ -44,7 +44,7 @@ public class DroneLockOnComponent : MonoBehaviour, IDroneComponent
     private Image _reticleImage = null;
 
     [SerializeField, Tooltip("ロックオン中のレティクルの色")]
-    Color _lockingOnColor = new Color(255, 0, 0, 200);
+    Color _lockOnColor = new Color(255, 0, 0, 200);
 
     [SerializeField, Tooltip("非ロックオン中のレティクルの色")]
     Color _noLockOnColor = new Color(255, 255, 255, 128);
@@ -133,7 +133,7 @@ public class DroneLockOnComponent : MonoBehaviour, IDroneComponent
         _cameraTransform = _camera.transform;
     }
 
-    private void LateUpdate()
+    private void FixedUpdate()
     {
         // ロックオン中でない場合は処理しない
         if (!_startedLockOn) return;
@@ -180,7 +180,7 @@ public class DroneLockOnComponent : MonoBehaviour, IDroneComponent
         // ロックオン画像の色変更
         if (_reticleImage != null)
         {
-            _reticleImage.color = _lockingOnColor;
+            _reticleImage.color = _lockOnColor;
         }
 
         // 新規ターゲットロックオンイベント発火
