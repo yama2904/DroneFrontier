@@ -1,5 +1,6 @@
 ﻿using Cysharp.Threading.Tasks;
 using Offline;
+using Offline.Player;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -159,6 +160,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
         _weaponComponent.Initialize();
         _boostComponent.Initialize();
         GetComponent<DroneBarrierComponent>().Initialize();
+        GetComponent<DroneStatusComponent>().IsPlayer = true;
     }
 
     private void Awake()
@@ -255,10 +257,15 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
             _weaponComponent.Shot(DroneWeaponComponent.Weapon.SUB, _lockOnComponent.Target);
         }
 
-        // ブースト使用
-        if (_input.Keys.Contains(KeyCode.Space))
+        // ブースト開始
+        if (_input.DownedKeys.Contains(KeyCode.Space))
         {
-            _boostComponent.Boost();
+            _boostComponent.StartBoost();
+        }
+        // ブースト停止
+        if (_input.UppedKeys.Contains(KeyCode.Space))
+        {
+            _boostComponent.StopBoost();
         }
 
         // アイテム使用
@@ -338,7 +345,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
             if (other.CompareTag(TagNameConst.ITEM))
             {
                 ISpawnItem item = other.GetComponent<ISpawnItem>();
-                if (_itemComponent.SetItem(item))
+                if (_itemComponent.SetItem(item.DroneItem))
                 {
                     Destroy(other.gameObject);
                 }

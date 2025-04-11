@@ -54,14 +54,75 @@ namespace Offline
         private GameObject _creater = null;
 
         /// <summary>
+        /// ジャミングボットの生存時間（秒）
+        /// </summary>
+        public float DestroySec { get; set; } = 60.0f;
+
+        /// <summary>
+        /// ボット生成時の移動時間（秒）
+        /// </summary>
+        public float InitMoveSec { get; set; } = 1;
+
+        /// <summary>
         /// ジャミングボット破壊イベント
         /// </summary>
         public event EventHandler DestroyEvent;
 
         /// <summary>
+        /// ジャミングボット生成直後の移動量
+        /// </summary>
+        private const int BOT_MOVE_VALUE = 60;
+
+        /// <summary>
+        /// ジャミングボット生成直後の移動時間計測
+        /// </summary>
+        private float _initMoveTimer = 0;
+
+        /// <summary>
+        /// ジャミングボット破壊タイマー
+        /// </summary>
+        private float _destroyTimer = 0;
+
+        /// <summary>
         /// 各オブジェクトに付与したジャミングステータス
         /// </summary>
         private Dictionary<GameObject, JammingStatus> _addedJammingStatusMap = new Dictionary<GameObject, JammingStatus>();
+
+        /// <summary>
+        /// ジャミングボットのRigidBody
+        /// </summary>
+        private Rigidbody _rigidBody = null;
+
+        private void Awake()
+        {
+            _rigidBody = GetComponent<Rigidbody>();
+        }
+
+        private void Update()
+        {
+            if (_destroyTimer > DestroySec) return;
+
+            _destroyTimer += Time.deltaTime;
+            if (_destroyTimer > DestroySec)
+            {
+                Destroy(gameObject);
+            }
+        }
+
+        private void FixedUpdate()
+        {
+            // ジャミングボットの移動が終わった場合は処理しない
+            if (_initMoveTimer > InitMoveSec) return;
+
+            _rigidBody.AddForce(Vector3.up * BOT_MOVE_VALUE, ForceMode.Acceleration);
+
+            // 移動時間計測
+            _initMoveTimer += Time.deltaTime;
+            if (_initMoveTimer > InitMoveSec)
+            {
+                _rigidBody.isKinematic = true;
+            }
+        }
 
         private void OnDestroy()
         {

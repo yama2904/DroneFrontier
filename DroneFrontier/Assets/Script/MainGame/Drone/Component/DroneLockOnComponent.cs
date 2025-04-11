@@ -101,29 +101,29 @@ public class DroneLockOnComponent : MonoBehaviour, IDroneComponent
     }
 
     /// <summary>
-    /// 一時的にロックオン無効を設定する
+    /// ロックオンの有効・無効を設定<br/>
+    /// ロックオン無効が重複している状態で有効にした場合は無効のままとなる
     /// </summary>
-    public void QueueDisabled()
+    public void SetEnableLockOn(bool enable)
     {
-        if (_disabledCount == 0)
+        if (enable)
         {
-            StopLockOn();
+            _disabledCount--;
+            if (_disabledCount <= 0)
+            {
+                _disabledCount = 0;
+                enabled = true;
+            }
         }
-
-        _disabledCount++;
-        enabled = false;
-    }
-
-    /// <summary>
-    /// 一時的なロックオン無効を解除する。ロックオン無効が重複してる場合は無効のままとなる。
-    /// </summary>
-    public void DequeueDisabled()
-    {
-        _disabledCount--;
-        if (_disabledCount <= 0)
+        else
         {
-            _disabledCount = 0;
-            enabled = true;
+            if (_disabledCount == 0)
+            {
+                StopLockOn();
+            }
+
+            _disabledCount++;
+            enabled = false;
         }
     }
 

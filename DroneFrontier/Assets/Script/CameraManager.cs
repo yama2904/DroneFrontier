@@ -2,46 +2,41 @@
 
 public class CameraManager : MonoBehaviour
 {
-    //const float MAX_CAMERA_SPEED = 2.0f;    //カメラ感度の最高値
-    private const float MIN_CAMERA_SPEED = 0.3f;    //カメラ感度の最低値
+    /// <summary>
+    /// 設定したカメラ感度の調整用倍率
+    /// </summary>
+    private const float CAMERA_SPEED_SCALE = 4f;
 
     public static short ReverseX { get; private set; } = 1;
     public static short ReverseY { get; private set; } = 1;
 
-    //内部のカメラ感度
-    static float baseSpeed = 1.0f;
-    public static float BaseSpeed
-    {
-        get { return baseSpeed; }
-        set
-        {
-            float s = value;
-            if (value < 0)
-            {
-                s = 0;
-            }
-            if (value > 1.0f)
-            {
-                s = 1.0f;
-            }
-            baseSpeed = s;
-        }
-    }
-    
-    //実際のカメラ感度を取得
-    //基本的にゲーム中で使うのはこっち
+    /// <summary>
+    /// カメラ感度
+    /// </summary>
     public static float CameraSpeed
     {
-        get { return (BaseSpeed + MIN_CAMERA_SPEED); }
+        get
+        {
+            return _cameraSpeed;
+        }
+        set
+        {
+            _cameraSpeed = value;
+            if (_cameraSpeed < 0)
+            {
+                _cameraSpeed = 0;
+            }
+            if (_cameraSpeed > 1.0f)
+            {
+                _cameraSpeed = 1.0f;
+            }
+        }
     }
+    private static float _cameraSpeed = 1f;
 
     void Start()
     {
         DontDestroyOnLoad(gameObject);
-    }
-    
-    void Update()
-    {
     }
 
     //カメラをリバースモードにするならtrue

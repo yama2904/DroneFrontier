@@ -28,7 +28,7 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2bdfeffbaad7c4a4dad06059b234f84e
-    m_Address: NetworkSpawnStunGrenade
+    m_Address: NetworkSpawnStunGrenadeItem
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -37,13 +37,23 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4f64592b87bb18f46bf6a7fbc2a981e8
+    m_Address: JammingBot
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 52b578acb9298404d85417da13e71509
-    m_Address: NetworkSpawnJammingBot
+    m_Address: NetworkSpawnJammingItem
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5605f4dc9579efd42afc3b6d6bb27df0
     m_Address: GatlingWeapon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6d6b6b44b8d6bae4ab0f90520f57f3bb
+    m_Address: StunGrenade
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -57,13 +67,28 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b7ca1f1d0896cff408d815240bed4e11
+    m_Address: GrenadeIconImage
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c010ea8af69f67742bfa72cd3e095e91
+    m_Address: JammingIconImage
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c185333b265c4c944b3a763f2d9c61e5
     m_Address: NetworkBattleDrone
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d436d6d0d3f34cb4e8e145549987d99e
+    m_Address: BarrierIconImage
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f54898de3a1cb7048afd04e02f34308e
-    m_Address: NetworkSpawnBarrier
+    m_Address: NetworkSpawnBarrierStrengthenItem
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

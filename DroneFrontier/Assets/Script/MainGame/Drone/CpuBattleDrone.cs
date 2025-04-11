@@ -452,7 +452,7 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
             if (other.CompareTag(TagNameConst.ITEM))
             {
                 ISpawnItem item = other.GetComponent<ISpawnItem>();
-                if (_itemComponent.SetItem(item))
+                if (_itemComponent.SetItem(item.DroneItem))
                 {
                     Destroy(other.gameObject);
                 }

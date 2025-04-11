@@ -16,6 +16,11 @@ namespace Offline
             public List<StatusChangeType> Statuses { get; private set; } = new List<StatusChangeType>();
 
             /// <summary>
+            /// プレイヤーであるか
+            /// </summary>
+            public bool IsPlayer { get; set; } = false;
+
+            /// <summary>
             /// ステータス変化イベントハンドラー
             /// </summary>
             /// <param name="component">イベントコンポーネント</param>
@@ -66,17 +71,20 @@ namespace Offline
                 Statuses.Add(status.StatusType);
 
                 // ステータス変化アイコンを表示
-                Image icon = status.InstantiateIcon();
-                if (icon != null)
+                if (IsPlayer)
                 {
-                    RectTransform t = icon.rectTransform;
-                    t.SetParent(_statusIconCanvas, false);
+                    Image icon = status.InstantiateIcon();
+                    if (icon != null)
+                    {
+                        RectTransform t = icon.rectTransform;
+                        t.SetParent(_statusIconCanvas, false);
 
-                    // アイコン表示位置調整
-                    t.localPosition = new Vector3(STATUS_ICON_WIDTH * _statusesIconMap.Count, t.localPosition.y, t.localPosition.z);
+                        // アイコン表示位置調整
+                        t.localPosition = new Vector3(STATUS_ICON_WIDTH * _statusesIconMap.Count, t.localPosition.y, t.localPosition.z);
 
-                    // マップに追加
-                    _statusesIconMap.Add(status, t);
+                        // マップに追加
+                        _statusesIconMap.Add(status, t);
+                    }
                 }
 
                 // ステータス変化追加イベント発火

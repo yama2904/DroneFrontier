@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -69,7 +68,7 @@ public class DroneItemComponent : MonoBehaviour, IDroneComponent
     /// </summary>
     /// <param name="item">設定するアイテム</param>
     /// <returns>アイテム枠が全て埋まっている場合はfalse</returns>
-    public bool SetItem(ISpawnItem item)
+    public bool SetItem(IDroneItem item)
     {
         foreach (ItemData data in _itemDatas)
         {
@@ -77,7 +76,7 @@ public class DroneItemComponent : MonoBehaviour, IDroneComponent
             if (data.HasItem) continue;
 
             // アイテム情報更新
-            data.Item = item.DroneItem;
+            data.Item = item;
             data.HasItem = true;
 
             // アイテム枠が表示されており、所持アイテムにアイコンが設定されている場合はアイコンを表示

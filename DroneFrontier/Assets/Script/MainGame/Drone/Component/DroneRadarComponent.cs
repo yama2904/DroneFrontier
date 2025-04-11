@@ -90,7 +90,7 @@ public class DroneRadarComponent : MonoBehaviour, IDroneComponent
     private int _nowLevel = 0;
 
     /// <summary>
-    /// 一時的なロックオン無効の重複カウント
+    /// 一時的なレーダー無効の重複カウント
     /// </summary>
     private int _disabledCount = 0;
 
@@ -130,29 +130,29 @@ public class DroneRadarComponent : MonoBehaviour, IDroneComponent
     }
 
     /// <summary>
-    /// 一時的にロックオン無効を設定する
+    /// レーダーの有効・無効を設定<br/>
+    /// レーダー無効が重複している状態で有効にした場合は無効のままとなる
     /// </summary>
-    public void QueueDisabled()
+    public void SetEnableRadar(bool enable)
     {
-        if (_disabledCount == 0)
+        if (enable)
         {
-            StopRadar();
+            _disabledCount--;
+            if (_disabledCount <= 0)
+            {
+                _disabledCount = 0;
+                enabled = true;
+            }
         }
-
-        _disabledCount++;
-        enabled = false;
-    }
-
-    /// <summary>
-    /// 一時的なロックオン無効を解除する。ロックオン無効が重複してる場合は無効のままとなる。
-    /// </summary>
-    public void DequeueDisabled()
-    {
-        _disabledCount--;
-        if (_disabledCount <= 0)
+        else
         {
-            _disabledCount = 0;
-            enabled = true;
+            if (_disabledCount == 0)
+            {
+                StopRadar();
+            }
+
+            _disabledCount++;
+            enabled = false;
         }
     }
 

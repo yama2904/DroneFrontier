@@ -1,4 +1,5 @@
 using Offline;
+using System.Drawing.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -97,11 +98,9 @@ public class DroneBoostComponent : MonoBehaviour, IDroneComponent
     private int _boostSEId = -1;
 
     /// <summary>
-    /// Boostメソッド呼び出し履歴<br/>
-    /// [0]:現在のフレーム<br/>
-    /// [1]:1フレーム前
+    /// ブースト中であるか
     /// </summary>
-    private bool[] _isBoosted = new bool[2];
+    private bool _isBoost = false;
 
     // コンポーネントキャッシュ
     private DroneMoveComponent _moveComponent = null;
@@ -109,40 +108,43 @@ public class DroneBoostComponent : MonoBehaviour, IDroneComponent
 
     public void Initialize() { }
 
-    public void Boost()
+    /// <summary>
+    /// ブースト開始
+    /// </summary>
+    public void StartBoost()
     {
+        // 既にブースト中の場合は何もしない
+        if (_isBoost) return;
+
         // ブーストに必要な最低限のゲージがないとブースト開始できない
-        if (!_isBoosted[1])
-        {
-            if (_gaugeValue < BOOSTABLE_MIN_GAUGE)
-            {
-                return;
-            }
-        }
+        if (_gaugeValue < BOOSTABLE_MIN_GAUGE) return;
 
-        // ブースト適用
-        if (!_isBoosted[1])
-        {
-            _moveComponent.MoveSpeed *= _boostAccele;
-            _boostSEId = _soundComponent.PlayLoopSE(SoundManager.SE.BOOST, SoundManager.SEVolume * 0.15f);
-        }
-        _isBoosted[0] = true;
+        // 移動速度上昇
+        _moveComponent.MoveSpeed *= _boostAccele;
+        
+        // ブーストSE再生
+        _boostSEId = _soundComponent.PlayLoopSE(SoundManager.SE.BOOST, SoundManager.SEVolume * 0.15f);
 
-        // ブースト中はゲージを減らす
-        _gaugeValue -= _useGaugePerSec * Time.deltaTime;
+        // ブーストフラグON
+        _isBoost = true;
+    }
 
-        // ゲージが無くなった場合はレーザー停止
-        if (_gaugeValue <= 0)
-        {
-            _gaugeValue = 0;
-            _isBoosted[0] = false;
-        }
+    /// <summary>
+    /// ブースト停止
+    /// </summary>
+    public void StopBoost()
+    {
+        // ブースト中でない場合は何もしない
+        if (!_isBoost) return;
 
-        // UIに反映
-        if (!_hideGaugeUI && _boostGaugeUI != null)
-        {
-            _boostGaugeUI.fillAmount = _gaugeValue;
-        }
+        // 移動速度を戻す
+        _moveComponent.MoveSpeed *= 1 / _boostAccele;
+
+        // ブーストSE停止
+        _soundComponent.StopLoopSE(_boostSEId);
+
+        // ブーストフラグOFF
+        _isBoost = false;
     }
 
     private void Awake()
@@ -158,16 +160,21 @@ public class DroneBoostComponent : MonoBehaviour, IDroneComponent
 
     private void LateUpdate()
     {
-        // ブーストをやめた場合は速度を戻す
-        if (!_isBoosted[0] && _isBoosted[1])
+        // ブースト中はゲージを減らす
+        if (_isBoost)
         {
-            _moveComponent.MoveSpeed *= 1 / _boostAccele;
-            _soundComponent.StopLoopSE(_boostSEId);
-        }
+            _gaugeValue -= _useGaugePerSec * Time.deltaTime;
 
-        // ブースト中でない場合はゲージ回復
-        if (!_isBoosted[0])
+            // ゲージが無くなった場合はブースト停止
+            if (_gaugeValue <= 0)
+            {
+                _gaugeValue = 0;
+                StopBoost();
+            }
+        }
+        else
         {
+            // ブースト中でない場合はゲージ回復
             if (_gaugeValue < 1.0f)
             {
                 // ゲージを回復
@@ -176,17 +183,13 @@ public class DroneBoostComponent : MonoBehaviour, IDroneComponent
                 {
                     _gaugeValue = 1f;
                 }
-
-                // UIに反映
-                if (!_hideGaugeUI && _boostGaugeUI != null)
-                {
-                    _boostGaugeUI.fillAmount = _gaugeValue;
-                }
             }
         }
 
-        // Boostメソッド呼び出し履歴更新
-        _isBoosted[1] = _isBoosted[0];
-        _isBoosted[0] = false;
+        // UIに反映
+        if (!_hideGaugeUI && _boostGaugeUI != null)
+        {
+            _boostGaugeUI.fillAmount = _gaugeValue;
+        }
     }
 }

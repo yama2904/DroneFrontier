@@ -60,6 +60,16 @@ namespace Network.Udp
         /// <summary>
         /// フレーム同期
         /// </summary>
-        FrameSync = 1 << 10
+        FrameSync = 1 << 10,
+
+        /// <summary>
+        /// ドローンアクション
+        /// </summary>
+        DroneAction = 1 << 11,
+
+        /// <summary>
+        /// アイテム使用
+        /// </summary>
+        GetItem = 1 << 12,
     }
 }

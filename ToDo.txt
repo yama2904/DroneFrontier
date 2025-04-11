@@ -1,5 +1,2 @@
-TryGetComponent
-状態異常のSE
-アイテム同士で非接触判定共有
-MoveComponentの速度変更処理の修正
-CPUのアイテム取得処理
+マッチング画面のSetGameAlfaを画面側でImage使うように変える
+BrightnessManagerとか見直し

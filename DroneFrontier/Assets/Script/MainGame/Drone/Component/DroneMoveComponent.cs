@@ -56,6 +56,11 @@ namespace Offline
         /// </summary>
         public float InitSpeed { get; private set; } = 0f;
 
+        /// <summary>
+        /// 回転速度
+        /// </summary>
+        private const float ROTATE_SPEED = 4f;
+
         [SerializeField, Tooltip("移動速度")] 
         private float _moveSpeed = 800;
 
@@ -123,13 +128,13 @@ namespace Offline
         /// <summary>
         /// ドローンを回転させて進行方向を変える
         /// </summary>
-        /// <param name="vertical">左右方向の回転量</param>
-        /// <param name="horizontal">上下方向の回転量</param>
+        /// <param name="vertical">左右方向の回転量（0～1）</param>
+        /// <param name="horizontal">上下方向の回転量（0～1）</param>
         public void RotateDir(float vertical, float horizontal)
         {
             // 上下の角度制限をつける
             Vector3 localAngle = _transform.localEulerAngles;
-            localAngle.x += horizontal * -1;
+            localAngle.x += horizontal * ROTATE_SPEED  * - 1;
             if (localAngle.x > _maxRotateX && localAngle.x < 180)
             {
                 localAngle.x = _maxRotateX;
@@ -142,7 +147,7 @@ namespace Offline
 
             // 左右回転
             Vector3 angle = _transform.eulerAngles;
-            angle.y += vertical;
+            angle.y += vertical * ROTATE_SPEED;
             _transform.eulerAngles = angle;
         }
 

@@ -3,6 +3,10 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 
+//
+// StunStatusƒNƒ‰ƒX‚ªCPU‚à³í‚É“®‚¢‚½ê‡‚Ííœ
+//
+
 public class CpuStunStatus : IDroneStatusChange
 {
     public StatusChangeType StatusType => StatusChangeType.Stun;

@@ -9,9 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6342175787228130886}
+  - component: {fileID: 8495789516920243579}
   - component: {fileID: 1484035709399646254}
   - component: {fileID: 1597514520077966212}
-  - component: {fileID: 8495789516920243579}
   m_Layer: 0
   m_Name: JammingBot
   m_TagString: NotCollision
@@ -36,6 +36,18 @@ Transform:
   - {fileID: 6276613118418127001}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+--- !u!114 &8495789516920243579
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 528843652124265974}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a2fc828a104ac54dbe00c77a44b5cbe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!54 &1484035709399646254
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -84,18 +96,6 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 35
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &8495789516920243579
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 528843652124265974}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1a2fc828a104ac54dbe00c77a44b5cbe, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &4407835491605891049
 GameObject:
   m_ObjectHideFlags: 0

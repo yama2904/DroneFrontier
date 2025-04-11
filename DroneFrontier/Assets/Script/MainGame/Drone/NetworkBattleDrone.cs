@@ -1,6 +1,7 @@
 using Cysharp.Threading.Tasks;
 using Network.Udp;
 using Offline;
+using Offline.Player;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -233,7 +234,7 @@ namespace Network
                 _boostComponent.HideGaugeUI = true;
 
                 // 入力情報受信イベント設定
-                MyNetworkManager.Singleton.OnUdpReceive += OnReceiveUdpOfInput;
+                MyNetworkManager.Singleton.OnUdpReceiveOnMainThread += OnReceiveUdp;
 
                 // 補間をオフにしないと瞬間移動する
                 _rigidbody.interpolation = RigidbodyInterpolation.None;
@@ -249,6 +250,7 @@ namespace Network
             _weaponComponent.Initialize();
             _boostComponent.Initialize();
             GetComponent<DroneBarrierComponent>().Initialize();
+            GetComponent<DroneStatusComponent>().IsPlayer = IsControl;
         }
 
         protected override void Awake()
@@ -283,23 +285,32 @@ namespace Network
 
                 // プロペラ減速
                 _animator.speed *= 0.993f;
-                
-                return;
-            }
 
-            // ロックオン使用
-            if (_input.DownedKeys.Contains(KeyCode.LeftShift))
-            {
-                _lockOnComponent.StartLockOn();
-            }
-            // ロックオン解除
-            if (_input.UppedKeys.Contains(KeyCode.LeftShift))
-            {
-                _lockOnComponent.StopLockOn();
+                return;
             }
 
             if (_isControl)
             {
+                bool startLockOn = false;
+                bool stopLockOn = false;
+                bool startBoost = false;
+                bool stopBoost = false;
+                bool useItem1 = false;
+                bool useItem2 = false;
+
+                // ロックオン使用
+                if (_input.DownedKeys.Contains(KeyCode.LeftShift))
+                {
+                    _lockOnComponent.StartLockOn();
+                    startLockOn = true;
+                }
+                // ロックオン解除
+                if (_input.UppedKeys.Contains(KeyCode.LeftShift))
+                {
+                    _lockOnComponent.StopLockOn();
+                    stopLockOn = true;
+                }
+
                 // レーダー使用
                 if (_input.DownedKeys.Contains(KeyCode.Q))
                 {
@@ -311,40 +322,37 @@ namespace Network
                 {
                     _radarComponent.StopRadar();
                 }
-            }
 
-            // メイン武器攻撃（サブ武器攻撃中の場合は不可）
-            if (_input.MouseButtonL && !_weaponComponent.ShootingSubWeapon)
-            {
-                _weaponComponent.Shot(DroneWeaponComponent.Weapon.MAIN, _lockOnComponent.Target);
-            }
+                // ブースト開始
+                if (_input.DownedKeys.Contains(KeyCode.Space))
+                {
+                    _boostComponent.StartBoost();
+                    startBoost = true;
+                }
+                // ブースト停止
+                if (_input.UppedKeys.Contains(KeyCode.Space))
+                {
+                    _boostComponent.StopBoost();
+                    stopBoost = true;
+                }
 
-            // サブ武器攻撃（メイン武器攻撃中の場合は不可）
-            if (_input.MouseButtonR && !_weaponComponent.ShootingMainWeapon)
-            {
-                _weaponComponent.Shot(DroneWeaponComponent.Weapon.SUB, _lockOnComponent.Target);
-            }
+                // アイテム使用
+                if (_input.UppedKeys.Contains(KeyCode.Alpha1))
+                {
+                    UseItem(ItemNum.Item1);
+                    useItem1 = true;
+                }
+                if (_input.UppedKeys.Contains(KeyCode.Alpha2))
+                {
+                    UseItem(ItemNum.Item2);
+                    useItem2 = true;
+                }
 
-            // ブースト使用
-            if (_input.Keys.Contains(KeyCode.Space))
-            {
-                _boostComponent.Boost();
-            }
-
-            // アイテム使用
-            if (_input.UppedKeys.Contains(KeyCode.Alpha1))
-            {
-                UseItem(ItemNum.Item1);
-            }
-            if (_input.UppedKeys.Contains(KeyCode.Alpha2))
-            {
-                UseItem(ItemNum.Item2);
-            }
-
-            if (_isControl)
-            {
                 // 入力情報更新
                 _input.UpdateInput();
+
+                // アクション情報送信
+                MyNetworkManager.Singleton.SendToAll(new DroneActionPacket(startLockOn, stopLockOn, startBoost, stopBoost, useItem1, useItem2));
             }
         }
 
@@ -398,6 +406,18 @@ namespace Network
             // マウスによる向き変更
             _moveComponent.RotateDir(_input.MouseX, _input.MouseY);
 
+            // メイン武器攻撃（サブ武器攻撃中の場合は不可）
+            if (_input.MouseButtonL && !_weaponComponent.ShootingSubWeapon)
+            {
+                _weaponComponent.Shot(DroneWeaponComponent.Weapon.MAIN, _lockOnComponent.Target);
+            }
+
+            // サブ武器攻撃（メイン武器攻撃中の場合は不可）
+            if (_input.MouseButtonR && !_weaponComponent.ShootingMainWeapon)
+            {
+                _weaponComponent.Shot(DroneWeaponComponent.Weapon.SUB, _lockOnComponent.Target);
+            }
+
             if (_isControl)
             {
                 MyNetworkManager.Singleton.SendToAll(new InputPacket(_input));
@@ -410,8 +430,8 @@ namespace Network
 
             // イベント削除
             _searchComponent.ObjectStayEvent -= ObjectSearchEvent;
-            if (!_isControl) 
-                MyNetworkManager.Singleton.OnUdpReceive -= OnReceiveUdpOfInput;
+            if (!_isControl)
+                MyNetworkManager.Singleton.OnUdpReceiveOnMainThread -= OnReceiveUdp;
         }
 
         /// <summary>
@@ -423,16 +443,24 @@ namespace Network
             // 死亡処理中は操作不可
             if (_isDestroy) return;
 
+            // プレイヤーのみ処理
+            if (!_isControl) return;
+
             // Eキーでアイテム取得
             if (_input.Keys.Contains(KeyCode.E))
             {
                 if (other.CompareTag(TagNameConst.ITEM))
                 {
                     ISpawnItem item = other.GetComponent<ISpawnItem>();
-                    if (_itemComponent.SetItem(item))
+                    if (_itemComponent.SetItem(item.DroneItem))
                     {
+                        // 取得アイテム情報送信
+                        MyNetworkManager.Singleton.SendToAll(new GetItemPacket(item.DroneItem));
+
+                        // 取得したアイテム削除
                         Destroy(other.gameObject);
                     }
+
                 }
             }
         }
@@ -443,11 +471,52 @@ namespace Network
         /// <param name="player">送信元プレイヤー</param>
         /// <param name="header">受信したUDPパケットのヘッダ</param>
         /// <param name="packet">受信したUDPパケット</param>
-        private void OnReceiveUdpOfInput(string player, UdpHeader header, UdpPacket packet)
+        private void OnReceiveUdp(string player, UdpHeader header, UdpPacket packet)
         {
-            if (header != UdpHeader.Input) return;
             if (player != Name) return;
-            _input = (packet as InputPacket).Input;
+
+            // 入力情報
+            if (header == UdpHeader.Input)
+            {
+                _input = (packet as InputPacket).Input;
+            }
+
+            // アクション
+            if (header == UdpHeader.DroneAction)
+            {
+                DroneActionPacket action = packet as DroneActionPacket;
+
+                if (action.StartLockOn)
+                {
+                    _lockOnComponent.StartLockOn();
+                }
+                if (action.StopLockOn)
+                {
+                    _lockOnComponent.StopLockOn();
+                }
+                if (action.StartBoost)
+                {
+                    _boostComponent.StartBoost();
+                }
+                if (action.StopBoost)
+                {
+                    _boostComponent.StopBoost();
+                }
+                if (action.UseItem1)
+                {
+                    UseItem(ItemNum.Item1);
+                }
+                if (action.UseItem2)
+                {
+                    UseItem(ItemNum.Item2);
+                }
+            }
+
+            // アイテム取得
+            if (header == UdpHeader.GetItem)
+            {
+                _itemComponent.SetItem((packet as GetItemPacket).Item);
+            }
         }
 
         /// <summary>

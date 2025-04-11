@@ -140,6 +140,9 @@ namespace Network
             }
             else
             {
+                // アイテムスポナー初期化
+                _itemSpawnManager.Initialize(false);
+
                 while (true)
                 {
                     // ドローン検索

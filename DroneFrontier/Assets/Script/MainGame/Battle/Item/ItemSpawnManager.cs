@@ -28,12 +28,6 @@ public class ItemSpawnManager : MonoBehaviour
     /// </summary>
     private float _spawnTimer = 0;
 
-
-    /// <summary>
-    /// アイテムスポーンが有効であるか
-    /// </summary>
-    private bool _isEnabled = false;
-
     /// <summary>
     /// アイテムスポーンを有効にするか指定して初期化
     /// </summary>
@@ -54,8 +48,6 @@ public class ItemSpawnManager : MonoBehaviour
 
             // アイテムのランダムスポーン
             ItemSpawn(_spawnerList, _maxSpawnNum);
-
-            _isEnabled = true;
         }
         else
         {
@@ -70,8 +62,6 @@ public class ItemSpawnManager : MonoBehaviour
 
     private void Update()
     {
-        if (!_isEnabled) return;
-
         _spawnTimer += Time.deltaTime;
         if (_spawnTimer < _spawnInterval) return;
 

@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using Network;
 using Offline.Player;
 using System;
 using System.Threading;
@@ -10,6 +11,15 @@ public class StunGrenade : MonoBehaviour
     /// 投擲者
     /// </summary>
     public GameObject Thrower { get; set; }
+
+    /// <summary>
+    /// 投擲角度
+    /// </summary>
+    public Transform ThrowRotate
+    {
+        get => _throwRotate;
+        set => _throwRotate = value;
+    }
 
     /// <summary>
     /// 着弾時間（秒）
@@ -28,6 +38,9 @@ public class StunGrenade : MonoBehaviour
 
     [SerializeField, Tooltip("グレネードオブジェクト")]
     private GameObject _grenadeObject = null;
+
+    [SerializeField, Tooltip("投擲角度")]
+    private Transform _throwRotate = null;
 
     [SerializeField, Tooltip("着弾用オブジェクト")]
     private GameObject _impactObject = null;
@@ -62,6 +75,7 @@ public class StunGrenade : MonoBehaviour
 
         // 投擲開始
         _isThrowing = true;
+        transform.rotation = thrower.transform.rotation * _throwRotate.localRotation;
         _rigidbody.AddForce(transform.forward * speed, ForceMode.Impulse);
 
         // 時間経過で着弾
@@ -113,13 +127,20 @@ public class StunGrenade : MonoBehaviour
 
         if (other.CompareTag(TagNameConst.PLAYER))
         {
-            other.GetComponent<DroneStatusComponent>().AddStatus(new PlayerStunStatus(), StunSec); 
+            if (other.TryGetComponent<NetworkBattleDrone>(out var component))
+            {
+                other.GetComponent<DroneStatusComponent>().AddStatus(new StunStatus(), StunSec, component.IsControl); 
+            }
+            else
+            {
+                other.GetComponent<DroneStatusComponent>().AddStatus(new StunStatus(), StunSec, true); 
+            }
             return;
         }
 
         if (other.CompareTag(TagNameConst.CPU))
         {
-            other.GetComponent<DroneStatusComponent>().AddStatus(new CpuStunStatus(), StunSec * 0.5f);
+            other.GetComponent<DroneStatusComponent>().AddStatus(new StunStatus(), StunSec * 0.5f, false);
             return;
         }
     }

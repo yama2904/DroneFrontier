@@ -49,8 +49,8 @@ public class JammingStatus : IDroneStatusChange
         _sound = drone.GetComponent<DroneSoundComponent>();
 
         // ジャミング効果付与
-        _lockon?.QueueDisabled();
-        _radar?.QueueDisabled();
+        _lockon?.SetEnableLockOn(false);
+        _radar?.SetEnableRadar(false);
 
         // ジャミングSE再生
         if (_sound != null)
@@ -74,8 +74,8 @@ public class JammingStatus : IDroneStatusChange
     public void EndJamming()
     {
         // ジャミング終了
-        _lockon?.DequeueDisabled();
-        _radar?.DequeueDisabled();
+        _lockon?.SetEnableLockOn(true);
+        _radar?.SetEnableRadar(true);
         _sound?.StopLoopSE(_seId);
         
         // ジャミング終了タイマー停止

@@ -1686,7 +1686,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7227552611025124727}
   - component: {fileID: 4561591382122992199}
-  - component: {fileID: 1929993823392764867}
+  - component: {fileID: 4432980645856490035}
   - component: {fileID: 7583762420128102007}
   m_Layer: 0
   m_Name: ItemSearch
@@ -1737,8 +1737,8 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!135 &1929993823392764867
-SphereCollider:
+--- !u!65 &4432980645856490035
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -1756,8 +1756,8 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 100
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Size: {x: 50, y: 35, z: 100}
+  m_Center: {x: 0, y: 0, z: 25.473434}
 --- !u!114 &7583762420128102007
 MonoBehaviour:
   m_ObjectHideFlags: 0
