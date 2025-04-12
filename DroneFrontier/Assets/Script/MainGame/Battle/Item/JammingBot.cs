@@ -8,6 +8,11 @@ namespace Offline
     public class JammingBot : MonoBehaviour, ILockableOn, IRadarable
     {
         /// <summary>
+        /// ジャミングボット生成直後の移動量
+        /// </summary>
+        private const int BOT_MOVE_VALUE = 60;
+
+        /// <summary>
         /// ロックオン可能であるか
         /// </summary>
         public bool IsLockableOn { get; } = true;
@@ -48,6 +53,7 @@ namespace Offline
                     Physics.IgnoreCollision(collider, GetComponent<Collider>());
                 }
 
+                _damageComponent.Creater = value;
                 _creater = value;
             }
         }
@@ -68,10 +74,8 @@ namespace Offline
         /// </summary>
         public event EventHandler DestroyEvent;
 
-        /// <summary>
-        /// ジャミングボット生成直後の移動量
-        /// </summary>
-        private const int BOT_MOVE_VALUE = 60;
+        [SerializeField]
+        private JammingBotDamage _damageComponent = null;
 
         /// <summary>
         /// ジャミングボット生成直後の移動時間計測

@@ -317,6 +317,9 @@ namespace Offline
                 // Transformキャッシュ
                 Transform t = hit.transform;
 
+                // レーザー発射元オブジェクトとはヒットさせない
+                if (t == Shooter.transform) continue;
+
                 // タグを基にヒット対象から除外
                 string tag = t.tag;
                 if (tag == TagNameConst.ITEM) continue;             // アイテム除外
@@ -324,9 +327,6 @@ namespace Offline
                 if (tag == TagNameConst.GIMMICK) continue;          // ギミック除外
                 if (tag == TagNameConst.JAMMING) continue;          // ジャミングエリア除外
                 if (tag == TagNameConst.NOT_COLLISION) continue;
-
-                // レーザー発射元オブジェクトとはヒットさせない
-                if (t == Shooter.transform) continue;
 
                 // 最小距離の場合は取得
                 if (target.distance > hit.distance)

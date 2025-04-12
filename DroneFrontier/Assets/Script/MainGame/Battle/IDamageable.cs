@@ -6,6 +6,11 @@ using UnityEngine;
 public interface IDamageable
 {
     /// <summary>
+    /// ダメージを与えないオブジェクト
+    /// </summary>
+    GameObject NoDamageObject { get; }
+
+    /// <summary>
     /// 実装したオブジェクトにダメージを与える
     /// </summary>
     /// <param name="source">ダメージ元オブジェクト</param>

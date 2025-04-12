@@ -128,6 +128,7 @@ namespace Offline
             // ダメージ可能インターフェースが実装されている場合はダメージを与える
             if (other.TryGetComponent(out IDamageable damageable))
             {
+                if (damageable.NoDamageObject == Shooter) return;
                 damageable.Damage(Shooter, _damage);
             }
 

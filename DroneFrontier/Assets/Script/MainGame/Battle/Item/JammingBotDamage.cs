@@ -2,6 +2,10 @@ using UnityEngine;
 
 public class JammingBotDamage : MonoBehaviour, IDamageable
 {
+    public GameObject NoDamageObject => Creater;
+
+    public GameObject Creater { get; set; } = null;
+
     /// <summary>
     /// ジャミングボットの残りHP
     /// </summary>

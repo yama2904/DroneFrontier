@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 1597514520077966212}
   m_Layer: 0
   m_Name: JammingBot
-  m_TagString: NotCollision
+  m_TagString: Jamming
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -48,6 +48,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1a2fc828a104ac54dbe00c77a44b5cbe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _damageComponent: {fileID: 7300464961638009260}
 --- !u!54 &1484035709399646254
 Rigidbody:
   m_ObjectHideFlags: 0

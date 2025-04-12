@@ -6,6 +6,8 @@ namespace Offline
 {
     public class DroneDamageComponent : MonoBehaviour, IDamageable, IDroneComponent
     {
+        public GameObject NoDamageObject => gameObject;
+
         /// <summary>
         /// ダメージハンドラー
         /// </summary>

@@ -618,6 +618,7 @@ GameObject:
   - component: {fileID: 8772739536242291359}
   - component: {fileID: 5756816350272667785}
   - component: {fileID: 5756816350272667786}
+  - component: {fileID: 2338891237525509297}
   - component: {fileID: 5756816350272667789}
   - component: {fileID: 2268401430616989749}
   - component: {fileID: 1387660337042471973}
@@ -713,6 +714,27 @@ SphereCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Radius: 12
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!65 &2338891237525509297
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5756816350272667788}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 40, y: 40, z: 40}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &5756816350272667789
 MonoBehaviour:
@@ -851,7 +873,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _camera: {fileID: 6808110575809998135}
   _reticleImage: {fileID: 0}
-  _lockingOnColor: {r: 255, g: 0, b: 0, a: 200}
+  _lockOnColor: {r: 255, g: 0, b: 0, a: 200}
   _noLockOnColor: {r: 255, g: 255, b: 255, a: 128}
   _aimSpeed: 12
   _lockOnRadius: 450

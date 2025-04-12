@@ -89,6 +89,9 @@ namespace Offline
 
         private void OnTriggerEnter(Collider other)
         {
+            // 発射元には判定しない
+            if (other.gameObject == Shooter) return;
+
             // ダメージ可能インターフェースが実装されていない場合は除外
             IDamageable damageable;
             if (!other.TryGetComponent(out damageable))
