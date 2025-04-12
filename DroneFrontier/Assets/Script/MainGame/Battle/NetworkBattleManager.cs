@@ -124,6 +124,7 @@ namespace Network
                 foreach (var player in PlayerList)
                 {
                     NetworkBattleDrone spawnDrone = _droneSpawnManager.SpawnDrone(player.Name, player.Weapon);
+                    spawnDrone.enabled = false;
                     spawnDrone.Initialize();
                     player.Drone = spawnDrone;
                     player.StockNum = spawnDrone.StockNum;
@@ -157,6 +158,8 @@ namespace Network
 
                     foreach (var drone in drones)
                     {
+                        drone.enabled = false;
+
                         PlayerData player = new PlayerData();
                         player.Drone = drone;
                         player.StockNum = drone.StockNum;
@@ -235,6 +238,16 @@ namespace Network
                 {
                     _watchingGame.enabled = true;
                 }
+                else
+                {
+                    // ★ToDo:観戦送信
+                }
+            }
+            else
+            {
+                // ドローン初期化
+                respawnDrone.Initialize();
+                NetworkObjectSpawner.Spawn(respawnDrone);
             }
 
             // 破壊されたドローン情報更新

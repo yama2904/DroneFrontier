@@ -120,11 +120,6 @@ namespace Offline
 
         public void Initialize() 
         {
-            // 各コンポーネント取得
-            _drone = GetComponent<IBattleDrone>();
-            _soundComponent = GetComponent<DroneSoundComponent>();
-            _material = _barrierObject.GetComponent<Renderer>().material;
-
             // HP初期化
             HP = _barrierMaxHP;
 
@@ -294,6 +289,14 @@ namespace Offline
             WeakStartEvent?.Invoke(this, EventArgs.Empty);
 
             return true;
+        }
+
+        private void Awake()
+        {
+            // 各コンポーネント取得
+            _drone = GetComponent<IBattleDrone>();
+            _soundComponent = GetComponent<DroneSoundComponent>();
+            _material = _barrierObject.GetComponent<Renderer>().material;
         }
 
         private void Update()

@@ -115,9 +115,6 @@ namespace Offline
         /// <param name="e">イベント引数</param>
         private void DroneDestroyEvent(object o, EventArgs e)
         {
-            // 本コンポーネント停止
-            enabled = false;
-
             // イベント削除
             _drone.DroneDestroyEvent -= DroneDestroyEvent;
         }

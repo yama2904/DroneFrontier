@@ -122,6 +122,9 @@ namespace Network
             MyNetworkManager.Singleton.OnUdpReceiveOnMainThread -= OnUdpReceiveOfSendMethod;
             MyNetworkManager.Singleton.OnUdpReceiveOnMainThread -= OnUdpReceiveOfPosition;
 
+            // ÉLÉÉÉìÉZÉãî≠çs
+            _cancel.Cancel();
+
             OnDestroyObject?.Invoke(this, EventArgs.Empty);
         }
 

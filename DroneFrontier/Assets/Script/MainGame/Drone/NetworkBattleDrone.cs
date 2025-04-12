@@ -35,7 +35,7 @@ namespace Network
                 _hp = value;
                 if (value < 0)
                 {
-                    _hp = value;
+                    _hp = 0;
                 }
             }
         }
@@ -290,19 +290,13 @@ namespace Network
             if (_hp <= 0) return;
 
             // 小数点第2以下切り捨てでダメージ適用
-            _hp -= Useful.Floor(value, 1);
+            HP -= Useful.Floor(value, 1);
 
             // HPが0になったら破壊処理
             if (_hp <= 0)
             {
                 Destroy().Forget();
             }
-        }
-
-        protected override void Awake()
-        {
-            base.Awake();
-            enabled = false;
         }
 
         private void Update()
