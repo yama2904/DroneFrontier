@@ -26,20 +26,12 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
     public float HP
     {
         get { return _hp; }
-        set
+        private set
         {
-            if (_hp <= 0) return;
-
-            if (value > 0)
+            _hp = value;
+            if (value < 0)
             {
-                // 小数点第2以下切り捨て
-                _hp = Useful.Floor(value, 1);
-            }
-            else
-            {
-                // HPが0になったら破壊処理
-                _hp = 0;
-                Destroy().Forget();
+                _hp = value;
             }
         }
     }
@@ -143,21 +135,6 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
 
     public void Initialize()
     {
-        // コンポーネント初期化
-        _moveComponent.Initialize();
-        _rotateComponent.Initialize();
-        _soundComponent.Initialize();
-        _lockOnComponent.Initialize();
-        _radarComponent.Initialize();
-        _itemComponent.Initialize();
-        _weaponComponent.Initialize();
-        _boostComponent.Initialize();
-        GetComponent<DroneBarrierComponent>().Initialize();
-        GetComponent<DroneStatusComponent>().IsPlayer = true;
-    }
-
-    private void Awake()
-    {
         // コンポーネントの取得
         _rigidbody = GetComponent<Rigidbody>();
         _animator = GetComponent<Animator>();
@@ -179,6 +156,33 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
 
         // オブジェクト探索イベント設定
         _searchComponent.ObjectStayEvent += ObjectSearchEvent;
+
+        // コンポーネント初期化
+        _moveComponent.Initialize();
+        _rotateComponent.Initialize();
+        _soundComponent.Initialize();
+        _lockOnComponent.Initialize();
+        _radarComponent.Initialize();
+        _itemComponent.Initialize();
+        _weaponComponent.Initialize();
+        _boostComponent.Initialize();
+        GetComponent<DroneBarrierComponent>().Initialize();
+        GetComponent<DroneStatusComponent>().IsPlayer = true;
+    }
+
+    public void Damage(float value)
+    {
+        // ドローンが破壊されている場合は何もしない
+        if (_hp <= 0) return;
+
+        // 小数点第2以下切り捨てでダメージ適用
+        _hp -= Useful.Floor(value, 1);
+
+        // HPが0になったら破壊処理
+        if (_hp <= 0)
+        {
+            Destroy().Forget();
+        }
     }
 
     private void Start()
@@ -364,6 +368,8 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
     /// </summary>
     private async UniTask Destroy()
     {
+        if (_isDestroy) return;
+
         // 死亡フラグを立てる
         _isDestroy = true;
 

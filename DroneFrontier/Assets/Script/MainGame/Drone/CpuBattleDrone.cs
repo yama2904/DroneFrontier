@@ -20,20 +20,12 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
     public float HP
     {
         get { return _hp; }
-        set
+        private set
         {
-            if (_hp <= 0) return;
-
-            if (value > 0)
+            _hp = value;
+            if (value < 0)
             {
-                // 小数点第2以下切り捨て
-                _hp = Useful.Floor(value, 1);
-            }
-            else
-            {
-                // HPが0になったら破壊処理
-                _hp = 0;
-                Destroy().Forget();
+                _hp = value;
             }
         }
     }
@@ -196,20 +188,6 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
 
     public void Initialize()
     {
-        // コンポーネント初期化
-        _moveComponent.Initialize();
-        _rotateComponent.Initialize();
-        _soundComponent.Initialize();
-        _lockOnComponent.Initialize();
-        _radarComponent.Initialize();
-        _itemComponent.Initialize();
-        _weaponComponent.Initialize();
-        _boostComponent.Initialize();
-        GetComponent<DroneBarrierComponent>().Initialize();
-    }
-
-    private void Awake()
-    {
         // コンポーネントの取得
         _rigidbody = GetComponent<Rigidbody>();
         _transform = _rigidbody.transform;
@@ -223,7 +201,7 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
         _itemComponent = GetComponent<DroneItemComponent>();
         _weaponComponent = GetComponent<DroneWeaponComponent>();
         _boostComponent = GetComponent<DroneBoostComponent>();
-        
+
         // ダメージイベント設定
         _damageComponent.DamageEvent += DamageEvent;
 
@@ -237,6 +215,32 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
 
         // オブジェクト探索イベント設定
         _searchComponent.ObjectStayEvent += ObjectSearchEvent;
+
+        // コンポーネント初期化
+        _moveComponent.Initialize();
+        _rotateComponent.Initialize();
+        _soundComponent.Initialize();
+        _lockOnComponent.Initialize();
+        _radarComponent.Initialize();
+        _itemComponent.Initialize();
+        _weaponComponent.Initialize();
+        _boostComponent.Initialize();
+        GetComponent<DroneBarrierComponent>().Initialize();
+    }
+
+    public void Damage(float value)
+    {
+        // ドローンが破壊されている場合は何もしない
+        if (_hp <= 0) return;
+
+        // 小数点第2以下切り捨てでダメージ適用
+        _hp -= Useful.Floor(value, 1);
+
+        // HPが0になったら破壊処理
+        if (_hp <= 0)
+        {
+            Destroy().Forget();
+        }
     }
 
     private void Start()

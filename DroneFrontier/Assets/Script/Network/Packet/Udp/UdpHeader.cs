@@ -76,5 +76,10 @@ namespace Network.Udp
         /// ドローンステータス
         /// </summary>
         DroneStatus = 1 << 13,
+
+        /// <summary>
+        /// ドローンイベント
+        /// </summary>
+        DroneEvent = 1 << 14
     }
 }

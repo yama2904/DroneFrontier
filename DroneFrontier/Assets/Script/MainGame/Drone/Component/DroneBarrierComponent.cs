@@ -8,9 +8,29 @@ namespace Offline
     public class DroneBarrierComponent : MonoBehaviour, IDroneComponent
     {
         /// <summary>
+        /// バリアの最大透過度
+        /// </summary>
+        private const float BARRIER_MAX_ALFA_COLOR = 0.5f;
+
+        /// <summary>
         /// バリアの残りHP
         /// </summary>
         public float HP { get; private set; }
+
+        /// <summary>
+        /// バリアの最大HP
+        /// </summary>
+        public float MaxHP => _barrierMaxHP;
+
+        /// <summary>
+        /// バリア破壊イベント
+        /// </summary>
+        public event EventHandler BarrierBreakEvent;
+
+        /// <summary>
+        /// バリア復活イベント
+        /// </summary>
+        public event EventHandler BarrierResurrectEvent;
 
         /// <summary>
         /// バリア強化開始イベント
@@ -31,11 +51,6 @@ namespace Offline
         /// バリア弱体化終了イベント
         /// </summary>
         public event EventHandler WeakEndEvent;
-
-        /// <summary>
-        /// バリアの最大透過度
-        /// </summary>
-        private const float BARRIER_MAX_ALFA_COLOR = 0.5f;
 
         [SerializeField, Tooltip("バリアオブジェクト")]
         private GameObject _barrierObject = null;
@@ -105,6 +120,18 @@ namespace Offline
 
         public void Initialize() 
         {
+            // 各コンポーネント取得
+            _drone = GetComponent<IBattleDrone>();
+            _soundComponent = GetComponent<DroneSoundComponent>();
+            _material = _barrierObject.GetComponent<Renderer>().material;
+
+            // HP初期化
+            HP = _barrierMaxHP;
+
+            // ドローンが破壊された場合は本コンポーネントを停止
+            _drone.DroneDestroyEvent += DroneDestroyEvent;
+
+            // バリアカラー初期化
             ChangeBarrierColor();
         }
 
@@ -137,6 +164,9 @@ namespace Offline
                 // 破壊された場合はバリア破壊SE
                 HP = 0;
                 _soundComponent.PlayOneShot(SoundManager.SE.DestroyBarrier, SoundManager.MasterSEVolume);
+
+                // バリア破壊イベント発火
+                BarrierBreakEvent?.Invoke(this, EventArgs.Empty);
                 Debug.Log($"{_drone.Name}:バリア破壊");
             }
 
@@ -148,6 +178,23 @@ namespace Offline
             ChangeBarrierColor();
 
             Debug.Log($"{_drone.Name}:バリアに{damage}のダメージ\n残りHP:{HP}");
+        }
+
+        /// <summary>
+        /// バリアを復活させる
+        /// </summary>
+        public void ResurrectBarrier()
+        {
+            // 修復したら回復処理に移る
+            HP = _resurrectBarrierHP;
+            _isRegening = true;
+
+            // バリアの色更新
+            ChangeBarrierColor();
+
+            // イベント発火
+            BarrierResurrectEvent?.Invoke(this, EventArgs.Empty);
+            Debug.Log("バリア復活");
         }
 
         /// <summary>
@@ -234,7 +281,7 @@ namespace Offline
                 // バリアが破壊されている場合は修復
                 if (HP <= 0)
                 {
-                    ResurrectBarrier(_resurrectBarrierHP);
+                    ResurrectBarrier();
                 }
 
                 // バリア弱体化終了イベント発火
@@ -247,22 +294,11 @@ namespace Offline
             return true;
         }
 
-        private void Awake()
-        {
-            // 各コンポーネント取得
-            _drone = GetComponent<IBattleDrone>();
-            _soundComponent = GetComponent<DroneSoundComponent>();
-            _material = _barrierObject.GetComponent<Renderer>().material;
-
-            // HP初期化
-            HP = _barrierMaxHP;
-
-            // ドローンが破壊された場合は本コンポーネントを停止
-            _drone.DroneDestroyEvent += DroneDestroyEvent;
-        }
-
         private void Update()
         {
+            // ドローンが破壊されている場合は処理しない
+            if (_drone.HP <= 0) return;
+
             // バリア弱体化中は回復処理を行わない
             if (_isWeak) return;
 
@@ -305,7 +341,7 @@ namespace Offline
                 if (_regeneTimer >= _resurrectBarrierSec)
                 {
                     // バリア復活
-                    ResurrectBarrier(_resurrectBarrierHP);
+                    ResurrectBarrier();
                     _regeneTimer = 0;
 
                     Debug.Log($"{_drone.Name}:バリア復活");
@@ -313,22 +349,6 @@ namespace Offline
             }
 
             _regeneTimer += Time.deltaTime;
-        }
-
-        /// <summary>
-        /// バリアを復活させる
-        /// </summary>
-        /// <param name="resurrectHP">復活時のHP</param>
-        private void ResurrectBarrier(float resurrectHP)
-        {
-            // 修復したら回復処理に移る
-            HP = resurrectHP;
-            _isRegening = true;
-
-            // バリアの色更新
-            ChangeBarrierColor();
-
-            Debug.Log("バリア復活");
         }
 
         /// <summary>

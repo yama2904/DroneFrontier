@@ -13,7 +13,7 @@ public interface IBattleDrone
     /// <summary>
     /// ドローンのHP
     /// </summary>
-    public float HP { get; set; }
+    public float HP { get; }
 
     /// <summary>
     /// 現在のストック数
@@ -29,6 +29,12 @@ public interface IBattleDrone
     /// 初期化
     /// </summary>
     public void Initialize();
+
+    /// <summary>
+    /// ドローンにダメージを与える
+    /// </summary>
+    /// <param name="value">ダメージ量</param>
+    public void Damage(float value);
 
     /// <summary>
     /// ドローン破壊イベント

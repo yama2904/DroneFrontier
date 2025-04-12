@@ -30,20 +30,12 @@ namespace Network
         public float HP
         {
             get { return _hp; }
-            set
+            private set
             {
-                if (_hp <= 0) return;
-
-                if (value > 0)
+                _hp = value;
+                if (value < 0)
                 {
-                    // 小数点第2以下切り捨て
-                    _hp = Useful.Floor(value, 1);
-                }
-                else
-                {
-                    // HPが0になったら破壊処理
-                    _hp = 0;
-                    Destroy().Forget();
+                    _hp = value;
                 }
             }
         }
@@ -185,6 +177,7 @@ namespace Network
         DroneItemComponent _itemComponent = null;
         DroneWeaponComponent _weaponComponent = null;
         DroneBoostComponent _boostComponent = null;
+        DroneBarrierComponent _barrierComponent = null;
 
         public override string GetAddressKey()
         {
@@ -209,6 +202,20 @@ namespace Network
 
         public override void Initialize()
         {
+            // コンポーネントの取得
+            _rigidbody = GetComponent<Rigidbody>();
+            _animator = GetComponent<Animator>();
+            _listener = GetComponent<AudioListener>();
+            _moveComponent = GetComponent<DroneMoveComponent>();
+            _rotateComponent = GetComponent<DroneRotateComponent>();
+            _soundComponent = GetComponent<DroneSoundComponent>();
+            _lockOnComponent = GetComponent<DroneLockOnComponent>();
+            _radarComponent = GetComponent<DroneRadarComponent>();
+            _itemComponent = GetComponent<DroneItemComponent>();
+            _weaponComponent = GetComponent<DroneWeaponComponent>();
+            _boostComponent = GetComponent<DroneBoostComponent>();
+            _barrierComponent = GetComponent<DroneBarrierComponent>();
+
             // ストック数UI初期化
             StockNum = _stockNum;
 
@@ -239,6 +246,10 @@ namespace Network
                         MyNetworkManager.Singleton.SendToAll(new DroneStatusPacket(HP, moveSpeed));
                     }
                 });
+
+                // バリアイベント設定
+                _barrierComponent.BarrierBreakEvent += OnBarrierBreak;
+                _barrierComponent.BarrierResurrectEvent += OnBarrierResurrect;
             }
             else
             {
@@ -257,8 +268,8 @@ namespace Network
                 _rigidbody.interpolation = RigidbodyInterpolation.None;
             }
 
-                // コンポーネント初期化
-                _moveComponent.Initialize();
+            // コンポーネント初期化
+            _moveComponent.Initialize();
             _rotateComponent.Initialize();
             _soundComponent.Initialize();
             _lockOnComponent.Initialize();
@@ -266,27 +277,29 @@ namespace Network
             _itemComponent.Initialize();
             _weaponComponent.Initialize();
             _boostComponent.Initialize();
-            GetComponent<DroneBarrierComponent>().Initialize();
+            _barrierComponent.Initialize();
             GetComponent<DroneStatusComponent>().IsPlayer = IsControl;
+        }
+
+        public void Damage(float value)
+        {
+            // ドローンが破壊されている場合は何もしない
+            if (_hp <= 0) return;
+
+            // 小数点第2以下切り捨てでダメージ適用
+            _hp -= Useful.Floor(value, 1);
+
+            // HPが0になったら破壊処理
+            if (_hp <= 0)
+            {
+                Destroy().Forget();
+            }
         }
 
         protected override void Awake()
         {
             base.Awake();
             enabled = false;
-
-            // コンポーネントの取得
-            _rigidbody = GetComponent<Rigidbody>();
-            _animator = GetComponent<Animator>();
-            _listener = GetComponent<AudioListener>();
-            _moveComponent = GetComponent<DroneMoveComponent>();
-            _rotateComponent = GetComponent<DroneRotateComponent>();
-            _soundComponent = GetComponent<DroneSoundComponent>();
-            _lockOnComponent = GetComponent<DroneLockOnComponent>();
-            _radarComponent = GetComponent<DroneRadarComponent>();
-            _itemComponent = GetComponent<DroneItemComponent>();
-            _weaponComponent = GetComponent<DroneWeaponComponent>();
-            _boostComponent = GetComponent<DroneBoostComponent>();
         }
 
         private void Update()
@@ -456,8 +469,35 @@ namespace Network
 
             // イベント削除
             _searchComponent.ObjectStayEvent -= ObjectSearchEvent;
-            if (!_isControl)
+            if (_isControl)
+            {
+                _barrierComponent.BarrierBreakEvent -= OnBarrierBreak;
+                _barrierComponent.BarrierResurrectEvent -= OnBarrierResurrect;
+            }
+            else
+            {
                 MyNetworkManager.Singleton.OnUdpReceiveOnMainThread -= OnReceiveUdp;
+            }
+        }
+
+        /// <summary>
+        /// バリア破壊イベント
+        /// </summary>
+        /// <param name="sender">イベントオブジェクト</param>
+        /// <param name="e">イベント引数</param>
+        private void OnBarrierBreak(object sender, EventArgs e)
+        {
+            MyNetworkManager.Singleton.SendToAll(new DroneEventPacket(true, false, false));
+        }
+
+        /// <summary>
+        /// バリア復活イベント
+        /// </summary>
+        /// <param name="sender">イベントオブジェクト</param>
+        /// <param name="e">イベント引数</param>
+        private void OnBarrierResurrect(object sender, EventArgs e)
+        {
+            MyNetworkManager.Singleton.SendToAll(new DroneEventPacket(false, true, false));
         }
 
         /// <summary>
@@ -551,6 +591,28 @@ namespace Network
                 HP = status.Hp;
                 _moveComponent.MoveSpeed = status.MoveSpeed;
             }
+
+            // イベント
+            if (header == UdpHeader.DroneEvent)
+            {
+                DroneEventPacket evnt = packet as DroneEventPacket;
+
+                if (evnt.BarrierBreak)
+                {
+                    // バリアに最大ダメージを与えて破壊
+                    _barrierComponent.Damage(_barrierComponent.MaxHP);
+                }
+                if (evnt.BarrierResurrect)
+                {
+                    // バリア復活
+                    _barrierComponent.ResurrectBarrier();
+                }
+                if (evnt.Destroy)
+                {
+                    // ドローン破壊
+                    Destroy().Forget();
+                }
+            }
         }
 
         /// <summary>
@@ -571,8 +633,13 @@ namespace Network
         /// </summary>
         private async UniTask Destroy()
         {
+            if (_isDestroy) return;
+
             // 死亡フラグを立てる
             _isDestroy = true;
+
+            // 死亡情報送信
+            MyNetworkManager.Singleton.SendToAll(new DroneEventPacket(false, false, true));
 
             // 移動コンポーネント停止
             _moveComponent.enabled = false;
