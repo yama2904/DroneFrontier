@@ -223,8 +223,15 @@ namespace Network
             NotLockableOnList.Add(gameObject);
             NotRadarableList.Add(gameObject);
 
+            // バリアイベント設定
+            _barrierComponent.BarrierBreakEvent += OnBarrierBreak;
+            _barrierComponent.BarrierResurrectEvent += OnBarrierResurrect;
+
             // オブジェクト探索イベント設定
             _searchComponent.ObjectStayEvent += ObjectSearchEvent;
+
+            // イベント受信イベント設定
+            MyNetworkManager.Singleton.OnUdpReceiveOnMainThread += OnReceiveUdpOfEvent;
 
             // プレイヤー名を基に操作するか識別
             if (Name == MyNetworkManager.Singleton.MyPlayerName)
@@ -246,10 +253,6 @@ namespace Network
                         MyNetworkManager.Singleton.SendToAll(new DroneStatusPacket(HP, moveSpeed));
                     }
                 });
-
-                // バリアイベント設定
-                _barrierComponent.BarrierBreakEvent += OnBarrierBreak;
-                _barrierComponent.BarrierResurrectEvent += OnBarrierResurrect;
             }
             else
             {
@@ -261,7 +264,7 @@ namespace Network
                 _weaponComponent.HideBulletUI = true;
                 _boostComponent.HideGaugeUI = true;
 
-                // 入力情報受信イベント設定
+                // 受信イベント設定
                 MyNetworkManager.Singleton.OnUdpReceiveOnMainThread += OnReceiveUdp;
 
                 // 補間をオフにしないと瞬間移動する
@@ -468,16 +471,12 @@ namespace Network
             base.OnDestroy();
 
             // イベント削除
+            _barrierComponent.BarrierBreakEvent -= OnBarrierBreak;
+            _barrierComponent.BarrierResurrectEvent -= OnBarrierResurrect;
             _searchComponent.ObjectStayEvent -= ObjectSearchEvent;
-            if (_isControl)
-            {
-                _barrierComponent.BarrierBreakEvent -= OnBarrierBreak;
-                _barrierComponent.BarrierResurrectEvent -= OnBarrierResurrect;
-            }
-            else
-            {
+            MyNetworkManager.Singleton.OnUdpReceiveOnMainThread -= OnReceiveUdpOfEvent;
+            if (!_isControl)
                 MyNetworkManager.Singleton.OnUdpReceiveOnMainThread -= OnReceiveUdp;
-            }
         }
 
         /// <summary>
@@ -487,7 +486,7 @@ namespace Network
         /// <param name="e">イベント引数</param>
         private void OnBarrierBreak(object sender, EventArgs e)
         {
-            MyNetworkManager.Singleton.SendToAll(new DroneEventPacket(true, false, false));
+            MyNetworkManager.Singleton.SendToAll(new DroneEventPacket(Name, true, false, false));
         }
 
         /// <summary>
@@ -497,7 +496,7 @@ namespace Network
         /// <param name="e">イベント引数</param>
         private void OnBarrierResurrect(object sender, EventArgs e)
         {
-            MyNetworkManager.Singleton.SendToAll(new DroneEventPacket(false, true, false));
+            MyNetworkManager.Singleton.SendToAll(new DroneEventPacket(Name, false, true, false));
         }
 
         /// <summary>
@@ -532,7 +531,7 @@ namespace Network
         }
 
         /// <summary>
-        /// 入力情報パケット受信イベント
+        /// 他プレイヤー情報受信イベント
         /// </summary>
         /// <param name="player">送信元プレイヤー</param>
         /// <param name="header">受信したUDPパケットのヘッダ</param>
@@ -591,27 +590,38 @@ namespace Network
                 HP = status.Hp;
                 _moveComponent.MoveSpeed = status.MoveSpeed;
             }
+        }
 
-            // イベント
-            if (header == UdpHeader.DroneEvent)
+        /// <summary>
+        /// ドローンイベント受信イベント
+        /// </summary>
+        /// <param name="player">送信元プレイヤー</param>
+        /// <param name="header">受信したUDPパケットのヘッダ</param>
+        /// <param name="packet">受信したUDPパケット</param>
+        private void OnReceiveUdpOfEvent(string player, UdpHeader header, UdpPacket packet)
+        {
+            if (header != UdpHeader.DroneEvent) return;
+
+            // パケット取得
+            DroneEventPacket evnt = packet as DroneEventPacket;
+
+            // イベント発生者のドローン以外は処理しない
+            if (Name != evnt.Name) return;
+
+            if (evnt.BarrierBreak)
             {
-                DroneEventPacket evnt = packet as DroneEventPacket;
-
-                if (evnt.BarrierBreak)
-                {
-                    // バリアに最大ダメージを与えて破壊
-                    _barrierComponent.Damage(_barrierComponent.MaxHP);
-                }
-                if (evnt.BarrierResurrect)
-                {
-                    // バリア復活
-                    _barrierComponent.ResurrectBarrier();
-                }
-                if (evnt.Destroy)
-                {
-                    // ドローン破壊
-                    Destroy().Forget();
-                }
+                // バリアに最大ダメージを与えて破壊
+                _barrierComponent.Damage(_barrierComponent.MaxHP);
+            }
+            if (evnt.BarrierResurrect)
+            {
+                // バリア復活
+                _barrierComponent.ResurrectBarrier();
+            }
+            if (evnt.Destroy)
+            {
+                // ドローン破壊
+                Destroy().Forget();
             }
         }
 
@@ -639,7 +649,7 @@ namespace Network
             _isDestroy = true;
 
             // 死亡情報送信
-            MyNetworkManager.Singleton.SendToAll(new DroneEventPacket(false, false, true));
+            MyNetworkManager.Singleton.SendToAll(new DroneEventPacket(Name, false, false, true));
 
             // 移動コンポーネント停止
             _moveComponent.enabled = false;

@@ -185,6 +185,8 @@ namespace Offline
         /// </summary>
         public void ResurrectBarrier()
         {
+            if (HP > 0) return;
+
             // 修復したら回復処理に移る
             HP = _resurrectBarrierHP;
             _isRegening = true;

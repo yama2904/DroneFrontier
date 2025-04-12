@@ -1,8 +1,16 @@
+using System.Linq;
+using System.Text;
+
 namespace Network.Udp
 {
     public class DroneEventPacket : UdpPacket
     {
         public override UdpHeader Header => UdpHeader.DroneEvent;
+
+        /// <summary>
+        /// ドローン名
+        /// </summary>
+        public string Name { get; private set; } = string.Empty;
 
         /// <summary>
         /// バリア破壊
@@ -24,8 +32,9 @@ namespace Network.Udp
         /// </summary>
         public DroneEventPacket() { }
 
-        public DroneEventPacket(bool barrierBreak, bool resurrectBarrier, bool destroy)
+        public DroneEventPacket(string name, bool barrierBreak, bool resurrectBarrier, bool destroy)
         {
+            Name = name;
             BarrierBreak = barrierBreak;
             BarrierResurrect = resurrectBarrier;
             Destroy = destroy;
@@ -33,14 +42,25 @@ namespace Network.Udp
 
         protected override IPacket ParseBody(byte[] body)
         {
-            byte data = body[0];
-            int offset = 0;
-            bool barrierBreak = BitFlagUtil.CheckFlag(data, offset++);
-            bool resurrectBarrier = BitFlagUtil.CheckFlag(data, offset++);
-            bool destroy = BitFlagUtil.CheckFlag(data, offset++);
+            int byteOffset = 0;
+            
+            // ビットフラグ取得
+            byte data = body[byteOffset];
+            byteOffset += sizeof(byte);
+
+            // ドローン名取得
+            int nameLen = body.Length - byteOffset;
+            string name = Encoding.UTF8.GetString(body, byteOffset, nameLen);
+            byteOffset += nameLen;
+
+            // ビットフラグから各フラグ取得
+            int bitOffset = 0;
+            bool barrierBreak = BitFlagUtil.CheckFlag(data, bitOffset++);
+            bool resurrectBarrier = BitFlagUtil.CheckFlag(data, bitOffset++);
+            bool destroy = BitFlagUtil.CheckFlag(data, bitOffset++);
 
             // インスタンスを作成して返す
-            return new DroneEventPacket(barrierBreak, resurrectBarrier, destroy);
+            return new DroneEventPacket(name, barrierBreak, resurrectBarrier, destroy);
         }
 
         protected override byte[] ConvertToPacketBody()
@@ -50,7 +70,9 @@ namespace Network.Udp
             bitFlag = BitFlagUtil.UpdateFlag(bitFlag, offset++, BarrierBreak);
             bitFlag = BitFlagUtil.UpdateFlag(bitFlag, offset++, BarrierResurrect);
             bitFlag = BitFlagUtil.UpdateFlag(bitFlag, offset++, Destroy);
-            return new byte[] { bitFlag };
+            return new byte[] { bitFlag }
+                    .Concat(Encoding.UTF8.GetBytes(Name))
+                    .ToArray();
         }
     }
 }
