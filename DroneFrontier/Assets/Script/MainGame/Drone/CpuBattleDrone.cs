@@ -402,6 +402,9 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
 
     private void LateUpdate()
     {
+        // 死亡処理中は操作不可
+        if (_isDestroy) return;
+
         // 前進
         if (BitFlagUtil.CheckFlag(_moveDir, (int)DroneMoveComponent.Direction.Forward))
         {
