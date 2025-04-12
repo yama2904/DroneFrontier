@@ -723,7 +723,7 @@ namespace Network
         /// 指定したプレイヤーからのTCP受信を開始する
         /// </summary>
         /// <param name="player">TCPの受信先プレイヤー</param>
-        /// <param name="isHost">受信先がホストであるか</param>
+        /// <param name="isHost">送信元がホストであるか</param>
         private void ReceiveTcp(string player, bool isHost)
         {
             if (_tcpReceiving) return;
@@ -753,23 +753,30 @@ namespace Network
                                     lock (PlayerNames) PlayerNames.Remove(player);
                                 }
                             }
-                            OnDisconnect?.Invoke(player, isHost);
 
-                            // ホストの場合は全てのクライアントと切断
-                            if (isHost)
+                            // 通信切断済みでない場合
+                            if (IsHost || IsClient)
                             {
-                                lock (_peers)
+                                // 切断イベント発火
+                                OnDisconnect?.Invoke(player, isHost);
+
+                                // ホストの場合は全てのクライアントと切断
+                                if (isHost)
                                 {
-                                    foreach (string key in _peers.Keys)
+                                    lock (_peers)
                                     {
-                                        _peers[key].tcp.Close();
-                                        _peers[key].tcp.Dispose();
-                                        OnDisconnect?.Invoke(key, false);
+                                        foreach (string key in _peers.Keys)
+                                        {
+                                            _peers[key].tcp.Close();
+                                            _peers[key].tcp.Dispose();
+                                            OnDisconnect?.Invoke(key, false);
+                                        }
+                                        _peers.Clear();
+                                        lock (PlayerNames) PlayerNames.Clear();
                                     }
-                                    _peers.Clear();
-                                    lock (PlayerNames) PlayerNames.Clear();
                                 }
                             }
+                            
                             break;
                         }
 

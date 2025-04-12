@@ -178,13 +178,11 @@ namespace Offline
                 {
                     Cursor.lockState = CursorLockMode.Locked;
                     Cursor.visible = false;
-                    Debug.Log("カメラロック");
                 }
                 else
                 {
                     Cursor.lockState = CursorLockMode.None;
                     Cursor.visible = true;
-                    Debug.Log("カメラロック解除");
                 }
             }
         }

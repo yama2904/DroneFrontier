@@ -197,13 +197,11 @@ namespace Network
                 {
                     Cursor.lockState = CursorLockMode.Locked;
                     Cursor.visible = false;
-                    Debug.Log("カメラロック");
                 }
                 else
                 {
                     Cursor.lockState = CursorLockMode.None;
                     Cursor.visible = true;
-                    Debug.Log("カメラロック解除");
                 }
             }
         }
@@ -346,6 +344,11 @@ namespace Network
 
             // 3秒後リザルト画面に移動
             await UniTask.Delay(TimeSpan.FromSeconds(3));
+
+            // 通信切断
+            MyNetworkManager.Singleton.Disconnect();
+
+            // リザルト画面へ移動
             ResultSceneManager.SetRank(ranking);
             SceneManager.LoadScene("ResultScene");
         }
