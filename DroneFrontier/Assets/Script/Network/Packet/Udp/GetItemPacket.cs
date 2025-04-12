@@ -5,7 +5,7 @@ namespace Network.Udp
         public override UdpHeader Header => UdpHeader.GetItem;
 
         /// <summary>
-        /// 使用アイテム
+        /// 取得アイテム
         /// </summary>
         public IDroneItem Item { get; private set; } = null;
 

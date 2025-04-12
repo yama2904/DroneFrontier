@@ -4,6 +4,11 @@ namespace Offline
 {
     public class DroneMoveComponent : MonoBehaviour, IDroneComponent
     {
+        /// <summary>
+        /// 回転速度
+        /// </summary>
+        private const float ROTATE_SPEED = 4f;
+
         public enum Direction
         {
             /// <summary>
@@ -55,11 +60,6 @@ namespace Offline
         /// 初期速度
         /// </summary>
         public float InitSpeed { get; private set; } = 0f;
-
-        /// <summary>
-        /// 回転速度
-        /// </summary>
-        private const float ROTATE_SPEED = 4f;
 
         [SerializeField, Tooltip("移動速度")] 
         private float _moveSpeed = 800;

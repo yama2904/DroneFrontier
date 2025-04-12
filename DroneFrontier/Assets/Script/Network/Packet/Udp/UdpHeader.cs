@@ -68,8 +68,13 @@ namespace Network.Udp
         DroneAction = 1 << 11,
 
         /// <summary>
-        /// アイテム使用
+        /// アイテム取得
         /// </summary>
         GetItem = 1 << 12,
+
+        /// <summary>
+        /// ドローンステータス
+        /// </summary>
+        DroneStatus = 1 << 13,
     }
 }

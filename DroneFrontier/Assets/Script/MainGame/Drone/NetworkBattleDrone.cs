@@ -4,6 +4,7 @@ using Offline;
 using Offline.Player;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -154,10 +155,18 @@ namespace Network
         [SerializeField, Tooltip("ストック数")]
         private int _stockNum = 2;
 
+        [SerializeField, Tooltip("ステータス同期間隔（秒）")]
+        private int _syncStatusInterval = 1;
+
         /// <summary>
         /// 入力情報
         /// </summary>
         private InputData _input = new InputData();
+
+        /// <summary>
+        /// 死亡時に発行するキャンセル
+        /// </summary>
+        private CancellationTokenSource _cancel = new CancellationTokenSource();
 
         /// <summary>
         /// 死亡フラグ
@@ -217,9 +226,24 @@ namespace Network
                 IsSyncPosition = true;
             }
 
-            // 他プレイヤーの場合
-            if (!_isControl)
+            // 自プレイヤーの場合
+            if (_isControl)
             {
+                // 定期的にステータス同期
+                UniTask.Void(async () =>
+                {
+                    while (true)
+                    {
+                        await UniTask.Delay(_syncStatusInterval * 1000, ignoreTimeScale: true, cancellationToken: _cancel.Token);
+                        float moveSpeed = _moveComponent.MoveSpeed;
+                        MyNetworkManager.Singleton.SendToAll(new DroneStatusPacket(HP, moveSpeed));
+                    }
+                });
+            }
+            else
+            {
+                // 他プレイヤーの場合
+
                 // UI非表示
                 _lockOnComponent.HideReticle = true;
                 _itemComponent.HideItemUI = true;
@@ -233,8 +257,8 @@ namespace Network
                 _rigidbody.interpolation = RigidbodyInterpolation.None;
             }
 
-            // コンポーネント初期化
-            _moveComponent.Initialize();
+                // コンポーネント初期化
+                _moveComponent.Initialize();
             _rotateComponent.Initialize();
             _soundComponent.Initialize();
             _lockOnComponent.Initialize();
@@ -284,6 +308,8 @@ namespace Network
 
             if (_isControl)
             {
+                bool sendPacket = false;
+
                 bool startLockOn = false;
                 bool stopLockOn = false;
                 bool startBoost = false;
@@ -296,12 +322,14 @@ namespace Network
                 {
                     _lockOnComponent.StartLockOn();
                     startLockOn = true;
+                    sendPacket = true;
                 }
                 // ロックオン解除
                 if (_input.UppedKeys.Contains(KeyCode.LeftShift))
                 {
                     _lockOnComponent.StopLockOn();
                     stopLockOn = true;
+                    sendPacket = true;
                 }
 
                 // レーダー使用
@@ -321,12 +349,14 @@ namespace Network
                 {
                     _boostComponent.StartBoost();
                     startBoost = true;
+                    sendPacket = true;
                 }
                 // ブースト停止
                 if (_input.UppedKeys.Contains(KeyCode.Space))
                 {
                     _boostComponent.StopBoost();
                     stopBoost = true;
+                    sendPacket = true;
                 }
 
                 // アイテム使用
@@ -334,18 +364,21 @@ namespace Network
                 {
                     UseItem(ItemNum.Item1);
                     useItem1 = true;
+                    sendPacket = true;
                 }
                 if (_input.UppedKeys.Contains(KeyCode.Alpha2))
                 {
                     UseItem(ItemNum.Item2);
                     useItem2 = true;
+                    sendPacket = true;
                 }
 
                 // 入力情報更新
                 _input.UpdateInput();
 
                 // アクション情報送信
-                MyNetworkManager.Singleton.SendToAll(new DroneActionPacket(startLockOn, stopLockOn, startBoost, stopBoost, useItem1, useItem2));
+                if (sendPacket)
+                    MyNetworkManager.Singleton.SendToAll(new DroneActionPacket(startLockOn, stopLockOn, startBoost, stopBoost, useItem1, useItem2));
             }
         }
 
@@ -510,6 +543,14 @@ namespace Network
             {
                 _itemComponent.SetItem((packet as GetItemPacket).Item);
             }
+
+            // ステータス
+            if (header == UdpHeader.DroneStatus)
+            {
+                DroneStatusPacket status = packet as DroneStatusPacket;
+                HP = status.Hp;
+                _moveComponent.MoveSpeed = status.MoveSpeed;
+            }
         }
 
         /// <summary>
@@ -560,6 +601,9 @@ namespace Network
 
             // 爆破後一定時間でオブジェクト破棄
             await UniTask.Delay(5000);
+
+            // キャンセル発行
+            _cancel.Cancel();
 
             // ドローン破壊イベント通知
             DroneDestroyEvent?.Invoke(this, EventArgs.Empty);
