@@ -199,7 +199,7 @@ public class DroneWeaponComponent : MonoBehaviour, IDroneComponent
     private void LateUpdate()
     {
         // ƒƒCƒ“•Ší‚ÌUŒ‚‚ğ’â~‚µ‚½ê‡‚Í‘¬“x‚ğ–ß‚·
-        if (!_mainShotHistory.CurrentValue && _mainShotHistory.CurrentValue)
+        if (!_mainShotHistory.CurrentValue && _mainShotHistory.PreviousValue)
         {
             _moveComponent.MoveSpeed *= 1 / MainSpeedDownPer;
         }
