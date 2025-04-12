@@ -150,6 +150,7 @@ namespace Offline
             {
                 _rigidBody.isKinematic = true;
                 _createdArea = Instantiate(_jammingArea, transform.position, Quaternion.identity);
+                _createdArea.Creater = Creater;
             }
         }
 
