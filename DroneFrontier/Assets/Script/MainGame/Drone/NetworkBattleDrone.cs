@@ -262,8 +262,6 @@ namespace Network
                 // 他プレイヤーの場合
 
                 // UI非表示
-                _weaponComponent.HideBulletUI = true;
-                _boostComponent.HideGaugeUI = true;
                 _uiCanvas.enabled = false;
 
                 // 受信イベント設定

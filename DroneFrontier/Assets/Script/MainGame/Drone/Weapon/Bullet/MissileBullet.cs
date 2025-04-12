@@ -79,6 +79,7 @@ namespace Offline
             _transform = GetComponent<Rigidbody>().transform;
             _audioSource = GetComponent<AudioSource>();
             _audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.Missile);
+            _audioSource.volume = SoundManager.MasterSEVolume;
         }
 
         private void FixedUpdate()

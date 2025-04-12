@@ -39,11 +39,6 @@ public class DroneWeaponComponent : MonoBehaviour, IDroneComponent
     public float SubSpeedDownPer { get; set; } = 0;
 
     /// <summary>
-    /// ’eŠÛUI‚ğ”ñ•\¦‚É‚·‚é‚©
-    /// </summary>
-    public bool HideBulletUI { get; set; } = false;
-
-    /// <summary>
     /// ƒƒCƒ“•ŠíUŒ‚’†‚Å‚ ‚é‚©
     /// </summary>
     public bool ShootingMainWeapon => _mainShotHistory.CurrentValue || _mainShotHistory.PreviousValue;
@@ -138,7 +133,7 @@ public class DroneWeaponComponent : MonoBehaviour, IDroneComponent
         SubWeapon = subWeapon.GetComponent<IWeapon>();
         SubWeapon.Owner = gameObject;
         SubWeapon.ShotPosition = _subShotPos;
-        SubWeapon.BulletUICanvas = HideBulletUI ? null : _bulletUICanvs;
+        SubWeapon.BulletUICanvas = _bulletUICanvs;
         SubWeapon.OnBulletFull += (o, e) =>
         {
             OnBulletFull?.Invoke(this, Weapon.SUB, SubWeapon);

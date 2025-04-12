@@ -41,23 +41,6 @@ public class DroneBoostComponent : MonoBehaviour, IDroneComponent
     }
 
     /// <summary>
-    /// ゲージUIを非表示にするか
-    /// </summary>
-    public bool HideGaugeUI
-    {
-        get { return _hideGaugeUI; }
-        set
-        {
-            if (_boostGaugeUI != null)
-            {
-                _boostGaugeUI.enabled = !value;
-            }
-            _hideGaugeUI = value;
-        }
-    }
-    private bool _hideGaugeUI = false;
-
-    /// <summary>
     /// ブースト可能な最低ゲージ量
     /// </summary>
     private const float BOOSTABLE_MIN_GAUGE = 0.2f;
@@ -187,7 +170,7 @@ public class DroneBoostComponent : MonoBehaviour, IDroneComponent
         }
 
         // UIに反映
-        if (!_hideGaugeUI && _boostGaugeUI != null)
+        if (_boostGaugeUI != null)
         {
             _boostGaugeUI.fillAmount = _gaugeValue;
         }
