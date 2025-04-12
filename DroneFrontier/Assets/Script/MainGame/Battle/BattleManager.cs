@@ -263,6 +263,10 @@ namespace Offline
                     _watchingGame.enabled = true;
                 }
             }
+            else
+            {
+                respawnDrone.Initialize();
+            }
 
             // 破壊されたドローン情報更新
             droneData.Drone = respawnDrone;

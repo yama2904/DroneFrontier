@@ -188,20 +188,6 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
 
     public void Initialize()
     {
-        // コンポーネントの取得
-        _rigidbody = GetComponent<Rigidbody>();
-        _transform = _rigidbody.transform;
-        _animator = GetComponent<Animator>();
-        _moveComponent = GetComponent<DroneMoveComponent>();
-        _rotateComponent = GetComponent<DroneRotateComponent>();
-        _damageComponent = GetComponent<DroneDamageComponent>();
-        _soundComponent = GetComponent<DroneSoundComponent>();
-        _lockOnComponent = GetComponent<DroneLockOnComponent>();
-        _radarComponent = GetComponent<DroneRadarComponent>();
-        _itemComponent = GetComponent<DroneItemComponent>();
-        _weaponComponent = GetComponent<DroneWeaponComponent>();
-        _boostComponent = GetComponent<DroneBoostComponent>();
-
         // ダメージイベント設定
         _damageComponent.DamageEvent += DamageEvent;
 
@@ -241,6 +227,23 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
         {
             Destroy().Forget();
         }
+    }
+
+    private void Awake()
+    {
+        // コンポーネントの取得
+        _rigidbody = GetComponent<Rigidbody>();
+        _transform = _rigidbody.transform;
+        _animator = GetComponent<Animator>();
+        _moveComponent = GetComponent<DroneMoveComponent>();
+        _rotateComponent = GetComponent<DroneRotateComponent>();
+        _damageComponent = GetComponent<DroneDamageComponent>();
+        _soundComponent = GetComponent<DroneSoundComponent>();
+        _lockOnComponent = GetComponent<DroneLockOnComponent>();
+        _radarComponent = GetComponent<DroneRadarComponent>();
+        _itemComponent = GetComponent<DroneItemComponent>();
+        _weaponComponent = GetComponent<DroneWeaponComponent>();
+        _boostComponent = GetComponent<DroneBoostComponent>();
     }
 
     private void Start()
