@@ -5,7 +5,7 @@ public class TitleSceneManager : MonoBehaviour
 {
     private void Start()
     {
-        SoundManager.Play(SoundManager.BGM.Home, SoundManager.MasterBGMVolume * 0.8f);
+        SoundManager.Play(SoundManager.BGM.Home, 0.8f);
     }
 
     private void Update()

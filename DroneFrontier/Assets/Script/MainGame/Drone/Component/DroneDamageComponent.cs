@@ -74,7 +74,7 @@ namespace Offline
             {
                 // バリアが破壊されている場合はドローン本体へダメージ
                 _drone.Damage(value);
-                Debug.Log($"{_drone.Name}:ドローンに{value}のダメージ 残りHP:{_drone.HP}");
+                //Debug.Log($"{_drone.Name}:ドローンに{value}のダメージ 残りHP:{_drone.HP}");
             }
 
             // ダメージ回数加算

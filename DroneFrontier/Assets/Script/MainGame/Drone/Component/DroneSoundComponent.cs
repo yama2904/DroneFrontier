@@ -1,108 +1,112 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 [RequireComponent(typeof(AudioSource))]
 public class DroneSoundComponent : MonoBehaviour, IDroneComponent
 {
     /// <summary>
-    /// 1回きりのSE再生用AudioSource
+    /// 同一SEの最大同時再生可能数
     /// </summary>
-    private AudioSource _oneShotAudio = null;
+    private const int MAX_SAME_PLAY = 2;
 
     /// <summary>
-    /// ループSE再生用AudioSource
+    /// AudioSource管理クラス
     /// </summary>
-    private AudioSource[] _loopPlayAudios = null;
+    private class AudioSourceData
+    {
+        /// <summary>
+        /// AudioSource
+        /// </summary>
+        public AudioSource AudioSource { get; set; } = null;
+
+        /// <summary>
+        /// 再生SE
+        /// </summary>
+        public SoundManager.SE SE { get; set; } = SoundManager.SE.None;
+
+        /// <summary>
+        /// 未使用であるか
+        /// </summary>
+        public bool IsFree { get; set; } = true;
+    }
 
     /// <summary>
-    /// 現在ループ再生中のAudioSource<br/>
-    /// key:採番したSE再生番号<br/>
-    /// value:ループSEを再生しているAudioSource
+    /// Audio情報
     /// </summary>
-    private Dictionary<int, AudioSource> _loopPlayingAudioMap = new Dictionary<int, AudioSource>();
+    private AudioSourceData[] _audioDatas = null;
 
     /// <summary>
-    /// SE再生番号採番値
+    /// SE同時再生用ロック
     /// </summary>
-    private int _numberingSeNumber = 0;
+    private  object _lock = new object();
 
     public void Initialize() { }
 
     /// <summary>
-    /// ループせずにSE再生用
+    /// 指定したSEを再生する
     /// </summary>
     /// <param name="se">再生するSE</param>
-    /// <param name="volume">再生音量を0～1で指定（指定しない場合はSoundManagerのSE音量を使用）</param>
-    public void PlayOneShot(SoundManager.SE se, float volume = -1)
-    {
-        if (se == SoundManager.SE.None) return;
-
-        if (volume == -1)
-        {
-            volume = SoundManager.MasterSEVolume;
-        }
-        _oneShotAudio.PlayOneShot(SoundManager.GetAudioClip(se), volume);
-    }
-
-    /// <summary>
-    /// ループしてSE再生用<br/>
-    /// 再生に失敗した場合は-1を返却
-    /// </summary>
-    /// <param name="se">再生するSE</param>
-    /// <param name="volume">再生音量を0～1で指定（指定しない場合はSoundManagerのSE音量を使用）</param>
-    /// <returns>SE再生番号（SEを停止する際に使用）</returns>
-    public int PlayLoopSE(SoundManager.SE se, float volume = -1)
+    /// <param name="volume">再生音量を0～1で指定</param>
+    /// <param name="loop">ループ再生させるか</param>
+    /// <returns>SE管理番号。再生に失敗した場合は-1</returns>
+    public int Play(SoundManager.SE se, float volume = 1, bool loop = false)
     {
         if (se == SoundManager.SE.None) return -1;
 
-        if (volume == -1)
+        int index = -1;
+        lock (_lock)
         {
-            volume = SoundManager.MasterSEVolume;
+            // AudioSourceに空きがあるか調べる
+            for (int i = 0; i < _audioDatas.Length; i++)
+            {
+                AudioSourceData data = _audioDatas[i];
+                if (data.IsFree)
+                {
+                    index = i;
+                    break;
+                }
+            }
+
+            // 空きがなかったら処理しない
+            if (index == -1) return -1;
+
+            // 同一SEが既に一定数以上再生されている場合は処理しない
+            int sameSe = 0;
+            foreach (var data in _audioDatas)
+            {
+                if (data.SE == se)
+                {
+                    sameSe++;
+                    if (sameSe >= MAX_SAME_PLAY) return -1;
+                }
+            }
+
+            _audioDatas[index].AudioSource.volume = SoundManager.GetTotalSEVolume(volume);
+            _audioDatas[index].AudioSource.clip = SoundManager.GetAudioClip(se);
+            _audioDatas[index].AudioSource.loop = loop;
+            _audioDatas[index].SE = se;
+            _audioDatas[index].IsFree = false;
         }
 
-        //再生可能なAudioSourceを調べる
-        foreach (AudioSource audio in _loopPlayAudios)
-        {
-            // 再生中の場合は次のAudioSource
-            if (audio.isPlaying) continue;
+        // SE再生
+        _audioDatas[index].AudioSource.Play();
 
-            // AudioSourceに再生SE設定
-            audio.clip = SoundManager.GetAudioClip(se);
-            audio.volume = volume;
-            audio.Play();
-
-            // SE再生番号採番
-            int seNumber = _numberingSeNumber++;
-
-            // ループ再生中AudioSourceとしてMapに追加
-            _loopPlayingAudioMap.Add(seNumber, audio);
-
-            // SE再生番号返却
-            return seNumber;
-        }
-
-        //再生できなかった
-        return -1;
+        return index;
     }
 
     /// <summary>
-    /// SE再生番号を指定してループ再生中のSEを停止
+    /// 指定した管理番号のSEを停止
     /// </summary>
-    /// <param name="seNumber">停止するSE再生番号</param>
-    /// <returns>成功した場合はtrue</returns>
-    public bool StopLoopSE(int seNumber)
+    /// <param name="id">停止するSEの管理番号</param>
+    public void StopSE(int id)
     {
-        // SE番号は0以上
-        if (seNumber <= -1) return false;
+        // 有効なSE管理番号でない場合は処理しない
+        if (!IsValidSEId(id)) return;
 
-        // ループ再生中マップに指定されたSE再生番号が存在しない場合は失敗
-        if (!_loopPlayingAudioMap.ContainsKey(seNumber)) return false;
-
-        // SE停止
-        _loopPlayingAudioMap[seNumber].Stop();
-        _loopPlayingAudioMap.Remove(seNumber);
-
-        return true;
+        AudioSourceData asd = _audioDatas[id];
+        if (asd.AudioSource.isPlaying)
+        {
+            StopAudio(asd);
+        }
     }
 
     private void Awake()
@@ -110,15 +114,57 @@ public class DroneSoundComponent : MonoBehaviour, IDroneComponent
         // ドローンにアタッチされているAudioSourceコンポーネント群を取得
         AudioSource[] audios = GetComponents<AudioSource>();
 
-        // oneShot用AudioSource設定
-        _oneShotAudio = audios[0];
-
-        // ループ用AudioSource設定
-        _loopPlayAudios = new AudioSource[audios.Length - 1];
-        for (int i = 1; i < audios.Length; i++)
+        // オーディオ初期化
+        _audioDatas = new AudioSourceData[audios.Length];
+        for (int i = 0; i < audios.Length; i++)
         {
-            audios[i].loop = true;
-            _loopPlayAudios[i - 1] = audios[i];
+            _audioDatas[i] = new AudioSourceData()
+            {
+                AudioSource = audios[i]
+            };
+            StopAudio(_audioDatas[i]);
         }
+    }
+
+    private void LateUpdate()
+    {
+        // 再生が終わったSEがあるかチェック
+        for (int i = 0; i < _audioDatas.Length; i++)
+        {
+            // 再生が終わったAudioSourceを初期化
+            AudioSourceData data = _audioDatas[i];
+            if (!data.AudioSource.isPlaying && !data.IsFree)
+            {
+                StopAudio(data);
+            }
+        }
+    }
+
+    /// <summary>
+    /// オーディオ停止
+    /// </summary>
+    /// <param name="audio">停止するオーディオ</param>
+    private void StopAudio(AudioSourceData audio)
+    {
+        audio.AudioSource.Stop();
+        audio.AudioSource.clip = null;
+        audio.AudioSource.loop = false;
+        audio.AudioSource.time = 0;
+        audio.SE = SoundManager.SE.None;
+        audio.IsFree = true;
+    }
+
+    /// <summary>
+    /// 有効なSE管理番号であるかチェックする
+    /// </summary>
+    /// <param name="id">チェックするSE管理番号</param>
+    /// <returns>有効な場合はtrue</returns>
+    private bool IsValidSEId(int id)
+    {
+        if (id < 0 || id >= _audioDatas.Length)
+        {
+            return false;
+        }
+        return true;
     }
 }

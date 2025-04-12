@@ -161,7 +161,7 @@ namespace Offline
             if (_cpuWeaponList[cpuNumber - 1] == Weapon.SHOTGUN) return;
 
             //SE再生
-            SoundManager.Play(SoundManager.SE.Select, SoundManager.MasterSEVolume);
+            SoundManager.Play(SoundManager.SE.Select);
 
             // 武器更新
             _cpuWeaponList[cpuNumber - 1] = Weapon.SHOTGUN;
@@ -180,7 +180,7 @@ namespace Offline
             if (_cpuWeaponList[cpuNumber - 1] == Weapon.MISSILE) return;
 
             //SE再生
-            SoundManager.Play(SoundManager.SE.Select, SoundManager.MasterSEVolume);
+            SoundManager.Play(SoundManager.SE.Select);
 
             // 武器更新
             _cpuWeaponList[cpuNumber - 1] = Weapon.MISSILE;
@@ -199,7 +199,7 @@ namespace Offline
             if (_cpuWeaponList[cpuNumber - 1] == Weapon.LASER) return;
 
             //SE再生
-            SoundManager.Play(SoundManager.SE.Select, SoundManager.MasterSEVolume);
+            SoundManager.Play(SoundManager.SE.Select);
 
             // 武器更新
             _cpuWeaponList[cpuNumber - 1] = Weapon.LASER;
@@ -242,7 +242,7 @@ namespace Offline
                 BattleManager.CpuList.Add(cpu);
             }
 
-            SoundManager.Play(SoundManager.SE.Select, SoundManager.MasterSEVolume);
+            SoundManager.Play(SoundManager.SE.Select);
             SelectedButton = ButtonType.OK;
             OnButtonClick(this, EventArgs.Empty);
         }

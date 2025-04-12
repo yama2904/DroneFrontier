@@ -152,13 +152,13 @@ namespace Offline
             // HPが残っている場合はダメージSE再生
             if (HP > 0)
             {
-                _soundComponent.PlayOneShot(SoundManager.SE.BarrierDamage, SoundManager.MasterSEVolume * 0.7f);
+                _soundComponent.Play(SoundManager.SE.BarrierDamage, 0.7f);
             }
             else
             {
                 // 破壊された場合はバリア破壊SE
                 HP = 0;
-                _soundComponent.PlayOneShot(SoundManager.SE.DestroyBarrier, SoundManager.MasterSEVolume);
+                _soundComponent.Play(SoundManager.SE.DestroyBarrier);
 
                 // バリア破壊イベント発火
                 BarrierBreakEvent?.Invoke(this, EventArgs.Empty);
@@ -172,7 +172,7 @@ namespace Offline
             // バリアの色更新
             ChangeBarrierColor();
 
-            Debug.Log($"{_drone.Name}:バリアに{damage}のダメージ\n残りHP:{HP}");
+            //Debug.Log($"{_drone.Name}:バリアに{damage}のダメージ\n残りHP:{HP}");
         }
 
         /// <summary>
@@ -325,7 +325,7 @@ namespace Offline
                         // 回復タイマーリセット
                         _regeneTimer = 0;
 
-                        Debug.Log($"{_drone.Name}:バリア回復後HP->{HP}");
+                        //Debug.Log($"{_drone.Name}:バリア回復後HP->{HP}");
                     }
                 }
                 else

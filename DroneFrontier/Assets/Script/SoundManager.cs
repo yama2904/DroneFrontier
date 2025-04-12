@@ -26,6 +26,11 @@ public class SoundManager : MonoBehaviour
     private const float INIT_SE_VOLUME = 0.5f;
 
     /// <summary>
+    /// 同一SEの最大同時再生可能数
+    /// </summary>
+    private const int MAX_SAME_SE_PLAY = 2;
+
+    /// <summary>
     /// BGM一覧
     /// </summary>
     public enum BGM
@@ -194,7 +199,7 @@ public class SoundManager : MonoBehaviour
     /// <summary>
     /// 再生中のBGM
     /// </summary>
-    public static BGM PlayingBGM { get; private set; } = BGM.None;
+    public static BGM PlayingBGM => _bgmAudioData.BGM;
 
     /// <summary>
     /// BGMのマスター音量（0～1）
@@ -246,11 +251,6 @@ public class SoundManager : MonoBehaviour
     private static float _bgmVolume = 1.0f;
 
     /// <summary>
-    /// SEの音量（0～1）
-    /// </summary>
-    public static float SEVolume { get; set; } = 1.0f;
-
-    /// <summary>
     /// BGMオーディオデータ
     /// </summary>
     private static AudioClip[] _bgmClips;
@@ -269,6 +269,16 @@ public class SoundManager : MonoBehaviour
         /// AudioSource
         /// </summary>
         public AudioSource AudioSource { get; set; } = null;
+
+        /// <summary>
+        /// 再生BGM
+        /// </summary>
+        public BGM BGM { get; set; } = BGM.None;
+
+        /// <summary>
+        /// 再生SE
+        /// </summary>
+        public SE SE { get; set; } = SE.None;
 
         /// <summary>
         /// 一時停止しているか
@@ -307,6 +317,11 @@ public class SoundManager : MonoBehaviour
     private static bool _isFadeOut = false;
 
     /// <summary>
+    /// SE同時再生用ロック
+    /// </summary>
+    private static object _lock = new object();
+
+    /// <summary>
     /// 指定したBGMのAudioClipを取得
     /// </summary>
     public static AudioClip GetAudioClip(BGM bgm)
@@ -324,6 +339,24 @@ public class SoundManager : MonoBehaviour
         return _seClips[(int)se];
     }
 
+    /// <summary>
+    /// マスター音量と掛け合わせた最終的なBGM音量を取得
+    /// </summary>
+    /// <returns></returns>
+    public static float GetTotalBGMVolume()
+    {
+        return MasterBGMVolume * BGMVolume;
+    }
+
+    /// <summary>
+    /// マスター音量と掛け合わせた最終的なSE音量を取得
+    /// </summary>
+    /// <returns></returns>
+    public static float GetTotalSEVolume(float seVolume)
+    {
+        return MasterSEVolume * seVolume;
+    }
+
     #region BGM
 
     /// <summary>
@@ -335,12 +368,11 @@ public class SoundManager : MonoBehaviour
         StopBGM();
         if (bgm == BGM.None) return;
 
-        _bgmAudioData.IsFree = false;
         _bgmAudioData.AudioSource.clip = _bgmClips[(int)bgm];
         _bgmAudioData.AudioSource.loop = true;
         _bgmAudioData.AudioSource.Play();
-
-        PlayingBGM = bgm;
+        _bgmAudioData.BGM = bgm;
+        _bgmAudioData.IsFree = false;
     }
 
     /// <summary>
@@ -348,8 +380,9 @@ public class SoundManager : MonoBehaviour
     /// </summary>
     /// <param name="bgm">再生するBGM</param>
     /// <param name="volume">音量（0～1）</param>
-    public static void Play(BGM bgm, float volume)
+    public static void Play(BGM bgm, float volume = 1)
     {
+        if (bgm == BGM.None) return;
         BGMVolume = volume;
         Play(bgm);
     }
@@ -376,7 +409,6 @@ public class SoundManager : MonoBehaviour
     public static void StopBGM()
     {
         StopAudio(_bgmAudioData);
-        PlayingBGM = BGM.None;
         StopFadeInOut();
     }
 
@@ -462,7 +494,7 @@ public class SoundManager : MonoBehaviour
     /// 指定したSEを再生する。最大10個まで同時に再生可能。
     /// </summary>
     /// <param name="se">再生するSE</param>
-    /// <param name="volume">補正音量（0～1）</param>
+    /// <param name="volume">音量（0～1）</param>
     /// <param name="loop">ループ再生させるか</param>
     /// <param name="time">再生位置（秒）</param>
     /// <returns>SE管理番号。再生に失敗した場合は-1</returns>
@@ -470,29 +502,44 @@ public class SoundManager : MonoBehaviour
     {
         if (se == SE.None) return -1;
 
-        // AudioSourceに空きがあるか調べる
         int index = -1;
-        for (int i = 0; i < _seAudioDatas.Length; i++)
+        lock (_lock)
         {
-            AudioSourceData data = _seAudioDatas[i];
-            if (data.IsFree)
+            // AudioSourceに空きがあるか調べる
+            for (int i = 0; i < _seAudioDatas.Length; i++)
             {
-                index = i;
-                break;
+                AudioSourceData data = _seAudioDatas[i];
+                if (data.IsFree)
+                {
+                    index = i;
+                    break;
+                }
             }
+
+            // 空きがなかったら処理しない
+            if (index == -1) return -1;
+
+            // 再生位置がclipの長さ以上の場合は再生失敗
+            if (time > 0 && time >= _seClips[(int)se].length) return -1;
+
+            // 同一SEが既に一定数以上再生されている場合は処理しない
+            int sameSe = 0;
+            foreach (var data in _seAudioDatas)
+            {
+                if (data.SE == se)
+                {
+                    sameSe++;
+                    if (sameSe >= MAX_SAME_SE_PLAY) return -1;
+                }
+            }
+
+            _seAudioDatas[index].AudioSource.volume = GetTotalSEVolume(volume);
+            _seAudioDatas[index].AudioSource.clip = _seClips[(int)se];
+            _seAudioDatas[index].AudioSource.loop = loop;
+            _seAudioDatas[index].SE = se;
+            _seAudioDatas[index].IsFree = false;
         }
 
-        //空きがなかったら処理しない
-        if (index == -1) return -1;
-
-        // 再生位置がclipの長さ以上の場合は再生失敗
-        if (time > 0 && time >= _seClips[(int)se].length) return -1;
-
-        SEVolume = volume;
-        _seAudioDatas[index].IsFree = false;
-        _seAudioDatas[index].AudioSource.volume = GetTotalSEVolume();
-        _seAudioDatas[index].AudioSource.clip = _seClips[(int)se];
-        _seAudioDatas[index].AudioSource.loop = loop;
 
         // 再生位置が指定されている場合は適用
         if (time > 0)
@@ -509,7 +556,7 @@ public class SoundManager : MonoBehaviour
     /// <summary>
     /// 指定した管理番号のSEを停止
     /// </summary>
-    /// <param name="id">一時停止するSEの管理番号</param>
+    /// <param name="id">停止するSEの管理番号</param>
     public static void StopSE(int id)
     {
         // 有効なSE管理番号でない場合は処理しない
@@ -550,7 +597,7 @@ public class SoundManager : MonoBehaviour
             asd.IsPause = true;
         }
     }
-    
+
     /// <summary>
     /// 一時停止したSEを再開
     /// </summary>
@@ -678,7 +725,7 @@ public class SoundManager : MonoBehaviour
         }
     }
 
-    private void Update()
+    private void LateUpdate()
     {
         // 再生が終わったSEがあるかチェック
         for (int i = 0; i < _seAudioDatas.Length; i++)
@@ -724,24 +771,6 @@ public class SoundManager : MonoBehaviour
     }
 
     /// <summary>
-    /// マスター音量と掛け合わせた最終的なBGM音量を取得
-    /// </summary>
-    /// <returns></returns>
-    private static float GetTotalBGMVolume()
-    {
-        return MasterBGMVolume * BGMVolume;
-    }
-
-    /// <summary>
-    /// マスター音量と掛け合わせた最終的なSE音量を取得
-    /// </summary>
-    /// <returns></returns>
-    private static float GetTotalSEVolume()
-    {
-        return MasterSEVolume * SEVolume;
-    }
-
-    /// <summary>
     /// オーディオ停止
     /// </summary>
     /// <param name="audio">停止するオーディオ</param>
@@ -751,6 +780,8 @@ public class SoundManager : MonoBehaviour
         audio.AudioSource.clip = null;
         audio.AudioSource.loop = false;
         audio.AudioSource.time = 0;
+        audio.BGM = BGM.None;
+        audio.SE = SE.None;
         audio.IsPause = false;
         audio.IsFree = true;
     }

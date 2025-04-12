@@ -123,7 +123,7 @@ public class DroneBoostComponent : MonoBehaviour, IDroneComponent
         _moveComponent.MoveSpeed *= _boostAccele;
         
         // ブーストSE再生
-        _boostSEId = _soundComponent.PlayLoopSE(SoundManager.SE.Boost, SoundManager.MasterSEVolume * 0.15f);
+        _boostSEId = _soundComponent.Play(SoundManager.SE.Boost, 0.15f, true);
 
         // ブーストフラグON
         _isBoost = true;
@@ -141,7 +141,7 @@ public class DroneBoostComponent : MonoBehaviour, IDroneComponent
         _moveComponent.MoveSpeed *= 1 / _boostAccele;
 
         // ブーストSE停止
-        _soundComponent.StopLoopSE(_boostSEId);
+        _soundComponent.StopSE(_boostSEId);
 
         // ブーストフラグOFF
         _isBoost = false;

@@ -174,11 +174,11 @@ namespace Network
 
             // 3秒後にカウントダウンSE再生
             await UniTask.Delay(TimeSpan.FromSeconds(3));
-            SoundManager.Play(SoundManager.SE.StartCountDownD, SoundManager.MasterSEVolume);
+            SoundManager.Play(SoundManager.SE.StartCountDownD);
 
             // カウントダウンSE終了後にゲーム開始
             await UniTask.Delay(TimeSpan.FromSeconds(4.5));
-            SoundManager.Play(SoundManager.BGM.Loop, SoundManager.MasterBGMVolume * 0.4f);
+            SoundManager.Play(SoundManager.BGM.Loop, 0.4f);
             StartCountDown().Forget();
 
             // 各ドローンのスクリプト有効化
@@ -342,7 +342,7 @@ namespace Network
             _finishAnimator.SetBool("SetFinish", true);
 
             // ゲーム終了SE再生
-            SoundManager.Play(SoundManager.SE.Finish, SoundManager.MasterSEVolume);
+            SoundManager.Play(SoundManager.SE.Finish);
 
             // 3秒後リザルト画面に移動
             await UniTask.Delay(TimeSpan.FromSeconds(3));

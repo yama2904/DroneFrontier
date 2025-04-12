@@ -116,7 +116,7 @@ namespace Offline
                 Destroy(gameObject);
             }
 
-            Debug.Log($"{name}に{value}のダメージ 残りHP:{_hp}");
+            //Debug.Log($"{name}に{value}のダメージ 残りHP:{_hp}");
         }
 
         private void Awake()

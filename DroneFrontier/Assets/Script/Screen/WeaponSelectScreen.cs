@@ -70,7 +70,7 @@ namespace Offline
             if (_selectedWeapon == selectWeapon) return;
 
             //SE再生
-            SoundManager.Play(SoundManager.SE.Select, SoundManager.MasterSEVolume);
+            SoundManager.Play(SoundManager.SE.Select);
 
             messageWindowText.text = SHOTGUN_TEXT;
             SetWeaponButtonsColor(selectWeapon);
@@ -83,7 +83,7 @@ namespace Offline
             if (_selectedWeapon == selectWeapon) return;
 
             //SE再生
-            SoundManager.Play(SoundManager.SE.Select, SoundManager.MasterSEVolume);
+            SoundManager.Play(SoundManager.SE.Select);
 
             messageWindowText.text = MISSILE_TEXT;
             SetWeaponButtonsColor(selectWeapon);
@@ -96,7 +96,7 @@ namespace Offline
             if (_selectedWeapon == selectWeapon) return;
 
             //SE再生
-            SoundManager.Play(SoundManager.SE.Select, SoundManager.MasterSEVolume);
+            SoundManager.Play(SoundManager.SE.Select);
 
             messageWindowText.text = LASER_TEXT;
             SetWeaponButtonsColor(selectWeapon);
@@ -110,7 +110,7 @@ namespace Offline
             if (!isItemOnButton)
             {
                 //SE再生
-                SoundManager.Play(SoundManager.SE.Select, SoundManager.MasterSEVolume);
+                SoundManager.Play(SoundManager.SE.Select);
 
                 BattleManager.IsItemSpawn = true;
                 itemOnButton.image.color = selectItemButtonColor;
@@ -126,7 +126,7 @@ namespace Offline
             if (isItemOnButton)
             {
                 //SE再生
-                SoundManager.Play(SoundManager.SE.Select, SoundManager.MasterSEVolume);
+                SoundManager.Play(SoundManager.SE.Select);
 
                 BattleManager.IsItemSpawn = false;
                 itemOnButton.image.color = notSelectButtonColor;
@@ -142,7 +142,7 @@ namespace Offline
             if (_selectedWeapon == WeaponType.NONE) return;
 
             BattleManager.PlayerWeapon = _selectedWeapon;
-            SoundManager.Play(SoundManager.SE.Select, SoundManager.MasterSEVolume);
+            SoundManager.Play(SoundManager.SE.Select);
             SelectedButton = ButtonType.OK;
             OnButtonClick(this, EventArgs.Empty);
         }

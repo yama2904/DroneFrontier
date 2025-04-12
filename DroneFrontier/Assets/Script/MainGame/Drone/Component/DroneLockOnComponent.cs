@@ -11,23 +11,6 @@ public class DroneLockOnComponent : MonoBehaviour, IDroneComponent
     private GameObject _target = null;
 
     /// <summary>
-    /// レティクルを非表示にするか
-    /// </summary>
-    public bool HideReticle
-    {
-        get { return _hideReticle; }
-        set
-        {
-            if (_reticleImage != null)
-            {
-                _reticleImage.enabled = !value;
-            }
-            _hideReticle = value;
-        }
-    }
-    private bool _hideReticle = false;
-
-    /// <summary>
     /// 新規ターゲットロックオンイベント
     /// </summary>
     public event EventHandler OnTargetLockOn;

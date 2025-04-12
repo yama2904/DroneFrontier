@@ -65,7 +65,7 @@ public class HomeSceneManager : MonoBehaviour
         // BGMが再生されていなかったら再生
         if (SoundManager.PlayingBGM != SoundManager.BGM.Home)
         {
-            SoundManager.Play(SoundManager.BGM.Home, SoundManager.MasterBGMVolume * 0.8f);
+            SoundManager.Play(SoundManager.BGM.Home, 0.8f);
         }
     }
 

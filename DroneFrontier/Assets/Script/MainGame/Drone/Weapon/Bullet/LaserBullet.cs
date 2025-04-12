@@ -147,7 +147,7 @@ namespace Offline
 
                     _audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.BeamChange);
                     _audioSource.time = 0.2f;
-                    _audioSource.volume = SoundManager.MasterSEVolume * 0.15f;
+                    _audioSource.volume = SoundManager.GetTotalSEVolume(0.15f);
                     _audioSource.Play();
                 }
 
@@ -170,7 +170,7 @@ namespace Offline
 
                     // レーザー発射SE再生
                     _audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.Beam);
-                    _audioSource.volume = SoundManager.MasterSEVolume * 0.05f;
+                    _audioSource.volume = SoundManager.GetTotalSEVolume(0.05f);
                     _audioSource.loop = true;
                     _audioSource.Play();
 

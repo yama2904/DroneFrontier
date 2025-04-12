@@ -262,10 +262,8 @@ namespace Network
                 // 他プレイヤーの場合
 
                 // UI非表示
-                //_lockOnComponent.HideReticle = true;
-                //_itemComponent.HideItemUI = true;
-                //_weaponComponent.HideBulletUI = true;
-                //_boostComponent.HideGaugeUI = true;
+                _weaponComponent.HideBulletUI = true;
+                _boostComponent.HideGaugeUI = true;
                 _uiCanvas.enabled = false;
 
                 // 受信イベント設定
@@ -349,7 +347,7 @@ namespace Network
                 // レーダー使用
                 if (_input.DownedKeys.Contains(KeyCode.Q))
                 {
-                    _soundComponent.PlayOneShot(SoundManager.SE.Radar, SoundManager.MasterSEVolume);
+                    _soundComponent.Play(SoundManager.SE.Radar);
                     _radarComponent.StartRadar();
                 }
                 // レーダー終了
@@ -635,7 +633,7 @@ namespace Network
             // アイテム枠にアイテムを持っていたら使用
             if (_itemComponent.UseItem((int)item))
             {
-                _soundComponent.PlayOneShot(SoundManager.SE.UseItem, SoundManager.MasterSEVolume);
+                _soundComponent.Play(SoundManager.SE.UseItem);
             }
         }
 
@@ -662,7 +660,7 @@ namespace Network
             _radarComponent.StopRadar();
 
             // 死亡SE再生
-            _soundComponent.PlayOneShot(SoundManager.SE.Death, SoundManager.MasterSEVolume);
+            _soundComponent.Play(SoundManager.SE.Death);
 
             // 一定時間経過してから爆破
             await UniTask.Delay(TimeSpan.FromSeconds(DEATH_FALL_TIME), ignoreTimeScale: true);

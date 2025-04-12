@@ -105,7 +105,7 @@ namespace Network
                 respawnDrone = CreateDrone(drone.Name, drone.SubWeapon, initPos);
 
                 // 復活SE再生
-                respawnDrone.GetComponent<DroneSoundComponent>().PlayOneShot(SoundManager.SE.Respawn);
+                respawnDrone.GetComponent<DroneSoundComponent>().Play(SoundManager.SE.Respawn);
 
                 // ストック数更新
                 respawnDrone.StockNum = drone.StockNum - 1;

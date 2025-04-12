@@ -257,7 +257,7 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
         }
 
         // プロペラは最初から流す
-        _soundComponent.PlayLoopSE(SoundManager.SE.Propeller, SoundManager.MasterSEVolume);
+        _soundComponent.Play(SoundManager.SE.Propeller, 1, true);
 
         // 常にロックオン処理
         _lockOnComponent.StartLockOn();
@@ -561,7 +561,7 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
         // アイテム枠にアイテムを持っていたら使用
         if (_itemComponent.UseItem((int)item))
         {
-            _soundComponent.PlayOneShot(SoundManager.SE.UseItem, SoundManager.MasterSEVolume);
+            _soundComponent.Play(SoundManager.SE.UseItem);
         }
     }
 
@@ -594,7 +594,7 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
         _lockOnComponent.StopLockOn();
 
         // 死亡SE再生
-        _soundComponent.PlayOneShot(SoundManager.SE.Death, SoundManager.MasterSEVolume);
+        _soundComponent.Play(SoundManager.SE.Death);
 
         // 一定時間経過してから爆破
         await UniTask.Delay(TimeSpan.FromSeconds(DEATH_FALL_TIME));

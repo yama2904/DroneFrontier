@@ -4,26 +4,6 @@ using UnityEngine.UI;
 
 public class DroneItemComponent : MonoBehaviour, IDroneComponent
 {
-    /// <summary>
-    /// アイテムUIを非表示にするか
-    /// </summary>
-    public bool HideItemUI
-    {
-        get { return _hideItemUI; }
-        set
-        {
-            if (_itemFrameImages != null)
-            {
-                foreach (Image image in _itemFrameImages)
-                {
-                    image.enabled = !value;
-                }
-            }
-            _hideItemUI = value;
-        }
-    }
-    private bool _hideItemUI = false;
-
     [SerializeField, Tooltip("所持できるアイテム数")]
     private int _maxItemNum = 2;
 
@@ -79,8 +59,8 @@ public class DroneItemComponent : MonoBehaviour, IDroneComponent
             data.Item = item;
             data.HasItem = true;
 
-            // アイテム枠が表示されており、所持アイテムにアイコンが設定されている場合はアイコンを表示
-            if (!_hideItemUI && data.ItemFrameTransform != null)
+            // アイテム枠が表示されている場合はアイコンを表示
+            if (data.ItemFrameTransform != null)
             {
                 // アイコン生成
                 Image icon = item.InstantiateIcon();
