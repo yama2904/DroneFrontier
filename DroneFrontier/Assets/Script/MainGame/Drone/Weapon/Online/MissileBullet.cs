@@ -55,7 +55,7 @@ namespace Online
             if (other.CompareTag(TagNameConst.BULLET)) return;
             if (other.CompareTag(TagNameConst.ITEM)) return;
             if (other.CompareTag(TagNameConst.GIMMICK)) return;
-            if (other.CompareTag(TagNameConst.JAMMING)) return;
+            if (other.CompareTag(TagNameConst.JAMMING_AREA)) return;
             if (other.CompareTag(TagNameConst.TOWER)) return;
 
             if (other.CompareTag(TagNameConst.PLAYER))

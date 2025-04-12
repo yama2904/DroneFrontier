@@ -89,7 +89,7 @@ public class Bullet : MonoBehaviour, IBullet
         if (other.CompareTag(TagNameConst.BULLET)) return;
         if (other.CompareTag(TagNameConst.ITEM)) return;
         if (other.CompareTag(TagNameConst.GIMMICK)) return;
-        if (other.CompareTag(TagNameConst.JAMMING)) return;
+        if (other.CompareTag(TagNameConst.JAMMING_AREA)) return;
         if (other.CompareTag(TagNameConst.NOT_COLLISION)) return;
 
         // ダメージ可能インターフェースが実装されている場合はダメージを与える

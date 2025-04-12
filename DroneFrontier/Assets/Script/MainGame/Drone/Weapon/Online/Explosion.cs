@@ -102,7 +102,7 @@ namespace Online
             //当たり判定を行わないオブジェクトだったら処理をしない
             if (other.CompareTag(TagNameConst.BULLET)) return;
             if (other.CompareTag(TagNameConst.ITEM)) return;
-            if (other.CompareTag(TagNameConst.JAMMING)) return;
+            if (other.CompareTag(TagNameConst.JAMMING_AREA)) return;
             if (other.CompareTag(TagNameConst.GIMMICK)) return;
 
             if (other.CompareTag(TagNameConst.PLAYER))

@@ -1,16 +1,25 @@
-﻿using Offline.Player;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace Offline
 {
-    public class JammingBot : MonoBehaviour, ILockableOn, IRadarable
+    public class JammingBot : MonoBehaviour, ILockableOn, IRadarable, IDamageable
     {
         /// <summary>
         /// ジャミングボット生成直後の移動量
         /// </summary>
         private const int BOT_MOVE_VALUE = 60;
+
+        public GameObject NoDamageObject => Creater;
+
+        /// <summary>
+        /// ジャミングボットの残りHP
+        /// </summary>
+        public float HP
+        {
+            get { return _hp; }
+        }
 
         /// <summary>
         /// ロックオン可能であるか
@@ -53,7 +62,6 @@ namespace Offline
                     Physics.IgnoreCollision(collider, GetComponent<Collider>());
                 }
 
-                _damageComponent.Creater = value;
                 _creater = value;
             }
         }
@@ -75,7 +83,12 @@ namespace Offline
         public event EventHandler DestroyEvent;
 
         [SerializeField]
-        private JammingBotDamage _damageComponent = null;
+        private float _hp = 30.0f;
+
+        [SerializeField]
+        private JammingArea _jammingArea = null;
+
+        private JammingArea _createdArea = null;
 
         /// <summary>
         /// ジャミングボット生成直後の移動時間計測
@@ -88,14 +101,23 @@ namespace Offline
         private float _destroyTimer = 0;
 
         /// <summary>
-        /// 各オブジェクトに付与したジャミングステータス
-        /// </summary>
-        private Dictionary<GameObject, JammingStatus> _addedJammingStatusMap = new Dictionary<GameObject, JammingStatus>();
-
-        /// <summary>
         /// ジャミングボットのRigidBody
         /// </summary>
         private Rigidbody _rigidBody = null;
+
+        public void Damage(GameObject source, float value)
+        {
+            // 小数点第2以下切り捨て
+            value = Useful.Floor(value, 1);
+            _hp -= value;
+            if (_hp < 0)
+            {
+                // オブジェクト削除
+                Destroy(gameObject);
+            }
+
+            Debug.Log($"{name}に{value}のダメージ 残りHP:{_hp}");
+        }
 
         private void Awake()
         {
@@ -122,17 +144,21 @@ namespace Offline
 
             // 移動時間計測
             _initMoveTimer += Time.deltaTime;
+
+            // 移動終了
             if (_initMoveTimer > InitMoveSec)
             {
                 _rigidBody.isKinematic = true;
+                _createdArea = Instantiate(_jammingArea, transform.position, Quaternion.identity);
             }
         }
 
         private void OnDestroy()
         {
-            foreach (JammingStatus status in _addedJammingStatusMap.Values)
+            // ジャミングエリア削除
+            if (_createdArea != null)
             {
-                status.EndJamming();
+                Destroy(_createdArea.gameObject);
             }
 
             // 破壊イベント発火
@@ -140,34 +166,6 @@ namespace Offline
 
             //デバッグ用
             Debug.Log("ジャミングボット破壊");
-        }
-
-        private void OnTriggerEnter(Collider other)
-        {
-            // ジャミングボットを生成したオブジェクト自身なら処理しない
-            if (other.gameObject == _creater) return;
-
-            // 既にジャミング付与済みの場合は処理しない
-            if (_addedJammingStatusMap.ContainsKey(other.gameObject)) return;
-
-            // プレイヤーかCPUのみ処理
-            string tag = other.tag;
-            if (tag != TagNameConst.PLAYER && tag != TagNameConst.CPU) return;
-
-            // ジャミングステータス付与
-            JammingStatus status = new JammingStatus();
-            other.GetComponent<DroneStatusComponent>().AddStatus(status, 9999);
-            _addedJammingStatusMap.Add(other.gameObject, status);
-        }
-
-        private void OnTriggerExit(Collider other)
-        {
-            // ジャミング解除
-            if (_addedJammingStatusMap.ContainsKey(other.gameObject))
-            {
-                _addedJammingStatusMap[other.gameObject].EndJamming();
-                _addedJammingStatusMap.Remove(other.gameObject);
-            }
         }
     }
 }

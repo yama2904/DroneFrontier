@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
 using UnityEngine;
 
 namespace Offline
@@ -317,16 +318,19 @@ namespace Offline
                 // Transformキャッシュ
                 Transform t = hit.transform;
 
-                // レーザー発射元オブジェクトとはヒットさせない
-                if (t == Shooter.transform) continue;
-
                 // タグを基にヒット対象から除外
                 string tag = t.tag;
                 if (tag == TagNameConst.ITEM) continue;             // アイテム除外
                 if (tag == TagNameConst.BULLET) continue;           // 弾丸除外
                 if (tag == TagNameConst.GIMMICK) continue;          // ギミック除外
-                if (tag == TagNameConst.JAMMING) continue;          // ジャミングエリア除外
+                if (tag == TagNameConst.JAMMING_AREA) continue;     // ジャミングエリア除外
                 if (tag == TagNameConst.NOT_COLLISION) continue;
+
+                // レーザー発射元オブジェクトを非ダメージ指定されている場合はヒットしない
+                if (t.TryGetComponent(out IDamageable damageable))
+                {
+                    if (damageable.NoDamageObject == Shooter) continue;
+                }
 
                 // 最小距離の場合は取得
                 if (target.distance > hit.distance)

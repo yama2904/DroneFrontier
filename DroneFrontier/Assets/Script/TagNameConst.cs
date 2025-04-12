@@ -6,7 +6,7 @@
     public const string JAMMING_BOT = "JammingBot";
     public const string BULLET = "Bullet";
     public const string GIMMICK = "Gimmick";
-    public const string JAMMING = "Jamming";
+    public const string JAMMING_AREA = "JammingArea";
     public const string GOAL = "Goal";
     public const string ITEM_SPAWN = "ItemSpawn";
     public const string TOWER = "Tower";

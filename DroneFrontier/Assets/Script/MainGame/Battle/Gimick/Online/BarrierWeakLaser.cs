@@ -160,7 +160,7 @@ public class BarrierWeakLaser : MonoBehaviour
         return hits.Where(h => !h.transform.CompareTag(TagNameConst.ITEM))    //アイテム除外
                    .Where(h => !h.transform.CompareTag(TagNameConst.BULLET))  //弾丸除外
                    .Where(h => !h.transform.CompareTag(TagNameConst.GIMMICK)) //ギミックエリア除外
-                   .Where(h => !h.transform.CompareTag(TagNameConst.JAMMING)) //ジャミングエリア除外
+                   .Where(h => !h.transform.CompareTag(TagNameConst.JAMMING_AREA)) //ジャミングエリア除外
                    .Where(h => !h.transform.CompareTag(TagNameConst.TOWER))   //タワー除外
                    .ToList();
     }

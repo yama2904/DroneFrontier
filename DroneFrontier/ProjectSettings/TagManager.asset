@@ -9,11 +9,11 @@ TagManager:
   - Bullet
   - JammingBot
   - Gimmick
-  - Jamming
   - Goal
   - ItemSpawn
   - Tower
   - NotCollision
+  - JammingArea
   layers:
   - Default
   - TransparentFX

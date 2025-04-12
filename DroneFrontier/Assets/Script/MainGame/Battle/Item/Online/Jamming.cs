@@ -91,7 +91,7 @@ namespace Online
             var hits = Physics.SphereCastAll(
                 t.position, jammingBot.transform.localScale.x, t.up, jammingBotPosition.localPosition.y)
                 .Where(h => !ReferenceEquals(creater, h.transform.gameObject))
-                .Where(h => !h.transform.CompareTag(TagNameConst.JAMMING))
+                .Where(h => !h.transform.CompareTag(TagNameConst.JAMMING_AREA))
                 .Where(h => !h.transform.CompareTag(TagNameConst.ITEM))
                 .Where(h => !h.transform.CompareTag(TagNameConst.BULLET))
                 .Where(h => !h.transform.CompareTag(TagNameConst.GIMMICK))
