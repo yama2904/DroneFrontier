@@ -311,6 +311,7 @@ MonoBehaviour:
   _stockText: {fileID: 7646116371101854067}
   _searchComponent: {fileID: 8076797654263036361}
   _camera: {fileID: 2032111343277000741}
+  _uiCanvas: {fileID: 2857361770926363682}
   _hp: 100
   _stockNum: 2
   _syncStatusInterval: 1

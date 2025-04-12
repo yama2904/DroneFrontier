@@ -259,7 +259,7 @@ namespace Network
             List<PlayerData> aliveDrones = PlayerList.Where(x => x.Drone == null).ToList();
             if (aliveDrones.Count == 1)
             {
-                FinishGame();
+                SendFinishGame();
             }
         }
 
@@ -297,7 +297,7 @@ namespace Network
                 }
 
                 // 制限時間によるゲーム終了
-                FinishGame();
+                SendFinishGame();
             }
             catch (OperationCanceledException)
             {
@@ -309,9 +309,24 @@ namespace Network
         }
 
         /// <summary>
+        /// 全クライアントにゲーム終了を知らせる
+        /// </summary>
+        private void SendFinishGame()
+        {
+            if (MyNetworkManager.Singleton.IsClient) return;
+
+            // [残ストック数 DESC, 破壊された時間 DESC]でソートしてランキング設定
+            string[] ranking = PlayerList.OrderByDescending(x => x.StockNum)
+                                         .ThenByDescending(x => x.DestroyTime)
+                                         .Select(x => x.Name)
+                                         .ToArray();
+            SendMethod(() => FinishGame(ranking));
+        }
+
+        /// <summary>
         /// ゲーム終了処理
         /// </summary>
-        private async void FinishGame()
+        private async void FinishGame(string[] ranking)
         {
             // ゲーム終了のバッティング防止
             lock (_lock)
@@ -329,15 +344,9 @@ namespace Network
             // ゲーム終了SE再生
             SoundManager.Play(SoundManager.SE.Finish, SoundManager.MasterSEVolume);
 
-            // [残ストック数 DESC, 破壊された時間 DESC]でソートしてランキング設定
-            string[] ranking = PlayerList.OrderByDescending(x => x.StockNum)
-                                         .ThenByDescending(x => x.DestroyTime)
-                                         .Select(x => x.Name)
-                                         .ToArray();
-            ResultSceneManager.SetRank(ranking);
-
             // 3秒後リザルト画面に移動
             await UniTask.Delay(TimeSpan.FromSeconds(3));
+            ResultSceneManager.SetRank(ranking);
             SceneManager.LoadScene("ResultScene");
         }
     }

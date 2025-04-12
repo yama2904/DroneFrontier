@@ -141,6 +141,9 @@ namespace Network
         [SerializeField, Tooltip("カメラ")]
         private Camera _camera = null;
 
+        [SerializeField, Tooltip("UI表示用Canvas")]
+        private Canvas _uiCanvas = null;
+
         [SerializeField, Tooltip("ドローンのHP")]
         private float _hp = 100f;
 
@@ -259,10 +262,11 @@ namespace Network
                 // 他プレイヤーの場合
 
                 // UI非表示
-                _lockOnComponent.HideReticle = true;
-                _itemComponent.HideItemUI = true;
-                _weaponComponent.HideBulletUI = true;
-                _boostComponent.HideGaugeUI = true;
+                //_lockOnComponent.HideReticle = true;
+                //_itemComponent.HideItemUI = true;
+                //_weaponComponent.HideBulletUI = true;
+                //_boostComponent.HideGaugeUI = true;
+                _uiCanvas.enabled = false;
 
                 // 受信イベント設定
                 MyNetworkManager.Singleton.OnUdpReceiveOnMainThread += OnReceiveUdp;
