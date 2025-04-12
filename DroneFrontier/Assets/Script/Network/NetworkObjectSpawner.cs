@@ -13,15 +13,10 @@ namespace Network
     {
         public static Dictionary<string, MyNetworkBehaviour> SpawnedObjects { get; private set; } = new Dictionary<string, MyNetworkBehaviour>();
 
-        static NetworkObjectSpawner()
+        public static void Initialize() 
         {
             // 受信イベント設定
             MyNetworkManager.Singleton.OnUdpReceiveOnMainThread += OnUdpReceive;
-        }
-
-        public static void Initialize() 
-        {
-            // ゲーム開始時に呼び出させてstaticコンストラクタを呼ばせる
         }
 
         /// <summary>
