@@ -192,7 +192,9 @@ namespace Network
             return new Dictionary<string, object>()
             {
                 { "Name", Name },
-                { "Weapon", SubWeapon }
+                { "Weapon", SubWeapon },
+                { "Stock", StockNum },
+                { "enabled", enabled }
             };
         }
 
@@ -201,6 +203,8 @@ namespace Network
             var dic = data as Dictionary<string, object>;
             Name = (string)dic["Name"];
             SubWeapon = (WeaponType)Enum.ToObject(typeof(WeaponType), dic["Weapon"]);
+            StockNum = Convert.ToInt32(dic["Stock"]);
+            enabled = Convert.ToBoolean(dic["enabled"]);
         }
 
         public override void Initialize()
@@ -297,6 +301,12 @@ namespace Network
             {
                 Destroy().Forget();
             }
+        }
+
+        protected override void Awake()
+        {
+            base.Awake();
+            enabled = false;
         }
 
         private void Update()
