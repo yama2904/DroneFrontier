@@ -34,8 +34,7 @@ namespace Network
             obj.ObjectId = Guid.NewGuid().ToString("N");
 
             // パケット送信
-            IPacket packet = new SpawnPacket(obj);
-            MyNetworkManager.Singleton.SendToAll(packet);
+            MyNetworkManager.Singleton.SendToAll(new SpawnPacket(obj));
 
             // 削除イベント設定
             obj.OnDestroyObject += OnDestroy;

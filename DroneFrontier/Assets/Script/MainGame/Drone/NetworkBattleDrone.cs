@@ -168,6 +168,8 @@ namespace Network
         /// </summary>
         private bool _isDestroy = false;
 
+        private readonly object _lock = new object();
+
         // コンポーネントキャッシュ
         Rigidbody _rigidbody = null;
         Animator _animator = null;
@@ -484,6 +486,9 @@ namespace Network
             MyNetworkManager.Singleton.OnUdpReceiveOnMainThread -= OnReceiveUdpOfEvent;
             if (!_isControl)
                 MyNetworkManager.Singleton.OnUdpReceiveOnMainThread -= OnReceiveUdp;
+
+            // キャンセル発行
+            _cancel.Cancel();
         }
 
         /// <summary>
@@ -650,10 +655,13 @@ namespace Network
         /// </summary>
         private async UniTask Destroy()
         {
-            if (_isDestroy) return;
+            lock (_lock)
+            {
+                if (_isDestroy) return;
 
-            // 死亡フラグを立てる
-            _isDestroy = true;
+                // 死亡フラグを立てる
+                _isDestroy = true;
+            }
 
             // 移動停止
             _rigidbody.velocity = Vector3.zero;

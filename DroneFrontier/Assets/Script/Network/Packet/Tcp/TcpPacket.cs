@@ -121,7 +121,8 @@ namespace Network.Tcp
         private byte[] GetHeaderBytes()
         {
             // ヘッダータイプ
-            byte[] header = BitConverter.GetBytes((short)Header);
+            //byte[] header = BitConverter.GetBytes((short)Header);
+            byte[] header = new byte[] { (byte)Header };
 
             // 型名
             byte[] typeNameByte = Encoding.UTF8.GetBytes(GetType().Name);

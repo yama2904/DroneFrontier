@@ -868,6 +868,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c65e3fe29ad0884468dfc49805d7a08c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _syncPosition: 0
+  _syncInterval: 1
+  _syncPositionDistance: 20
   _1pText: {fileID: 2579965352053884328}
   _2pText: {fileID: 7377938013570961503}
   _3pText: {fileID: 7377938014354109856}

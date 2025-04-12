@@ -163,7 +163,7 @@ public class SoloMultiSelectScreen : MonoBehaviour, IScreen
         UniTask.Void(async () =>
         {
             // 通信相手発見イベント設定
-            MyNetworkManager.Singleton.OnDiscovery += OnDiscovery;
+            MyNetworkManager.Singleton.OnConnect += OnConnect;
 
             try
             {
@@ -193,7 +193,7 @@ public class SoloMultiSelectScreen : MonoBehaviour, IScreen
         if (_isDiscovery)
         {
             MyNetworkManager.Singleton.Disconnect();
-            MyNetworkManager.Singleton.OnDiscovery -= OnDiscovery;
+            MyNetworkManager.Singleton.OnConnect -= OnConnect;
 
             // 探索解除
             ChangeDiscovery(false);
@@ -223,13 +223,13 @@ public class SoloMultiSelectScreen : MonoBehaviour, IScreen
     }
 
     /// <summary>
-    /// 通信相手発見イベント
+    /// 通信接続イベント
     /// </summary>
     /// <param name="player">通信相手のプレイヤー名</param>
-    private void OnDiscovery(string player)
+    private void OnConnect(string player)
     {
         // 本イベント削除
-        MyNetworkManager.Singleton.OnDiscovery -= OnDiscovery;
+        MyNetworkManager.Singleton.OnConnect -= OnConnect;
 
         // 探索解除
         ChangeDiscovery(false);

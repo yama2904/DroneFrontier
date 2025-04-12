@@ -47,7 +47,7 @@ public class SyncHandler
         MyNetworkManager.Singleton.OnUdpReceive += OnUdpReceiveOfSync;
 
         // 受信前に同期パケット送信
-        IPacket packet = new SimpleSyncPacket();
+        UdpPacket packet = new SimpleSyncPacket();
         if (MyNetworkManager.Singleton.IsHost)
         {
             if (value != null)

@@ -10,6 +10,11 @@ namespace Network.Tcp
         /// <summary>
         /// クライアント同士の接続
         /// </summary>
-        PeerConnect
+        PeerConnect = 1 << 0,
+
+        /// <summary>
+        /// プレイヤー探索完了
+        /// </summary>
+        DiscoveryComplete = 1 << 1
     }
 }

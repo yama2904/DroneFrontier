@@ -149,7 +149,7 @@ namespace Network
             }
 
             // パケット送信
-            IPacket packet = new SendMethodPacket(ObjectId, _className, name, args.ToArray());
+            UdpPacket packet = new SendMethodPacket(ObjectId, _className, name, args.ToArray());
             MyNetworkManager.Singleton.SendToAll(packet);
 
             // メソッド実行

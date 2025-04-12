@@ -75,6 +75,12 @@ namespace Network
         [SerializeField, Tooltip("ゲーム終了アニメーター")]
         private Animator _finishAnimator = null;
 
+        [SerializeField, Tooltip("エラーメッセージのCanvas")]
+        private Canvas _errMsgCanvas = null;
+
+        [SerializeField, Tooltip("デバッグソロモード")]
+        private bool _debug = false;
+
         /// <summary>
         /// 制限時間のカウントダウンキャンセルトークン
         /// </summary>
@@ -90,8 +96,10 @@ namespace Network
         /// </summary>
         private readonly object _lock = new object();
 
-        [SerializeField, Tooltip("デバッグソロモード")]
-        private bool _debug = false;
+        /// <summary>
+        /// 通信エラーが発生したか
+        /// </summary>
+        private bool _isError = false;
 
         protected override void Awake()
         {
@@ -107,6 +115,9 @@ namespace Network
                 };
                 PlayerList.Add(player);
             }
+
+            // 切断イベント設定
+            MyNetworkManager.Singleton.OnDisconnect += OnDisconnect;
         }
 
         private async void Start()
@@ -117,6 +128,10 @@ namespace Network
 
             // BGM停止
             SoundManager.StopBGM();
+
+            // ランダムシード値設定
+            int seed = DateTime.Now.Millisecond;
+            UnityEngine.Random.InitState(seed);
 
             // ドローンをスポーン
             if (MyNetworkManager.Singleton.IsHost)
@@ -167,7 +182,12 @@ namespace Network
                 }
             }
 
-            await new SyncHandler().WaitAsync();
+            // 同期してランダムシード値も共有
+            object value = await new SyncHandler().SyncValueAsync(seed);
+            if (MyNetworkManager.Singleton.IsClient)
+            {
+                UnityEngine.Random.InitState(Convert.ToInt32(value));
+            }
 
             // 3秒後にカウントダウンSE再生
             await UniTask.Delay(TimeSpan.FromSeconds(3));
@@ -201,6 +221,16 @@ namespace Network
                     Cursor.visible = true;
                 }
             }
+
+            // 通信エラーの場合はクリックでホーム画面へ戻る
+            if (_isError)
+            {
+                if (Input.GetMouseButtonDown(0))
+                {
+                    SoundManager.Play(SoundManager.SE.Select);
+                    SceneManager.LoadScene("HomeScene");
+                }
+            }
         }
 
         /// <summary>
@@ -210,9 +240,37 @@ namespace Network
         {
             base.OnDestroy();
 
+            // カーソル戻す
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
+
+            // イベント削除
             _droneSpawnManager.DroneDestroyEvent -= DroneDestroy;
+            MyNetworkManager.Singleton.OnDisconnect -= OnDisconnect;
+
+            // プレイヤー情報初期化
+            PlayerList.Clear();
+
+            // 切断
+            MyNetworkManager.Singleton.Disconnect();
+        }
+
+        /// <summary>
+        /// プレイヤー切断イベント
+        /// </summary>
+        /// <param name="name">切断したプレイヤー名</param>
+        /// <param name="isHost">切断したプレイヤーがホストであるか</param>
+        private async void OnDisconnect(string name, bool isHost)
+        {
+            // ホストから切断、又はプレイヤーが自分のみの場合はエラーメッセージ表示
+            if (isHost || MyNetworkManager.Singleton.PlayerCount == 1)
+            {
+                _errMsgCanvas.enabled = true;
+
+                await UniTask.Delay(1000, ignoreTimeScale: true);
+                _isError = true;
+                return;
+            }
         }
 
         /// <summary>
@@ -330,6 +388,9 @@ namespace Network
                 if (_gameFinished) return;
                 _gameFinished = true;
             }
+
+            // 切断イベント削除
+            MyNetworkManager.Singleton.OnDisconnect -= OnDisconnect;
 
             // キャンセルトークン発行
             _cancelToken.Cancel();

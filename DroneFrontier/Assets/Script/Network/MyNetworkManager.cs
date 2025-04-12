@@ -10,6 +10,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Runtime.ExceptionServices;
+using System.Security.Policy;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -60,18 +61,23 @@ namespace Network
         /// </summary>
         public int PlayerCount => PlayerNames.Count;
 
-        #region 通信相手発見イベント
+        /// <summary>
+        /// 通信相手探索完了イベント
+        /// </summary>
+        public event EventHandler OnDiscoveryCompleted;
+
+        #region 通信接続イベント
 
         /// <summary>
-        /// 通信相手発見イベントハンドラー
+        /// 通信接続イベントハンドラー
         /// </summary>
         /// <param name="playerName">通信相手のプレイヤー名</param>
         public delegate void DiscoveryHandle(string playerName);
 
         /// <summary>
-        /// 通信相手発見イベント
+        /// 通信接続イベント
         /// </summary>
-        public event DiscoveryHandle OnDiscovery;
+        public event DiscoveryHandle OnConnect;
 
         #endregion
 
@@ -131,6 +137,11 @@ namespace Network
         #endregion
 
         /// <summary>
+        /// プレイヤー探索用UDP管理クラス
+        /// </summary>
+        private UdpClient _discoverUdpClient = null;
+
+        /// <summary>
         /// UDP管理クラス
         /// </summary>
         private UdpClient _udpClient = null;
@@ -183,13 +194,13 @@ namespace Network
                     if (_peers.Count >= MAX_CLIENT_NUM) continue;
 
                     // UdpClient初期化
-                    _udpClient?.Close();
-                    _udpClient?.Dispose();
-                    _udpClient = new UdpClient(LOCAL_ENDPOINT);
-                    _udpClient.EnableBroadcast = true;
+                    _discoverUdpClient?.Close();
+                    _discoverUdpClient?.Dispose();
+                    _discoverUdpClient = new UdpClient(LOCAL_ENDPOINT);
+                    _discoverUdpClient.EnableBroadcast = true;
 
                     // UDP受信待機
-                    var receive = await _udpClient.ReceiveAsync();
+                    var receive = await _discoverUdpClient.ReceiveAsync();
                     Debug.Log("受信：" + receive.RemoteEndPoint);
 
                     // プレイヤー探索パケット以外の場合はスキップ
@@ -203,11 +214,11 @@ namespace Network
 
                         // プレイヤー名が重複している場合はエラーパケットを返す
                         byte[] errData = new ErrorPacket(ErrorCode.ExistsName).ConvertToPacket();
-                        await _udpClient.SendAsync(errData, errData.Length, receive.RemoteEndPoint);
+                        await _discoverUdpClient.SendAsync(errData, errData.Length, receive.RemoteEndPoint);
 
                         // 再度受信
-                        _udpClient.Close();
-                        _udpClient.Dispose();
+                        _discoverUdpClient.Close();
+                        _discoverUdpClient.Dispose();
                         continue;
                     }
 
@@ -225,7 +236,7 @@ namespace Network
 
                     // 自分の名前と各クライアントの情報を格納して返信
                     byte[] responseData = new DiscoverResponsePacket(name, clientAdrs).ConvertToPacket();
-                    await _udpClient.SendAsync(responseData, responseData.Length, receive.RemoteEndPoint);
+                    await _discoverUdpClient.SendAsync(responseData, responseData.Length, receive.RemoteEndPoint);
 
                     // --- クライアントへ返信 end
 
@@ -295,7 +306,7 @@ namespace Network
                     lock (PlayerNames) PlayerNames.Add(receivePacket.Name);
 
                     // 接続イベント発行
-                    OnDiscovery?.Invoke(receivePacket.Name);
+                    OnConnect?.Invoke(receivePacket.Name);
 
                     // 新規クライアントからのTCP受信開始
                     ReceiveTcp(receivePacket.Name, false);
@@ -357,18 +368,18 @@ namespace Network
                     if (_discoverCancel.IsCancellationRequested) break;
 
                     // UdpClient初期化
-                    _udpClient = new UdpClient(LOCAL_ENDPOINT);
+                    _discoverUdpClient = new UdpClient(LOCAL_ENDPOINT);
 
                     // ブロードキャスト有効化
-                    _udpClient.EnableBroadcast = true;
+                    _discoverUdpClient.EnableBroadcast = true;
 
                     // ブロードキャストで探索パケット送信
                     byte[] data = new DiscoverPacket(name).ConvertToPacket();
-                    await _udpClient.SendAsync(data, data.Length, new IPEndPoint(IPAddress.Broadcast, PORT));
+                    await _discoverUdpClient.SendAsync(data, data.Length, new IPEndPoint(IPAddress.Broadcast, PORT));
 
                     // 返信待機
                     Task responseTimeoutTask = Task.Delay(10 * 1000);
-                    var receiveTask = _udpClient.ReceiveAsync();
+                    var receiveTask = _discoverUdpClient.ReceiveAsync();
                     while (true)
                     {
                         if (await Task.WhenAny(receiveTask, responseTimeoutTask) == receiveTask)
@@ -376,7 +387,7 @@ namespace Network
                             // 自分が投げたブロードキャストの場合は無視
                             if (GetLocalIPAddresses().Contains(receiveTask.Result.RemoteEndPoint.Address.ToString()))
                             {
-                                receiveTask = _udpClient.ReceiveAsync();
+                                receiveTask = _discoverUdpClient.ReceiveAsync();
                                 continue;
                             }
                             break;
@@ -392,8 +403,8 @@ namespace Network
                     // タイムアウトチェック
                     if (receiveTask == null)
                     {
-                        _udpClient.Close();
-                        _udpClient.Dispose();
+                        _discoverUdpClient.Close();
+                        _discoverUdpClient.Dispose();
                         continue;
                     }
 
@@ -422,8 +433,8 @@ namespace Network
                         }
 
                         // ソケットを閉じて例外スロー
-                        _udpClient.Close();
-                        _udpClient.Dispose();
+                        _discoverUdpClient.Close();
+                        _discoverUdpClient.Dispose();
                         throw ex;
                     }
 
@@ -448,8 +459,8 @@ namespace Network
                         // タイムアウト
                         tcpClient.Close();
                         tcpClient.Dispose();
-                        _udpClient?.Close();
-                        _udpClient?.Dispose();
+                        _discoverUdpClient?.Close();
+                        _discoverUdpClient?.Dispose();
                         continue;
                     }
 
@@ -473,8 +484,8 @@ namespace Network
                         tcpCancel.Dispose();
                         tcpClient.Close();
                         tcpClient.Dispose();
-                        _udpClient?.Close();
-                        _udpClient?.Dispose();
+                        _discoverUdpClient?.Close();
+                        _discoverUdpClient?.Dispose();
                         continue;
                     }
 
@@ -484,8 +495,8 @@ namespace Network
                         tcpCancel.Dispose();
                         tcpClient.Close();
                         tcpClient.Dispose();
-                        _udpClient?.Close();
-                        _udpClient?.Dispose();
+                        _discoverUdpClient?.Close();
+                        _discoverUdpClient?.Dispose();
                         continue;
                     }
 
@@ -497,6 +508,9 @@ namespace Network
 
                     // ホストからのTCP受信を開始する
                     ReceiveTcp(responsePacket.HostName, true);
+
+                    // ホストからの探索完了パケット受信待機
+                    OnTcpReceive += OnDiscoveryCompleteReceive;
 
                     // 他プレイヤーとも接続
                     try
@@ -530,10 +544,7 @@ namespace Network
                     lock (PlayerNames) PlayerNames.Add(name);
 
                     // 接続イベント発行
-                    OnDiscovery?.Invoke(responsePacket.HostName);
-
-                    // Udp受信開始
-                    ReceiveUdp();
+                    OnConnect?.Invoke(responsePacket.HostName);
 
                     // 新規プレイヤーからの接続待機
                     TcpListener listener = new TcpListener(LOCAL_ENDPOINT);
@@ -618,6 +629,31 @@ namespace Network
         }
 
         /// <summary>
+        /// 通信相手の探索を停止
+        /// </summary>
+        public void StopDiscovery()
+        {
+            _discoverCancel.Cancel();
+            _discoverUdpClient.Close();
+            _discoverUdpClient.Dispose();
+            _discoverUdpClient = null;
+
+            // クライアントへ探索完了を通知
+            if (IsHost)
+                SendToAll(new DiscoveryCompletePacket());
+
+            // UDP受信開始
+            _udpClient = new UdpClient(LOCAL_ENDPOINT);
+            ReceiveUdp();
+
+            // 探索完了受信イベント削除
+            OnTcpReceive -= OnDiscoveryCompleteReceive;
+
+            // 探索完了イベント発火
+            OnDiscoveryCompleted?.Invoke(this, EventArgs.Empty);
+        }
+
+        /// <summary>
         /// 通信切断
         /// </summary>
         public void Disconnect()
@@ -628,6 +664,9 @@ namespace Network
 
             // 探索停止
             _discoverCancel.Cancel();
+
+            // 探索完了受信イベント削除
+            OnTcpReceive -= OnDiscoveryCompleteReceive;
 
             // Udp停止
             _udpClient?.Close();
@@ -646,31 +685,17 @@ namespace Network
 
                 lock (PlayerNames) PlayerNames.Clear();
             }
-        }
 
-        /// <summary>
-        /// 通信相手の探索を停止
-        /// </summary>
-        public void StopDiscovery()
-        {
-            _discoverCancel.Cancel();
-
-            if (!_udpReceiving)
-            {
-                _udpClient.Close();
-                _udpClient.Dispose();
-                _udpClient = new UdpClient(LOCAL_ENDPOINT);
-
-                // 受信開始
-                ReceiveUdp();
-            }
+            // 受信キュー削除
+            _receivedUdpQueue.Clear();
+            _invokeUdpQueue.Clear();
         }
 
         /// <summary>
         /// ホストへパケットを送信する
         /// </summary>
         /// <param name="packet">送信パケット</param>
-        public void SendToHost(IPacket packet)
+        public void SendToHost(UdpPacket packet)
         {
             if (IsHost) return;
 
@@ -691,10 +716,34 @@ namespace Network
         }
 
         /// <summary>
+        /// ホストへパケットを送信する
+        /// </summary>
+        /// <param name="packet">送信パケット</param>
+        public void SendToHost(TcpPacket packet)
+        {
+            if (IsHost) return;
+
+            byte[] data = packet.ConvertToPacket();
+            UniTask.Void(async () =>
+            {
+                foreach (string key in _peers.Keys)
+                {
+                    if (_peers[key].isHost)
+                    {
+                        _peers[key].tcp.GetStream().Write(data, 0, data.Length);
+                        break;
+                    }
+                }
+
+                await UniTask.CompletedTask;
+            });
+        }
+
+        /// <summary>
         /// 全ての通信相手へパケットを送信する
         /// </summary>
         /// <param name="packet">送信パケット</param>
-        public void SendToAll(IPacket packet)
+        public void SendToAll(UdpPacket packet)
         {
             byte[] data = packet.ConvertToPacket();
             UniTask.Void(async () =>
@@ -702,6 +751,24 @@ namespace Network
                 foreach (string key in _peers.Keys)
                 {
                     _udpClient.Send(data, data.Length, _peers[key].ep);
+                }
+
+                await UniTask.CompletedTask;
+            });
+        }
+
+        /// <summary>
+        /// 全ての通信相手へパケットを送信する
+        /// </summary>
+        /// <param name="packet">送信パケット</param>
+        public void SendToAll(TcpPacket packet)
+        {
+            byte[] data = packet.ConvertToPacket();
+            UniTask.Void(async () =>
+            {
+                foreach (string key in _peers.Keys)
+                {
+                    _peers[key].tcp.GetStream().Write(data, 0, data.Length);
                 }
 
                 await UniTask.CompletedTask;
@@ -763,17 +830,7 @@ namespace Network
                                 // ホストの場合は全てのクライアントと切断
                                 if (isHost)
                                 {
-                                    lock (_peers)
-                                    {
-                                        foreach (string key in _peers.Keys)
-                                        {
-                                            _peers[key].tcp.Close();
-                                            _peers[key].tcp.Dispose();
-                                            OnDisconnect?.Invoke(key, false);
-                                        }
-                                        _peers.Clear();
-                                        lock (PlayerNames) PlayerNames.Clear();
-                                    }
+                                    Disconnect();
                                 }
                             }
                             
@@ -840,7 +897,7 @@ namespace Network
                         await semaphore.WaitAsync();
                         var result = await _udpClient.ReceiveAsync().ConfigureAwait(false);
                         semaphore.Release();
-                        
+
                         // 受信データをキューに追加
                         _receivedUdpQueue.Enqueue((result.Buffer, result.RemoteEndPoint));
                     }
@@ -848,15 +905,16 @@ namespace Network
                 catch (SocketException)
                 {
                     // 切断
+                    semaphore.Release();
                 }
                 catch (ObjectDisposedException)
                 {
                     // 切断
+                    semaphore.Release();
                 }
-                finally
-                {
-                    _udpReceiving = false;
-                }
+
+                Debug.Log("ReceiveUdp() End");
+                _udpReceiving = false;
             });
         }
 
@@ -941,6 +999,21 @@ namespace Network
             }
 
             return addresses;
+        }
+
+        /// <summary>
+        /// 探索完了パケット受信イベント
+        /// </summary>
+        /// <param name="name">プレイヤー名</param>
+        /// <param name="header">受信したTCPパケットのヘッダ</param>
+        /// <param name="packet">受信したTCPパケット</param>
+        private void OnDiscoveryCompleteReceive(string name, TcpHeader header, TcpPacket packet)
+        {
+            if (header == TcpHeader.DiscoveryComplete)
+            {
+                OnTcpReceive -= OnDiscoveryCompleteReceive;
+                StopDiscovery();
+            }
         }
     }
 }

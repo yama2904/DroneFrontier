@@ -79,8 +79,8 @@ namespace Network
         /// </summary>
         public void ClickOk()
         {
-            // 全クライアントへOKボタン選択イベント送信
-            SendMethod(() => MatchingCompleted(DateTime.Now.Millisecond));
+            // プレイヤー探索終了
+            MyNetworkManager.Singleton.StopDiscovery();
         }
 
         /// <summary>
@@ -89,8 +89,9 @@ namespace Network
         public void ClickBack()
         {
             // イベント削除
-            MyNetworkManager.Singleton.OnDiscovery -= OnDiscovery;
+            MyNetworkManager.Singleton.OnConnect -= OnConnect;
             MyNetworkManager.Singleton.OnDisconnect -= OnDisconnect;
+            MyNetworkManager.Singleton.OnDiscoveryCompleted -= OnDiscoveryComplete;
 
             // 通信切断
             MyNetworkManager.Singleton.Disconnect();
@@ -124,8 +125,9 @@ namespace Network
             UpdatePlayerNames();
 
             // 通信イベント設定
-            MyNetworkManager.Singleton.OnDiscovery += OnDiscovery;
+            MyNetworkManager.Singleton.OnConnect += OnConnect;
             MyNetworkManager.Singleton.OnDisconnect += OnDisconnect;
+            MyNetworkManager.Singleton.OnDiscoveryCompleted += OnDiscoveryComplete;
 
             // ホスト、かつ参加者がいる場合は決定ボタン表示
             if (MyNetworkManager.Singleton.IsHost && MyNetworkManager.Singleton.PlayerCount >= 2)
@@ -139,10 +141,10 @@ namespace Network
         }
 
         /// <summary>
-        /// 通信相手発見イベント
+        /// 通信接続イベント
         /// </summary>
         /// <param name="player">通信相手のプレイヤー名</param>
-        private void OnDiscovery(string player)
+        private void OnConnect(string player)
         {
             // ホストの場合は決定ボタン表示
             if (MyNetworkManager.Singleton.IsHost && !_okButton.activeSelf)
@@ -178,6 +180,26 @@ namespace Network
 
             // プレイヤー名更新
             UpdatePlayerNames();
+        }
+
+        /// <summary>
+        /// プレイヤー探索完了イベント
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnDiscoveryComplete(object sender, EventArgs e)
+        {
+            // イベント削除
+            MyNetworkManager.Singleton.OnConnect -= OnConnect;
+            MyNetworkManager.Singleton.OnDisconnect -= OnDisconnect;
+            MyNetworkManager.Singleton.OnDiscoveryCompleted -= OnDiscoveryComplete;
+
+            NetworkObjectSpawner.Initialize();
+
+            // ボタン選択イベント発火
+            SoundManager.Play(SoundManager.SE.Select);
+            SelectedButton = ButtonType.Ok;
+            OnButtonClick(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -221,30 +243,6 @@ namespace Network
                         break;
                 }
             }
-        }
-
-        /// <summary>
-        /// マッチング完了
-        /// </summary>
-        /// <param name="seed">全プレイヤーで共有する乱数のシード値</param>
-        private void MatchingCompleted(int seed)
-        {
-            // イベント削除
-            MyNetworkManager.Singleton.OnDiscovery -= OnDiscovery;
-            MyNetworkManager.Singleton.OnDisconnect -= OnDisconnect;
-
-            NetworkObjectSpawner.Initialize();
-
-            // 探索停止
-            MyNetworkManager.Singleton.StopDiscovery();
-
-            // シード値設定
-            UnityEngine.Random.InitState(seed);
-
-            // ボタン選択イベント発火
-            SoundManager.Play(SoundManager.SE.Select);
-            SelectedButton = ButtonType.Ok;
-            OnButtonClick(this, EventArgs.Empty);
         }
     }
 }
