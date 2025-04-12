@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using UnityEditor;
 using UnityEngine;
 
 namespace Offline
@@ -120,11 +119,9 @@ namespace Offline
         private float _addChargeParticlePerSec;
 
         /// <summary>
-        /// Shotメソッド呼び出し履歴<br/>
-        /// [0]:現在のフレーム<br/>
-        /// [1]:1フレーム前
+        /// Shotメソッド呼び出し履歴
         /// </summary>
-        private bool[] _isShooted = new bool[2];
+        private ValueHistory<bool> _shotHistory = new ValueHistory<bool>();
 
         /// <summary>
         /// チャージ中であるか
@@ -144,7 +141,7 @@ namespace Offline
                 // --- チャージ start
 
                 // チャージ開始時はチャージパーティクルとチャージSE再生
-                if (!_isShooted[1])
+                if (!_shotHistory.PreviousValue)
                 {
                     _chargeParticle.Play();
 
@@ -242,7 +239,7 @@ namespace Offline
                 // --- レーザー発射 end
             }
 
-            _isShooted[0] = true;
+            _shotHistory.CurrentValue = true;
         }
 
         private void Awake()
@@ -288,14 +285,13 @@ namespace Offline
         private void LateUpdate()
         {
             // レーザー発射停止チェック
-            if (!_isShooted[0] && _isShooted[1])
+            if (!_shotHistory.CurrentValue && _shotHistory.PreviousValue)
             {
                 StopShot();
             }
 
             // Shotメソッド呼び出し履歴更新
-            _isShooted[1] = _isShooted[0];
-            _isShooted[0] = false;
+            _shotHistory.UpdateCurrentValue(false);
         }
 
         /// <summary>

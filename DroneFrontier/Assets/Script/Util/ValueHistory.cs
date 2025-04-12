@@ -6,22 +6,7 @@ public class ValueHistory<T>
     /// <summary>
     /// 現在値
     /// </summary>
-    public T CurrentValue
-    {
-        get
-        {
-            return _currentValue;
-        }
-        set
-        {
-            if (AutoUpdate)
-            {
-                PreviousValue = _currentValue;
-            }
-            _currentValue = value;
-        }
-    }
-    private T _currentValue = default;
+    public T CurrentValue { get; set; } = default;
 
     /// <summary>
     /// 前回値
@@ -29,7 +14,19 @@ public class ValueHistory<T>
     public T PreviousValue { get; set; } = default;
 
     /// <summary>
-    /// 現在値を更新した際に自動的に前回値も更新するか
+    /// 前回値を更新して現在値を設定する
     /// </summary>
-    public bool AutoUpdate { get; set; } = true;
+    public void UpdateCurrentValue(T value)
+    {
+        UpdatePreviousValue();
+        CurrentValue = value;
+    }
+
+    /// <summary>
+    /// 前回値を現在値で更新
+    /// </summary>
+    public void UpdatePreviousValue()
+    {
+        PreviousValue = CurrentValue;
+    }
 }

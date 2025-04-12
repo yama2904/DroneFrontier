@@ -93,16 +93,14 @@ namespace Offline
         private float _addGaugePerSec = 0;
 
         /// <summary>
-        /// Shotメソッド呼び出し履歴<br/>
-        /// [0]:現在のフレーム<br/>
-        /// [1]:1フレーム前
+        /// Shotメソッド呼び出し履歴
         /// </summary>
-        private bool[] _isShooted = new bool[2];
+        private ValueHistory<bool> _shotHistory = new ValueHistory<bool>();
 
         public void Shot(GameObject target = null)
         {
             // 発射に必要な最低限のゲージがないと発射開始できない
-            if (!_isShooted[1])
+            if (!_shotHistory.PreviousValue)
             {
                 if (_gaugeValue < SHOOTABLE_MIN_GAUGE)
                 {
@@ -111,7 +109,7 @@ namespace Offline
             }
 
             _bullet.Shot(Owner, _damage, 0, _trackingPower, target);
-            _isShooted[0] = true;
+            _shotHistory.CurrentValue = true;
 
             // チャージが完了してレーザーが発射されている間はゲージを減らす
             if (_bullet.IsShootingLaser)
@@ -122,7 +120,7 @@ namespace Offline
                 if (_gaugeValue <= 0)
                 {
                     _gaugeValue = 0;
-                    _isShooted[0] = false;
+                    _shotHistory.CurrentValue = false;
 
                     // 残弾無しイベント発火
                     OnBulletEmpty?.Invoke(this, EventArgs.Empty);
@@ -147,7 +145,7 @@ namespace Offline
         private void LateUpdate()
         {
             // レーザーを発射していない場合はゲージ回復
-            if (!_isShooted[0])
+            if (!_shotHistory.CurrentValue)
             {
                 if (_gaugeValue < 1.0f)
                 {
@@ -170,8 +168,7 @@ namespace Offline
             }
 
             // Shotメソッド呼び出し履歴更新
-            _isShooted[1] = _isShooted[0];
-            _isShooted[0] = false;
+            _shotHistory.UpdateCurrentValue(false);
         }
     }
 }

@@ -46,12 +46,12 @@ public class DroneWeaponComponent : MonoBehaviour, IDroneComponent
     /// <summary>
     /// メイン武器攻撃中であるか
     /// </summary>
-    public bool ShootingMainWeapon => _isMainShot[0] || _isMainShot[1];
+    public bool ShootingMainWeapon => _mainShotHistory.CurrentValue || _mainShotHistory.PreviousValue;
 
     /// <summary>
     /// サブ武器攻撃中であるか
     /// </summary>
-    public bool ShootingSubWeapon => _isSubAttacked[0] || _isSubAttacked[1];
+    public bool ShootingSubWeapon => _subShotHistory.CurrentValue || _subShotHistory.PreviousValue;
 
     /// <summary>
     /// 弾丸イベントハンドラー
@@ -101,18 +101,15 @@ public class DroneWeaponComponent : MonoBehaviour, IDroneComponent
     /// </summary>
     private WeaponType _subWeaponType = WeaponType.NONE;
 
-    /// メイン武器使用履歴<br/>
-    /// [0]:現在のフレーム<br/>
-    /// [1]:1フレーム前
+    /// <summary>
+    /// メイン武器使用履歴
     /// </summary>
-    private bool[] _isMainShot = new bool[2];
+    private ValueHistory<bool> _mainShotHistory = new ValueHistory<bool>();
 
     /// <summary>
-    /// サブ武器使用履歴<br/>
-    /// [0]:現在のフレーム<br/>
-    /// [1]:1フレーム前
+    /// サブ武器使用履歴
     /// </summary>
-    private bool[] _isSubAttacked = new bool[2];
+    private ValueHistory<bool> _subShotHistory = new ValueHistory<bool>();
 
     // コンポーネントキャッシュ
     DroneMoveComponent _moveComponent = null;
@@ -169,13 +166,13 @@ public class DroneWeaponComponent : MonoBehaviour, IDroneComponent
             MainWeapon.Shot(target);
 
             // 攻撃中は速度低下
-            if (!_isMainShot[1])
+            if (!_mainShotHistory.PreviousValue)
             {
                 _moveComponent.MoveSpeed *= MainSpeedDownPer;
             }
 
             // メイン攻撃フラグを立てる
-            _isMainShot[0] = true;
+            _mainShotHistory.CurrentValue = true;
         }
 
         // サブ武器攻撃
@@ -184,13 +181,13 @@ public class DroneWeaponComponent : MonoBehaviour, IDroneComponent
             SubWeapon.Shot(target);
 
             // 攻撃中は速度低下
-            if (!_isSubAttacked[1])
+            if (!_subShotHistory.PreviousValue)
             {
                 _moveComponent.MoveSpeed *= SubSpeedDownPer;
             }
 
             // サブ攻撃フラグを立てる
-            _isSubAttacked[0] = true;
+            _subShotHistory.CurrentValue = true;
         }
     }
 
@@ -202,21 +199,19 @@ public class DroneWeaponComponent : MonoBehaviour, IDroneComponent
     private void LateUpdate()
     {
         // メイン武器の攻撃を停止した場合は速度を戻す
-        if (!_isMainShot[0] && _isMainShot[1])
+        if (!_mainShotHistory.CurrentValue && _mainShotHistory.CurrentValue)
         {
             _moveComponent.MoveSpeed *= 1 / MainSpeedDownPer;
         }
 
         // サブ武器の攻撃を停止した場合は速度を戻す
-        if (!_isSubAttacked[0] && _isSubAttacked[1])
+        if (!_subShotHistory.CurrentValue && _subShotHistory.PreviousValue)
         {
             _moveComponent.MoveSpeed *= 1 / SubSpeedDownPer;
         }
 
         // 武器使用履歴更新
-        _isMainShot[1] = _isMainShot[0];
-        _isMainShot[0] = false;
-        _isSubAttacked[1] = _isSubAttacked[0];
-        _isSubAttacked[0] = false;
+        _mainShotHistory.UpdateCurrentValue(false);
+        _subShotHistory.UpdateCurrentValue(false);
     }
 }
