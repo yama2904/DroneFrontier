@@ -205,19 +205,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
     private void Update()
     {
         // 死亡処理中は操作不可
-        if (_isDestroy)
-        {
-            // 加速しながら落ちる
-            _rigidbody.AddForce(new Vector3(0, -400, 0), ForceMode.Acceleration);
-
-            // ドローンを傾ける
-            _rotateComponent.Rotate(Quaternion.Euler(28, -28, -28), 2 * Time.deltaTime);
-
-            // プロペラ減速
-            _animator.speed *= 0.993f;
-
-            return;
-        }
+        if (_isDestroy) return;
 
         // 入力情報更新
         _input.UpdateInput();
@@ -281,6 +269,21 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
 
     private void FixedUpdate()
     {
+        // 死亡処理
+        if (_isDestroy)
+        {
+            // 加速しながら落ちる
+            _rigidbody.AddForce(new Vector3(0, -400, 0), ForceMode.Acceleration);
+
+            // ドローンを傾ける
+            _rotateComponent.Rotate(Quaternion.Euler(28, -28, -28), 2 * Time.deltaTime);
+
+            // プロペラ減速
+            _animator.speed *= 0.993f;
+
+            return;
+        }
+
         // 前進
         if (_input.Keys.Contains(KeyCode.W))
         {
@@ -376,10 +379,12 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
         // 死亡フラグを立てる
         _isDestroy = true;
 
-        // 移動コンポーネント停止
-        _moveComponent.enabled = false;
+        // 移動停止
+        _rigidbody.velocity = Vector3.zero;
 
-        // ロックオン・レーダー解除
+        // コンポーネント停止
+        _moveComponent.enabled = false;
+        _boostComponent.enabled = false;
         _lockOnComponent.StopLockOn();
         _radarComponent.StopRadar();
 

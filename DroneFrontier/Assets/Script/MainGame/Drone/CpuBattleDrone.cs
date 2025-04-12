@@ -391,10 +391,12 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
             _rigidbody.AddForce(new Vector3(0, -400, 0), ForceMode.Acceleration);
 
             // ドローンを傾ける
-            _rotateComponent.Rotate(DEATH_ROTATE, DEATH_ROTATE_SPEED * Time.deltaTime);
+            _rotateComponent.Rotate(Quaternion.Euler(28, -28, -28), 2 * Time.deltaTime);
 
             // プロペラ減速
             _animator.speed *= 0.993f;
+
+            return;
         }
     }
 
@@ -581,6 +583,9 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
     {
         // 死亡フラグを立てる
         _isDestroy = true;
+
+        // 移動停止
+        _rigidbody.velocity = Vector3.zero;
 
         // 移動コンポーネント停止
         _moveComponent.enabled = false;
