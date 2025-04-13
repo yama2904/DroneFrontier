@@ -20,7 +20,7 @@ namespace Network
             /// プレイヤー名
             /// </summary>
             public string Name { get; set; }
-            
+
             /// <summary>
             /// サブ武器
             /// </summary>
@@ -149,7 +149,7 @@ namespace Network
 
                 // ドローン破壊イベント設定
                 _droneSpawnManager.DroneDestroyEvent += DroneDestroy;
-                
+
                 // アイテムスポナー初期化
                 _itemSpawnManager.Initialize(IsItemSpawn);
             }
@@ -162,7 +162,7 @@ namespace Network
                 {
                     // ドローン検索
                     var drones = GameObject.FindGameObjectsWithTag(TagNameConst.PLAYER).Select(x => x.GetComponent<NetworkBattleDrone>()).ToArray();
-                    
+
                     // 全プレイヤー分生成されていない場合は待機
                     if (drones.Length < MyNetworkManager.Singleton.PlayerCount)
                     {
@@ -220,6 +220,12 @@ namespace Network
                     Cursor.lockState = CursorLockMode.None;
                     Cursor.visible = true;
                 }
+            }
+
+            // 設定画面を開く
+            if (Input.GetKeyDown(KeyCode.M))
+            {
+                // ToDo
             }
 
             // 通信エラーの場合はクリックでホーム画面へ戻る

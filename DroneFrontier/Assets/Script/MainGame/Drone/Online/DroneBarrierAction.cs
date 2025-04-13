@@ -9,8 +9,6 @@ namespace Online
     {
         [SerializeField] GameObject barrierObject = null;
         public GameObject BarrierObject { get { return barrierObject; } }
-        DroneSoundAction soundAction = null;
-        DroneDamageAction damageAction = null;
 
         const float MAX_HP = 100;
         [SyncVar] float syncHP = MAX_HP;
@@ -43,8 +41,6 @@ namespace Online
         {
             base.OnStartClient();
 
-            soundAction = GetComponent<DroneSoundAction>();
-            damageAction = GetComponent<DroneDamageAction>();
             material = barrierObject.GetComponent<Renderer>().material;
             CmdInit();
         }
@@ -54,10 +50,6 @@ namespace Online
         {
             //バリア弱体化中は回復処理を行わない
             if (syncIsWeak) return;
-
-            //ドローンが破壊されていたら回復処理を行わない
-            if (damageAction == null) return;
-            if (damageAction.HP <= 0) return;
 
             //バリアが破壊されていたら修復処理
             if (syncHP <= 0)
@@ -144,79 +136,6 @@ namespace Online
             //デバッグ用
             Debug.Log("バリア修復");
         }
-
-        #region Damage
-
-        //バリアに引数分のダメージを与える
-        [Server]
-        public void Damage(float power)
-        {
-            float p = Useful.Floor(power * syncDamagePercent, 1);  //小数点第2以下切り捨て
-            syncHP -= p;
-
-            //バリアHPが0になったらバリアを非表示
-            if (syncHP <= 0)
-            {
-                syncHP = 0;
-                RpcSetActiveBarrier(false);
-                soundAction.RpcPlayOneShotSEAllClient(SoundManager.SE.DestroyBarrier, SoundManager.MasterSEVolume);
-            }
-            syncRegeneTimeCount = 0;
-            syncIsRegene = false;
-            soundAction.RpcPlayOneShotSEAllClient(SoundManager.SE.BarrierDamage, SoundManager.MasterSEVolume * 0.7f);
-
-            //バリアの色変え
-            float value = syncHP / MAX_HP;
-            RpcSetBarrierColor(value, IsStrength);
-
-            Debug.Log("バリアに" + p + "のダメージ\n残りHP: " + syncHP);
-        }
-
-        #endregion
-
-        #region BarrierStrength
-
-        /*
-         * バリアの受けるダメージを軽減する
-         * 引数1: 軽減する割合(0～1)
-         * 引数2: 軽減する時間(秒数)
-         */
-        [Command(ignoreAuthority = true)]
-        public void CmdBarrierStrength(float strengthPrercent, float time)
-        {
-            syncDamagePercent = 1 - strengthPrercent;
-            Invoke(nameof(CmdEndStrength), time);
-            syncIsStrength = true;
-
-            //バリアの色変え
-            float value = syncHP / MAX_HP;
-            RpcSetBarrierColor(value, IsStrength);
-
-
-            //デバッグ用
-            Debug.Log("バリア強化");
-        }
-        //バリア強化を終了させる
-        [Command(ignoreAuthority = true)]
-        void CmdEndStrength()
-        {
-            if (syncIsWeak)
-            {
-                return;
-            }
-            syncDamagePercent = 1;
-            syncIsStrength = false;
-
-            //バリアの色変え
-            float value = syncHP / MAX_HP;
-            RpcSetBarrierColor(value, IsStrength);
-
-
-            //デバッグ用
-            Debug.Log("バリア強化解除");
-        }
-
-        #endregion
 
         #region BarrierWeak
 

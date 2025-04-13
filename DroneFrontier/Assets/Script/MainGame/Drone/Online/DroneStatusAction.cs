@@ -26,9 +26,6 @@ namespace Online
         [SerializeField] Image jammingIcon = null;
         [SerializeField] Image speedDownIcon = null;
 
-        //サウンド
-        DroneSoundAction soundAction = null;
-
         //バリア用
         DroneBarrierAction barrier = null;
 
@@ -43,7 +40,7 @@ namespace Online
         int jammingCount = 0;
 
         //スピードダウン用
-        DroneBaseAction baseAction = null;
+        //DroneBaseAction baseAction = null;
         int speedDownSoundId = 0;
         int speedDownCount = 0;
 
@@ -52,9 +49,7 @@ namespace Online
         {
             base.OnStartClient();
 
-            baseAction = GetComponent<DroneBaseAction>();
             barrier = GetComponent<DroneBarrierAction>();
-            soundAction = GetComponent<DroneSoundAction>();
             lockOn = GetComponent<DroneLockOnComponent>();
             radar = GetComponent<DroneRadarComponent>();
             createdStunScreenMask = Instantiate(stunScreenMask);
@@ -94,22 +89,6 @@ namespace Online
             return isStatus[(int)status];
         }
 
-
-        //バリア強化
-        public bool SetBarrierStrength(float strengthPercent, float time)
-        {
-            if (barrier == null) return false;
-            if (barrier.IsStrength) return false;
-            if (barrier.IsWeak) return false;
-            if (barrier.HP <= 0) return false;
-
-            barrier.CmdBarrierStrength(strengthPercent, time);
-            isStatus[(int)Status.BARRIER_STRENGTH] = true;
-
-            return true;
-        }
-
-
         //バリア弱体化
         public void SetBarrierWeak()
         {
@@ -136,50 +115,11 @@ namespace Online
         }
 
 
-        //スタン
-        public void SetStun(float time)
-        {
-            if (createdStunScreenMask == null) return;
-            //createdStunScreenMask.SetStun(time);
-        }
-
-
-        //ジャミング
-        public void SetJamming()
-        {
-            if (lockOn == null) return;
-            if (radar == null) return;
-            if (++jammingCount > 1) return;  //既にジャミングにかかっている場合は無駄なので処理しない
-
-            lockOn.StopLockOn();
-            radar.StopRadar();
-            isStatus[(int)Status.JAMMING] = true;
-
-            //SE再生
-            jammingSoundId = soundAction.PlayLoopSE(SoundManager.SE.JammingNoise, SoundManager.MasterSEVolume);
-
-            //アイコン表示
-            jammingIcon.enabled = true;
-        }
-
-        //ジャミング解除
-        public void UnSetJamming()
-        {
-            //複数のジャミングに同時にかかっている場合は解除しない
-            if (--jammingCount > 0) return;
-
-            isStatus[(int)Status.JAMMING] = false;
-            soundAction.StopLoopSE(jammingSoundId); //SE停止
-
-            //アイコン非表示
-            jammingIcon.enabled = false;
-        }
-
 
         //スピードダウン
         public void SetSpeedDown(float downPercent)
         {
-            baseAction.ModifySpeed(1 - downPercent);
+            //baseAction.ModifySpeed(1 - downPercent);
             if (++speedDownCount > 1) return;  //既にスピードダウンにかかっている場合は無駄なので処理しない
 
             //フラグを立てる
@@ -189,13 +129,13 @@ namespace Online
             speedDownIcon.enabled = true;
 
             //SE再生
-            speedDownSoundId = soundAction.PlayLoopSE(SoundManager.SE.MagneticArea, SoundManager.MasterSEVolume);
+            //speedDownSoundId = soundAction.PlayLoopSE(SoundManager.SE.MagneticArea, SoundManager.MasterSEVolume);
         }
 
         //スピードダウン解除
         public void UnSetSpeedDown(float downPercent)
         {
-            baseAction.ModifySpeed(1 / (1 - downPercent));
+            //baseAction.ModifySpeed(1 / (1 - downPercent));
 
             //同時にスピードダウンにかかっている場合は解除しない
             if (--speedDownCount > 0) return;
@@ -207,7 +147,7 @@ namespace Online
             speedDownIcon.enabled = false;
 
             //SE停止
-            soundAction.StopLoopSE(speedDownSoundId);
+            //soundAction.StopLoopSE(speedDownSoundId);
         }
     }
 }

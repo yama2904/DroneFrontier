@@ -13,7 +13,7 @@ namespace Online
         {
             public NetworkConnection conn;
             public RaceDrone drone = null;
-            public int ranking = MatchingManager.PlayerNum;
+            //public int ranking = MatchingManager.PlayerNum;
             public bool isGoal = false;
             public static int goalNum = 0;
         }
@@ -41,25 +41,25 @@ namespace Online
         void Update()
         {
             //カウントダウンが終わってから処理
-            if (!MainGameManager.Singleton.StartFlag) return;
+            //if (!MainGameManager.Singleton.StartFlag) return;
 
             //ゴールしたドローンを走査
             if (isServer)
             {
                 //ゴールしていないプレイヤーが1人になったら終了処理
-                if (ServerPlayerData.goalNum >= MatchingManager.PlayerNum - 1)
-                {
-                    if (!isFinished)
-                    {
-                        string[] ranking = new string[serverPlayerDatas.Count];
-                        foreach (ServerPlayerData pd in serverPlayerDatas)
-                        {
-                            ranking[pd.ranking - 1] = pd.drone.name;
-                        }
-                        MainGameManager.Singleton.FinishGame(ranking);
-                        isFinished = true;
-                    }
-                }
+                //if (ServerPlayerData.goalNum >= MatchingManager.PlayerNum - 1)
+                //{
+                //    if (!isFinished)
+                //    {
+                //        string[] ranking = new string[serverPlayerDatas.Count];
+                //        foreach (ServerPlayerData pd in serverPlayerDatas)
+                //        {
+                //            ranking[pd.ranking - 1] = pd.drone.name;
+                //        }
+                //        MainGameManager.Singleton.FinishGame(ranking);
+                //        isFinished = true;
+                //    }
+                //}
             }
         }
 
@@ -92,7 +92,7 @@ namespace Online
             if (pd.isGoal) return;  //既にゴール処理を行っていたら処理しない
 
             //リスト情報の変更
-            pd.ranking = ServerPlayerData.goalNum + 1;
+            //pd.ranking = ServerPlayerData.goalNum + 1;
             pd.isGoal = true;
             ServerPlayerData.goalNum++;
         }
@@ -106,13 +106,13 @@ namespace Online
             if (index < 0) return;
 
             //ランキングを修正
-            int rank = serverPlayerDatas[index].ranking;
+            //int rank = serverPlayerDatas[index].ranking;
             foreach (ServerPlayerData pd in serverPlayerDatas)
             {
-                if (pd.ranking >= rank)
-                {
-                    pd.ranking--;
-                }
+                //if (pd.ranking >= rank)
+                //{
+                //    pd.ranking--;
+                //}
             }
 
             //残りプレイヤーの修正
@@ -129,7 +129,7 @@ namespace Online
         [Server]
         void CallRpcPlayStartCountDown()
         {
-            MainGameManager.Singleton.RpcPlayStartCountDown();
+            //MainGameManager.Singleton.RpcPlayStartCountDown();
         }
     }
 }

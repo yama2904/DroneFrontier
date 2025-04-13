@@ -69,14 +69,6 @@ public class HomeSceneManager : MonoBehaviour
         }
     }
 
-    public static void LoadHomeScene(BaseScreenManager.Screen startScreen)
-    {
-        // 後で消す
-
-        //HomeSceneManager.startScreen = startScreen;
-        //SceneManager.LoadScene("HomeScene");
-    }
-
     #region ボタンイベント
 
     /// <summary>
@@ -95,7 +87,7 @@ public class HomeSceneManager : MonoBehaviour
     public void ClickRace()
     {
         SoundManager.Play(SoundManager.SE.Select);
-        BaseScreenManager.SetScreen(BaseScreenManager.Screen.SOLO_MULTI_SELECT);
+        // ToDo
     }
 
     /// <summary>
