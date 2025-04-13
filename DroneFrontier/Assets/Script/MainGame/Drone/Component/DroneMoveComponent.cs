@@ -1,203 +1,200 @@
 ﻿using UnityEngine;
 
-namespace Offline
+public class DroneMoveComponent : MonoBehaviour, IDroneComponent
 {
-    public class DroneMoveComponent : MonoBehaviour, IDroneComponent
+    /// <summary>
+    /// 回転速度
+    /// </summary>
+    private const float ROTATE_SPEED = 4f;
+
+    public enum Direction
     {
         /// <summary>
-        /// 回転速度
+        /// 前
         /// </summary>
-        private const float ROTATE_SPEED = 4f;
+        Forward,
 
-        public enum Direction
+        /// <summary>
+        /// 左
+        /// </summary>
+        Left,
+
+        /// <summary>
+        /// 右
+        /// </summary>
+        Right,
+
+        /// <summary>
+        /// 後ろ
+        /// </summary>
+        Backwad,
+
+        /// <summary>
+        /// 上
+        /// </summary>
+        Up,
+
+        /// <summary>
+        /// 下
+        /// </summary>
+        Down,
+
+        None
+    }
+
+    /// <summary>
+    /// 移動速度
+    /// </summary>
+    public float MoveSpeed
+    {
+        get { return _moveSpeed; }
+        set
         {
-            /// <summary>
-            /// 前
-            /// </summary>
-            Forward,
+            _moveSpeed = value > 0 ? value : 0f;
+        }
+    }
 
-            /// <summary>
-            /// 左
-            /// </summary>
-            Left,
+    /// <summary>
+    /// 初期速度
+    /// </summary>
+    public float InitSpeed { get; private set; } = 0f;
 
-            /// <summary>
-            /// 右
-            /// </summary>
-            Right,
+    [SerializeField, Tooltip("移動速度")]
+    private float _moveSpeed = 800;
 
-            /// <summary>
-            /// 後ろ
-            /// </summary>
-            Backwad,
+    [SerializeField, Tooltip("移動時のドローン回転速度")]
+    private float _rotateSpeed = 2f;
 
-            /// <summary>
-            /// 上
-            /// </summary>
-            Up,
+    [SerializeField, Tooltip("上下の角度上限")]
+    private float _maxRotateX = 40f;
 
-            /// <summary>
-            /// 下
-            /// </summary>
-            Down,
+    /// <summary>
+    /// 移動フラグ
+    /// </summary>
+    private bool[] _movingDirs = new bool[(int)Direction.None];
 
-            None
+    // 各コンポーネント
+    private Rigidbody _rigidbody = null;
+    private Transform _transform = null;
+    private DroneRotateComponent _rotateComponent = null;
+
+    public void Initialize() { }
+
+    /// <summary>
+    /// 指定された方向へ移動
+    /// </summary>
+    /// <param name="dir">移動する方向</param>
+    public void Move(Direction dir)
+    {
+        // 指定された方向に応じて移動先の向き設定
+        Vector3 force = Vector3.zero;
+        switch (dir)
+        {
+            case Direction.Forward:
+                force = _transform.forward;
+                break;
+
+            case Direction.Left:
+                force = _transform.right * -1;
+                break;
+
+            case Direction.Right:
+                force = _transform.right;
+                break;
+
+            case Direction.Backwad:
+                force = _transform.forward * -1;
+                break;
+
+            case Direction.Up:
+                force = _transform.up;
+                break;
+
+            case Direction.Down:
+                force = _transform.up * -1;
+                break;
         }
 
-        /// <summary>
-        /// 移動速度
-        /// </summary>
-        public float MoveSpeed 
+        // 移動
+        force *= _moveSpeed;
+        _rigidbody.AddForce(force + (force - _rigidbody.velocity), ForceMode.Force);
+
+        // 移動中の方向更新
+        _movingDirs[(int)dir] = true;
+    }
+
+    /// <summary>
+    /// ドローンを回転させて進行方向を変える
+    /// </summary>
+    /// <param name="vertical">左右方向の回転量（0～1）</param>
+    /// <param name="horizontal">上下方向の回転量（0～1）</param>
+    public void RotateDir(float vertical, float horizontal)
+    {
+        // 上下の角度制限をつける
+        Vector3 localAngle = _transform.localEulerAngles;
+        localAngle.x += horizontal * ROTATE_SPEED * -1;
+        if (localAngle.x > _maxRotateX && localAngle.x < 180)
         {
-            get { return _moveSpeed; } 
-            set 
-            { 
-                _moveSpeed = value > 0 ? value : 0f; 
-            }
+            localAngle.x = _maxRotateX;
         }
-
-        /// <summary>
-        /// 初期速度
-        /// </summary>
-        public float InitSpeed { get; private set; } = 0f;
-
-        [SerializeField, Tooltip("移動速度")] 
-        private float _moveSpeed = 800;
-
-        [SerializeField, Tooltip("移動時のドローン回転速度")] 
-        private float _rotateSpeed = 2f;
-
-        [SerializeField, Tooltip("上下の角度上限")] 
-        private float _maxRotateX = 40f;
-
-        /// <summary>
-        /// 移動フラグ
-        /// </summary>
-        private bool[] _movingDirs = new bool[(int)Direction.None];
-
-        // 各コンポーネント
-        private Rigidbody _rigidbody = null;
-        private Transform _transform = null;
-        private DroneRotateComponent _rotateComponent = null;
-
-        public void Initialize() { }
-
-        /// <summary>
-        /// 指定された方向へ移動
-        /// </summary>
-        /// <param name="dir">移動する方向</param>
-        public void Move(Direction dir)
+        if (localAngle.x < 360 - _maxRotateX && localAngle.x > 180)
         {
-            // 指定された方向に応じて移動先の向き設定
-            Vector3 force = Vector3.zero;
-            switch (dir)
+            localAngle.x = 360 - _maxRotateX;
+        }
+        _transform.localEulerAngles = localAngle;
+
+        // 左右回転
+        Vector3 angle = _transform.eulerAngles;
+        angle.y += vertical * ROTATE_SPEED;
+        _transform.eulerAngles = angle;
+    }
+
+    private void Awake()
+    {
+        // コンポーネント取得
+        _rigidbody = GetComponent<Rigidbody>();
+        _transform = transform;
+        _rotateComponent = GetComponent<DroneRotateComponent>();
+
+        // 初期速度保存
+        InitSpeed = _moveSpeed;
+    }
+
+    private void LateUpdate()
+    {
+        // 移動している方向に傾ける
+        Quaternion rotate = Quaternion.identity;
+        for (int i = 0; i < _movingDirs.Length; i++)
+        {
+            // 移動フラグが立っていない場合はスキップ
+            if (!_movingDirs[i]) continue;
+
+            // 移動方向へ傾ける
+            switch ((Direction)i)
             {
                 case Direction.Forward:
-                    force = _transform.forward;
+                    rotate *= Quaternion.Euler(25, 0, 0);
                     break;
 
                 case Direction.Left:
-                    force = _transform.right * -1;
+                    rotate *= Quaternion.Euler(0, 0, 30);
                     break;
 
                 case Direction.Right:
-                    force = _transform.right;
+                    rotate *= Quaternion.Euler(0, 0, -30);
                     break;
 
                 case Direction.Backwad:
-                    force = _transform.forward * -1;
-                    break;
-
-                case Direction.Up:
-                    force = _transform.up;
-                    break;
-
-                case Direction.Down:
-                    force = _transform.up * -1;
+                    rotate *= Quaternion.Euler(-35, 0, 0);
                     break;
             }
-
-            // 移動
-            force *= _moveSpeed;
-            _rigidbody.AddForce(force + (force - _rigidbody.velocity), ForceMode.Force);
-
-            // 移動中の方向更新
-            _movingDirs[(int)dir] = true;
         }
+        _rotateComponent.Rotate(rotate, _rotateSpeed * Time.deltaTime);
 
-        /// <summary>
-        /// ドローンを回転させて進行方向を変える
-        /// </summary>
-        /// <param name="vertical">左右方向の回転量（0～1）</param>
-        /// <param name="horizontal">上下方向の回転量（0～1）</param>
-        public void RotateDir(float vertical, float horizontal)
+        // フラグ初期化
+        for (int i = 0; i < _movingDirs.Length; i++)
         {
-            // 上下の角度制限をつける
-            Vector3 localAngle = _transform.localEulerAngles;
-            localAngle.x += horizontal * ROTATE_SPEED  * - 1;
-            if (localAngle.x > _maxRotateX && localAngle.x < 180)
-            {
-                localAngle.x = _maxRotateX;
-            }
-            if (localAngle.x < 360 - _maxRotateX && localAngle.x > 180)
-            {
-                localAngle.x = 360 - _maxRotateX;
-            }
-            _transform.localEulerAngles = localAngle;
-
-            // 左右回転
-            Vector3 angle = _transform.eulerAngles;
-            angle.y += vertical * ROTATE_SPEED;
-            _transform.eulerAngles = angle;
-        }
-
-        private void Awake()
-        {
-            // コンポーネント取得
-            _rigidbody = GetComponent<Rigidbody>();
-            _transform = transform;
-            _rotateComponent = GetComponent<DroneRotateComponent>();
-
-            // 初期速度保存
-            InitSpeed = _moveSpeed;
-        }
-
-        private void LateUpdate()
-        {
-            // 移動している方向に傾ける
-            Quaternion rotate = Quaternion.identity;
-            for (int i = 0; i < _movingDirs.Length; i++)
-            {
-                // 移動フラグが立っていない場合はスキップ
-                if (!_movingDirs[i]) continue;
-
-                // 移動方向へ傾ける
-                switch ((Direction)i)
-                {
-                    case Direction.Forward:
-                        rotate *= Quaternion.Euler(25, 0, 0);
-                        break;
-
-                    case Direction.Left:
-                        rotate *= Quaternion.Euler(0, 0, 30);
-                        break;
-
-                    case Direction.Right:
-                        rotate *= Quaternion.Euler(0, 0, -30);
-                        break;
-
-                    case Direction.Backwad:
-                        rotate *= Quaternion.Euler(-35, 0, 0);
-                        break;
-                }
-            }
-            _rotateComponent.Rotate(rotate, _rotateSpeed * Time.deltaTime);
-
-            // フラグ初期化
-            for (int i = 0; i < _movingDirs.Length; i++)
-            {
-                _movingDirs[i] = false;
-            }
+            _movingDirs[i] = false;
         }
     }
 }

@@ -57,6 +57,11 @@ namespace Network
         /// </summary>
         public static bool IsItemSpawn { get; set; } = true;
 
+        /// <summary>
+        /// 設定画面を開いているか
+        /// </summary>
+        public static bool IsConfig { get; set; } = false;
+
         [SerializeField, Tooltip("ドローンスポーン管理オブジェクト")]
         private NetworkDroneSpawnManager _droneSpawnManager = null;
 
@@ -74,6 +79,9 @@ namespace Network
 
         [SerializeField, Tooltip("ゲーム終了アニメーター")]
         private Animator _finishAnimator = null;
+
+        [SerializeField, Tooltip("設定画面")]
+        private ConfigScreen _config = null;
 
         [SerializeField, Tooltip("エラーメッセージのCanvas")]
         private Canvas _errMsgCanvas = null;
@@ -101,6 +109,14 @@ namespace Network
         /// </summary>
         private bool _isError = false;
 
+        /// <summary>
+        /// 設定ボタン選択
+        /// </summary>
+        public void ClickConfig()
+        {
+            SwitchConfig();
+        }
+
         protected override void Awake()
         {
             base.Awake();
@@ -116,8 +132,13 @@ namespace Network
                 PlayerList.Add(player);
             }
 
-            // 切断イベント設定
+            // イベント設定
             MyNetworkManager.Singleton.OnDisconnect += OnDisconnect;
+            _config.OnButtonClick += OnConfigBackClick;
+
+            // Config初期化
+            _config.Initialize();
+            IsConfig = false;
         }
 
         private async void Start()
@@ -225,7 +246,7 @@ namespace Network
             // 設定画面を開く
             if (Input.GetKeyDown(KeyCode.M))
             {
-                // ToDo
+                SwitchConfig();
             }
 
             // 通信エラーの場合はクリックでホーム画面へ戻る
@@ -324,6 +345,19 @@ namespace Network
         }
 
         /// <summary>
+        /// 設定画面の戻るボタン選択イベント
+        /// </summary>
+        /// <param name="sender">イベントオブジェクト</param>
+        /// <param name="e">イベント引数</param>
+        private void OnConfigBackClick(object sender, EventArgs e)
+        {
+            if (_config.SelectedButton == ConfigScreen.ButtonType.Back)
+            {
+                SwitchConfig();
+            }
+        }
+
+        /// <summary>
         /// 制限時間のカウントダウン開始
         /// </summary>
         /// <returns></returns>
@@ -366,6 +400,15 @@ namespace Network
                 // 残り時間非表示
                 _timeText.enabled = false;
             }
+        }
+
+        /// <summary>
+        /// 設定画面の表示切り替え
+        /// </summary>
+        private void SwitchConfig()
+        {
+            _config.gameObject.SetActive(!IsConfig);
+            IsConfig = !IsConfig;
         }
 
         /// <summary>

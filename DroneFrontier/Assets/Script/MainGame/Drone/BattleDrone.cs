@@ -1,6 +1,4 @@
 ﻿using Cysharp.Threading.Tasks;
-using Offline;
-using Offline.Player;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -233,16 +231,19 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
             _radarComponent.StopRadar();
         }
 
-        // メイン武器攻撃（サブ武器攻撃中の場合は不可）
-        if (_input.MouseButtonL && !_weaponComponent.ShootingSubWeapon)
+        if (!BattleManager.IsConfig)
         {
-            _weaponComponent.Shot(DroneWeaponComponent.Weapon.MAIN, _lockOnComponent.Target);
-        }
+            // メイン武器攻撃（サブ武器攻撃中の場合は不可）
+            if (_input.MouseButtonL && !_weaponComponent.ShootingSubWeapon)
+            {
+                _weaponComponent.Shot(DroneWeaponComponent.Weapon.MAIN, _lockOnComponent.Target);
+            }
 
-        // サブ武器攻撃（メイン武器攻撃中の場合は不可）
-        if (_input.MouseButtonR && !_weaponComponent.ShootingMainWeapon)
-        {
-            _weaponComponent.Shot(DroneWeaponComponent.Weapon.SUB, _lockOnComponent.Target);
+            // サブ武器攻撃（メイン武器攻撃中の場合は不可）
+            if (_input.MouseButtonR && !_weaponComponent.ShootingMainWeapon)
+            {
+                _weaponComponent.Shot(DroneWeaponComponent.Weapon.SUB, _lockOnComponent.Target);
+            }
         }
 
         // ブースト開始

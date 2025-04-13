@@ -1,7 +1,5 @@
 using Cysharp.Threading.Tasks;
 using Network.Udp;
-using Offline;
-using Offline.Player;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -316,16 +314,19 @@ namespace Network
             // 死亡処理中は操作不可
             if (_isDestroy) return;
 
-            // メイン武器攻撃（サブ武器攻撃中の場合は不可）
-            if (_input.MouseButtonL && !_weaponComponent.ShootingSubWeapon)
+            if (!_isControl || !NetworkBattleManager.IsConfig)
             {
-                _weaponComponent.Shot(DroneWeaponComponent.Weapon.MAIN, _lockOnComponent.Target);
-            }
+                // メイン武器攻撃（サブ武器攻撃中の場合は不可）
+                if (_input.MouseButtonL && !_weaponComponent.ShootingSubWeapon)
+                {
+                    _weaponComponent.Shot(DroneWeaponComponent.Weapon.MAIN, _lockOnComponent.Target);
+                }
 
-            // サブ武器攻撃（メイン武器攻撃中の場合は不可）
-            if (_input.MouseButtonR && !_weaponComponent.ShootingMainWeapon)
-            {
-                _weaponComponent.Shot(DroneWeaponComponent.Weapon.SUB, _lockOnComponent.Target);
+                // サブ武器攻撃（メイン武器攻撃中の場合は不可）
+                if (_input.MouseButtonR && !_weaponComponent.ShootingMainWeapon)
+                {
+                    _weaponComponent.Shot(DroneWeaponComponent.Weapon.SUB, _lockOnComponent.Target);
+                }
             }
 
             if (_isControl)
