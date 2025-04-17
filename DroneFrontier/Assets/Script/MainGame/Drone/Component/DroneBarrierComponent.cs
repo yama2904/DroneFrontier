@@ -125,7 +125,7 @@ public class DroneBarrierComponent : MonoBehaviour, IDroneComponent
         _drone.DroneDestroyEvent += DroneDestroyEvent;
 
         // バリアカラー初期化
-        ChangeBarrierColor();
+        ApplyBarrierColor();
     }
 
     /// <summary>
@@ -168,7 +168,7 @@ public class DroneBarrierComponent : MonoBehaviour, IDroneComponent
         _isRegening = false;
 
         // バリアの色更新
-        ChangeBarrierColor();
+        ApplyBarrierColor();
 
         //Debug.Log($"{_drone.Name}:バリアに{damage}のダメージ\n残りHP:{HP}");
     }
@@ -185,7 +185,7 @@ public class DroneBarrierComponent : MonoBehaviour, IDroneComponent
         _isRegening = true;
 
         // バリアの色更新
-        ChangeBarrierColor();
+        ApplyBarrierColor();
 
         // イベント発火
         BarrierResurrectEvent?.Invoke(this, EventArgs.Empty);
@@ -216,17 +216,22 @@ public class DroneBarrierComponent : MonoBehaviour, IDroneComponent
         _strengthenValue = damageDown;
 
         // 強化時のバリアの色へ変更
-        ChangeBarrierColor();
+        ApplyBarrierColor();
 
         // 強化終了タイマー開始
         UniTask.Void(async () =>
         {
-            await UniTask.Delay(TimeSpan.FromSeconds(time), cancellationToken: _cancel.Token);
-            _isStrengthen = false;  // 強化フラグ初期化
-            ChangeBarrierColor();   // 通常時のバリアの色へ戻す
-
-            // バリア強化終了イベント発火
-            StrengthenEndEvent?.Invoke(this, EventArgs.Empty);
+            try
+            {
+                await UniTask.Delay(TimeSpan.FromSeconds(time), cancellationToken: _cancel.Token);
+                _isStrengthen = false;  // 強化フラグ初期化
+                ApplyBarrierColor();   // 通常時のバリアの色へ戻す
+            }
+            finally
+            {
+                // バリア強化終了イベント発火
+                StrengthenEndEvent?.Invoke(this, EventArgs.Empty);
+            }
         });
 
         // バリア強化開始イベント発火
@@ -240,7 +245,7 @@ public class DroneBarrierComponent : MonoBehaviour, IDroneComponent
     /// </summary>
     /// <param name="time">弱体化時間（秒）</param>
     /// <returns>弱体化に成功した場合はtrue</returns>
-    public bool WeakBarrier(int time)
+    public bool WeakBarrier(float time)
     {
         // 既に弱体化中の場合は失敗
         if (_isWeak) return false;
@@ -249,6 +254,7 @@ public class DroneBarrierComponent : MonoBehaviour, IDroneComponent
         if (_isStrengthen)
         {
             _cancel.Cancel();
+            _cancel = new CancellationTokenSource();
             _isStrengthen = false;
         }
         else
@@ -258,7 +264,7 @@ public class DroneBarrierComponent : MonoBehaviour, IDroneComponent
         }
 
         // バリアの色更新
-        ChangeBarrierColor();
+        ApplyBarrierColor();
 
         // バリア回復停止
         _regeneTimer = 0;
@@ -270,17 +276,22 @@ public class DroneBarrierComponent : MonoBehaviour, IDroneComponent
         // 弱体化終了タイマー開始
         UniTask.Void(async () =>
         {
-            await UniTask.Delay(TimeSpan.FromSeconds(time), cancellationToken: _cancel.Token);
-            _isWeak = false;
-
-            // バリアが破壊されている場合は修復
-            if (HP <= 0)
+            try
             {
-                ResurrectBarrier();
-            }
+                await UniTask.Delay(TimeSpan.FromSeconds(time), cancellationToken: _cancel.Token);
+                _isWeak = false;
 
-            // バリア弱体化終了イベント発火
-            WeakEndEvent?.Invoke(this, EventArgs.Empty);
+                // バリアが破壊されている場合は修復
+                if (HP <= 0)
+                {
+                    ResurrectBarrier();
+                }
+            }
+            finally
+            {
+                // バリア弱体化終了イベント発火
+                WeakEndEvent?.Invoke(this, EventArgs.Empty);
+            }
         });
 
         // バリア弱体化開始イベント発火
@@ -318,7 +329,7 @@ public class DroneBarrierComponent : MonoBehaviour, IDroneComponent
                     HP = hp >= _barrierMaxHP ? _barrierMaxHP : hp;  // 最大超過分を調整
 
                     // バリアの色更新
-                    ChangeBarrierColor();
+                    ApplyBarrierColor();
 
                     // 回復タイマーリセット
                     _regeneTimer = 0;
@@ -355,9 +366,9 @@ public class DroneBarrierComponent : MonoBehaviour, IDroneComponent
     }
 
     /// <summary>
-    /// 残りHPに応じてバリアの色を変更する
+    /// 残りHPに応じたバリアの色変更を適用する
     /// </summary>
-    private void ChangeBarrierColor()
+    private void ApplyBarrierColor()
     {
         // 残りHPの割合で色合いを変化
         float value = HP / _barrierMaxHP;
@@ -380,7 +391,7 @@ public class DroneBarrierComponent : MonoBehaviour, IDroneComponent
     private void DroneDestroyEvent(object o, EventArgs e)
     {
         HP = 0;
-        ChangeBarrierColor();
+        ApplyBarrierColor();
 
         // イベント削除
         _drone.DroneDestroyEvent -= DroneDestroyEvent;

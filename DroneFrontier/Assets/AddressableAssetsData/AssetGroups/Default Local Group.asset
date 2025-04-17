@@ -18,7 +18,7 @@ MonoBehaviour:
   m_GUID: 77a3b631f60219d4f90d070c6543a978
   m_SerializeEntries:
   - m_GUID: 020ba08994670fc42a791716f37eb94a
-    m_Address: JammigUI
+    m_Address: JammingIcon
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -84,6 +84,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d436d6d0d3f34cb4e8e145549987d99e
     m_Address: BarrierIconImage
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: dec920d0f7a04b44fa05de1dcdea8001
+    m_Address: BarrierWeakIcon
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

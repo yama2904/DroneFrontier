@@ -38,7 +38,7 @@ public class JammingStatus : IDroneStatusChange
 
     public Image InstantiateIcon()
     {
-        return Addressables.InstantiateAsync("JammigUI").WaitForCompletion().GetComponent<Image>();
+        return Addressables.InstantiateAsync("JammingIcon").WaitForCompletion().GetComponent<Image>();
     }
 
     public bool Invoke(GameObject drone, float statusSec, params object[] addParams)

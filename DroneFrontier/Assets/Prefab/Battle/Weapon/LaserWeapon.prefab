@@ -99,7 +99,7 @@ PrefabInstance:
     - target: {fileID: 7270458303023386736, guid: fb819132d31986f459ffa2ccafc9e8c3,
         type: 3}
       propertyPath: m_Name
-      value: LaserBullet_Offline
+      value: LaserBullet
       objectReference: {fileID: 0}
     - target: {fileID: 7764554142658295910, guid: fb819132d31986f459ffa2ccafc9e8c3,
         type: 3}

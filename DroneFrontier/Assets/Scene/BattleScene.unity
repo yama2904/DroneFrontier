@@ -812,7 +812,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &927886277
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1579,6 +1579,74 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 1757266318}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &211525345272414331
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1792025415574020454, guid: df90bb51d63d582488256ad2c127566d,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1792025415574020454, guid: df90bb51d63d582488256ad2c127566d,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1792025415574020454, guid: df90bb51d63d582488256ad2c127566d,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1792025415574020454, guid: df90bb51d63d582488256ad2c127566d,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1792025415574020454, guid: df90bb51d63d582488256ad2c127566d,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1792025415574020454, guid: df90bb51d63d582488256ad2c127566d,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1792025415574020454, guid: df90bb51d63d582488256ad2c127566d,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1792025415574020454, guid: df90bb51d63d582488256ad2c127566d,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1792025415574020454, guid: df90bb51d63d582488256ad2c127566d,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1792025415574020454, guid: df90bb51d63d582488256ad2c127566d,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6164884878792952457, guid: df90bb51d63d582488256ad2c127566d,
+        type: 3}
+      propertyPath: m_Name
+      value: BarrierWeakLaser
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: df90bb51d63d582488256ad2c127566d, type: 3}
 --- !u!224 &220533343007130403
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2063,6 +2131,7 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 149561200}
+  - {fileID: 211525345272414331}
   - {fileID: 158291429}
   - {fileID: 179752583}
   - {fileID: 8200932790367939753}

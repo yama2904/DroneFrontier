@@ -29098,7 +29098,7 @@ GameObject:
   - component: {fileID: 7270458303023386737}
   - component: {fileID: 8198160935777638173}
   m_Layer: 0
-  m_Name: LaserBullet_Offline
+  m_Name: LaserBullet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
