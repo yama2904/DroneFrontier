@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using static DroneWeaponComponent;
 
 namespace Network
 {
@@ -47,6 +48,7 @@ namespace Network
 
             // ドローン生成
             NetworkBattleDrone drone = CreateDrone(name, weapon, spawnPos);
+            drone.Initialize(name, weapon, drone.StockNum);
 
             // スポーン位置を保存
             _initPositions.Add(drone.Name, spawnPos);
@@ -77,8 +79,6 @@ namespace Network
         private NetworkBattleDrone CreateDrone(string name, WeaponType weapon, Transform spawnPosition)
         {
             NetworkBattleDrone createdDrone = Instantiate(_playerDrone, spawnPosition.position, spawnPosition.rotation);
-            createdDrone.Name = name;
-            createdDrone.SubWeapon = weapon;
             createdDrone.DroneDestroyEvent += DroneDestroy;
 
             return createdDrone;
@@ -103,12 +103,10 @@ namespace Network
             {
                 // リスポーン
                 respawnDrone = CreateDrone(drone.Name, drone.SubWeapon, initPos);
+                drone.Initialize(drone.Name, drone.SubWeapon, drone.StockNum - 1);
 
                 // 復活SE再生
                 respawnDrone.GetComponent<DroneSoundComponent>().Play(SoundManager.SE.Respawn);
-
-                // ストック数更新
-                respawnDrone.StockNum = drone.StockNum - 1;
             }
 
             // イベント発火

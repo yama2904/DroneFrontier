@@ -6,17 +6,12 @@ using UnityEngine.UI;
 
 public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
 {
-    /// <summary>
-    /// 死亡時の落下時間
-    /// </summary>
-    private const float DEATH_FALL_TIME = 2.5f;
-
     #region public
 
     /// <summary>
     /// ドローンの名前
     /// </summary>
-    public string Name { get; set; } = "";
+    public string Name { get; private set; } = "";
 
     /// <summary>
     /// ドローンのHP
@@ -35,22 +30,14 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
     }
 
     /// <summary>
-    /// 現在のストック数
-    /// </summary>
-    public int StockNum
-    {
-        get { return _stockNum; }
-        set
-        {
-            _stockNum = value;
-            _stockText.text = value.ToString();
-        }
-    }
-
-    /// <summary>
     /// ドローンのサブ武器
     /// </summary>
-    public WeaponType SubWeapon { get; set; }
+    public WeaponType SubWeapon { get; private set; }
+
+    /// <summary>
+    /// 現在のストック数
+    /// </summary>
+    public int StockNum => _stockNum;
 
     /// <summary>
     /// ロックオン可能であるか
@@ -131,10 +118,17 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
     DroneWeaponComponent _weaponComponent = null;
     DroneBoostComponent _boostComponent = null;
 
-    public void Initialize()
+    public void Initialize(string name, WeaponType subWeapon, int stock)
     {
-        // ストック数UI初期化
-        StockNum = _stockNum;
+        // ドローン名設定
+        Name = name;
+
+        // サブウェポン設定
+        SubWeapon = subWeapon;
+
+        // ストック数設定
+        _stockNum = stock;
+        _stockText.text = _stockNum.ToString();
 
         // ロックオン・レーダー不可オブジェクトに自分を設定
         NotLockableOnList.Add(gameObject);
@@ -393,7 +387,7 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
         _soundComponent.Play(SoundManager.SE.Death);
 
         // 一定時間経過してから爆破
-        await UniTask.Delay(TimeSpan.FromSeconds(DEATH_FALL_TIME), ignoreTimeScale: true);
+        await UniTask.Delay(TimeSpan.FromSeconds(2.5f), ignoreTimeScale: true);
 
         // ドローンの非表示
         _droneObject.gameObject.SetActive(false);

@@ -10,17 +10,12 @@ namespace Network
 {
     public class NetworkBattleDrone : MyNetworkBehaviour, IBattleDrone, ILockableOn, IRadarable
     {
-        /// <summary>
-        /// 死亡時の落下時間
-        /// </summary>
-        private const float DEATH_FALL_TIME = 2.5f;
-
         #region public
 
         /// <summary>
         /// ドローンの名前
         /// </summary>
-        public string Name { get; set; } = "";
+        public string Name { get; private set; } = "";
 
         /// <summary>
         /// ドローンのHP
@@ -41,20 +36,12 @@ namespace Network
         /// <summary>
         /// 現在のストック数
         /// </summary>
-        public int StockNum
-        {
-            get { return _stockNum; }
-            set
-            {
-                _stockNum = value;
-                _stockText.text = value.ToString();
-            }
-        }
+        public int StockNum => _stockNum;
 
         /// <summary>
         /// ドローンのサブ武器
         /// </summary>
-        public WeaponType SubWeapon { get; set; }
+        public WeaponType SubWeapon { get; private set; }
 
         /// <summary>
         /// ロックオン可能であるか
@@ -203,12 +190,30 @@ namespace Network
             var dic = data as Dictionary<string, object>;
             Name = (string)dic["Name"];
             SubWeapon = (WeaponType)Enum.ToObject(typeof(WeaponType), dic["Weapon"]);
-            StockNum = Convert.ToInt32(dic["Stock"]);
+            _stockNum = Convert.ToInt32(dic["Stock"]);
             enabled = Convert.ToBoolean(dic["enabled"]);
         }
 
+        /// <summary>
+        /// クライアントスポーン時の初期化
+        /// </summary>
         public override void Initialize()
         {
+            Initialize(Name, SubWeapon, StockNum);
+        }
+
+        public void Initialize(string name, WeaponType subWeapon, int stock)
+        {
+            // ドローン名設定
+            Name = name;
+
+            // サブウェポン設定
+            SubWeapon = subWeapon;
+
+            // ストック数設定
+            _stockNum = stock;
+            _stockText.text = _stockNum.ToString();
+
             // コンポーネントの取得
             _rigidbody = GetComponent<Rigidbody>();
             _animator = GetComponent<Animator>();
@@ -222,9 +227,6 @@ namespace Network
             _weaponComponent = GetComponent<DroneWeaponComponent>();
             _boostComponent = GetComponent<DroneBoostComponent>();
             _barrierComponent = GetComponent<DroneBarrierComponent>();
-
-            // ストック数UI初期化
-            StockNum = _stockNum;
 
             // ロックオン・レーダー不可オブジェクトに自分を設定
             NotLockableOnList.Add(gameObject);
@@ -680,7 +682,7 @@ namespace Network
             _soundComponent.Play(SoundManager.SE.Death);
 
             // 一定時間経過してから爆破
-            await UniTask.Delay(TimeSpan.FromSeconds(DEATH_FALL_TIME), ignoreTimeScale: true);
+            await UniTask.Delay(TimeSpan.FromSeconds(2.5f), ignoreTimeScale: true);
 
             // ドローンの非表示
             _droneObject.gameObject.SetActive(false);

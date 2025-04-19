@@ -49,6 +49,7 @@ public class DroneSpawnManager : MonoBehaviour
 
         // ドローン生成
         IBattleDrone drone = CreateDrone(name, weapon, spawnPos, isPlayer);
+        drone.Initialize(name, weapon, drone.StockNum);
 
         // スポーン位置を保存
         _initPositions.Add(drone.Name, spawnPos);
@@ -83,8 +84,6 @@ public class DroneSpawnManager : MonoBehaviour
         GameObject drone = isPlayer ? _playerDrone : _cpuDrone;
 
         IBattleDrone createdDrone = Instantiate(drone, spawnPosition.position, spawnPosition.rotation).GetComponent<IBattleDrone>();
-        createdDrone.Name = name;
-        createdDrone.SubWeapon = weapon;
         createdDrone.DroneDestroyEvent += DroneDestroy;
 
         return createdDrone;
@@ -121,8 +120,8 @@ public class DroneSpawnManager : MonoBehaviour
                 respawnDrone = CreateDrone(drone.Name, drone.SubWeapon, initPos, false);
             }
 
-            // ストック数更新
-            respawnDrone.StockNum = drone.StockNum - 1;
+            // ドローン初期化
+            respawnDrone.Initialize(drone.Name, drone.SubWeapon, drone.StockNum - 1);
         }
 
         // イベント発火

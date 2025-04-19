@@ -11,7 +11,7 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
     /// <summary>
     /// ドローンの名前
     /// </summary>
-    public string Name { get; set; } = "";
+    public string Name { get; private set; } = "";
 
     /// <summary>
     /// ドローンのHP
@@ -30,18 +30,14 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
     }
 
     /// <summary>
-    /// 現在のストック数
-    /// </summary>
-    public int StockNum
-    {
-        get { return _stockNum; }
-        set { _stockNum = value; }
-    }
-
-    /// <summary>
     /// ドローンのサブ武器
     /// </summary>
-    public WeaponType SubWeapon { get; set; }
+    public WeaponType SubWeapon { get; private set; }
+
+    /// <summary>
+    /// 現在のストック数
+    /// </summary>
+    public int StockNum => _stockNum;
 
     /// <summary>
     /// ロックオン可能であるか
@@ -95,21 +91,6 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
         /// </summary>
         Item2
     }
-
-    /// <summary>
-    /// 死亡時の回転量
-    /// </summary>
-    private readonly Quaternion DEATH_ROTATE = Quaternion.Euler(28, -28, -28);
-
-    /// <summary>
-    /// 死亡時の回転速度
-    /// </summary>
-    private const float DEATH_ROTATE_SPEED = 2f;
-
-    /// <summary>
-    /// 死亡時の落下時間
-    /// </summary>
-    private const float DEATH_FALL_TIME = 2.5f;
 
     [SerializeField, Tooltip("ドローン本体オブジェクト")]
     private Transform _droneObject = null;
@@ -185,8 +166,17 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
     DroneWeaponComponent _weaponComponent = null;
     DroneBoostComponent _boostComponent = null;
 
-    public void Initialize()
+    public void Initialize(string name, WeaponType subWeapon, int stock)
     {
+        // ドローン名設定
+        Name = name;
+
+        // サブウェポン設定
+        SubWeapon = subWeapon;
+
+        // ストック数設定
+        _stockNum = stock;
+
         // ダメージイベント設定
         _damageComponent.DamageEvent += DamageEvent;
 
@@ -599,7 +589,7 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
         _soundComponent.Play(SoundManager.SE.Death);
 
         // 一定時間経過してから爆破
-        await UniTask.Delay(TimeSpan.FromSeconds(DEATH_FALL_TIME));
+        await UniTask.Delay(TimeSpan.FromSeconds(2.5f));
 
         // ドローンの非表示
         _droneObject.gameObject.SetActive(false);

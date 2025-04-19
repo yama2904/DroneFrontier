@@ -129,7 +129,6 @@ public class BattleManager : MonoBehaviour
 
         // プレイヤードローンをスポーン
         IBattleDrone spawnDrone = _droneSpawnManager.SpawnDrone("Player", PlayerWeapon, true);
-        spawnDrone.Initialize();
         DroneData droneData = new DroneData()
         {
             Drone = spawnDrone,
@@ -145,7 +144,6 @@ public class BattleManager : MonoBehaviour
         foreach (CpuData cpu in CpuList)
         {
             spawnDrone = _droneSpawnManager.SpawnDrone(cpu.Name, cpu.Weapon, false);
-            spawnDrone.Initialize();
             droneData = new DroneData()
             {
                 Drone = spawnDrone,
@@ -242,10 +240,6 @@ public class BattleManager : MonoBehaviour
             {
                 _watchingGame.enabled = true;
             }
-        }
-        else
-        {
-            respawnDrone.Initialize();
         }
 
         // 破壊されたドローン情報更新

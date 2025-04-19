@@ -1,3 +1,4 @@
+using Mono.CecilX;
 using System;
 
 /// <summary>
@@ -8,7 +9,7 @@ public interface IBattleDrone
     // <summary>
     /// ドローンの名前
     /// </summary>
-    public string Name { get; set; }
+    public string Name { get; }
 
     /// <summary>
     /// ドローンのHP
@@ -16,19 +17,22 @@ public interface IBattleDrone
     public float HP { get; }
 
     /// <summary>
-    /// 現在のストック数
-    /// </summary>
-    public int StockNum { get; set; }
-
-    /// <summary>
     /// サブ武器
     /// </summary>
-    public WeaponType SubWeapon { get; set; }
+    public WeaponType SubWeapon { get; }
+
+    /// <summary>
+    /// 現在のストック数
+    /// </summary>
+    public int StockNum { get; }
 
     /// <summary>
     /// 初期化
     /// </summary>
-    public void Initialize();
+    /// <param name="name">ドローン名</param>
+    /// <param name="subWeapon">サブウェポン</param>
+    /// <param name="stock">ストック数</param>
+    public void Initialize(string name, WeaponType subWeapon, int stock);
 
     /// <summary>
     /// ドローンにダメージを与える
