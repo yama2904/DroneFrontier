@@ -601,7 +601,7 @@ namespace Network
             {
                 DroneStatusPacket status = packet as DroneStatusPacket;
                 HP = status.Hp;
-                _moveComponent.MoveSpeed = status.MoveSpeed;
+                _moveComponent._moveSpeed = status.MoveSpeed;
             }
         }
 

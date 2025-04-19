@@ -6,8 +6,6 @@ using UnityEngine.UI;
 
 public class StunStatus : IDroneStatusChange
 {
-    public StatusChangeType StatusType => StatusChangeType.Stun;
-
     public event EventHandler StatusEndEvent;
 
     private FadeoutImage _createdMask;

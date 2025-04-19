@@ -87,6 +87,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d78a8c1949fe50b43a58a550e64554ed
+    m_Address: SpeedDownIcon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: dec920d0f7a04b44fa05de1dcdea8001
     m_Address: BarrierWeakIcon
     m_ReadOnly: 0

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class DroneMoveComponent : MonoBehaviour, IDroneComponent
 {
@@ -45,14 +46,7 @@ public class DroneMoveComponent : MonoBehaviour, IDroneComponent
     /// <summary>
     /// 移動速度
     /// </summary>
-    public float MoveSpeed
-    {
-        get { return _moveSpeed; }
-        set
-        {
-            _moveSpeed = value > 0 ? value : 0f;
-        }
-    }
+    public float MoveSpeed => _moveSpeed;
 
     /// <summary>
     /// 初期速度
@@ -60,10 +54,10 @@ public class DroneMoveComponent : MonoBehaviour, IDroneComponent
     public float InitSpeed { get; private set; } = 0f;
 
     [SerializeField, Tooltip("移動速度")]
-    private float _moveSpeed = 800;
+    internal float _moveSpeed = 800;
 
     [SerializeField, Tooltip("移動時のドローン回転速度")]
-    private float _rotateSpeed = 2f;
+    internal float _rotateSpeed = 2f;
 
     [SerializeField, Tooltip("上下の角度上限")]
     private float _maxRotateX = 40f;
@@ -72,6 +66,16 @@ public class DroneMoveComponent : MonoBehaviour, IDroneComponent
     /// 移動フラグ
     /// </summary>
     private bool[] _movingDirs = new bool[(int)Direction.None];
+
+    /// <summary>
+    /// 移動速度変更時の採番値
+    /// </summary>
+    private int _numbering = 0;
+
+    /// <summary>
+    /// 変更した移動スピード
+    /// </summary>
+    private Dictionary<int, float> _changedSpeeds = new Dictionary<int, float>();
 
     // 各コンポーネント
     private Rigidbody _rigidbody = null;
@@ -147,6 +151,48 @@ public class DroneMoveComponent : MonoBehaviour, IDroneComponent
         Vector3 angle = _transform.eulerAngles;
         angle.y += vertical * ROTATE_SPEED;
         _transform.eulerAngles = angle;
+    }
+
+    /// <summary>
+    /// パーセンテージで指定して移動速度を変更
+    /// </summary>
+    /// <param name="percent">1を現在の速度とした変更速度</param>
+    /// <returns>変更ID</returns>
+    public int ChangeMoveSpeedPercent(float percent)
+    {
+        // 変更適用
+        _moveSpeed *= percent;
+
+        // 変更一覧に追加
+        int id = _numbering++;
+        _changedSpeeds.Add(id, percent);
+
+        // IDを返す
+        return id;
+    }
+
+    /// <summary>
+    /// 変更した移動速度を戻す
+    /// </summary>
+    /// <param name="id">変更時に発行したID</param>
+    public void ResetMoveSpeed(int id)
+    {
+        // ID有効チェック
+        if (!_changedSpeeds.ContainsKey(id)) return;
+
+        // 変更値取得
+        float per = _changedSpeeds[id];
+        _changedSpeeds.Remove(id);
+
+        // 変更を戻す
+        if (_changedSpeeds.Count == 0)
+        {
+            _moveSpeed = InitSpeed;
+        }
+        else
+        {
+            _moveSpeed *= 1 / per;
+        }
     }
 
     private void Awake()

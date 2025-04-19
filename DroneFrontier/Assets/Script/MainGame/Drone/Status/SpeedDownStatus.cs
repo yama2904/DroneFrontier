@@ -5,22 +5,17 @@ using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.UI;
 
-public class JammingStatus : IDroneStatusChange
+public class SpeedDownStatus : IDroneStatusChange
 {
     public event EventHandler StatusEndEvent;
 
     /// <summary>
-    /// ジャミング付与したオブジェクトのLockOnコンポーネント
+    /// スピードダウン付与したオブジェクトのMoveコンポーネント
     /// </summary>
-    private DroneLockOnComponent _lockon = null;
+    private DroneMoveComponent _move = null;
 
     /// <summary>
-    /// ジャミング付与したオブジェクトのRadarコンポーネント
-    /// </summary>
-    private DroneRadarComponent _radar = null;
-
-    /// <summary>
-    /// ジャミング付与したオブジェクトのSoundコンポーネント
+    /// スピードダウン付与したオブジェクトのSoundコンポーネント
     /// </summary>
     private DroneSoundComponent _sound = null;
 
@@ -30,53 +25,55 @@ public class JammingStatus : IDroneStatusChange
     private int _seId = 0;
 
     /// <summary>
+    /// 発行した移動速度変更ID
+    /// </summary>
+    private int _changeSpeedId = -1;
+
+    /// <summary>
     /// キャンセルトークン発行クラス
     /// </summary>
     private CancellationTokenSource _cancel = new CancellationTokenSource();
 
     public Image InstantiateIcon()
     {
-        return Addressables.InstantiateAsync("JammingIcon").WaitForCompletion().GetComponent<Image>();
+        return Addressables.InstantiateAsync("SpeedDownIcon").WaitForCompletion().GetComponent<Image>();
     }
 
     public bool Invoke(GameObject drone, float statusSec, params object[] addParams)
     {
         // コンポーネント取得
-        _lockon = drone.GetComponent<DroneLockOnComponent>();
-        _radar = drone.GetComponent<DroneRadarComponent>();
+        _move = drone.GetComponent<DroneMoveComponent>();
         _sound = drone.GetComponent<DroneSoundComponent>();
 
-        // ジャミング効果付与
-        _lockon?.SetEnableLockOn(false);
-        _radar?.SetEnableRadar(false);
+        // スピードダウン効果付与
+        _changeSpeedId = _move.ChangeMoveSpeedPercent(1 - (float)addParams[0]);
 
-        // ジャミングSE再生
+        // スピードダウンSE再生
         if (_sound != null)
         {
-            _seId = _sound.Play(SoundManager.SE.JammingNoise, 1, true);
+            _seId = _sound.Play(SoundManager.SE.MagneticArea, 1, true);
         }
 
-        // ジャミング終了タイマー設定
+        // スピードダウン終了タイマー設定
         UniTask.Void(async () =>
         {
             await UniTask.Delay(TimeSpan.FromSeconds(statusSec), cancellationToken: _cancel.Token);
-            EndJamming();
+            EndSpeedDown();
         });
 
         return true;
     }
-    
+
     /// <summary>
-    /// ジャミング終了
+    /// スピードダウン終了
     /// </summary>
-    public void EndJamming()
+    public void EndSpeedDown()
     {
-        // ジャミング終了
-        _lockon?.SetEnableLockOn(true);
-        _radar?.SetEnableRadar(true);
+        // スピードダウン終了
+        _move.ResetMoveSpeed(_changeSpeedId);
         _sound?.StopSE(_seId);
-        
-        // ジャミング終了タイマー停止
+
+        // スピードダウン終了タイマー停止
         _cancel.Cancel();
 
         // 終了イベント発火

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,7 +9,7 @@ public class DroneStatusComponent : MonoBehaviour, IDroneComponent
     /// <summary>
     /// 変化中のステータスリスト
     /// </summary>
-    public List<StatusChangeType> Statuses { get; private set; } = new List<StatusChangeType>();
+    public List<IDroneStatusChange> Statuses => _statuses.Select(x => x.status).ToList();
 
     /// <summary>
     /// プレイヤーであるか
@@ -42,10 +42,9 @@ public class DroneStatusComponent : MonoBehaviour, IDroneComponent
     private RectTransform _statusIconCanvas = null;
 
     /// <summary>
-    /// 状態異常と対応するアイコン<br/>
-    /// key:状態異常を付与したIDroneStatusChange, value:状態異常アイコンのRectTransform
+    /// 付与中のステータス一覧
     /// </summary>
-    private OrderedDictionary _statusesIconMap = new OrderedDictionary();
+    private List<(IDroneStatusChange status, RectTransform transform)> _statuses = new List<(IDroneStatusChange status, RectTransform transform)>();
 
     public void Initialize() { }
 
@@ -62,25 +61,30 @@ public class DroneStatusComponent : MonoBehaviour, IDroneComponent
         bool success = status.Invoke(gameObject, statusSec, addParams);
         if (!success) return false;
 
-        // ステータス終了イベントを設定してリストに追加
+        // ステータス終了イベントを設定
         status.StatusEndEvent += StatusEndEvent;
-        Statuses.Add(status.StatusType);
 
-        // ステータス変化アイコンを表示
-        if (IsPlayer)
+        lock (_statuses)
         {
-            Image icon = status.InstantiateIcon();
-            if (icon != null)
+            // ステータス変化アイコンを表示
+            RectTransform iconTransform = null;
+            if (IsPlayer)
             {
-                RectTransform t = icon.rectTransform;
-                t.SetParent(_statusIconCanvas, false);
+                Image icon = status.InstantiateIcon();
+                if (icon != null)
+                {
+                    iconTransform = icon.rectTransform;
+                    iconTransform.SetParent(_statusIconCanvas, false);
 
-                // アイコン表示位置調整
-                t.localPosition = new Vector3(STATUS_ICON_WIDTH * _statusesIconMap.Count, t.localPosition.y, t.localPosition.z);
-
-                // マップに追加
-                _statusesIconMap.Add(status, t);
+                    // アイコン表示位置調整
+                    iconTransform.localPosition = new Vector3(STATUS_ICON_WIDTH * _statuses.Count, 
+                                                              iconTransform.localPosition.y, 
+                                                              iconTransform.localPosition.z);
+                }
             }
+
+            // ステータス一覧に追加
+            _statuses.Add((status, iconTransform));
         }
 
         // ステータス変化追加イベント発火
@@ -132,20 +136,26 @@ public class DroneStatusComponent : MonoBehaviour, IDroneComponent
     {
         IDroneStatusChange status = sender as IDroneStatusChange;
 
-        // ステータスリストから除去
-        Statuses.Remove(status.StatusType);
-
-        // 状態異常アイコンを削除
-        if (_statusesIconMap.Contains(status))
+        lock (_statuses)
         {
-            Destroy((_statusesIconMap[status] as RectTransform).gameObject);
-            _statusesIconMap.Remove(status);
+            // 終了したステータス情報取得
+            int index = _statuses.FindIndex(x => x.status == status);
+            RectTransform icon = _statuses[index].transform;
 
-            // 削除した分アイコンの表示を詰める
-            for (int i = 0; i < _statusesIconMap.Count; i++)
+            // ステータスリストから除去
+            _statuses.RemoveAt(index);
+
+            // 状態異常アイコンを削除
+            if (icon != null)
             {
-                RectTransform t = _statusesIconMap[i] as RectTransform;
-                t.localPosition = new Vector3(STATUS_ICON_WIDTH * i, t.localPosition.y, t.localPosition.z);
+                Destroy(icon.gameObject);
+
+                // 削除した分アイコンの表示を詰める
+                for (int i = 0; i < _statuses.Count; i++)
+                {
+                    RectTransform t = _statuses[i].transform;
+                    t.localPosition = new Vector3(STATUS_ICON_WIDTH * i, t.localPosition.y, t.localPosition.z);
+                }
             }
         }
 

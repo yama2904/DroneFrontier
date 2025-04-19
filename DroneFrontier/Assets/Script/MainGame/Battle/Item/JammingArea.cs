@@ -8,14 +8,15 @@ public class JammingArea : MonoBehaviour
     /// <summary>
     /// 各オブジェクトに付与したジャミングステータス
     /// </summary>
-    private Dictionary<GameObject, JammingStatus> _addedJammingStatusMap = new Dictionary<GameObject, JammingStatus>();
+    private Dictionary<GameObject, JammingStatus> _jammingStatuses = new Dictionary<GameObject, JammingStatus>();
 
     private void OnDestroy()
     {
-        foreach (JammingStatus status in _addedJammingStatusMap.Values)
+        foreach (JammingStatus status in _jammingStatuses.Values)
         {
             status.EndJamming();
         }
+        _jammingStatuses.Clear();
     }
 
     private void OnTriggerEnter(Collider other)
@@ -24,7 +25,7 @@ public class JammingArea : MonoBehaviour
         if (other.gameObject == Creater) return;
 
         // 既にジャミング付与済みの場合は処理しない
-        if (_addedJammingStatusMap.ContainsKey(other.gameObject)) return;
+        if (_jammingStatuses.ContainsKey(other.gameObject)) return;
 
         // プレイヤーかCPUのみ処理
         string tag = other.tag;
@@ -33,16 +34,16 @@ public class JammingArea : MonoBehaviour
         // ジャミングステータス付与
         JammingStatus status = new JammingStatus();
         other.GetComponent<DroneStatusComponent>().AddStatus(status, 9999);
-        _addedJammingStatusMap.Add(other.gameObject, status);
+        _jammingStatuses.Add(other.gameObject, status);
     }
 
     private void OnTriggerExit(Collider other)
     {
         // ジャミング解除
-        if (_addedJammingStatusMap.ContainsKey(other.gameObject))
+        if (_jammingStatuses.ContainsKey(other.gameObject))
         {
-            _addedJammingStatusMap[other.gameObject].EndJamming();
-            _addedJammingStatusMap.Remove(other.gameObject);
+            _jammingStatuses[other.gameObject].EndJamming();
+            _jammingStatuses.Remove(other.gameObject);
         }
     }
 }

@@ -105,6 +105,11 @@ public class DroneWeaponComponent : MonoBehaviour, IDroneComponent
     /// </summary>
     private ValueHistory<bool> _subShotHistory = new ValueHistory<bool>();
 
+    /// <summary>
+    /// 攻撃時に発行された移動速度変更ID
+    /// </summary>
+    private int _changeSpeedId = -1;
+
     // コンポーネントキャッシュ
     DroneMoveComponent _moveComponent = null;
 
@@ -162,7 +167,7 @@ public class DroneWeaponComponent : MonoBehaviour, IDroneComponent
             // 攻撃中は速度低下
             if (!_mainShotHistory.PreviousValue)
             {
-                _moveComponent.MoveSpeed *= MainSpeedDownPer;
+                _changeSpeedId = _moveComponent.ChangeMoveSpeedPercent(MainSpeedDownPer);
             }
 
             // メイン攻撃フラグを立てる
@@ -177,7 +182,7 @@ public class DroneWeaponComponent : MonoBehaviour, IDroneComponent
             // 攻撃中は速度低下
             if (!_subShotHistory.PreviousValue)
             {
-                _moveComponent.MoveSpeed *= SubSpeedDownPer;
+                _changeSpeedId = _moveComponent.ChangeMoveSpeedPercent(SubSpeedDownPer);
             }
 
             // サブ攻撃フラグを立てる
@@ -195,13 +200,13 @@ public class DroneWeaponComponent : MonoBehaviour, IDroneComponent
         // メイン武器の攻撃を停止した場合は速度を戻す
         if (!_mainShotHistory.CurrentValue && _mainShotHistory.PreviousValue)
         {
-            _moveComponent.MoveSpeed *= 1 / MainSpeedDownPer;
+            _moveComponent.ResetMoveSpeed(_changeSpeedId);
         }
 
         // サブ武器の攻撃を停止した場合は速度を戻す
         if (!_subShotHistory.CurrentValue && _subShotHistory.PreviousValue)
         {
-            _moveComponent.MoveSpeed *= 1 / SubSpeedDownPer;
+            _moveComponent.ResetMoveSpeed(_changeSpeedId);
         }
 
         // 武器使用履歴更新

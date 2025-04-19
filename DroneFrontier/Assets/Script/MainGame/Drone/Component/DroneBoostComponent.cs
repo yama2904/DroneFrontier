@@ -79,6 +79,11 @@ public class DroneBoostComponent : MonoBehaviour, IDroneComponent
     private int _boostSEId = -1;
 
     /// <summary>
+    /// ブースト時に発行された移動速度変更ID
+    /// </summary>
+    private int _changeSpeedId = -1;
+
+    /// <summary>
     /// ブースト中であるか
     /// </summary>
     private bool _isBoost = false;
@@ -101,7 +106,7 @@ public class DroneBoostComponent : MonoBehaviour, IDroneComponent
         if (_gaugeValue < BOOSTABLE_MIN_GAUGE) return;
 
         // 移動速度上昇
-        _moveComponent.MoveSpeed *= _boostAccele;
+        _changeSpeedId = _moveComponent.ChangeMoveSpeedPercent(_boostAccele);
         
         // ブーストSE再生
         _boostSEId = _soundComponent.Play(SoundManager.SE.Boost, 0.15f, true);
@@ -119,7 +124,7 @@ public class DroneBoostComponent : MonoBehaviour, IDroneComponent
         if (!_isBoost) return;
 
         // 移動速度を戻す
-        _moveComponent.MoveSpeed *= 1 / _boostAccele;
+        _moveComponent.ResetMoveSpeed(_changeSpeedId);
 
         // ブーストSE停止
         _soundComponent.StopSE(_boostSEId);

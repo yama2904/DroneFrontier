@@ -5,8 +5,6 @@ using UnityEngine.UI;
 
 public class BarrierWeakStatus : IDroneStatusChange
 {
-    public StatusChangeType StatusType => StatusChangeType.BarrierWeak;
-
     public event EventHandler StatusEndEvent;
 
     private DroneBarrierComponent _barrier = null;

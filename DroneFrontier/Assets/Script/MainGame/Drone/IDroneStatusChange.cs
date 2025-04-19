@@ -9,11 +9,6 @@ using UnityEngine.UI;
 public interface IDroneStatusChange
 {
     /// <summary>
-    /// ステータス変化種類
-    /// </summary>
-    StatusChangeType StatusType { get; }
-
-    /// <summary>
     /// 状態異常アイコン生成
     /// </summary>
     /// <returns></returns>

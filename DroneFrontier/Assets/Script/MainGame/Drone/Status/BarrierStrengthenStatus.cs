@@ -4,8 +4,6 @@ using UnityEngine.UI;
 
 public class BarrierStrengthenStatus : IDroneStatusChange
 {
-    public StatusChangeType StatusType => StatusChangeType.BarrierStrenghen;
-
     public event EventHandler StatusEndEvent;
 
     private DroneBarrierComponent _barrier = null;
