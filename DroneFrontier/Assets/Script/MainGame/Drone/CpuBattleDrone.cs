@@ -153,18 +153,18 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
     private CancellationTokenSource _moveCancel = new CancellationTokenSource();
 
     // コンポーネントキャッシュ
-    Transform _transform = null;
-    Rigidbody _rigidbody = null;
-    Animator _animator = null;
-    DroneMoveComponent _moveComponent = null;
-    DroneRotateComponent _rotateComponent = null;
-    DroneDamageComponent _damageComponent = null;
-    DroneSoundComponent _soundComponent = null;
-    DroneLockOnComponent _lockOnComponent = null;
-    DroneRadarComponent _radarComponent = null;
-    DroneItemComponent _itemComponent = null;
-    DroneWeaponComponent _weaponComponent = null;
-    DroneBoostComponent _boostComponent = null;
+    private Transform _transform = null;
+    private Rigidbody _rigidbody = null;
+    private Animator _animator = null;
+    private DroneMoveComponent _moveComponent = null;
+    private DroneRotateComponent _rotateComponent = null;
+    private DroneDamageComponent _damageComponent = null;
+    private DroneSoundComponent _soundComponent = null;
+    private DroneLockOnComponent _lockOnComponent = null;
+    private DroneRadarComponent _radarComponent = null;
+    private DroneItemComponent _itemComponent = null;
+    private DroneWeaponComponent _weaponComponent = null;
+    private DroneBoostComponent _boostComponent = null;
 
     public void Initialize(string name, WeaponType subWeapon, int stock)
     {
@@ -384,8 +384,6 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
 
             // プロペラ減速
             _animator.speed *= 0.993f;
-
-            return;
         }
     }
 

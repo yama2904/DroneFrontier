@@ -95,7 +95,10 @@ namespace Network
 
         public virtual void ImportSpawnData(object data) { }
 
-        public virtual void Initialize() { }
+        /// <summary>
+        /// オブジェクト生成パケットによるスポーン時の初期化
+        /// </summary>
+        public virtual void InitializeSpawn() { }
 
         protected virtual void Awake()
         {

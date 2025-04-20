@@ -73,7 +73,9 @@ namespace Network
         /// 通信中にエラーが発生したか
         /// </summary>
         private bool _isError = false;
-        
+
+        public void Initialize() { }
+
         /// <summary>
         /// 決定選択
         /// </summary>

@@ -156,18 +156,18 @@ namespace Network
         private readonly object _lock = new object();
 
         // コンポーネントキャッシュ
-        Rigidbody _rigidbody = null;
-        Animator _animator = null;
-        AudioListener _listener = null;
-        DroneMoveComponent _moveComponent = null;
-        DroneRotateComponent _rotateComponent = null;
-        DroneSoundComponent _soundComponent = null;
-        DroneLockOnComponent _lockOnComponent = null;
-        DroneRadarComponent _radarComponent = null;
-        DroneItemComponent _itemComponent = null;
-        DroneWeaponComponent _weaponComponent = null;
-        DroneBoostComponent _boostComponent = null;
-        DroneBarrierComponent _barrierComponent = null;
+        private Rigidbody _rigidbody = null;
+        private Animator _animator = null;
+        private AudioListener _listener = null;
+        private DroneMoveComponent _moveComponent = null;
+        private DroneRotateComponent _rotateComponent = null;
+        private DroneSoundComponent _soundComponent = null;
+        private DroneLockOnComponent _lockOnComponent = null;
+        private DroneRadarComponent _radarComponent = null;
+        private DroneItemComponent _itemComponent = null;
+        private DroneWeaponComponent _weaponComponent = null;
+        private DroneBoostComponent _boostComponent = null;
+        private DroneBarrierComponent _barrierComponent = null;
 
         public override string GetAddressKey()
         {
@@ -194,10 +194,7 @@ namespace Network
             enabled = Convert.ToBoolean(dic["enabled"]);
         }
 
-        /// <summary>
-        /// クライアントスポーン時の初期化
-        /// </summary>
-        public override void Initialize()
+        public override void InitializeSpawn()
         {
             Initialize(Name, SubWeapon, StockNum);
         }

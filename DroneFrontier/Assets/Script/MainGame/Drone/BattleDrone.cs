@@ -107,16 +107,16 @@ public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
     private bool _isDestroy = false;
 
     // コンポーネントキャッシュ
-    Rigidbody _rigidbody = null;
-    Animator _animator = null;
-    DroneMoveComponent _moveComponent = null;
-    DroneRotateComponent _rotateComponent = null;
-    DroneSoundComponent _soundComponent = null;
-    DroneLockOnComponent _lockOnComponent = null;
-    DroneRadarComponent _radarComponent = null;
-    DroneItemComponent _itemComponent = null;
-    DroneWeaponComponent _weaponComponent = null;
-    DroneBoostComponent _boostComponent = null;
+    private Rigidbody _rigidbody = null;
+    private Animator _animator = null;
+    private DroneMoveComponent _moveComponent = null;
+    private DroneRotateComponent _rotateComponent = null;
+    private DroneSoundComponent _soundComponent = null;
+    private DroneLockOnComponent _lockOnComponent = null;
+    private DroneRadarComponent _radarComponent = null;
+    private DroneItemComponent _itemComponent = null;
+    private DroneWeaponComponent _weaponComponent = null;
+    private DroneBoostComponent _boostComponent = null;
 
     public void Initialize(string name, WeaponType subWeapon, int stock)
     {

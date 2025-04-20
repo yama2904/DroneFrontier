@@ -75,7 +75,7 @@ namespace Network
                 spawn.OnDestroyObject += OnDestroy;
 
                 // 初期化
-                spawn.Initialize();
+                spawn.InitializeSpawn();
 
                 // 生成オブジェクト一覧に追加
                 SpawnedObjects.Add(spawn.ObjectId, spawn);

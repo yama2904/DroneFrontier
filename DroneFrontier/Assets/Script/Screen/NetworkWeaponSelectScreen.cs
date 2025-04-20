@@ -87,6 +87,8 @@ namespace Network
         /// </summary>
         private bool _isError = false;
 
+        public void Initialize() { }
+
         private void Update()
         {
             if (_isError && Input.GetMouseButtonUp(0))
