@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Common;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -158,7 +159,7 @@ public class CPUSelectScreen : MonoBehaviour, IScreen
         // 同じ武器が選ばれた場合は処理しない
         if (_cpuWeaponList[cpuNumber - 1] == Weapon.SHOTGUN) return;
 
-        //SE再生
+        // SE再生
         SoundManager.Play(SoundManager.SE.Select);
 
         // 武器更新

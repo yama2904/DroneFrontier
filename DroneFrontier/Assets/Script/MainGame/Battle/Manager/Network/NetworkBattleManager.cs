@@ -1,4 +1,6 @@
-﻿using Cysharp.Threading.Tasks;
+﻿using Common;
+using Cysharp.Threading.Tasks;
+using Drone.Battle.Network;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -321,12 +323,6 @@ namespace Network
                 {
                     // ★ToDo:観戦送信
                 }
-            }
-            else
-            {
-                // ドローン初期化
-                respawnDrone.enabled = true;
-                NetworkObjectSpawner.Spawn(respawnDrone);
             }
 
             // 破壊されたドローン情報更新

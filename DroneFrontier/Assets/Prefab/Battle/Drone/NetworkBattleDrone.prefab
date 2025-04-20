@@ -315,7 +315,7 @@ MonoBehaviour:
   _stockText: {fileID: 7646116371101854067}
   _searchComponent: {fileID: 8076797654263036361}
   _camera: {fileID: 2032111343277000741}
-  _uiCanvas: {fileID: 2857361770926363682}
+  _canvas: {fileID: 969262399878152283}
   _hp: 100
   _stockNum: 2
   _syncStatusInterval: 1
@@ -375,9 +375,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _mainWeaponPos: {fileID: 7507649623529911125}
   _subWeaponPos: {fileID: 6426950336976273560}
-  _mainShotPos: {fileID: 5342571190570849000}
-  _subShotPos: {fileID: 4376204232206925555}
-  _bulletUICanvs: {fileID: 969262399878152283}
 --- !u!114 &7478387226167914077
 MonoBehaviour:
   m_ObjectHideFlags: 0

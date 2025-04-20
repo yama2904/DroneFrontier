@@ -1,3 +1,4 @@
+using Drone.Battle;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
@@ -23,7 +24,7 @@ public class WeaponCreater
     /// </summary>
     private const string LASER_ADDRESS_KEY = "LaserWeapon";
 
-    public static GameObject CreateWeapon(WeaponType weapon)
+    public static IWeapon CreateWeapon(WeaponType weapon)
     {
         // 武器オブジェクト読み込み
         string addressKey = "";
@@ -47,6 +48,6 @@ public class WeaponCreater
         }
 
         // 武器オブジェクト読み込み
-        return Addressables.InstantiateAsync(addressKey).WaitForCompletion();
+        return Addressables.InstantiateAsync(addressKey).WaitForCompletion().GetComponent<IWeapon>();
     }
 }

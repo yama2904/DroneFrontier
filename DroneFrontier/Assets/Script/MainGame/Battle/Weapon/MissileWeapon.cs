@@ -1,55 +1,11 @@
-﻿using System;
+﻿using Drone.Battle;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class MissileWeapon : MonoBehaviour, IWeapon
 {
-    public GameObject Owner { get; set; } = null;
-
-    public Transform ShotPosition
-    {
-        get { return _shotPosition; }
-        set { _shotPosition = value; }
-    }
-
-    public Canvas BulletUICanvas
-    {
-        get
-        {
-            return _bulletUICanvas;
-        }
-        set
-        {
-            _bulletUICanvas = value;
-            if (_bulletUICanvas == null) return;
-
-            // 残弾UI作成
-            _bulletUIs = new Image[_maxBulletNum];
-            for (int i = 0; i < _maxBulletNum; i++)
-            {
-                // UIの配置位置計算
-                float x = UI_WIDTH * i + UI_WIDTH * 0.5f;
-                float y = UI_HEIGHT * 0.5f;
-
-                // 背景UIの生成
-                Image back = Instantiate(_bulletBackUI);
-                back.transform.SetParent(_bulletUICanvas.transform);
-                back.transform.localPosition = new Vector3(x, y, 0);
-                back.transform.localRotation = Quaternion.identity;
-
-                // 前面UIの生成
-                Image front = Instantiate(_bulletFrontUI);
-                front.transform.SetParent(_bulletUICanvas.transform);
-                front.transform.localPosition = new Vector3(x, y, 0);
-                front.transform.localRotation = Quaternion.identity;
-
-                // 残弾UIに追加
-                _bulletUIs[i] = front.GetComponent<Image>();
-                _bulletUIs[i].fillAmount = 1f;
-            }
-        }
-    }
-    private Canvas _bulletUICanvas = null;
+    public GameObject Owner { get; private set; } = null;
 
     public event EventHandler OnBulletFull;
 
@@ -122,9 +78,50 @@ public class MissileWeapon : MonoBehaviour, IWeapon
     private int _hasBulletNum = 0;
 
     /// <summary>
+    /// 武器所有者Canvas
+    /// </summary>
+    private Canvas _bulletUICanvas = null;
+
+    /// <summary>
     /// 各残弾UI
     /// </summary>
     private Image[] _bulletUIs = null;
+
+    public void Initialize(GameObject owner)
+    {
+        Owner = owner;
+
+        // ドローンの場合残弾UI作成
+        if (owner.TryGetComponent<IBattleDrone>(out var drone))
+        {
+            if (drone.Canvas == null) return;
+
+            _bulletUICanvas = drone.Canvas;
+            _bulletUIs = new Image[_maxBulletNum];
+            for (int i = 0; i < _maxBulletNum; i++)
+            {
+                // UIの配置位置計算
+                float x = UI_WIDTH * i + UI_WIDTH * 0.5f;
+                float y = UI_HEIGHT * 0.5f;
+
+                // 背景UIの生成
+                Image back = Instantiate(_bulletBackUI);
+                back.transform.SetParent(_bulletUICanvas.transform);
+                back.transform.localPosition = new Vector3(x, y, 0);
+                back.transform.localRotation = Quaternion.identity;
+
+                // 前面UIの生成
+                Image front = Instantiate(_bulletFrontUI);
+                front.transform.SetParent(_bulletUICanvas.transform);
+                front.transform.localPosition = new Vector3(x, y, 0);
+                front.transform.localRotation = Quaternion.identity;
+
+                // 残弾UIに追加
+                _bulletUIs[i] = front.GetComponent<Image>();
+                _bulletUIs[i].fillAmount = 1f;
+            }
+        }
+    }
 
     public void Shot(GameObject target = null)
     {
@@ -135,7 +132,7 @@ public class MissileWeapon : MonoBehaviour, IWeapon
         if (_hasBulletNum <= 0) return;
 
         // 弾丸生成
-        IBullet bullet = Instantiate(_bullet, ShotPosition.position, ShotPosition.rotation).GetComponent<IBullet>();
+        IBullet bullet = Instantiate(_bullet, _shotPosition.position, _shotPosition.rotation).GetComponent<IBullet>();
         bullet.Shot(Owner, _damage, _speed, _trackingPower, target);
         (bullet as MissileBullet).ExplosionSec = _explosionSec; // ※要検討
 

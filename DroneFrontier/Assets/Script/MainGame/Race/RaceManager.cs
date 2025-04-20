@@ -73,7 +73,7 @@ namespace Online
         public static void AddPlayerData(RaceDrone drone, NetworkConnection conn)
         {
             //既にリストにあったら処理しない
-            if (serverPlayerDatas.FindIndex(pd => pd.drone.netId == drone.netId) >= 0) return;
+            //if (serverPlayerDatas.FindIndex(pd => pd.drone.netId == drone.netId) >= 0) return;
 
             serverPlayerDatas.Add(new ServerPlayerData
             {
@@ -85,16 +85,16 @@ namespace Online
         //ゴールしたプレイヤーを登録
         public void SetGoalDrone(uint netId)
         {
-            int index = serverPlayerDatas.FindIndex(playerData => playerData.drone.netId == netId);
-            if (index == -1) return;  //対応するドローンがなかったら処理しない
+            //int index = serverPlayerDatas.FindIndex(playerData => playerData.drone.netId == netId);
+            //if (index == -1) return;  //対応するドローンがなかったら処理しない
 
-            ServerPlayerData pd = serverPlayerDatas[index];  //名前省略
-            if (pd.isGoal) return;  //既にゴール処理を行っていたら処理しない
+            //ServerPlayerData pd = serverPlayerDatas[index];  //名前省略
+            //if (pd.isGoal) return;  //既にゴール処理を行っていたら処理しない
 
             //リスト情報の変更
             //pd.ranking = ServerPlayerData.goalNum + 1;
-            pd.isGoal = true;
-            ServerPlayerData.goalNum++;
+            //pd.isGoal = true;
+            //ServerPlayerData.goalNum++;
         }
 
 

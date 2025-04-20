@@ -1,55 +1,13 @@
-﻿using System;
+﻿using Common;
+using Drone;
+using Drone.Battle;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class ShotgunWeapon : MonoBehaviour, IWeapon
 {
-    public GameObject Owner { get; set; } = null;
-
-    public Transform ShotPosition
-    {
-        get { return _shotPosition; }
-        set { _shotPosition = value; }
-    }
-
-    public Canvas BulletUICanvas
-    {
-        get
-        {
-            return _bulletUICanvas;
-        }
-        set
-        {
-            _bulletUICanvas = value;
-            if (_bulletUICanvas == null) return;
-
-            // 残弾UI作成
-            _bulletUIs = new Image[_maxBulletNum];
-            for (int i = 0; i < _maxBulletNum; i++)
-            {
-                // UIの配置位置計算
-                float x = UI_WIDTH * i + UI_WIDTH * 0.5f;
-                float y = UI_HEIGHT * 0.5f;
-
-                // 背景UIの生成
-                Image back = Instantiate(_bulletBackUI);
-                back.transform.SetParent(_bulletUICanvas.transform);
-                back.transform.localPosition = new Vector3(x, y, 0);
-                back.transform.localRotation = Quaternion.identity;
-
-                // 前面UIの生成
-                Image front = Instantiate(_bulletFrontUI);
-                front.transform.SetParent(_bulletUICanvas.transform);
-                front.transform.localPosition = new Vector3(x, y, 0);
-                front.transform.localRotation = Quaternion.identity;
-
-                // 残弾UIに追加
-                _bulletUIs[i] = front.GetComponent<Image>();
-                _bulletUIs[i].fillAmount = 1f;
-            }
-        }
-    }
-    private Canvas _bulletUICanvas = null;
+    public GameObject Owner { get; private set; } = null;
 
     public event EventHandler OnBulletFull;
 
@@ -122,11 +80,60 @@ public class ShotgunWeapon : MonoBehaviour, IWeapon
     private int _hasBulletNum = 0;
 
     /// <summary>
-    /// 各残弾UI
+    /// 武器所有者Canvas
     /// </summary>
+    private Canvas _bulletUICanvas = null;
+
+    /// <summary>
+    /// 各残弾UI
+    /// </summary>s
     private Image[] _bulletUIs = null;
 
     private AudioSource _audioSource = null;
+
+    public void Initialize(GameObject owner)
+    {
+        Owner = owner;
+
+        // ドローンの場合
+        if (owner.TryGetComponent<IBattleDrone>(out var drone))
+        {
+            // 残弾UI作成
+            if (drone.Canvas != null)
+            {
+                _bulletUICanvas = drone.Canvas;
+                _bulletUIs = new Image[_maxBulletNum];
+                for (int i = 0; i < _maxBulletNum; i++)
+                {
+                    // UIの配置位置計算
+                    float x = UI_WIDTH * i + UI_WIDTH * 0.5f;
+                    float y = UI_HEIGHT * 0.5f;
+
+                    // 背景UIの生成
+                    Image back = Instantiate(_bulletBackUI);
+                    back.transform.SetParent(_bulletUICanvas.transform);
+                    back.transform.localPosition = new Vector3(x, y, 0);
+                    back.transform.localRotation = Quaternion.identity;
+
+                    // 前面UIの生成
+                    Image front = Instantiate(_bulletFrontUI);
+                    front.transform.SetParent(_bulletUICanvas.transform);
+                    front.transform.localPosition = new Vector3(x, y, 0);
+                    front.transform.localRotation = Quaternion.identity;
+
+                    // 残弾UIに追加
+                    _bulletUIs[i] = front.GetComponent<Image>();
+                    _bulletUIs[i].fillAmount = 1f;
+                }
+            }
+
+            // ブーストを多少強化
+            DroneBoostComponent boost = owner.GetComponent<DroneBoostComponent>();
+            boost.BoostAccele *= 1.2f;
+            boost.MaxBoostTime *= 1.2f;
+            boost.MaxBoostRecastTime *= 0.8f;
+        }
+    }
 
     public void Shot(GameObject target = null)
     {
@@ -137,11 +144,11 @@ public class ShotgunWeapon : MonoBehaviour, IWeapon
         if (_hasBulletNum <= 0) return;
 
         // 敵の位置に応じて発射角度を修正
-        Quaternion rotation = ShotPosition.rotation;
+        Quaternion rotation = _shotPosition.rotation;
         if (target != null)
         {
             // 追従対象への角度を計算
-            Vector3 diff = target.transform.position - ShotPosition.position;
+            Vector3 diff = target.transform.position - _shotPosition.position;
             rotation = Quaternion.LookRotation(diff);
         }
 
@@ -151,7 +158,7 @@ public class ShotgunWeapon : MonoBehaviour, IWeapon
             for (int y = -1; y <= 1; y++)
             {
                 // 弾丸生成
-                GameObject bullet = Instantiate(_bullet, ShotPosition.position, rotation);
+                GameObject bullet = Instantiate(_bullet, _shotPosition.position, rotation);
                 bullet.GetComponent<IBullet>().Shot(Owner, _damage, _speed);
 
                 // ブレ幅設定

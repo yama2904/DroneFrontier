@@ -1,4 +1,6 @@
-﻿using Cysharp.Threading.Tasks;
+﻿using Common;
+using Cysharp.Threading.Tasks;
+using Drone.Battle;
 using System;
 using System.Threading;
 using UnityEngine;
@@ -127,7 +129,7 @@ public class MissileBullet : MonoBehaviour, IBullet
         // ダメージ可能インターフェースが実装されている場合はダメージを与える
         if (other.TryGetComponent(out IDamageable damageable))
         {
-            if (damageable.NoDamageObject == Shooter) return;
+            if (damageable.Owner == Shooter) return;
             damageable.Damage(Shooter, _damage);
         }
 

@@ -1,5 +1,5 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
+using Common;
 using UnityEngine;
 using Mirror;
 
@@ -50,9 +50,9 @@ namespace Online
         {
             if (collision.gameObject.CompareTag(TagNameConst.PLAYER))
             {
-                RaceDrone p = collision.gameObject.GetComponent<RaceDrone>();
-                if (!p.isLocalPlayer) return;
-                p.GetComponent<Rigidbody>().AddForce(p.transform.forward * power * -1, ForceMode.Impulse);
+                //RaceDrone p = collision.gameObject.GetComponent<RaceDrone>();
+                //if (!p.isLocalPlayer) return;
+                //p.GetComponent<Rigidbody>().AddForce(p.transform.forward * power * -1, ForceMode.Impulse);
             }
         }
     }

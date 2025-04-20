@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Common;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -67,7 +68,7 @@ public class WeaponSelectScreen : MonoBehaviour, IScreen
         WeaponType selectWeapon = WeaponType.SHOTGUN;
         if (_selectedWeapon == selectWeapon) return;
 
-        //SE再生
+        // SE再生
         SoundManager.Play(SoundManager.SE.Select);
 
         messageWindowText.text = SHOTGUN_TEXT;
@@ -80,7 +81,7 @@ public class WeaponSelectScreen : MonoBehaviour, IScreen
         WeaponType selectWeapon = WeaponType.MISSILE;
         if (_selectedWeapon == selectWeapon) return;
 
-        //SE再生
+        // SE再生
         SoundManager.Play(SoundManager.SE.Select);
 
         messageWindowText.text = MISSILE_TEXT;
@@ -93,7 +94,7 @@ public class WeaponSelectScreen : MonoBehaviour, IScreen
         WeaponType selectWeapon = WeaponType.LASER;
         if (_selectedWeapon == selectWeapon) return;
 
-        //SE再生
+        // SE再生
         SoundManager.Play(SoundManager.SE.Select);
 
         messageWindowText.text = LASER_TEXT;

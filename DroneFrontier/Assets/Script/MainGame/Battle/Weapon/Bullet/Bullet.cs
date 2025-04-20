@@ -1,3 +1,5 @@
+using Common;
+using Drone.Battle;
 using UnityEngine;
 
 public class Bullet : MonoBehaviour, IBullet
@@ -95,7 +97,7 @@ public class Bullet : MonoBehaviour, IBullet
         // ダメージ可能インターフェースが実装されている場合はダメージを与える
         if (other.TryGetComponent(out IDamageable damageable))
         {
-            if (damageable.NoDamageObject == Shooter) return;
+            if (damageable.Owner == Shooter) return;
             damageable.Damage(Shooter, _damage);
         }
 

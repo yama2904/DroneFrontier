@@ -1,15 +1,17 @@
-﻿using System;
+﻿using Common;
+using Drone.Battle;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class JammingBot : MonoBehaviour, ILockableOn, IRadarable, IDamageable
 {
+    public GameObject Owner => Creater;
+
     /// <summary>
     /// ジャミングボット生成直後の移動量
     /// </summary>
     private const int BOT_MOVE_VALUE = 60;
-
-    public GameObject NoDamageObject => Creater;
 
     /// <summary>
     /// ジャミングボットの残りHP
@@ -103,8 +105,11 @@ public class JammingBot : MonoBehaviour, ILockableOn, IRadarable, IDamageable
     /// </summary>
     private Rigidbody _rigidBody = null;
 
-    public void Damage(GameObject source, float value)
+    public bool Damage(GameObject source, float value)
     {
+        // 自オブジェクト生成者からはダメージを受けない
+        if (source == Creater) return false;
+
         // 小数点第2以下切り捨て
         value = Useful.Floor(value, 1);
         _hp -= value;
@@ -114,7 +119,7 @@ public class JammingBot : MonoBehaviour, ILockableOn, IRadarable, IDamageable
             Destroy(gameObject);
         }
 
-        //Debug.Log($"{name}に{value}のダメージ 残りHP:{_hp}");
+        return true;
     }
 
     private void Awake()

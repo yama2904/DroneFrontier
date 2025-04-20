@@ -1,13 +1,11 @@
-﻿using System;
+﻿using Common;
+using Drone.Battle;
+using System;
 using UnityEngine;
 
 public class GatlingWeapon : MonoBehaviour, IWeapon
 {
-    public GameObject Owner { get; set; } = null;
-
-    public Transform ShotPosition { get; set; } = null;
-
-    public Canvas BulletUICanvas { get; set; } = null;
+    public GameObject Owner { get; private set; } = null;
 
     public event EventHandler OnBulletFull;
 
@@ -49,13 +47,18 @@ public class GatlingWeapon : MonoBehaviour, IWeapon
     /// </summary>
     private float _shotTimer = 0;
 
+    public void Initialize(GameObject owner)
+    {
+        Owner = owner;
+    }
+
     public void Shot(GameObject target = null)
     {
         // 前回発射からの発射間隔チェック
         if (_shotTimer < _shotIntervalSec) return;
 
         // 弾丸発射
-        GameObject bullet = Instantiate(_bullet, ShotPosition.position, ShotPosition.rotation);
+        GameObject bullet = Instantiate(_bullet, _shotPosition.position, _shotPosition.rotation);
         bullet.GetComponent<IBullet>().Shot(Owner, _damage, _speed, _trackingPower, target);
 
         // 一定時間後弾丸削除
@@ -78,9 +81,6 @@ public class GatlingWeapon : MonoBehaviour, IWeapon
         // コンポーネント取得
         _audioSource = GetComponent<AudioSource>();
         _audioSource.clip = SoundManager.GetAudioClip(SoundManager.SE.Gatling);
-
-        // 弾丸発射位置初期化
-        ShotPosition = _shotPosition;
     }
 
     private void Update()

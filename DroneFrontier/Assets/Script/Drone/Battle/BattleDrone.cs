@@ -1,0 +1,397 @@
+﻿using Common;
+using Cysharp.Threading.Tasks;
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+
+namespace Drone.Battle
+{
+    public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
+    {
+        #region public
+
+        public string Name { get; private set; } = "";
+
+        public float HP
+        {
+            get { return _hp; }
+            private set
+            {
+                _hp = value;
+                if (value < 0)
+                {
+                    _hp = 0;
+                }
+            }
+        }
+
+        public IWeapon MainWeapon { get; private set; }
+
+        public IWeapon SubWeapon { get; private set; }
+
+        public int StockNum => _stockNum;
+
+        public Canvas Canvas => _canvas;
+
+        public bool IsLockableOn { get; } = true;
+
+        public List<GameObject> NotLockableOnList { get; } = new List<GameObject>();
+
+        public IRadarable.ObjectType Type => IRadarable.ObjectType.Enemy;
+
+        public bool IsRadarable => true;
+
+        public List<GameObject> NotRadarableList { get; } = new List<GameObject>();
+
+        /// <summary>
+        /// ドローン破壊イベント
+        /// </summary>
+        public event EventHandler DroneDestroyEvent;
+
+        #endregion
+
+        /// <summary>
+        /// 所持アイテム番号
+        /// </summary>
+        private enum ItemNum
+        {
+            /// <summary>
+            /// アイテム1
+            /// </summary>
+            Item1,
+
+            /// <summary>
+            /// アイテム2
+            /// </summary>
+            Item2
+        }
+
+        [SerializeField, Tooltip("ドローン本体オブジェクト")]
+        private Transform _droneObject = null;
+
+        [SerializeField, Tooltip("ドローン死亡時の爆発オブジェクト")]
+        private GameObject _explosion = null;
+
+        [SerializeField, Tooltip("ストック数を表示するTextコンポーネント")]
+        private Text _stockText = null;
+
+        [SerializeField, Tooltip("オブジェクト探索コンポーネント")]
+        private ObjectSearchComponent _searchComponent = null;
+
+        [SerializeField, Tooltip("UI表示用Canvas")]
+        private Canvas _canvas = null;
+
+        [SerializeField, Tooltip("ドローンのHP")]
+        private float _hp = 100f;
+
+        [SerializeField, Tooltip("ストック数")]
+        private int _stockNum = 2;
+
+        /// <summary>
+        /// 入力情報
+        /// </summary>
+        private InputData _input = new InputData();
+
+        /// <summary>
+        /// 死亡フラグ
+        /// </summary>
+        private bool _isDestroy = false;
+
+        // コンポーネントキャッシュ
+        private Rigidbody _rigidbody = null;
+        private Animator _animator = null;
+        private DroneMoveComponent _moveComponent = null;
+        private DroneRotateComponent _rotateComponent = null;
+        private DroneSoundComponent _soundComponent = null;
+        private DroneLockOnComponent _lockOnComponent = null;
+        private DroneRadarComponent _radarComponent = null;
+        private DroneItemComponent _itemComponent = null;
+        private DroneWeaponComponent _weaponComponent = null;
+        private DroneBoostComponent _boostComponent = null;
+
+        public void Initialize(string name, IWeapon mainWeapon, IWeapon subWeapon, int stock)
+        {
+            // ドローン名設定
+            Name = name;
+
+            // メインウェポン設定
+            MainWeapon = mainWeapon;
+            MainWeapon.Initialize(gameObject);
+
+            // サブウェポン設定
+            SubWeapon = subWeapon;
+            SubWeapon.Initialize(gameObject);
+
+            // ストック数設定
+            _stockNum = stock;
+            _stockText.text = _stockNum.ToString();
+
+            // ロックオン・レーダー不可オブジェクトに自分を設定
+            NotLockableOnList.Add(gameObject);
+            NotRadarableList.Add(gameObject);
+
+            // オブジェクト探索イベント設定
+            _searchComponent.ObjectStayEvent += ObjectSearchEvent;
+
+            // コンポーネント初期化
+            _moveComponent.Initialize();
+            _rotateComponent.Initialize();
+            _soundComponent.Initialize();
+            _lockOnComponent.Initialize();
+            _radarComponent.Initialize();
+            _itemComponent.Initialize();
+            _weaponComponent.Initialize();
+            _boostComponent.Initialize();
+            GetComponent<DroneBarrierComponent>().Initialize();
+            GetComponent<DroneStatusComponent>().IsPlayer = true;
+
+            // プロペラ音再生
+            _soundComponent.Play(SoundManager.SE.Propeller, -1, true);
+        }
+
+        public void Damage(float value)
+        {
+            // ドローンが破壊されている場合は何もしない
+            if (_hp <= 0) return;
+
+            // 小数点第2以下切り捨てでダメージ適用
+            HP -= Useful.Floor(value, 1);
+
+            // HPが0になったら破壊処理
+            if (_hp <= 0)
+            {
+                Destroy().Forget();
+            }
+        }
+
+        private void Awake()
+        {
+            // コンポーネントの取得
+            _rigidbody = GetComponent<Rigidbody>();
+            _animator = GetComponent<Animator>();
+            _moveComponent = GetComponent<DroneMoveComponent>();
+            _rotateComponent = GetComponent<DroneRotateComponent>();
+            _soundComponent = GetComponent<DroneSoundComponent>();
+            _lockOnComponent = GetComponent<DroneLockOnComponent>();
+            _radarComponent = GetComponent<DroneRadarComponent>();
+            _itemComponent = GetComponent<DroneItemComponent>();
+            _weaponComponent = GetComponent<DroneWeaponComponent>();
+            _boostComponent = GetComponent<DroneBoostComponent>();
+        }
+
+        private void Update()
+        {
+            // 死亡処理中は操作不可
+            if (_isDestroy) return;
+
+            // 入力情報更新
+            _input.UpdateInput();
+
+            // ロックオン使用
+            if (_input.DownedKeys.Contains(KeyCode.LeftShift))
+            {
+                _lockOnComponent.StartLockOn();
+            }
+            // ロックオン解除
+            if (_input.UppedKeys.Contains(KeyCode.LeftShift))
+            {
+                _lockOnComponent.StopLockOn();
+            }
+
+            // レーダー使用
+            if (_input.DownedKeys.Contains(KeyCode.Q))
+            {
+                _soundComponent.Play(SoundManager.SE.Radar);
+                _radarComponent.StartRadar();
+            }
+            // レーダー終了
+            if (_input.UppedKeys.Contains(KeyCode.Q))
+            {
+                _radarComponent.StopRadar();
+            }
+
+            // メイン武器攻撃（サブ武器攻撃中の場合は不可）
+            if (_input.MouseButtonL && !_weaponComponent.ShootingSubWeapon)
+            {
+                _weaponComponent.Shot(DroneWeaponComponent.Weapon.MAIN, _lockOnComponent.Target);
+            }
+
+            // サブ武器攻撃（メイン武器攻撃中の場合は不可）
+            if (_input.MouseButtonR && !_weaponComponent.ShootingMainWeapon)
+            {
+                _weaponComponent.Shot(DroneWeaponComponent.Weapon.SUB, _lockOnComponent.Target);
+            }
+
+            // ブースト開始
+            if (_input.DownedKeys.Contains(KeyCode.Space))
+            {
+                _boostComponent.StartBoost();
+            }
+            // ブースト停止
+            if (_input.UppedKeys.Contains(KeyCode.Space))
+            {
+                _boostComponent.StopBoost();
+            }
+
+            // アイテム使用
+            if (_input.UppedKeys.Contains(KeyCode.Alpha1))
+            {
+                UseItem(ItemNum.Item1);
+            }
+            if (_input.UppedKeys.Contains(KeyCode.Alpha2))
+            {
+                UseItem(ItemNum.Item2);
+            }
+        }
+
+        private void FixedUpdate()
+        {
+            // 死亡処理
+            if (_isDestroy)
+            {
+                // 加速しながら落ちる
+                _rigidbody.AddForce(new Vector3(0, -400, 0), ForceMode.Acceleration);
+
+                // ドローンを傾ける
+                _rotateComponent.Rotate(Quaternion.Euler(28, -28, -28), 2 * Time.deltaTime);
+
+                // プロペラ減速
+                _animator.speed *= 0.993f;
+
+                return;
+            }
+
+            // 前進
+            if (_input.Keys.Contains(KeyCode.W))
+            {
+                _moveComponent.Move(DroneMoveComponent.Direction.Forward);
+            }
+
+            // 左移動
+            if (_input.Keys.Contains(KeyCode.A))
+            {
+                _moveComponent.Move(DroneMoveComponent.Direction.Left);
+            }
+
+            // 後退
+            if (_input.Keys.Contains(KeyCode.S))
+            {
+                _moveComponent.Move(DroneMoveComponent.Direction.Backwad);
+            }
+
+            // 右移動
+            if (_input.Keys.Contains(KeyCode.D))
+            {
+                _moveComponent.Move(DroneMoveComponent.Direction.Right);
+            }
+
+            // 上下移動
+            if (_input.MouseScrollDelta != 0)
+            {
+                if (_input.MouseScrollDelta > 0)
+                {
+                    _moveComponent.Move(DroneMoveComponent.Direction.Up);
+                }
+                else
+                {
+                    _moveComponent.Move(DroneMoveComponent.Direction.Down);
+                }
+            }
+            if (_input.Keys.Contains(KeyCode.R))
+            {
+                _moveComponent.Move(DroneMoveComponent.Direction.Up);
+            }
+            if (_input.Keys.Contains(KeyCode.F))
+            {
+                _moveComponent.Move(DroneMoveComponent.Direction.Down);
+            }
+
+            // マウスによる向き変更
+            _moveComponent.RotateDir(_input.MouseX, _input.MouseY);
+        }
+
+        /// <summary>
+        /// オブジェクト探索イベント
+        /// </summary>
+        /// <param name="other">発見オブジェクト</param>
+        private void ObjectSearchEvent(Collider other)
+        {
+            // 死亡処理中は操作不可
+            if (_isDestroy) return;
+
+            // Eキーでアイテム取得
+            if (_input.Keys.Contains(KeyCode.E))
+            {
+                if (other.CompareTag(TagNameConst.ITEM))
+                {
+                    ISpawnItem item = other.GetComponent<ISpawnItem>();
+                    if (_itemComponent.SetItem(item.DroneItem))
+                    {
+                        Destroy(other.gameObject);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 指定した番号のアイテム使用
+        /// </summary>
+        /// <param name="item">使用するアイテム番号</param>
+        private void UseItem(ItemNum item)
+        {
+            // アイテム枠にアイテムを持っていたら使用
+            if (_itemComponent.UseItem((int)item))
+            {
+                _soundComponent.Play(SoundManager.SE.UseItem);
+            }
+        }
+
+        /// <summary>
+        /// 死亡処理
+        /// </summary>
+        private async UniTask Destroy()
+        {
+            if (_isDestroy) return;
+
+            // 死亡フラグを立てる
+            _isDestroy = true;
+
+            // 移動停止
+            _rigidbody.velocity = Vector3.zero;
+
+            // コンポーネント停止
+            _moveComponent.enabled = false;
+            _boostComponent.enabled = false;
+            _lockOnComponent.StopLockOn();
+            _radarComponent.StopRadar();
+
+            // 死亡SE再生
+            _soundComponent.Play(SoundManager.SE.Death);
+
+            // 一定時間経過してから爆破
+            await UniTask.Delay(TimeSpan.FromSeconds(2.5f), ignoreTimeScale: true);
+
+            // ドローンの非表示
+            _droneObject.gameObject.SetActive(false);
+
+            // 当たり判定も消す
+            GetComponent<Collider>().enabled = false;
+
+            // 爆破生成
+            _explosion.SetActive(true);
+
+            // Update停止
+            enabled = false;
+
+            // 爆破後一定時間でオブジェクト破棄
+            await UniTask.Delay(5000);
+
+            // ドローン破壊イベント通知
+            DroneDestroyEvent?.Invoke(this, EventArgs.Empty);
+
+            // オブジェクト破棄
+            Destroy(gameObject);
+        }
+    }
+}

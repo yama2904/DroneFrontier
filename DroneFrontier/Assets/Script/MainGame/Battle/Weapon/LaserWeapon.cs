@@ -1,50 +1,26 @@
-﻿using System;
+﻿using Common;
+using Drone.Battle;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class LaserWeapon : MonoBehaviour, IWeapon
 {
-    public GameObject Owner { get; set; } = null;
-
-    public Transform ShotPosition
-    {
-        get { return _shotPosition; }
-        set { _shotPosition = value; }
-    }
-
-    public Canvas BulletUICanvas
-    {
-        get
-        {
-            return _bulletUICanvas;
-        }
-        set
-        {
-            _bulletUICanvas = value;
-            if (_bulletUICanvas == null) return;
-
-            // レーザーゲージUI生成
-            _laserGaugeUI = Instantiate(_bulletGaugeUI);
-            Image gaugeFrameUI = Instantiate(_bulletFrameUI);
-
-            // Canvasを親に設定
-            _laserGaugeUI.transform.SetParent(_bulletUICanvas.transform, false);
-            gaugeFrameUI.transform.SetParent(_bulletUICanvas.transform, false);
-
-            // レーザーゲージ量をUIに反映
-            _laserGaugeUI.fillAmount = _gaugeValue;
-        }
-    }
-    private Canvas _bulletUICanvas = null;
-
-    public event EventHandler OnBulletFull;
-
-    public event EventHandler OnBulletEmpty;
+    /// <summary>
+    /// レーザー攻撃中のスピード低下率
+    /// </summary>
+    private const float SPEED_DOWN_PER = 0.25f;
 
     /// <summary>
     /// 発射可能な最低ゲージ量
     /// </summary>
     private const float SHOOTABLE_MIN_GAUGE = 0.2f;
+
+    public GameObject Owner { get; private set; } = null;
+
+    public event EventHandler OnBulletFull;
+
+    public event EventHandler OnBulletEmpty;
 
     [SerializeField, Tooltip("弾丸")]
     private LaserBullet _bullet = null;
@@ -54,9 +30,6 @@ public class LaserWeapon : MonoBehaviour, IWeapon
 
     [SerializeField, Tooltip("残弾UI（背面）")]
     private Image _bulletFrameUI = null;
-
-    [SerializeField, Tooltip("レーザー発射座標")]
-    private Transform _shotPosition = null;
 
     [SerializeField, Tooltip("レーザーの最大発射可能時間")]
     private float _maxShotTime = 10f;
@@ -69,6 +42,11 @@ public class LaserWeapon : MonoBehaviour, IWeapon
 
     [SerializeField, Tooltip("レーザーが敵を追う速度")]
     private float _trackingPower = 0.01f;
+
+    /// <summary>
+    /// 武器所有者Canvas
+    /// </summary>
+    private Canvas _bulletUICanvas = null;
 
     /// <summary>
     /// レーザーゲージを表示するUI
@@ -94,6 +72,33 @@ public class LaserWeapon : MonoBehaviour, IWeapon
     /// Shotメソッド呼び出し履歴
     /// </summary>
     private ValueHistory<bool> _shotHistory = new ValueHistory<bool>();
+
+    public void Initialize(GameObject owner)
+    {
+        Owner = owner;
+
+        // ドローンの場合
+        if (owner.TryGetComponent<IBattleDrone>(out var drone))
+        {
+            // レーザーゲージUI生成
+            if (drone.Canvas != null)
+            {
+                _bulletUICanvas = drone.Canvas;
+                _laserGaugeUI = Instantiate(_bulletGaugeUI);
+                Image gaugeFrameUI = Instantiate(_bulletFrameUI);
+
+                // Canvasを親に設定
+                _laserGaugeUI.transform.SetParent(_bulletUICanvas.transform, false);
+                gaugeFrameUI.transform.SetParent(_bulletUICanvas.transform, false);
+
+                // レーザーゲージ量をUIに反映
+                _laserGaugeUI.fillAmount = _gaugeValue;
+            }
+
+            // 攻撃中の移動低下率設定
+            owner.GetComponent<DroneWeaponComponent>().SubSpeedDownPer = SPEED_DOWN_PER;
+        }
+    }
 
     public void Shot(GameObject target = null)
     {

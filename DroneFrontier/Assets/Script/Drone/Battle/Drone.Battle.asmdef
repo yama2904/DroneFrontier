@@ -1,0 +1,21 @@
+{
+    "name": "Drone.Battle",
+    "rootNamespace": "Drone.Battle",
+    "references": [
+        "GUID:b57510a51556f804d89a23b5f2c2dd28",
+        "GUID:b370c5702eb754c418446b2d2f8432dc",
+        "GUID:f554c02edefae634ea265b95410d3a82",
+        "GUID:f51ebe6a0ceec4240a699833d6309b23",
+        "GUID:9e24947de15b9834991c9d8411ea37cf",
+        "GUID:84651a3751eca9349aac36a66bba901b"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

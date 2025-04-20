@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Common;
+using Drone.Battle;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -321,10 +323,10 @@ public class LaserBullet : MonoBehaviour, IBullet
             if (tag == TagNameConst.JAMMING_AREA) continue;     // ジャミングエリア除外
             if (tag == TagNameConst.NOT_COLLISION) continue;
 
-            // レーザー発射元オブジェクトを非ダメージ指定されている場合はヒットしない
+            // 自分の所有者にはヒットさせない
             if (t.TryGetComponent(out IDamageable damageable))
             {
-                if (damageable.NoDamageObject == Shooter) continue;
+                if (damageable.Owner == Shooter) continue;
             }
 
             // 最小距離の場合は取得
