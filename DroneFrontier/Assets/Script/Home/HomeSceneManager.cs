@@ -71,9 +71,9 @@ public class HomeSceneManager : MonoBehaviour
 
     #region ボタンイベント
 
-    /// <summary>
-    /// バトルモード選択
-    /// </summary>
+        /// <summary>
+        /// バトルモード選択
+        /// </summary>
     public void ClickBattle()
     {
         SoundManager.Play(SoundManager.SE.Select);

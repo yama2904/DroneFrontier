@@ -7,15 +7,14 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using UnityEngine.UI;
 
 namespace Drone.Battle.Network
 {
-    public class NetworkBattleDrone : MyNetworkBehaviour, IBattleDrone, ILockableOn, IRadarable
+    public class NetworkBattleDrone : NetworkDrone, IBattleDrone, ILockableOn, IRadarable
     {
         #region public
-
-        public string Name { get; private set; } = "";
 
         public float HP
         {
@@ -49,35 +48,6 @@ namespace Drone.Battle.Network
         public List<GameObject> NotRadarableList { get; } = new List<GameObject>();
 
         /// <summary>
-        /// 操作するドローンか
-        /// </summary>
-        public bool IsControl
-        {
-            get { return _isControl; }
-            set
-            {
-                IsWatch = value;
-                _isControl = value;
-            }
-        }
-        private bool _isControl = false;
-
-        /// <summary>
-        /// このドローンを見るか
-        /// </summary>
-        public bool IsWatch
-        {
-            get { return _isWatch; }
-            set
-            {
-                _camera.depth = value ? 5 : 0;
-                _listener.enabled = value;
-                _isWatch = value;
-            }
-        }
-        private bool _isWatch = false;
-
-        /// <summary>
         /// ドローン破壊イベント
         /// </summary>
         public event EventHandler DroneDestroyEvent;
@@ -100,9 +70,6 @@ namespace Drone.Battle.Network
             Item2
         }
 
-        [SerializeField, Tooltip("ドローン本体オブジェクト")]
-        private Transform _droneObject = null;
-
         [SerializeField, Tooltip("ドローン死亡時の爆発オブジェクト")]
         private GameObject _explosion = null;
 
@@ -112,12 +79,6 @@ namespace Drone.Battle.Network
         [SerializeField, Tooltip("オブジェクト探索コンポーネント")]
         private ObjectSearchComponent _searchComponent = null;
 
-        [SerializeField, Tooltip("カメラ")]
-        private Camera _camera = null;
-
-        [SerializeField, Tooltip("UI表示用Canvas")]
-        private Canvas _canvas = null;
-
         [SerializeField, Tooltip("ドローンのHP")]
         private float _hp = 100f;
 
@@ -126,11 +87,6 @@ namespace Drone.Battle.Network
 
         [SerializeField, Tooltip("ステータス同期間隔（秒）")]
         private int _syncStatusInterval = 1;
-
-        /// <summary>
-        /// 入力情報
-        /// </summary>
-        private InputData _input = new InputData();
 
         /// <summary>
         /// 死亡時に発行するキャンセル
@@ -145,23 +101,48 @@ namespace Drone.Battle.Network
         private readonly object _lock = new object();
 
         // コンポーネントキャッシュ
-        private Rigidbody _rigidbody = null;
         private Animator _animator = null;
-        private AudioListener _listener = null;
-        private DroneMoveComponent _moveComponent = null;
-        private DroneRotateComponent _rotateComponent = null;
-        private DroneSoundComponent _soundComponent = null;
         private DroneLockOnComponent _lockOnComponent = null;
         private DroneRadarComponent _radarComponent = null;
         private DroneItemComponent _itemComponent = null;
         private DroneWeaponComponent _weaponComponent = null;
-        private DroneBoostComponent _boostComponent = null;
         private DroneBarrierComponent _barrierComponent = null;
+
+        public override string GetAddressKey()
+        {
+            return "NetworkBattleDrone";
+        }
+
+        public override object CreateSpawnData()
+        {
+            return new Dictionary<string, object>()
+            {
+                { "Name", Name },
+                { "MainWeapon", MainWeapon.GetAddressKey() },
+                { "SubWeapon", SubWeapon.GetAddressKey() },
+                { "Stock", StockNum },
+                { "enabled", enabled }
+            };
+        }
+
+        public override void ImportSpawnData(object data)
+        {
+            var dic = data as Dictionary<string, object>;
+            Name = (string)dic["Name"];
+            MainWeapon = Addressables.InstantiateAsync((string)dic["MainWeapon"]).WaitForCompletion().GetComponent<IWeapon>();
+            SubWeapon = Addressables.InstantiateAsync((string)dic["SubWeapon"]).WaitForCompletion().GetComponent<IWeapon>();
+            _stockNum = Convert.ToInt32(dic["Stock"]);
+            enabled = Convert.ToBoolean(dic["enabled"]);
+        }
+
+        public override void InitializeSpawn()
+        {
+            Initialize(Name, MainWeapon, SubWeapon, StockNum);
+        }
 
         public void Initialize(string name, IWeapon mainWeapon, IWeapon subWeapon, int stock)
         {
-            // ドローン名設定
-            Name = name;
+            base.Initialize(name);
 
             // メインウェポン設定
             MainWeapon = mainWeapon;
@@ -176,17 +157,11 @@ namespace Drone.Battle.Network
             _stockText.text = _stockNum.ToString();
 
             // コンポーネントの取得
-            _rigidbody = GetComponent<Rigidbody>();
             _animator = GetComponent<Animator>();
-            _listener = GetComponent<AudioListener>();
-            _moveComponent = GetComponent<DroneMoveComponent>();
-            _rotateComponent = GetComponent<DroneRotateComponent>();
-            _soundComponent = GetComponent<DroneSoundComponent>();
             _lockOnComponent = GetComponent<DroneLockOnComponent>();
             _radarComponent = GetComponent<DroneRadarComponent>();
             _itemComponent = GetComponent<DroneItemComponent>();
             _weaponComponent = GetComponent<DroneWeaponComponent>();
-            _boostComponent = GetComponent<DroneBoostComponent>();
             _barrierComponent = GetComponent<DroneBarrierComponent>();
 
             // ロックオン・レーダー不可オブジェクトに自分を設定
@@ -207,13 +182,11 @@ namespace Drone.Battle.Network
             if (Name == MyNetworkManager.Singleton.MyPlayerName)
             {
                 IsControl = true;
-                IsSyncPosition = true;
             }
 
-            // 自プレイヤーの場合
-            if (_isControl)
+            // 自プレイヤーの場合は定期的にステータス同期
+            if (IsControl)
             {
-                // 定期的にステータス同期
                 UniTask.Void(async () =>
                 {
                     while (true)
@@ -224,34 +197,14 @@ namespace Drone.Battle.Network
                     }
                 });
             }
-            else
-            {
-                // 他プレイヤーの場合
-
-                // UI非表示
-                _canvas.enabled = false;
-
-                // 受信イベント設定
-                MyNetworkManager.Singleton.OnUdpReceiveOnMainThread += OnReceiveUdp;
-
-                // 補間をオフにしないと瞬間移動する
-                _rigidbody.interpolation = RigidbodyInterpolation.None;
-            }
 
             // コンポーネント初期化
-            _moveComponent.Initialize();
-            _rotateComponent.Initialize();
-            _soundComponent.Initialize();
             _lockOnComponent.Initialize();
             _radarComponent.Initialize();
             _itemComponent.Initialize();
             _weaponComponent.Initialize();
-            _boostComponent.Initialize();
             _barrierComponent.Initialize();
             GetComponent<DroneStatusComponent>().IsPlayer = IsControl;
-
-            // プロペラ音再生
-            _soundComponent.Play(SoundManager.SE.Propeller, -1, true);
         }
 
         public void Damage(float value)
@@ -269,16 +222,12 @@ namespace Drone.Battle.Network
             }
         }
 
-        protected override void Awake()
-        {
-            base.Awake();
-            enabled = false;
-        }
-
-        private void Update()
+        protected override void Update()
         {
             // 死亡処理中は操作不可
             if (_isDestroy) return;
+
+            base.Update();
 
             // メイン武器攻撃（サブ武器攻撃中の場合は不可）
             if (_input.MouseButtonL && !_weaponComponent.ShootingSubWeapon)
@@ -292,14 +241,12 @@ namespace Drone.Battle.Network
                 _weaponComponent.Shot(DroneWeaponComponent.Weapon.SUB, _lockOnComponent.Target);
             }
 
-            if (_isControl)
+            if (IsControl)
             {
                 bool sendPacket = false;
 
                 bool startLockOn = false;
                 bool stopLockOn = false;
-                bool startBoost = false;
-                bool stopBoost = false;
                 bool useItem1 = false;
                 bool useItem2 = false;
 
@@ -330,21 +277,6 @@ namespace Drone.Battle.Network
                     _radarComponent.StopRadar();
                 }
 
-                // ブースト開始
-                if (_input.DownedKeys.Contains(KeyCode.Space))
-                {
-                    _boostComponent.StartBoost();
-                    startBoost = true;
-                    sendPacket = true;
-                }
-                // ブースト停止
-                if (_input.UppedKeys.Contains(KeyCode.Space))
-                {
-                    _boostComponent.StopBoost();
-                    stopBoost = true;
-                    sendPacket = true;
-                }
-
                 // アイテム使用
                 if (_input.UppedKeys.Contains(KeyCode.Alpha1))
                 {
@@ -359,16 +291,13 @@ namespace Drone.Battle.Network
                     sendPacket = true;
                 }
 
-                // 入力情報更新
-                _input.UpdateInput();
-
                 // アクション情報送信
                 if (sendPacket)
-                    MyNetworkManager.Singleton.SendToAll(new DroneActionPacket(startLockOn, stopLockOn, startBoost, stopBoost, useItem1, useItem2));
+                    MyNetworkManager.Singleton.SendToAll(new DroneActionPacket(startLockOn, stopLockOn, useItem1, useItem2));
             }
         }
 
-        private void FixedUpdate()
+        protected override void FixedUpdate()
         {
             // 死亡処理
             if (_isDestroy)
@@ -385,58 +314,7 @@ namespace Drone.Battle.Network
                 return;
             }
 
-            // 前進
-            if (_input.Keys.Contains(KeyCode.W))
-            {
-                _moveComponent.Move(DroneMoveComponent.Direction.Forward);
-            }
-
-            // 左移動
-            if (_input.Keys.Contains(KeyCode.A))
-            {
-                _moveComponent.Move(DroneMoveComponent.Direction.Left);
-            }
-
-            // 後退
-            if (_input.Keys.Contains(KeyCode.S))
-            {
-                _moveComponent.Move(DroneMoveComponent.Direction.Backwad);
-            }
-
-            // 右移動
-            if (_input.Keys.Contains(KeyCode.D))
-            {
-                _moveComponent.Move(DroneMoveComponent.Direction.Right);
-            }
-
-            // 上下移動
-            if (_input.MouseScrollDelta != 0)
-            {
-                if (_input.MouseScrollDelta > 0)
-                {
-                    _moveComponent.Move(DroneMoveComponent.Direction.Up);
-                }
-                else
-                {
-                    _moveComponent.Move(DroneMoveComponent.Direction.Down);
-                }
-            }
-            if (_input.Keys.Contains(KeyCode.R))
-            {
-                _moveComponent.Move(DroneMoveComponent.Direction.Up);
-            }
-            if (_input.Keys.Contains(KeyCode.F))
-            {
-                _moveComponent.Move(DroneMoveComponent.Direction.Down);
-            }
-
-            // マウスによる向き変更
-            _moveComponent.RotateDir(_input.MouseX, _input.MouseY);
-
-            if (_isControl)
-            {
-                MyNetworkManager.Singleton.SendToAll(new InputPacket(_input));
-            }
+            base.FixedUpdate();
         }
 
         protected override void OnDestroy()
@@ -448,8 +326,6 @@ namespace Drone.Battle.Network
             _barrierComponent.BarrierResurrectEvent -= OnBarrierResurrect;
             _searchComponent.ObjectStayEvent -= ObjectSearchEvent;
             MyNetworkManager.Singleton.OnUdpReceiveOnMainThread -= OnReceiveUdpOfEvent;
-            if (!_isControl)
-                MyNetworkManager.Singleton.OnUdpReceiveOnMainThread -= OnReceiveUdp;
 
             // キャンセル発行
             _cancel.Cancel();
@@ -485,7 +361,7 @@ namespace Drone.Battle.Network
             if (_isDestroy) return;
 
             // プレイヤーのみ処理
-            if (!_isControl) return;
+            if (!IsControl) return;
 
             // Eキーでアイテム取得
             if (_input.Keys.Contains(KeyCode.E))
@@ -512,15 +388,11 @@ namespace Drone.Battle.Network
         /// <param name="player">送信元プレイヤー</param>
         /// <param name="header">受信したUDPパケットのヘッダ</param>
         /// <param name="packet">受信したUDPパケット</param>
-        private void OnReceiveUdp(string player, UdpHeader header, UdpPacket packet)
+        protected override void OnReceiveUdpOfOtherPlayer(string player, UdpHeader header, UdpPacket packet)
         {
-            if (player != Name) return;
+            base.OnReceiveUdpOfOtherPlayer(player, header, packet);
 
-            // 入力情報
-            if (header == UdpHeader.Input)
-            {
-                _input = (packet as InputPacket).Input;
-            }
+            if (player != Name) return;
 
             // アクション
             if (header == UdpHeader.DroneAction)
@@ -534,14 +406,6 @@ namespace Drone.Battle.Network
                 if (action.StopLockOn)
                 {
                     _lockOnComponent.StopLockOn();
-                }
-                if (action.StartBoost)
-                {
-                    _boostComponent.StartBoost();
-                }
-                if (action.StopBoost)
-                {
-                    _boostComponent.StopBoost();
                 }
                 if (action.UseItem1)
                 {

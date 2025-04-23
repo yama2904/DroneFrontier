@@ -17,7 +17,9 @@ namespace Network
         /// </summary>
         public string ObjectId { get; internal set; } = string.Empty;
 
-
+        /// <summary>
+        /// ’èŠú“I‚ÉÀ•W‚ğ“¯Šú‚·‚é‚©
+        /// </summary>
         public bool IsSyncPosition
         {
             get

@@ -29,11 +29,20 @@ namespace Network.Tcp
 
             if (data == null || data.Length < TCP_HEADER_TYPE_SIZE) return;
 
-            // 型名のバイト長取得
-            int typeSize = BitConverter.ToInt32(data, TCP_HEADER_TYPE_SIZE);
-
             // ヘッダ部長
-            int headerSize = TCP_HEADER_TYPE_SIZE + sizeof(int) + typeSize;
+            int headerSize = TCP_HEADER_TYPE_SIZE;
+
+            // 名前空間のバイト長計算
+            int namespaceSize = BitConverter.ToInt32(data, headerSize);
+            headerSize += sizeof(int) + namespaceSize;
+
+            // 型名のバイト長計算
+            int typeSize = BitConverter.ToInt32(data, headerSize);
+            headerSize += sizeof(int) + typeSize;
+
+            // アセンブリ名のバイト長計算
+            int assemblySize = BitConverter.ToInt32(data, headerSize);
+            headerSize += sizeof(int) + assemblySize;
 
             // ヘッダ部切り出し
             header = data.Take(headerSize).ToArray();
@@ -67,15 +76,41 @@ namespace Network.Tcp
         {
             if (data == null) return null;
 
-            // ヘッダ部取得
-            Split(data, out byte[] header, out _);
+            int offset = TCP_HEADER_TYPE_SIZE;
 
-            // ヘッダ部から型名部分を切り出し
-            byte[] typeData = header.Skip(TCP_HEADER_TYPE_SIZE + sizeof(int)).ToArray();
+            // 名前空間サイズ取り出し
+            int namespaceSize = BitConverter.ToInt32(data, offset);
+            offset += sizeof(int);
 
-            // 型を返す
-            string typeName = Encoding.UTF8.GetString(typeData);
-            return Type.GetType($"Network.Tcp.{typeName}, Assembly-CSharp");
+            // 名前空間取り出し
+            string namespaceName = Encoding.UTF8.GetString(data, offset, namespaceSize);
+            offset += namespaceSize;
+
+            // 型名サイズ取り出し
+            int typeSize = BitConverter.ToInt32(data, offset);
+            offset += sizeof(int);
+
+            // 型名取り出し
+            string typeName = Encoding.UTF8.GetString(data, offset, typeSize);
+            offset += typeSize;
+
+            // アセンブリ名サイズ取り出し
+            int assemblySize = BitConverter.ToInt32(data, offset);
+            offset += sizeof(int);
+
+            // アセンブリ名取り出し
+            string assemblyName = Encoding.UTF8.GetString(data, offset, assemblySize);
+            offset += assemblySize;
+
+            // 型名を返却
+            if (string.IsNullOrWhiteSpace(namespaceName))
+            {
+                return Type.GetType($"{typeName}, {assemblyName}");
+            }
+            else
+            {
+                return Type.GetType($"{namespaceName}.{typeName}, {assemblyName}");
+            }
         }
 
         /// <summary>
@@ -124,14 +159,32 @@ namespace Network.Tcp
             //byte[] header = BitConverter.GetBytes((short)Header);
             byte[] header = new byte[] { (byte)Header };
 
+            // 名前空間
+            byte[] namespaceByte = Encoding.UTF8.GetBytes(GetType().Namespace ?? string.Empty);
+
+            // 名前空間のバイト長
+            byte[] namespaceLen = BitConverter.GetBytes(namespaceByte.Length);
+
             // 型名
             byte[] typeNameByte = Encoding.UTF8.GetBytes(GetType().Name);
 
             // 型名のバイト長
             byte[] typeNameLen = BitConverter.GetBytes(typeNameByte.Length);
 
-            // [ヘッダータイプ][型名バイト長][型名]で結合して返す
-            return header.Concat(typeNameLen).Concat(typeNameByte).ToArray();
+            // アセンブリ名
+            byte[] assemblyByte = Encoding.UTF8.GetBytes(GetType().Assembly.GetName().Name);
+
+            // アセンブリ名のバイト長
+            byte[] assemblyLen = BitConverter.GetBytes(assemblyByte.Length);
+
+            // [ヘッダータイプ][名前空間バイト長][名前空間][型名バイト長][型名][アセンブリ名バイト長][アセンブリ名]で結合して返す
+            return header.Concat(namespaceLen)
+                         .Concat(namespaceByte)
+                         .Concat(typeNameLen)
+                         .Concat(typeNameByte)
+                         .Concat(assemblyLen)
+                         .Concat(assemblyByte)
+                         .ToArray();
         }
     }
 }

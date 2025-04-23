@@ -19,16 +19,6 @@ namespace Drone.Battle.Network
         public bool StopLockOn { get; private set; } = false;
 
         /// <summary>
-        /// ブースト開始
-        /// </summary>
-        public bool StartBoost { get; private set; } = false;
-
-        /// <summary>
-        /// ブースト停止
-        /// </summary>
-        public bool StopBoost { get; private set; } = false;
-
-        /// <summary>
         /// アイテム1使用
         /// </summary>
         public bool UseItem1 { get; private set; } = false;
@@ -43,12 +33,10 @@ namespace Drone.Battle.Network
         /// </summary>
         public DroneActionPacket() { }
 
-        public DroneActionPacket(bool startLockOn, bool stopLockOn, bool startBoost, bool stopBoost, bool useItem1, bool useItem2)
+        public DroneActionPacket(bool startLockOn, bool stopLockOn, bool useItem1, bool useItem2)
         {
             StartLockOn = startLockOn;
             StopLockOn = stopLockOn;
-            StartBoost = startBoost;
-            StopBoost = stopBoost;
             UseItem1 = useItem1;
             UseItem2 = useItem2;
         }
@@ -59,11 +47,9 @@ namespace Drone.Battle.Network
             int offset = 0;
             bool startLockOn = BitFlagUtil.CheckFlag(data, offset++);
             bool stopLockOn = BitFlagUtil.CheckFlag(data, offset++);
-            bool startBoost = BitFlagUtil.CheckFlag(data, offset++);
-            bool stopBoost = BitFlagUtil.CheckFlag(data, offset++);
             bool item1 = BitFlagUtil.CheckFlag(data, offset++);
             bool item2 = BitFlagUtil.CheckFlag(data, offset++);
-            return new DroneActionPacket(startLockOn, stopLockOn, startBoost, stopBoost, item1, item2);
+            return new DroneActionPacket(startLockOn, stopLockOn, item1, item2);
         }
 
         protected override byte[] ConvertToPacketBody()
@@ -72,8 +58,6 @@ namespace Drone.Battle.Network
             int offset = 0;
             bitFlag = BitFlagUtil.UpdateFlag(bitFlag, offset++, StartLockOn);
             bitFlag = BitFlagUtil.UpdateFlag(bitFlag, offset++, StopLockOn);
-            bitFlag = BitFlagUtil.UpdateFlag(bitFlag, offset++, StartBoost);
-            bitFlag = BitFlagUtil.UpdateFlag(bitFlag, offset++, StopBoost);
             bitFlag = BitFlagUtil.UpdateFlag(bitFlag, offset++, UseItem1);
             bitFlag = BitFlagUtil.UpdateFlag(bitFlag, offset++, UseItem2);
             return new byte[] { bitFlag };

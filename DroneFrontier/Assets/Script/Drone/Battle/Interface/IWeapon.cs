@@ -21,6 +21,12 @@ namespace Drone.Battle
         public event EventHandler OnBulletEmpty;
 
         /// <summary>
+        /// Addressable‚ÌƒL[–¼
+        /// </summary>
+        /// <returns></returns>
+        public string GetAddressKey();
+
+        /// <summary>
         /// ‰Šú‰»
         /// </summary>
         /// <param name="owner">•ŠíŠ—LÒ</param>

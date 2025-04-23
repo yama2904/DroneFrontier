@@ -1,12 +1,15 @@
 ﻿using Common;
 using Drone;
 using Drone.Battle;
+using Drone.Battle.Network;
 using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class ShotgunWeapon : MonoBehaviour, IWeapon
 {
+    public const string ADDRESS_KEY = "ShotgunWeapon";
+
     public GameObject Owner { get; private set; } = null;
 
     public event EventHandler OnBulletFull;
@@ -90,6 +93,11 @@ public class ShotgunWeapon : MonoBehaviour, IWeapon
     private Image[] _bulletUIs = null;
 
     private AudioSource _audioSource = null;
+
+    public string GetAddressKey()
+    {
+        return ADDRESS_KEY;
+    }
 
     public void Initialize(GameObject owner)
     {

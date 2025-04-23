@@ -1,11 +1,14 @@
 ﻿using Common;
 using Drone.Battle;
+using Drone.Battle.Network;
 using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class LaserWeapon : MonoBehaviour, IWeapon
 {
+    public const string ADDRESS_KEY = "LaserWeapon";
+
     /// <summary>
     /// レーザー攻撃中のスピード低下率
     /// </summary>
@@ -72,6 +75,11 @@ public class LaserWeapon : MonoBehaviour, IWeapon
     /// Shotメソッド呼び出し履歴
     /// </summary>
     private ValueHistory<bool> _shotHistory = new ValueHistory<bool>();
+
+    public string GetAddressKey()
+    {
+        return ADDRESS_KEY;
+    }
 
     public void Initialize(GameObject owner)
     {

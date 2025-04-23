@@ -1,29 +1,9 @@
 using Drone.Battle;
-using UnityEngine;
+using Drone.Battle.Network;
 using UnityEngine.AddressableAssets;
 
 public class WeaponCreater
 {
-    /// <summary>
-    /// ガトリングのAddressKey
-    /// </summary>
-    private const string GATLING_ADDRESS_KEY = "GatlingWeapon";
-
-    /// <summary>
-    /// ショットガンのAddressKey
-    /// </summary>
-    private const string SHOTGUN_ADDRESS_KEY = "ShotgunWeapon";
-
-    /// <summary>
-    /// ミサイルのAddressKey
-    /// </summary>
-    private const string MISSILE_ADDRESS_KEY = "MissileWeapon";
-
-    /// <summary>
-    /// レーザーのAddressKey
-    /// </summary>
-    private const string LASER_ADDRESS_KEY = "LaserWeapon";
-
     public static IWeapon CreateWeapon(WeaponType weapon)
     {
         // 武器オブジェクト読み込み
@@ -31,19 +11,19 @@ public class WeaponCreater
         switch (weapon)
         {
             case WeaponType.GATLING:
-                addressKey = GATLING_ADDRESS_KEY;
+                addressKey = GatlingWeapon.ADDRESS_KEY;
                 break;
 
             case WeaponType.SHOTGUN:
-                addressKey = SHOTGUN_ADDRESS_KEY;
+                addressKey = ShotgunWeapon.ADDRESS_KEY;
                 break;
 
             case WeaponType.MISSILE:
-                addressKey = MISSILE_ADDRESS_KEY;
+                addressKey = MissileWeapon.ADDRESS_KEY;
                 break;
 
             case WeaponType.LASER:
-                addressKey = LASER_ADDRESS_KEY;
+                addressKey = LaserWeapon.ADDRESS_KEY;
                 break;
         }
 

@@ -7,11 +7,9 @@ using UnityEngine.UI;
 
 namespace Drone.Battle
 {
-    public class BattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarable
+    public class BattleDrone : Drone, IBattleDrone, ILockableOn, IRadarable
     {
         #region public
-
-        public string Name { get; private set; } = "";
 
         public float HP
         {
@@ -67,9 +65,6 @@ namespace Drone.Battle
             Item2
         }
 
-        [SerializeField, Tooltip("ドローン本体オブジェクト")]
-        private Transform _droneObject = null;
-
         [SerializeField, Tooltip("ドローン死亡時の爆発オブジェクト")]
         private GameObject _explosion = null;
 
@@ -89,31 +84,32 @@ namespace Drone.Battle
         private int _stockNum = 2;
 
         /// <summary>
-        /// 入力情報
-        /// </summary>
-        private InputData _input = new InputData();
-
-        /// <summary>
         /// 死亡フラグ
         /// </summary>
         private bool _isDestroy = false;
 
         // コンポーネントキャッシュ
-        private Rigidbody _rigidbody = null;
         private Animator _animator = null;
-        private DroneMoveComponent _moveComponent = null;
-        private DroneRotateComponent _rotateComponent = null;
-        private DroneSoundComponent _soundComponent = null;
         private DroneLockOnComponent _lockOnComponent = null;
         private DroneRadarComponent _radarComponent = null;
         private DroneItemComponent _itemComponent = null;
         private DroneWeaponComponent _weaponComponent = null;
-        private DroneBoostComponent _boostComponent = null;
 
         public void Initialize(string name, IWeapon mainWeapon, IWeapon subWeapon, int stock)
         {
-            // ドローン名設定
-            Name = name;
+            Initialize(name);
+
+            // コンポーネントの取得
+            _rigidbody = GetComponent<Rigidbody>();
+            _animator = GetComponent<Animator>();
+            _moveComponent = GetComponent<DroneMoveComponent>();
+            _rotateComponent = GetComponent<DroneRotateComponent>();
+            _soundComponent = GetComponent<DroneSoundComponent>();
+            _lockOnComponent = GetComponent<DroneLockOnComponent>();
+            _radarComponent = GetComponent<DroneRadarComponent>();
+            _itemComponent = GetComponent<DroneItemComponent>();
+            _weaponComponent = GetComponent<DroneWeaponComponent>();
+            _boostComponent = GetComponent<DroneBoostComponent>();
 
             // メインウェポン設定
             MainWeapon = mainWeapon;
@@ -165,28 +161,12 @@ namespace Drone.Battle
             }
         }
 
-        private void Awake()
-        {
-            // コンポーネントの取得
-            _rigidbody = GetComponent<Rigidbody>();
-            _animator = GetComponent<Animator>();
-            _moveComponent = GetComponent<DroneMoveComponent>();
-            _rotateComponent = GetComponent<DroneRotateComponent>();
-            _soundComponent = GetComponent<DroneSoundComponent>();
-            _lockOnComponent = GetComponent<DroneLockOnComponent>();
-            _radarComponent = GetComponent<DroneRadarComponent>();
-            _itemComponent = GetComponent<DroneItemComponent>();
-            _weaponComponent = GetComponent<DroneWeaponComponent>();
-            _boostComponent = GetComponent<DroneBoostComponent>();
-        }
-
-        private void Update()
+        protected override void Update()
         {
             // 死亡処理中は操作不可
             if (_isDestroy) return;
 
-            // 入力情報更新
-            _input.UpdateInput();
+            base.Update();
 
             // ロックオン使用
             if (_input.DownedKeys.Contains(KeyCode.LeftShift))
@@ -223,17 +203,6 @@ namespace Drone.Battle
                 _weaponComponent.Shot(DroneWeaponComponent.Weapon.SUB, _lockOnComponent.Target);
             }
 
-            // ブースト開始
-            if (_input.DownedKeys.Contains(KeyCode.Space))
-            {
-                _boostComponent.StartBoost();
-            }
-            // ブースト停止
-            if (_input.UppedKeys.Contains(KeyCode.Space))
-            {
-                _boostComponent.StopBoost();
-            }
-
             // アイテム使用
             if (_input.UppedKeys.Contains(KeyCode.Alpha1))
             {
@@ -245,7 +214,7 @@ namespace Drone.Battle
             }
         }
 
-        private void FixedUpdate()
+        protected override void FixedUpdate()
         {
             // 死亡処理
             if (_isDestroy)
@@ -262,53 +231,7 @@ namespace Drone.Battle
                 return;
             }
 
-            // 前進
-            if (_input.Keys.Contains(KeyCode.W))
-            {
-                _moveComponent.Move(DroneMoveComponent.Direction.Forward);
-            }
-
-            // 左移動
-            if (_input.Keys.Contains(KeyCode.A))
-            {
-                _moveComponent.Move(DroneMoveComponent.Direction.Left);
-            }
-
-            // 後退
-            if (_input.Keys.Contains(KeyCode.S))
-            {
-                _moveComponent.Move(DroneMoveComponent.Direction.Backwad);
-            }
-
-            // 右移動
-            if (_input.Keys.Contains(KeyCode.D))
-            {
-                _moveComponent.Move(DroneMoveComponent.Direction.Right);
-            }
-
-            // 上下移動
-            if (_input.MouseScrollDelta != 0)
-            {
-                if (_input.MouseScrollDelta > 0)
-                {
-                    _moveComponent.Move(DroneMoveComponent.Direction.Up);
-                }
-                else
-                {
-                    _moveComponent.Move(DroneMoveComponent.Direction.Down);
-                }
-            }
-            if (_input.Keys.Contains(KeyCode.R))
-            {
-                _moveComponent.Move(DroneMoveComponent.Direction.Up);
-            }
-            if (_input.Keys.Contains(KeyCode.F))
-            {
-                _moveComponent.Move(DroneMoveComponent.Direction.Down);
-            }
-
-            // マウスによる向き変更
-            _moveComponent.RotateDir(_input.MouseX, _input.MouseY);
+            base.FixedUpdate();
         }
 
         /// <summary>

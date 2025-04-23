@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class GatlingWeapon : MonoBehaviour, IWeapon
 {
+    public const string ADDRESS_KEY = "GatlingWeapon";
+
     public GameObject Owner { get; private set; } = null;
 
     public event EventHandler OnBulletFull;
@@ -46,6 +48,11 @@ public class GatlingWeapon : MonoBehaviour, IWeapon
     /// 前回発射からの経過時間
     /// </summary>
     private float _shotTimer = 0;
+
+    public string GetAddressKey()
+    {
+        return ADDRESS_KEY;
+    }
 
     public void Initialize(GameObject owner)
     {

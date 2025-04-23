@@ -5,11 +5,14 @@ namespace Drone
 {
     public class Drone : MonoBehaviour
     {
+        public string Name { get; private set; } = "";
+
         [SerializeField, Tooltip("ドローン本体オブジェクト")]
         protected Transform _droneObject = null;
 
         /// <summary>
-        /// 入力情報
+        /// 入力情報<br/>
+        /// 毎フレーム更新を行う
         /// </summary>
         protected InputData _input = new InputData();
 
@@ -20,8 +23,18 @@ namespace Drone
         protected DroneSoundComponent _soundComponent = null;
         protected DroneBoostComponent _boostComponent = null;
 
-        public virtual void Initialize()
+        public virtual void Initialize(string name)
         {
+            // ドローン名設定
+            Name = name;
+
+            // コンポーネント取得
+            _rigidbody = GetComponent<Rigidbody>();
+            _moveComponent = GetComponent<DroneMoveComponent>();
+            _rotateComponent = GetComponent<DroneRotateComponent>();
+            _soundComponent = GetComponent<DroneSoundComponent>();
+            _boostComponent = GetComponent<DroneBoostComponent>();
+
             // コンポーネント初期化
             _moveComponent.Initialize();
             _rotateComponent.Initialize();
@@ -30,16 +43,6 @@ namespace Drone
 
             // プロペラ音再生
             _soundComponent.Play(SoundManager.SE.Propeller, 1, true);
-        }
-
-        protected virtual void Awake()
-        {
-            // コンポーネント取得
-            _rigidbody = GetComponent<Rigidbody>();
-            _moveComponent = GetComponent<DroneMoveComponent>();
-            _rotateComponent = GetComponent<DroneRotateComponent>();
-            _soundComponent = GetComponent<DroneSoundComponent>();
-            _boostComponent = GetComponent<DroneBoostComponent>();
         }
 
         protected virtual void Update()

@@ -51,10 +51,11 @@ namespace Network
             Transform spawnPos = _droneSpawnPositions[_nextSpawnIndex];
 
             // ドローン生成
-            NetworkBattleDrone drone = CreateDrone(name, spawnPos.position, spawnPos.rotation);
+            NetworkBattleDrone drone = CreateDrone(spawnPos.position, spawnPos.rotation);
             IWeapon main = WeaponCreater.CreateWeapon(WeaponType.GATLING);
             IWeapon sub = WeaponCreater.CreateWeapon(weapon);
             drone.Initialize(name, main, sub, drone.StockNum);
+            drone.enabled = false;
 
             // スポーン時点情報を保存
             _initDatas.Add(drone.Name, (weapon, spawnPos));
@@ -66,14 +67,6 @@ namespace Network
                 _nextSpawnIndex = 0;
             }
 
-            // スポーン送信
-            MyNetworkManager.Singleton.SendToAll(new DroneSpawnPacket(name, 
-                                                                      weapon, 
-                                                                      drone.StockNum, 
-                                                                      drone.enabled, 
-                                                                      spawnPos.position, 
-                                                                      spawnPos.rotation));
-
             return drone;
         }
 
@@ -81,42 +74,20 @@ namespace Network
         {
             // 初期スポーン位置をランダムに選択
             _nextSpawnIndex = UnityEngine.Random.Range(0, _droneSpawnPositions.Length);
-
-            // 受信イベント設定
-            MyNetworkManager.Singleton.OnUdpReceiveOnMainThread += OnUdpReceive;
         }
 
         /// <summary>
         /// ドローン生成
         /// </summary>
-        /// <param name="name">ドローンに設定する名前</param>
         /// <param name="pos">スポーン位置</param>
         /// <param name="rotate">スポーン向き</param>
         /// <returns>生成したドローン</returns>
-        private NetworkBattleDrone CreateDrone(string name, Vector3 pos, Quaternion rotate)
+        private NetworkBattleDrone CreateDrone(Vector3 pos, Quaternion rotate)
         {
             NetworkBattleDrone createdDrone = Instantiate(_playerDrone, pos, rotate);
             createdDrone.DroneDestroyEvent += DroneDestroy;
 
             return createdDrone;
-        }
-
-        /// <summary>
-        /// UDPパケット受信イベント
-        /// </summary>
-        /// <param name="name">プレイヤー名</param>
-        /// <param name="header">受信したUDPパケットのヘッダ</param>
-        /// <param name="packet">受信したUDPパケット</param>
-        private void OnUdpReceive(string name, UdpHeader header, UdpPacket packet)
-        {
-            if (packet is DroneSpawnPacket spawn)
-            {
-                NetworkBattleDrone drone = CreateDrone(spawn.Name, spawn.Position, spawn.Rotation);
-                drone.enabled = spawn.Enabled;
-                IWeapon main = WeaponCreater.CreateWeapon(WeaponType.GATLING);
-                IWeapon sub = WeaponCreater.CreateWeapon(spawn.Weapon);
-                drone.Initialize(drone.Name, main, sub, spawn.StockNum);
-            }
         }
 
         /// <summary>
@@ -137,7 +108,7 @@ namespace Network
             if (drone.StockNum > 0)
             {
                 // リスポーン
-                respawnDrone = CreateDrone(drone.Name, initData.pos.position, initData.pos.rotation);
+                respawnDrone = CreateDrone(initData.pos.position, initData.pos.rotation);
                 respawnDrone.enabled = true;
                 IWeapon main = WeaponCreater.CreateWeapon(WeaponType.GATLING);
                 IWeapon sub = WeaponCreater.CreateWeapon(initData.weapon);
@@ -145,14 +116,6 @@ namespace Network
 
                 // 復活SE再生
                 respawnDrone.GetComponent<DroneSoundComponent>().Play(SoundManager.SE.Respawn);
-
-                // スポーン送信
-                MyNetworkManager.Singleton.SendToAll(new DroneSpawnPacket(name,
-                                                                          initData.weapon,
-                                                                          drone.StockNum,
-                                                                          drone.enabled,
-                                                                          initData.pos.position,
-                                                                          initData.pos.rotation));
             }
 
             // イベント発火

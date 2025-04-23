@@ -25,7 +25,7 @@ namespace Network
         /// <param name="obj">生成させるオブジェクト</param>
         public static void Spawn(MyNetworkBehaviour obj)
         {
-            // ID設定
+            // オブジェクトID設定
             obj.ObjectId = Guid.NewGuid().ToString("N");
 
             // パケット送信

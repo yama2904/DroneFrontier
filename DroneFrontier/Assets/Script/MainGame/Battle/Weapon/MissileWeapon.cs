@@ -1,10 +1,13 @@
 ﻿using Drone.Battle;
+using Drone.Battle.Network;
 using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class MissileWeapon : MonoBehaviour, IWeapon
 {
+    public const string ADDRESS_KEY = "MissileWeapon";
+
     public GameObject Owner { get; private set; } = null;
 
     public event EventHandler OnBulletFull;
@@ -86,6 +89,11 @@ public class MissileWeapon : MonoBehaviour, IWeapon
     /// 各残弾UI
     /// </summary>
     private Image[] _bulletUIs = null;
+
+    public string GetAddressKey()
+    {
+        return ADDRESS_KEY;
+    }
 
     public void Initialize(GameObject owner)
     {

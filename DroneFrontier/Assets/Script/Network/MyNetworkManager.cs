@@ -901,12 +901,7 @@ namespace Network
                         _receivedUdpQueue.Enqueue((result.Buffer, result.RemoteEndPoint));
                     }
                 }
-                catch (SocketException)
-                {
-                    // êÿíf
-                    semaphore.Release();
-                }
-                catch (ObjectDisposedException)
+                catch (Exception)
                 {
                     // êÿíf
                     semaphore.Release();

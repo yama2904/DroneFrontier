@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using System;
+using System.Threading;
 using UnityEngine;
 
 public class BuildingSink : MonoBehaviour
@@ -27,17 +28,25 @@ public class BuildingSink : MonoBehaviour
     
     private int _currentStep = 0;
     private bool _isSink = false;
+    private CancellationTokenSource _cancel = new CancellationTokenSource();
 
     private async void Start()
     {
         _particle.SetActive(false);
 
-        for (int step = 0; step < _sinkCount; step++)
+        try
         {
-            await UniTask.Delay(TimeSpan.FromSeconds(_startTimes[step]));
-            _particle.SetActive(true);
-            _currentStep = step;
-            _isSink = true;
+            for (int step = 0; step < _sinkCount; step++)
+            {
+                await UniTask.Delay(TimeSpan.FromSeconds(_startTimes[step]), cancellationToken: _cancel.Token);
+                _particle.SetActive(true);
+                _currentStep = step;
+                _isSink = true;
+            }
+        }
+        catch (OperationCanceledException)
+        {
+
         }
     }
 
@@ -62,5 +71,10 @@ public class BuildingSink : MonoBehaviour
                 Destroy(gameObject);
             }
         }
+    }
+
+    private void OnDestroy()
+    {
+        _cancel.Cancel();
     }
 }

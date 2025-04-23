@@ -50,7 +50,7 @@ public class DroneSpawnManager : MonoBehaviour
         Transform spawnPos = _droneSpawnPositions[_nextSpawnIndex];
 
         // ドローン生成
-        IBattleDrone drone = CreateDrone(name, spawnPos, isPlayer);
+        IBattleDrone drone = CreateDrone(spawnPos, isPlayer);
         IWeapon main = WeaponCreater.CreateWeapon(WeaponType.GATLING);
         IWeapon sub = WeaponCreater.CreateWeapon(weapon);
         drone.Initialize(name, main, sub, drone.StockNum);
@@ -77,11 +77,10 @@ public class DroneSpawnManager : MonoBehaviour
     /// <summary>
     /// ドローン生成
     /// </summary>
-    /// <param name="name">ドローンに設定する名前</param>
     /// <param name="spawnPosition">スポーン位置</param>
     /// <param name="isPlayer">プレイヤーであるか</param>
     /// <returns>生成したドローン</returns>
-    private IBattleDrone CreateDrone(string name, Transform spawnPosition, bool isPlayer)
+    private IBattleDrone CreateDrone(Transform spawnPosition, bool isPlayer)
     {
         // 生成元オブジェクト選択
         GameObject drone = isPlayer ? _playerDrone : _cpuDrone;
@@ -112,7 +111,7 @@ public class DroneSpawnManager : MonoBehaviour
             if (drone is BattleDrone)
             {
                 // リスポーン
-                respawnDrone = CreateDrone(drone.Name, initData.pos, true);
+                respawnDrone = CreateDrone(initData.pos, true);
 
                 // 復活SE再生
                 SoundManager.Play(SoundManager.SE.Respawn);
@@ -120,7 +119,7 @@ public class DroneSpawnManager : MonoBehaviour
             else
             {
                 // リスポーン
-                respawnDrone = CreateDrone(drone.Name, initData.pos, false);
+                respawnDrone = CreateDrone(initData.pos, false);
             }
 
             // ドローン初期化

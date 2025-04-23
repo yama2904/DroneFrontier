@@ -324,6 +324,10 @@ namespace Network
                     // ★ToDo:観戦送信
                 }
             }
+            else
+            {
+                NetworkObjectSpawner.Spawn(respawnDrone);
+            }
 
             // 破壊されたドローン情報更新
             droneData.Drone = respawnDrone;
