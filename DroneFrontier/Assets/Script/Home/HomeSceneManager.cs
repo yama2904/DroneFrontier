@@ -6,6 +6,14 @@ using UnityEngine.SceneManagement;
 
 public class HomeSceneManager : MonoBehaviour
 {
+    private enum GameMode
+    {
+        Battle,
+        Rece,
+
+        None
+    }
+
     [SerializeField]
     private GameObject _gameModeSelectUI;
 
@@ -29,6 +37,8 @@ public class HomeSceneManager : MonoBehaviour
 
     [SerializeField]
     private NetworkWeaponSelectScreen _networkWeaponSelect;
+
+    private GameMode _selectMode = GameMode.None;
 
     private void Start()
     {
@@ -71,12 +81,13 @@ public class HomeSceneManager : MonoBehaviour
 
     #region ボタンイベント
 
-        /// <summary>
-        /// バトルモード選択
-        /// </summary>
+    /// <summary>
+    /// バトルモード選択
+    /// </summary>
     public void ClickBattle()
     {
         SoundManager.Play(SoundManager.SE.Select);
+        _selectMode = GameMode.Battle;
         _gameModeSelectUI.SetActive(false);
         _soloMultiSelect.gameObject.SetActive(true);
     }
@@ -87,7 +98,7 @@ public class HomeSceneManager : MonoBehaviour
     public void ClickRace()
     {
         SoundManager.Play(SoundManager.SE.Select);
-        // ToDo
+        _selectMode = GameMode.Rece;
     }
 
     /// <summary>

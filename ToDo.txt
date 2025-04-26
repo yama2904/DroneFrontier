@@ -9,4 +9,3 @@ NetworkManager見直し
 　→Connecter、Receiver、Senderに分けれる？
 初期化フラグ
 ステータス同期
-クライアントのブースト減ってない

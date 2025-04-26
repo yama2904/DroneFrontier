@@ -1,42 +1,51 @@
-Ôªøusing System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class MoveGimick : MonoBehaviour
 {
-    enum Dir
+    private enum Dir
     {
-        DIR_X,
-        DIR_Y,
-        DIR_Z,
+        DirX,
+        DirY,
+        DirZ,
 
-        NONE
+        None
     }
-    [SerializeField] Dir type = Dir.NONE;
-    [SerializeField] float speed = 1f;
-    [SerializeField, Tooltip("ÁßªÂãïË∑ùÈõ¢")] float range = 7.5f;
-    Transform cacheTransform = null;
-    Vector3 initPos;
+    [SerializeField] 
+    private Dir _moveDir = Dir.None;
 
-    void Start()
+    [SerializeField] 
+    float _speed = 1f;
+
+    [SerializeField, Tooltip("à⁄ìÆãóó£")] 
+    private float _range = 7.5f;
+
+    /// <summary>
+    /// èâä˙ç¿ïW
+    /// </summary>
+    Vector3 _initPos;
+
+    // ÉRÉìÉ|Å[ÉlÉìÉgÉLÉÉÉbÉVÉÖ
+    Transform _transform = null;
+
+    private void Awake()
     {
-        cacheTransform = transform;
-        initPos = cacheTransform.position;
+        _transform = transform;
+        _initPos = _transform.position;
     }
-    
-    void Update()
+
+    private void FixedUpdate()
     {
-        if(type == Dir.DIR_X)
+        if (_moveDir == Dir.DirX)
         {
-            cacheTransform.position = new Vector3(initPos.x + Mathf.PingPong(Time.time * speed, range), initPos.y, initPos.z);
+            _transform.position = new Vector3(_initPos.x + Mathf.PingPong(Time.time * _speed, _range), _initPos.y, _initPos.z);
         }
-        if(type == Dir.DIR_Y)
+        if (_moveDir == Dir.DirY)
         {
-            cacheTransform.position = new Vector3(initPos.x, initPos.y + Mathf.PingPong(Time.time * speed, range), initPos.z);
+            _transform.position = new Vector3(_initPos.x, _initPos.y + Mathf.PingPong(Time.time * _speed, _range), _initPos.z);
         }
-        if(type == Dir.DIR_Z)
+        if (_moveDir == Dir.DirZ)
         {
-            cacheTransform.position = new Vector3(initPos.x, initPos.y, initPos.z + Mathf.PingPong(Time.time * speed, range));
+            _transform.position = new Vector3(_initPos.x, _initPos.y, _initPos.z + Mathf.PingPong(Time.time * _speed, _range));
         }
     }
 }

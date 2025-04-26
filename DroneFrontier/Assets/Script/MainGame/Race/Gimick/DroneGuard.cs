@@ -1,48 +1,51 @@
-ï»¿using System.Collections;
 using Common;
 using UnityEngine;
-using Mirror;
 
-namespace Online
+namespace Race
 {
-    public class DroneGuard : NetworkBehaviour
+    public class DroneGuard : MonoBehaviour
     {
-        [Header("ç§»å‹•æ–¹å‘")]
-        [SerializeField, Tooltip("Xè»¸ã«ç§»å‹•")] bool dirX = false;
-        [SerializeField, Tooltip("Yè»¸ã«ç§»å‹•")] bool dirY = false;
-        [SerializeField, Tooltip("Zè»¸ã«ç§»å‹•")] bool dirZ = false;
+        [Header("ˆÚ“®•ûŒü")]
+        [SerializeField, Tooltip("X²‚ÉˆÚ“®")] bool _dirX = false;
+        [SerializeField, Tooltip("Y²‚ÉˆÚ“®")] bool _dirY = false;
+        [SerializeField, Tooltip("Z²‚ÉˆÚ“®")] bool _dirZ = false;
 
-        [Header("ç§»å‹•é€Ÿåº¦")]
-        [SerializeField] float speed = 10f;
+        [Header("ˆÚ“®‘¬“x")]
+        [SerializeField] float _speed = 60f;
 
-        [Header("ç§»å‹•è·é›¢")]
-        [SerializeField] float range = 7.5f;
+        [Header("ˆÚ“®‹——£")]
+        [SerializeField] float _range = 60f;
 
-        [Header("åç™ºåŠ›")]
-        [SerializeField] float power = 200;
+        [Header("”½”­—Í")]
+        [SerializeField] float _power = 800f;
 
-        Transform cacheTransform = null;
-        Vector3 initPos;
+        /// <summary>
+        /// ‰ŠúÀ•W
+        /// </summary>
+        Vector3 _initPos;
 
-        void Start()
+        // ƒRƒ“ƒ|[ƒlƒ“ƒgƒLƒƒƒbƒVƒ…
+        private Transform _transform = null;
+
+        private void Awake()
         {
-            cacheTransform = transform;
-            initPos = cacheTransform.position;
+            _transform = transform;
+            _initPos = _transform.position;
         }
 
-        void Update()
+        private void FixedUpdate()
         {
-            if (dirX)
+            if (_dirX)
             {
-                cacheTransform.position = new Vector3(initPos.x + Mathf.PingPong(Time.time * speed, range), initPos.y, initPos.z);
+                _transform.position = new Vector3(_initPos.x + Mathf.PingPong(Time.time * _speed, _range), _initPos.y, _initPos.z);
             }
-            if (dirY)
+            if (_dirY)
             {
-                cacheTransform.position = new Vector3(initPos.x, initPos.y + Mathf.PingPong(Time.time * speed, range), initPos.z);
+                _transform.position = new Vector3(_initPos.x, _initPos.y + Mathf.PingPong(Time.time * _speed, _range), _initPos.z);
             }
-            if (dirZ)
+            if (_dirZ)
             {
-                cacheTransform.position = new Vector3(initPos.x, initPos.y, initPos.z + Mathf.PingPong(Time.time * speed, range));
+                _transform.position = new Vector3(_initPos.x, _initPos.y, _initPos.z + Mathf.PingPong(Time.time * _speed, _range));
             }
         }
 
@@ -50,9 +53,7 @@ namespace Online
         {
             if (collision.gameObject.CompareTag(TagNameConst.PLAYER))
             {
-                //RaceDrone p = collision.gameObject.GetComponent<RaceDrone>();
-                //if (!p.isLocalPlayer) return;
-                //p.GetComponent<Rigidbody>().AddForce(p.transform.forward * power * -1, ForceMode.Impulse);
+                collision.gameObject.GetComponent<Rigidbody>().AddForce(collision.transform.forward * _power * -1, ForceMode.Impulse);
             }
         }
     }
