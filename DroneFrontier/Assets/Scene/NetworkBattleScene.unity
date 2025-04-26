@@ -2571,6 +2571,54 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1397166821
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1397166823}
+  - component: {fileID: 1397166822}
+  m_Layer: 0
+  m_Name: BarrierWeakLaserSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1397166822
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1397166821}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d629209d3a6ed64f973439d8965e52b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _lazerPrefab: {fileID: 6230978841387524026, guid: df90bb51d63d582488256ad2c127566d,
+    type: 3}
+  _lazersOnScene:
+  - {fileID: 1848237144}
+--- !u!4 &1397166823
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1397166821}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1397984394
 GameObject:
   m_ObjectHideFlags: 0
@@ -3307,6 +3355,18 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: df90bb51d63d582488256ad2c127566d, type: 3}
+--- !u!114 &1848237144 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6230978841387524026, guid: df90bb51d63d582488256ad2c127566d,
+    type: 3}
+  m_PrefabInstance: {fileID: 1848237143}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc972e3389670224cbbfeb8929a40c8a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1851820763
 GameObject:
   m_ObjectHideFlags: 0
@@ -4604,6 +4664,7 @@ SceneRoots:
   - {fileID: 730125941}
   - {fileID: 1873781887}
   - {fileID: 579236799}
+  - {fileID: 1397166823}
   - {fileID: 1288167925}
   - {fileID: 367167425}
   - {fileID: 128192675}

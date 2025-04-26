@@ -17,6 +17,115 @@ public class BarrierWeakLaser : MonoBehaviour
     /// </summary>
     private const float MAX_LASER_WIDTH = 100f;
 
+    #region プロパティ
+
+    /// <summary>
+    /// バリア弱体化時間（秒）
+    /// </summary>
+    public float WeakTime
+    {
+        get => _weakTime;
+        set => _weakTime = value;
+    }
+
+    /// <summary>
+    /// レーザー射程
+    /// </summary>
+    public float LazerRange
+    {
+        get => _lazerRange;
+        set => _lazerRange = value;
+    }
+
+    /// <summary>
+    /// レーザーの当たり判定の半径
+    /// </summary>
+    public float LazerRadius
+    {
+        get => _lazerRadius;
+        set => _lazerRadius = value;
+    }
+
+    /// <summary>
+    /// レーザーのランダム発生間隔の最小値（秒）
+    /// </summary>
+    public float MinInterval
+    {
+        get => _minInterval;
+        set => _minInterval = value;
+    }
+
+    /// <summary>
+    /// レーザーのランダム発生間隔の最大値（秒）
+    /// </summary>
+    public float MaxInterval
+    {
+        get => _maxInterval;
+        set => _maxInterval = value;
+    }
+
+    /// <summary>
+    /// レーザーの発生時間（秒）
+    /// </summary>
+    public float LaserTime
+    {
+        get => _laserTime;
+        set => _laserTime = value;
+    }
+
+    /// <summary>
+    /// レーザーのY軸ランダム回転速度(/s)の最小値
+    /// </summary>
+    public float MinRotateSpeed
+    {
+        get => _minRotateSpeed;
+        set => _minRotateSpeed = value;
+    }
+
+    /// <summary>
+    /// レーザーのY軸ランダム回転速度(/s)の最大値
+    /// </summary>
+    public float MaxRotateSpeed
+    {
+        get => _maxRotateSpeed;
+        set => _maxRotateSpeed = value;
+    }
+
+    /// <summary>
+    /// レーザーのY軸ランダム回転速度(/s)の現在値
+    /// </summary>
+    public float CurrentRotateSpeed { get; private set; } = 0;
+
+    /// <summary>
+    /// レーザー発生時のX軸ランダム角度の最小値
+    /// </summary>
+    public float MinAngle
+    {
+        get => _minAngle;
+        set => _minAngle = value;
+    }
+
+    /// <summary>
+    /// レーザー発生時のX軸ランダム角度の最大値
+    /// </summary>
+    public float MaxAngle
+    {
+        get => _maxAngle;
+        set => _maxAngle = value;
+    }
+
+    #endregion
+
+    /// <summary>
+    /// レーザー発生イベント
+    /// </summary>
+    public event EventHandler OnSpawn;
+
+    /// <summary>
+    /// レーザー消滅イベント
+    /// </summary>
+    public event EventHandler OnDespawn;
+
     [SerializeField, Tooltip("バリア弱体化時間（秒）")]
     private float _weakTime = 15f;
 
@@ -48,11 +157,6 @@ public class BarrierWeakLaser : MonoBehaviour
     private float _maxAngle = 50f;
 
     /// <summary>
-    /// レーザーのY軸回転速度
-    /// </summary>
-    private float _rotateSpeed = 0;
-
-    /// <summary>
     /// 現在のレーザー半径
     /// </summary>
     private float _lazerWidth = 0;
@@ -72,7 +176,7 @@ public class BarrierWeakLaser : MonoBehaviour
         _renderer = GetComponent<LineRenderer>();
 
         // レーザーの始点初期化
-        _transform.position = _renderer.GetPosition(0);
+        _renderer.SetPosition(0, _transform.position);
 
         // レーザー非表示
         _renderer.startWidth = 0;
@@ -103,18 +207,22 @@ public class BarrierWeakLaser : MonoBehaviour
                 _transform.localEulerAngles = angle;
 
                 // 回転速度をランダムに設定
-                _rotateSpeed = UnityEngine.Random.Range(_minRotateSpeed, _maxRotateSpeed);
+                CurrentRotateSpeed = UnityEngine.Random.Range(_minRotateSpeed, _maxRotateSpeed);
 
                 // レーザー発生
                 _enabledLaser = true;
 
-                // レーザー停止タイマー
-                UniTask.Void(async () =>
-                {
-                    await UniTask.Delay(TimeSpan.FromSeconds(_laserTime), cancellationToken: _cancel.Token);
-                    _enabledLaser = false;
-                    Debug.Log("バリア弱体化レーザー停止");
-                });
+                // 発生イベント発火
+                OnSpawn?.Invoke(this, EventArgs.Empty);
+
+                // レーザー停止タイマー（レーザー停止時の徐々に細くする時間も考慮）
+                await UniTask.Delay(TimeSpan.FromSeconds(_laserTime - 1), cancellationToken: _cancel.Token);
+                _enabledLaser = false;
+                await UniTask.Delay(1000, cancellationToken: _cancel.Token);
+                Debug.Log("バリア弱体化レーザー停止");
+
+                // 消滅イベント発火
+                OnDespawn?.Invoke(this, EventArgs.Empty);
             }
         });
     }
@@ -131,7 +239,7 @@ public class BarrierWeakLaser : MonoBehaviour
 
         // レーザーの発生中は常に回転
         Vector3 angle = _transform.localEulerAngles;
-        angle.y += _rotateSpeed * Time.deltaTime;
+        angle.y += CurrentRotateSpeed * Time.deltaTime;
         _transform.localEulerAngles = angle;
 
         // レーザーのヒットオブジェクトをすべて取得
@@ -244,7 +352,7 @@ public class BarrierWeakLaser : MonoBehaviour
             if (_lazerWidth <= 0) return;
 
             _lazerWidth -= MAX_LASER_WIDTH * Time.deltaTime;
-            if (_lazerWidth < 0)
+            if (_lazerWidth <= 0)
             {
                 _lazerWidth = 0;
             }

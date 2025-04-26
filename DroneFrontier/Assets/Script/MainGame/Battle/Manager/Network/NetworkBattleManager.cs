@@ -279,6 +279,9 @@ namespace Network
             // プレイヤー情報初期化
             PlayerList.Clear();
 
+            // キャンセルトークン発行
+            _cancelToken.Cancel();
+
             // 切断
             MyNetworkManager.Singleton.Disconnect();
         }
