@@ -89,9 +89,9 @@ public class LaserWeapon : MonoBehaviour, IWeapon
         if (owner.TryGetComponent<IBattleDrone>(out var drone))
         {
             // レーザーゲージUI生成
-            if (drone.Canvas != null)
+            if (drone.BulletCanvas != null)
             {
-                _bulletUICanvas = drone.Canvas;
+                _bulletUICanvas = drone.BulletCanvas;
                 _laserGaugeUI = Instantiate(_bulletGaugeUI);
                 Image gaugeFrameUI = Instantiate(_bulletFrameUI);
 

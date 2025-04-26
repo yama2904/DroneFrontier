@@ -37,6 +37,8 @@ namespace Drone.Battle.Network
 
         public Canvas Canvas => _canvas;
 
+        public Canvas BulletCanvas => _bulletCanvas;
+
         public bool IsLockableOn { get; } = true;
 
         public List<GameObject> NotLockableOnList { get; } = new List<GameObject>();
@@ -78,6 +80,9 @@ namespace Drone.Battle.Network
 
         [SerializeField, Tooltip("オブジェクト探索コンポーネント")]
         private ObjectSearchComponent _searchComponent = null;
+
+        [SerializeField, Tooltip("弾丸UI表示用Canvas")]
+        private Canvas _bulletCanvas = null;
 
         [SerializeField, Tooltip("ドローンのHP")]
         private float _hp = 100f;
@@ -177,12 +182,6 @@ namespace Drone.Battle.Network
 
             // イベント受信イベント設定
             MyNetworkManager.Singleton.OnUdpReceiveOnMainThread += OnReceiveUdpOfEvent;
-
-            // プレイヤー名を基に操作するか識別
-            if (Name == MyNetworkManager.Singleton.MyPlayerName)
-            {
-                IsControl = true;
-            }
 
             // 自プレイヤーの場合は定期的にステータス同期
             if (IsControl)

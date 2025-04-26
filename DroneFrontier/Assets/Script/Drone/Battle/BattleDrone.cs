@@ -32,6 +32,8 @@ namespace Drone.Battle
 
         public Canvas Canvas => _canvas;
 
+        public Canvas BulletCanvas => _bulletCanvas;
+
         public bool IsLockableOn { get; } = true;
 
         public List<GameObject> NotLockableOnList { get; } = new List<GameObject>();
@@ -76,6 +78,9 @@ namespace Drone.Battle
 
         [SerializeField, Tooltip("UI表示用Canvas")]
         private Canvas _canvas = null;
+
+        [SerializeField, Tooltip("弾丸UI表示用Canvas")]
+        private Canvas _bulletCanvas = null;
 
         [SerializeField, Tooltip("ドローンのHP")]
         private float _hp = 100f;

@@ -311,11 +311,12 @@ MonoBehaviour:
   _syncInterval: 1
   _syncPositionDistance: 20
   _droneObject: {fileID: 6103758830164412855}
+  _camera: {fileID: 2032111343277000741}
+  _canvas: {fileID: 2857361770926363682}
   _explosion: {fileID: 7268668557149609815}
   _stockText: {fileID: 7646116371101854067}
   _searchComponent: {fileID: 8076797654263036361}
-  _camera: {fileID: 2032111343277000741}
-  _canvas: {fileID: 969262399878152283}
+  _bulletCanvas: {fileID: 969262399878152283}
   _hp: 100
   _stockNum: 2
   _syncStatusInterval: 1

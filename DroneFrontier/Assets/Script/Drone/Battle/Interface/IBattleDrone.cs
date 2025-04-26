@@ -39,6 +39,11 @@ namespace Drone.Battle
         public Canvas Canvas { get; }
 
         /// <summary>
+        /// ’eŠÛUI•\¦Canvas
+        /// </summary>
+        public Canvas BulletCanvas { get; }
+
+        /// <summary>
         /// ‰Šú‰»
         /// </summary>
         /// <param name="name">ƒhƒ[ƒ“–¼</param>

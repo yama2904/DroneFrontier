@@ -102,9 +102,9 @@ public class MissileWeapon : MonoBehaviour, IWeapon
         // ドローンの場合残弾UI作成
         if (owner.TryGetComponent<IBattleDrone>(out var drone))
         {
-            if (drone.Canvas == null) return;
+            if (drone.BulletCanvas == null) return;
 
-            _bulletUICanvas = drone.Canvas;
+            _bulletUICanvas = drone.BulletCanvas;
             _bulletUIs = new Image[_maxBulletNum];
             for (int i = 0; i < _maxBulletNum; i++)
             {

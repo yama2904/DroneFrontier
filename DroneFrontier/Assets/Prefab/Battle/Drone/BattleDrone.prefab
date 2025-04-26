@@ -312,6 +312,7 @@ MonoBehaviour:
   _stockText: {fileID: 7646116371101854067}
   _searchComponent: {fileID: 8076797654263036361}
   _canvas: {fileID: 969262399878152283}
+  _bulletCanvas: {fileID: 969262399878152283}
   _hp: 100
   _stockNum: 2
 --- !u!114 &6715498070689482023

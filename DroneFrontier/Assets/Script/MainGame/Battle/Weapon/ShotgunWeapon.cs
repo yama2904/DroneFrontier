@@ -107,9 +107,9 @@ public class ShotgunWeapon : MonoBehaviour, IWeapon
         if (owner.TryGetComponent<IBattleDrone>(out var drone))
         {
             // 残弾UI作成
-            if (drone.Canvas != null)
+            if (drone.BulletCanvas != null)
             {
-                _bulletUICanvas = drone.Canvas;
+                _bulletUICanvas = drone.BulletCanvas;
                 _bulletUIs = new Image[_maxBulletNum];
                 for (int i = 0; i < _maxBulletNum; i++)
                 {

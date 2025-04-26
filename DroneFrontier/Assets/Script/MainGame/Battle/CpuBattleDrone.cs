@@ -34,6 +34,8 @@ public class CpuBattleDrone : MonoBehaviour, IBattleDrone, ILockableOn, IRadarab
 
     public Canvas Canvas => null;
 
+    public Canvas BulletCanvas => null;
+
     public bool IsLockableOn { get; } = true;
 
     public List<GameObject> NotLockableOnList { get; } = new List<GameObject>();
