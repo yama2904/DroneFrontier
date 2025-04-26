@@ -10,6 +10,11 @@ public class DebugLogger
     private static readonly Encoding LOG_ENCODING = Encoding.UTF8;
     private static object _lock = new object();
 
+    public static void OutLog(object message)
+    {
+        OutLog(message.ToString());
+    }
+
     public static void OutLog(string message)
     {
         lock (_lock)

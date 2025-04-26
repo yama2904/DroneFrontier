@@ -18,6 +18,79 @@ public class MagnetArea : MonoBehaviour
     /// </summary>
     private static int _currentAreaNum = 0;
 
+    #region プロパティ
+
+    /// <summary>
+    /// 速度低下率
+    /// </summary>
+    public float DownPercent
+    {
+        get => _downPercent;
+        set => _downPercent = value;
+    }
+
+    /// <summary>
+    /// スポーン確率
+    /// </summary>
+    public int SpawnPercent
+    {
+        get => _spawnPercent;
+        set => _spawnPercent = value;
+    }
+
+    /// <summary>
+    /// 発生間隔（秒）
+    /// </summary>
+    public float SpawnInterval
+    {
+        get => _spawnInterval;
+        set => _spawnInterval = value;
+    }
+
+    /// <summary>
+    /// 発生時間（秒）
+    /// </summary>
+    public float ActiveTime
+    {
+        get => _activeTime;
+        set => _activeTime = value;
+    }
+
+    /// <summary>
+    /// 最小エリアサイズ
+    /// </summary>
+    public float MinAreaSize
+    {
+        get => _minAreaSize;
+        set => _minAreaSize = value;
+    }
+
+    /// <summary>
+    /// 最大エリアサイズ
+    /// </summary>
+    public float MaxAreaSize
+    {
+        get => _maxAreaSize;
+        set => _maxAreaSize = value;
+    }
+
+    /// <summary>
+    /// 現在エリアサイズ
+    /// </summary>
+    public float CurrentAreaSize { get; private set; } = 0;
+
+    #endregion
+
+    /// <summary>
+    /// 磁気エリア発生イベント
+    /// </summary>
+    public event EventHandler OnSpawn;
+
+    /// <summary>
+    /// 磁気エリア消滅イベント
+    /// </summary>
+    public event EventHandler OnDespawn;
+
     [SerializeField, Range(0, 1f), Tooltip("速度低下率")]
     private float _downPercent = 0.7f;
 
@@ -36,7 +109,7 @@ public class MagnetArea : MonoBehaviour
     [SerializeField, Tooltip("最大エリアサイズ")]
     private float _maxAreaSize = 3f;
 
-    [SerializeField] 
+    [SerializeField]
     private ParticleSystem _particle1 = null;
 
     [SerializeField]
@@ -63,7 +136,7 @@ public class MagnetArea : MonoBehaviour
             {
                 // 発生タイマー
                 await UniTask.Delay(TimeSpan.FromSeconds(_spawnInterval), cancellationToken: _cancel.Token);
-                
+
                 // 発生させるかランダムに決定
                 if (UnityEngine.Random.Range(0, 100) >= _spawnPercent) continue;
 
@@ -72,8 +145,12 @@ public class MagnetArea : MonoBehaviour
 
                 // 発生開始
                 _currentAreaNum++;
-                ChangeAreaSize(UnityEngine.Random.Range(_minAreaSize, _maxAreaSize));
+                CurrentAreaSize = UnityEngine.Random.Range(_minAreaSize, _maxAreaSize);
+                ChangeAreaSize(CurrentAreaSize);
                 SetEnabledArea(true);
+
+                // 発生イベント発火
+                OnSpawn?.Invoke(this, EventArgs.Empty);
 
                 // 停止タイマー
                 await UniTask.Delay(TimeSpan.FromSeconds(_activeTime), cancellationToken: _cancel.Token);
@@ -82,6 +159,9 @@ public class MagnetArea : MonoBehaviour
                 SetEnabledArea(false);
                 ClearStatus();
                 _currentAreaNum--;
+
+                // 消滅イベント発火
+                OnDespawn?.Invoke(this, EventArgs.Empty);
             }
         });
     }

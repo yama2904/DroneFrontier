@@ -3,4 +3,7 @@
 タワー周辺にオブジェクトある
 割合のSerializeFieldをRange
 武器選択画面スクリプト修正
-シード値違う
+namespace修正
+UdpPacketとTcpPacket統合
+NetworkManager見直し
+　→Connecter、Receiver、Senderに分けれる？
