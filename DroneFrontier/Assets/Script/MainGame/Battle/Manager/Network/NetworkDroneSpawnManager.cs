@@ -21,7 +21,7 @@ namespace Battle.Network
         /// <summary>
         /// ドローン破壊イベント
         /// </summary>
-        public event DroneDestroyHandler DroneDestroyEvent;
+        public event DroneDestroyHandler OnDroneDestroy;
 
         [SerializeField, Tooltip("プレイヤードローン")]
         private NetworkBattleDrone _playerDrone = null;
@@ -85,7 +85,7 @@ namespace Battle.Network
         private NetworkBattleDrone CreateDrone(Vector3 pos, Quaternion rotate)
         {
             NetworkBattleDrone createdDrone = Instantiate(_playerDrone, pos, rotate);
-            createdDrone.DroneDestroyEvent += DroneDestroy;
+            createdDrone.OnDroneDestroy += OnCreatedDroneDestroy;
 
             return createdDrone;
         }
@@ -95,7 +95,7 @@ namespace Battle.Network
         /// </summary>
         /// <param name="sender">イベントオブジェクト</param>
         /// <param name="e">イベント引数</param>
-        private void DroneDestroy(object sender, EventArgs e)
+        private void OnCreatedDroneDestroy(object sender, EventArgs e)
         {
             NetworkBattleDrone drone = sender as NetworkBattleDrone;
 
@@ -119,10 +119,10 @@ namespace Battle.Network
             }
 
             // イベント発火
-            DroneDestroyEvent?.Invoke(drone, respawnDrone);
+            OnDroneDestroy?.Invoke(drone, respawnDrone);
 
             // 破壊されたドローンからイベントの削除
-            drone.DroneDestroyEvent -= DroneDestroy;
+            drone.OnDroneDestroy -= OnCreatedDroneDestroy;
         }
     }
 }

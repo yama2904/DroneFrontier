@@ -108,7 +108,7 @@ namespace Battle.Spawner
                     ISpawnItem item = spawner.Spawn();
 
                     // アイテム消滅イベント設定
-                    item.SpawnItemDestroyEvent += SpawnItemDestroy;
+                    item.OnSpawnItemDestroy += OnSpawnItemDestroy;
 
                     // スポーン済みアイテムに追加
                     lock (_spawnedMap) _spawnedMap.Add(item, spawner);
@@ -133,7 +133,7 @@ namespace Battle.Spawner
                     if (item == null) continue;
 
                     // アイテム消滅イベント設定
-                    item.SpawnItemDestroyEvent += SpawnItemDestroy;
+                    item.OnSpawnItemDestroy += OnSpawnItemDestroy;
 
                     // スポーン済みアイテムに追加
                     lock (_spawnedMap) _spawnedMap.Add(item, spawner);
@@ -149,7 +149,7 @@ namespace Battle.Spawner
         /// スポーンアイテム消滅イベント
         /// </summary>
         /// <param name="item">消滅したアイテムのスポナー</param>
-        private void SpawnItemDestroy(object sender, EventArgs e)
+        private void OnSpawnItemDestroy(object sender, EventArgs e)
         {
             // アイテム取得
             ISpawnItem item = sender as ISpawnItem;
@@ -158,7 +158,7 @@ namespace Battle.Spawner
             IItemSpawner spawner = _spawnedMap[item];
 
             // 消滅したアイテムからイベント削除
-            item.SpawnItemDestroyEvent -= SpawnItemDestroy;
+            item.OnSpawnItemDestroy -= OnSpawnItemDestroy;
 
             // スポーン済みアイテムから削除
             lock (_spawnedMap) _spawnedMap.Remove(item);

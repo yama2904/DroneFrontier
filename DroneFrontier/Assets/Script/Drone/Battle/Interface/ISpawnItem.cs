@@ -7,7 +7,7 @@ namespace Drone.Battle
         /// <summary>
         /// スポーンアイテム消滅イベント
         /// </summary>
-        public event EventHandler SpawnItemDestroyEvent;
+        public event EventHandler OnSpawnItemDestroy;
 
         /// <summary>
         /// 取得時に使用可能となるアイテム

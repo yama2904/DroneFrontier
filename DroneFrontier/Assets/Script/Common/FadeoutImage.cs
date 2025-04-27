@@ -12,7 +12,7 @@ public class FadeoutImage : MonoBehaviour
     /// <summary>
     /// フェードアウト終了イベント
     /// </summary>
-    public event EventHandler FadeoutEndEvent;
+    public event EventHandler OnFadeoutEnd;
 
     [SerializeField, Tooltip("フェードアウトさせる画像")] 
     private Image _image = null;
@@ -35,7 +35,7 @@ public class FadeoutImage : MonoBehaviour
         else
         {
             // フェードアウト終了イベントを発火してスクリプト停止
-            FadeoutEndEvent?.Invoke(this, EventArgs.Empty);
+            OnFadeoutEnd?.Invoke(this, EventArgs.Empty);
             enabled = false;
         }
     }

@@ -174,7 +174,7 @@ namespace Battle.Network
                 }
 
                 // ドローン破壊イベント設定
-                _droneSpawnManager.DroneDestroyEvent += DroneDestroy;
+                _droneSpawnManager.OnDroneDestroy += OnDroneDestroy;
 
                 // アイテムスポナー初期化
                 _itemSpawnManager.Initialize(IsItemSpawn);
@@ -277,7 +277,7 @@ namespace Battle.Network
             Cursor.visible = true;
 
             // イベント削除
-            _droneSpawnManager.DroneDestroyEvent -= DroneDestroy;
+            _droneSpawnManager.OnDroneDestroy -= OnDroneDestroy;
             NetworkManager.Singleton.OnDisconnect -= OnDisconnect;
 
             // プレイヤー情報初期化
@@ -313,7 +313,7 @@ namespace Battle.Network
         /// </summary>
         /// <param name="destroyDrone">破壊されたドローン</param>
         /// <param name="respawnDrone">リスポーンしたドローン</param>
-        private void DroneDestroy(NetworkBattleDrone destroyDrone, NetworkBattleDrone respawnDrone)
+        private void OnDroneDestroy(NetworkBattleDrone destroyDrone, NetworkBattleDrone respawnDrone)
         {
             // 破壊されたドローン情報取得
             PlayerData droneData = PlayerList.Where(x => x.Name == destroyDrone.Name).FirstOrDefault();

@@ -26,32 +26,32 @@ namespace Drone.Battle
         /// <summary>
         /// バリア破壊イベント
         /// </summary>
-        public event EventHandler BarrierBreakEvent;
+        public event EventHandler OnBarrierBreak;
 
         /// <summary>
         /// バリア復活イベント
         /// </summary>
-        public event EventHandler BarrierResurrectEvent;
+        public event EventHandler OnBarrierResurrect;
 
         /// <summary>
         /// バリア強化開始イベント
         /// </summary>
-        public event EventHandler StrengthenStartEvent;
+        public event EventHandler OnStrengthenStart;
 
         /// <summary>
         /// バリア強化終了イベント
         /// </summary>
-        public event EventHandler StrengthenEndEvent;
+        public event EventHandler OnStrengthenEnd;
 
         /// <summary>
         /// バリア弱体化開始イベント
         /// </summary>
-        public event EventHandler WeakStartEvent;
+        public event EventHandler OnWeakStart;
 
         /// <summary>
         /// バリア弱体化終了イベント
         /// </summary>
-        public event EventHandler WeakEndEvent;
+        public event EventHandler OnWeakEnd;
 
         [SerializeField, Tooltip("バリアオブジェクト")]
         private GameObject _barrierObject = null;
@@ -125,7 +125,7 @@ namespace Drone.Battle
             HP = _barrierMaxHP;
 
             // ドローンが破壊された場合は本コンポーネントを停止
-            _drone.DroneDestroyEvent += DroneDestroyEvent;
+            _drone.OnDroneDestroy += OnDroneDestroy;
 
             // バリアカラー初期化
             ApplyBarrierColor();
@@ -162,7 +162,7 @@ namespace Drone.Battle
                 _soundComponent.Play(SoundManager.SE.DestroyBarrier);
 
                 // バリア破壊イベント発火
-                BarrierBreakEvent?.Invoke(this, EventArgs.Empty);
+                OnBarrierBreak?.Invoke(this, EventArgs.Empty);
                 Debug.Log($"{_drone.Name}:バリア破壊");
             }
 
@@ -191,7 +191,7 @@ namespace Drone.Battle
             ApplyBarrierColor();
 
             // イベント発火
-            BarrierResurrectEvent?.Invoke(this, EventArgs.Empty);
+            OnBarrierResurrect?.Invoke(this, EventArgs.Empty);
             Debug.Log("バリア復活");
         }
 
@@ -233,12 +233,12 @@ namespace Drone.Battle
                 finally
                 {
                     // バリア強化終了イベント発火
-                    StrengthenEndEvent?.Invoke(this, EventArgs.Empty);
+                    OnStrengthenEnd?.Invoke(this, EventArgs.Empty);
                 }
             });
 
             // バリア強化開始イベント発火
-            StrengthenStartEvent?.Invoke(this, EventArgs.Empty);
+            OnStrengthenStart?.Invoke(this, EventArgs.Empty);
 
             return true;
         }
@@ -293,12 +293,12 @@ namespace Drone.Battle
                 finally
                 {
                     // バリア弱体化終了イベント発火
-                    WeakEndEvent?.Invoke(this, EventArgs.Empty);
+                    OnWeakEnd?.Invoke(this, EventArgs.Empty);
                 }
             });
 
             // バリア弱体化開始イベント発火
-            WeakStartEvent?.Invoke(this, EventArgs.Empty);
+            OnWeakStart?.Invoke(this, EventArgs.Empty);
 
             return true;
         }
@@ -391,13 +391,13 @@ namespace Drone.Battle
         /// </summary>
         /// <param name="o">イベントオブジェクト</param>
         /// <param name="e">イベント引数</param>
-        private void DroneDestroyEvent(object o, EventArgs e)
+        private void OnDroneDestroy(object o, EventArgs e)
         {
             HP = 0;
             ApplyBarrierColor();
 
             // イベント削除
-            _drone.DroneDestroyEvent -= DroneDestroyEvent;
+            _drone.OnDroneDestroy -= OnDroneDestroy;
         }
     }
 }

@@ -61,6 +61,6 @@ namespace Drone.Battle
         /// <summary>
         /// ドローン破壊イベント
         /// </summary>
-        public event EventHandler DroneDestroyEvent;
+        public event EventHandler OnDroneDestroy;
     }
 }

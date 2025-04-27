@@ -58,7 +58,7 @@ namespace Battle
             _watchDrones[_watchingDrone].IsWatch = true;
 
             // ドローン破壊イベント設定
-            _droneSpawnManager.DroneDestroyEvent += DroneDestroy;
+            _droneSpawnManager.OnDroneDestroy += OnDroneDestroy;
 
             // AudioListener有効化
             GetComponent<AudioListener>().enabled = true;
@@ -74,7 +74,7 @@ namespace Battle
             }
 
             // ドローン破壊イベント削除
-            _droneSpawnManager.DroneDestroyEvent -= DroneDestroy;
+            _droneSpawnManager.OnDroneDestroy -= OnDroneDestroy;
 
             // AudioListener無効化
             GetComponent<AudioListener>().enabled = false;
@@ -85,7 +85,7 @@ namespace Battle
         /// </summary>
         /// <param name="destroyDrone">破壊されたドローン</param>
         /// <param name="respawnDrone">リスポーンしたドローン</param>
-        private void DroneDestroy(IBattleDrone destroyDrone, IBattleDrone respawnDrone)
+        private void OnDroneDestroy(IBattleDrone destroyDrone, IBattleDrone respawnDrone)
         {
             if (respawnDrone is CpuBattleDrone drone)
             {

@@ -165,7 +165,7 @@ namespace Battle
             }
 
             // ドローン破壊イベント設定
-            _droneSpawnManager.DroneDestroyEvent += DroneDestroy;
+            _droneSpawnManager.OnDroneDestroy += OnDroneDestroy;
 
             // アイテムスポナー初期化
             _itemSpawnManager.Initialize(IsItemSpawn);
@@ -227,7 +227,7 @@ namespace Battle
         {
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
-            _droneSpawnManager.DroneDestroyEvent -= DroneDestroy;
+            _droneSpawnManager.OnDroneDestroy -= OnDroneDestroy;
         }
 
         /// <summary>
@@ -235,7 +235,7 @@ namespace Battle
         /// </summary>
         /// <param name="destroyDrone">破壊されたドローン</param>
         /// <param name="respawnDrone">リスポーンしたドローン</param>
-        private void DroneDestroy(IBattleDrone destroyDrone, IBattleDrone respawnDrone)
+        private void OnDroneDestroy(IBattleDrone destroyDrone, IBattleDrone respawnDrone)
         {
             // 破壊されたドローン情報取得
             DroneData droneData = _droneDatas[destroyDrone.Name];

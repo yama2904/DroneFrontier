@@ -27,6 +27,6 @@ namespace Drone.Battle
         /// <summary>
         /// ステータス変化終了イベント
         /// </summary>
-        event EventHandler StatusEndEvent;
+        event EventHandler OnStatusEnd;
     }
 }

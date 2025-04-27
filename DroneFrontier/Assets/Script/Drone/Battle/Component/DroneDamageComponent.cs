@@ -20,7 +20,7 @@ namespace Drone.Battle
         /// <summary>
         /// ダメージイベント
         /// </summary>
-        public event DamageHandler DamageEvent;
+        public event DamageHandler OnDamage;
 
         [SerializeField, Tooltip("復活後の無敵時間（秒）")]
         private int _notDamageableSec = 4;
@@ -85,7 +85,7 @@ namespace Drone.Battle
             _damageCount++;
 
             // ダメージイベント発火
-            DamageEvent?.Invoke(this, source, value);
+            OnDamage?.Invoke(this, source, value);
 
             return true;
         }
@@ -97,7 +97,7 @@ namespace Drone.Battle
             _barrier = GetComponent<DroneBarrierComponent>();
 
             // ドローンが破壊された場合は本コンポーネントを停止
-            _drone.DroneDestroyEvent += DroneDestroyEvent;
+            _drone.OnDroneDestroy += OnDroneDestroy;
         }
 
         private void LateUpdate()
@@ -119,10 +119,10 @@ namespace Drone.Battle
         /// </summary>
         /// <param name="o">イベントオブジェクト</param>
         /// <param name="e">イベント引数</param>
-        private void DroneDestroyEvent(object o, EventArgs e)
+        private void OnDroneDestroy(object o, EventArgs e)
         {
             // イベント削除
-            _drone.DroneDestroyEvent -= DroneDestroyEvent;
+            _drone.OnDroneDestroy -= OnDroneDestroy;
         }
     }
 }

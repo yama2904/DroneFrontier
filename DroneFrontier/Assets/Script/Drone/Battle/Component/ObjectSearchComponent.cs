@@ -8,13 +8,13 @@ namespace Drone.Battle
     public class ObjectSearchComponent : MonoBehaviour, IDroneComponent
     {
         public delegate void ObjectStayHandler(Collider other);
-        public event ObjectStayHandler ObjectStayEvent;
+        public event ObjectStayHandler OnObjectStay;
 
         public void Initialize() { }
 
         private void OnTriggerStay(Collider other)
         {
-            ObjectStayEvent?.Invoke(other);
+            OnObjectStay?.Invoke(other);
         }
     }
 }

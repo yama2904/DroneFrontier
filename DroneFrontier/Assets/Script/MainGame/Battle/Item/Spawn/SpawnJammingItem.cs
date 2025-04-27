@@ -11,7 +11,7 @@ namespace Battle.SpawnItem
         /// <summary>
         /// スポーンアイテム消滅イベント
         /// </summary>
-        public event EventHandler SpawnItemDestroyEvent;
+        public event EventHandler OnSpawnItemDestroy;
 
         /// <summary>
         /// 取得時に使用可能となるアイテム
@@ -26,7 +26,7 @@ namespace Battle.SpawnItem
 
         private void OnDestroy()
         {
-            SpawnItemDestroyEvent?.Invoke(this, EventArgs.Empty);
+            OnSpawnItemDestroy?.Invoke(this, EventArgs.Empty);
         }
     }
 }

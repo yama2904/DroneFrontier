@@ -66,7 +66,7 @@ namespace Battle.Drone
         /// <summary>
         /// ドローン破壊イベント
         /// </summary>
-        public event EventHandler DroneDestroyEvent;
+        public event EventHandler OnDroneDestroy;
 
         #endregion
 
@@ -177,7 +177,7 @@ namespace Battle.Drone
             _stockNum = stock;
 
             // ダメージイベント設定
-            _damageComponent.DamageEvent += DamageEvent;
+            _damageComponent.OnDamage += OnDamage;
 
             // サブ武器残弾イベント設定
             _weaponComponent.OnBulletFull += OnBulletFull;
@@ -188,7 +188,7 @@ namespace Battle.Drone
             NotRadarableList.Add(gameObject);
 
             // オブジェクト探索イベント設定
-            _searchComponent.ObjectStayEvent += ObjectSearchEvent;
+            _searchComponent.OnObjectStay += OnObjectSearch;
 
             // コンポーネント初期化
             _moveComponent.Initialize();
@@ -428,7 +428,7 @@ namespace Battle.Drone
         /// オブジェクト探索イベント
         /// </summary>
         /// <param name="other">発見オブジェクト</param>
-        private void ObjectSearchEvent(Collider other)
+        private void OnObjectSearch(Collider other)
         {
             // 死亡処理中は操作不可
             if (_isDestroy) return;
@@ -453,7 +453,7 @@ namespace Battle.Drone
         /// <param name="sender">イベントオブジェクト</param>
         /// <param name="source">ダメージを与えたオブジェクト</param>
         /// <param name="damage">ダメージ量</param>
-        public void DamageEvent(DroneDamageComponent sender, GameObject source, float damage)
+        public void OnDamage(DroneDamageComponent sender, GameObject source, float damage)
         {
             if (_lockOnComponent.Target == null)
             {
@@ -593,7 +593,7 @@ namespace Battle.Drone
             await UniTask.Delay(5000);
 
             // ドローン破壊イベント通知
-            DroneDestroyEvent?.Invoke(this, EventArgs.Empty);
+            OnDroneDestroy?.Invoke(this, EventArgs.Empty);
 
             // オブジェクト破棄
             Destroy(gameObject);

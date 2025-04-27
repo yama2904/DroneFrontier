@@ -64,7 +64,7 @@ namespace Drone.Battle
             if (!success) return false;
 
             // ステータス終了イベントを設定
-            status.StatusEndEvent += StatusEndEvent;
+            status.OnStatusEnd += OnDroneStatusEnd;
 
             lock (_statuses)
             {
@@ -101,7 +101,7 @@ namespace Drone.Battle
         /// </summary>
         /// <param name="sender">イベントオブジェクト</param>
         /// <param name="e">イベント引数</param>
-        private void StatusEndEvent(object sender, EventArgs e)
+        private void OnDroneStatusEnd(object sender, EventArgs e)
         {
             IDroneStatusChange status = sender as IDroneStatusChange;
 
@@ -133,7 +133,7 @@ namespace Drone.Battle
             }
 
             // イベント削除
-            status.StatusEndEvent -= StatusEndEvent;
+            status.OnStatusEnd -= OnDroneStatusEnd;
 
             // ステータス変化終了イベント発火
             OnStatusEnd?.Invoke(this, status);

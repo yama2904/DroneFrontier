@@ -12,7 +12,7 @@ namespace Battle.Status
 {
     public class JammingStatus : IDroneStatusChange
     {
-        public event EventHandler StatusEndEvent;
+        public event EventHandler OnStatusEnd;
 
         /// <summary>
         /// ジャミング付与したオブジェクトのLockOnコンポーネント
@@ -85,7 +85,7 @@ namespace Battle.Status
             _cancel.Cancel();
 
             // 終了イベント発火
-            StatusEndEvent?.Invoke(this, EventArgs.Empty);
+            OnStatusEnd?.Invoke(this, EventArgs.Empty);
         }
     }
 }

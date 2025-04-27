@@ -7,7 +7,7 @@ namespace Battle.Status
 {
     public class BarrierStrengthenStatus : IDroneStatusChange
     {
-        public event EventHandler StatusEndEvent;
+        public event EventHandler OnStatusEnd;
 
         private DroneBarrierComponent _barrier = null;
 
@@ -29,7 +29,7 @@ namespace Battle.Status
             if (!success) return false;
 
             // 強化時間終了時にステータス変化終了イベント発火
-            _barrier.StrengthenEndEvent += StrengthenEndEvent;
+            _barrier.OnStrengthenEnd += OnStrengthenEnd;
 
             return true;
         }
@@ -39,10 +39,10 @@ namespace Battle.Status
         /// </summary>
         /// <param name="o">イベントオブジェクト</param>
         /// <param name="e">イベント引数</param>
-        private void StrengthenEndEvent(object o, EventArgs e)
+        private void OnStrengthenEnd(object o, EventArgs e)
         {
-            StatusEndEvent?.Invoke(this, EventArgs.Empty);
-            _barrier.StrengthenEndEvent -= StrengthenEndEvent;
+            OnStatusEnd?.Invoke(this, EventArgs.Empty);
+            _barrier.OnStrengthenEnd -= OnStrengthenEnd;
         }
     }
 }

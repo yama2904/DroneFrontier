@@ -82,7 +82,7 @@ namespace Battle.Item
         /// <summary>
         /// ジャミングボット破壊イベント
         /// </summary>
-        public event EventHandler DestroyEvent;
+        public event EventHandler OnJammingBotDestroy;
 
         [SerializeField]
         private float _hp = 30.0f;
@@ -168,7 +168,7 @@ namespace Battle.Item
             }
 
             // 破壊イベント発火
-            DestroyEvent?.Invoke(this, EventArgs.Empty);
+            OnJammingBotDestroy?.Invoke(this, EventArgs.Empty);
 
             //デバッグ用
             Debug.Log("ジャミングボット破壊");

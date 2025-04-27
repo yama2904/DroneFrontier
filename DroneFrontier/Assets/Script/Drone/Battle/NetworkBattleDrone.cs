@@ -52,7 +52,7 @@ namespace Drone.Battle.Network
         /// <summary>
         /// ドローン破壊イベント
         /// </summary>
-        public event EventHandler DroneDestroyEvent;
+        public event EventHandler OnDroneDestroy;
 
         #endregion
 
@@ -174,11 +174,11 @@ namespace Drone.Battle.Network
             NotRadarableList.Add(gameObject);
 
             // バリアイベント設定
-            _barrierComponent.BarrierBreakEvent += OnBarrierBreak;
-            _barrierComponent.BarrierResurrectEvent += OnBarrierResurrect;
+            _barrierComponent.OnBarrierBreak += OnBarrierBreak;
+            _barrierComponent.OnBarrierResurrect += OnBarrierResurrect;
 
             // オブジェクト探索イベント設定
-            _searchComponent.ObjectStayEvent += ObjectSearchEvent;
+            _searchComponent.OnObjectStay += OnObjectSearch;
 
             // イベント受信イベント設定
             NetworkManager.Singleton.OnUdpReceiveOnMainThread += OnReceiveUdpOfEvent;
@@ -321,9 +321,9 @@ namespace Drone.Battle.Network
             base.OnDestroy();
 
             // イベント削除
-            _barrierComponent.BarrierBreakEvent -= OnBarrierBreak;
-            _barrierComponent.BarrierResurrectEvent -= OnBarrierResurrect;
-            _searchComponent.ObjectStayEvent -= ObjectSearchEvent;
+            _barrierComponent.OnBarrierBreak -= OnBarrierBreak;
+            _barrierComponent.OnBarrierResurrect -= OnBarrierResurrect;
+            _searchComponent.OnObjectStay -= OnObjectSearch;
             NetworkManager.Singleton.OnUdpReceiveOnMainThread -= OnReceiveUdpOfEvent;
 
             // キャンセル発行
@@ -354,7 +354,7 @@ namespace Drone.Battle.Network
         /// オブジェクト探索イベント
         /// </summary>
         /// <param name="other">発見オブジェクト</param>
-        private void ObjectSearchEvent(Collider other)
+        private void OnObjectSearch(Collider other)
         {
             // 死亡処理中は操作不可
             if (_isDestroy) return;
@@ -527,7 +527,7 @@ namespace Drone.Battle.Network
             _cancel.Cancel();
 
             // ドローン破壊イベント通知
-            DroneDestroyEvent?.Invoke(this, EventArgs.Empty);
+            OnDroneDestroy?.Invoke(this, EventArgs.Empty);
 
             // オブジェクト破棄
             Destroy(gameObject);

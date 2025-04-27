@@ -19,7 +19,7 @@ namespace Battle
         /// <summary>
         /// ドローン破壊イベント
         /// </summary>
-        public event DroneDestroyHandler DroneDestroyEvent;
+        public event DroneDestroyHandler OnDroneDestroy;
 
         [SerializeField, Tooltip("プレイヤードローン")]
         private GameObject _playerDrone = null;
@@ -89,7 +89,7 @@ namespace Battle
             GameObject drone = isPlayer ? _playerDrone : _cpuDrone;
 
             IBattleDrone createdDrone = Instantiate(drone, spawnPosition.position, spawnPosition.rotation).GetComponent<IBattleDrone>();
-            createdDrone.DroneDestroyEvent += DroneDestroy;
+            createdDrone.OnDroneDestroy += OnCreatedDroneDestroy;
 
             return createdDrone;
         }
@@ -99,7 +99,7 @@ namespace Battle
         /// </summary>
         /// <param name="sender">イベントオブジェクト</param>
         /// <param name="e">イベント引数</param>
-        private void DroneDestroy(object sender, EventArgs e)
+        private void OnCreatedDroneDestroy(object sender, EventArgs e)
         {
             IBattleDrone drone = sender as IBattleDrone;
 
@@ -132,10 +132,10 @@ namespace Battle
             }
 
             // イベント発火
-            DroneDestroyEvent?.Invoke(drone, respawnDrone);
+            OnDroneDestroy?.Invoke(drone, respawnDrone);
 
             // 破壊されたドローンからイベントの削除
-            drone.DroneDestroyEvent -= DroneDestroy;
+            drone.OnDroneDestroy -= OnCreatedDroneDestroy;
         }
     }
 }

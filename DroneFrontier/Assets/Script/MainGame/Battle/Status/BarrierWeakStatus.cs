@@ -8,7 +8,7 @@ namespace Battle.Status
 {
     public class BarrierWeakStatus : IDroneStatusChange
     {
-        public event EventHandler StatusEndEvent;
+        public event EventHandler OnStatusEnd;
 
         private DroneBarrierComponent _barrier = null;
 
@@ -27,7 +27,7 @@ namespace Battle.Status
             if (!success) return false;
 
             // 弱体化時間終了時にステータス変化終了イベント発火
-            _barrier.WeakEndEvent += WeakEndEvent;
+            _barrier.OnWeakEnd += OnWeakEnd;
 
             return true;
         }
@@ -37,10 +37,10 @@ namespace Battle.Status
         /// </summary>
         /// <param name="o">イベントオブジェクト</param>
         /// <param name="e">イベント引数</param>
-        private void WeakEndEvent(object o, EventArgs e)
+        private void OnWeakEnd(object o, EventArgs e)
         {
-            StatusEndEvent?.Invoke(this, EventArgs.Empty);
-            _barrier.WeakEndEvent -= WeakEndEvent;
+            OnStatusEnd?.Invoke(this, EventArgs.Empty);
+            _barrier.OnWeakEnd -= OnWeakEnd;
         }
     }
 }

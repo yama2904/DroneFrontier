@@ -9,7 +9,7 @@ namespace Battle.Status
 {
     public class StunStatus : IDroneStatusChange
     {
-        public event EventHandler StatusEndEvent;
+        public event EventHandler OnStatusEnd;
 
         private FadeoutImage _createdMask;
 
@@ -27,7 +27,7 @@ namespace Battle.Status
                 {
                     _createdMask = handle.Result.GetComponent<FadeoutImage>();
                     _createdMask.FadeoutSec = statusSec;
-                    _createdMask.FadeoutEndEvent += FadeoutEndEvent;
+                    _createdMask.OnFadeoutEnd += OnFadeoutEnd;
                 };
             }
             else
@@ -43,7 +43,7 @@ namespace Battle.Status
                 {
                     await UniTask.Delay(TimeSpan.FromSeconds(statusSec));
                     lockon.SetEnableLockOn(true);
-                    StatusEndEvent?.Invoke(this, EventArgs.Empty);
+                    OnStatusEnd?.Invoke(this, EventArgs.Empty);
                 });
             }
             return true;
@@ -54,13 +54,13 @@ namespace Battle.Status
         /// </summary>
         /// <param name="o">イベントオブジェクト</param>
         /// <param name="e">イベント引数</param>
-        private void FadeoutEndEvent(object o, EventArgs e)
+        private void OnFadeoutEnd(object o, EventArgs e)
         {
             // ステータス終了イベント発火
-            StatusEndEvent?.Invoke(this, EventArgs.Empty);
+            OnStatusEnd?.Invoke(this, EventArgs.Empty);
 
             // イベント削除してオブジェクト破棄
-            _createdMask.FadeoutEndEvent -= FadeoutEndEvent;
+            _createdMask.OnFadeoutEnd -= OnFadeoutEnd;
             UnityEngine.Object.Destroy(_createdMask.gameObject);
         }
     }
