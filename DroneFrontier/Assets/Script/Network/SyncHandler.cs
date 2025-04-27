@@ -42,21 +42,21 @@ namespace Network
         public async UniTask<object> SyncValueAsync(object value, int timeout = 0)
         {
             _receivedPlayers.Clear();
-            _receivedPlayers.Add(MyNetworkManager.Singleton.MyPlayerName);
+            _receivedPlayers.Add(NetworkManager.Singleton.MyPlayerName);
 
             // 同期パケット受信イベント設定
-            MyNetworkManager.Singleton.OnUdpReceive += OnUdpReceiveOfSync;
+            NetworkManager.Singleton.OnUdpReceive += OnUdpReceiveOfSync;
 
             // 受信前に同期パケット送信
             UdpPacket packet = new SimpleSyncPacket();
-            if (MyNetworkManager.Singleton.IsHost)
+            if (NetworkManager.Singleton.IsHost)
             {
                 if (value != null)
                 {
                     packet = new SimpleSyncPacket(value);
                     _syncValue = value;
                 }
-                MyNetworkManager.Singleton.SendToAll(packet);
+                NetworkManager.Singleton.SendToAll(packet);
             }
 
             // タイムアウト計測用ストップウォッチ開始
@@ -64,7 +64,7 @@ namespace Network
 
             // ホスト側再送計測用ストップウォッチ開始
             Stopwatch retryStopwatch = new Stopwatch();
-            if (MyNetworkManager.Singleton.IsHost)
+            if (NetworkManager.Singleton.IsHost)
             {
                 retryStopwatch.Start();
             }
@@ -74,7 +74,7 @@ namespace Network
             while (true)
             {
                 // 全てのプレイヤーから受信した場合は終了
-                if (_receivedPlayers.Count == MyNetworkManager.Singleton.PlayerCount)
+                if (_receivedPlayers.Count == NetworkManager.Singleton.PlayerCount)
                 {
                     success = true;
                     break;
@@ -89,7 +89,7 @@ namespace Network
                 // 1秒ごとにリトライ
                 if (retryStopwatch.Elapsed.Seconds >= 1)
                 {
-                    MyNetworkManager.Singleton.SendToAll(packet);
+                    NetworkManager.Singleton.SendToAll(packet);
                     retryStopwatch.Restart();
                 }
 
@@ -98,7 +98,7 @@ namespace Network
             }
 
             // 同期パケット受信イベント削除
-            MyNetworkManager.Singleton.OnUdpReceive -= OnUdpReceiveOfSync;
+            NetworkManager.Singleton.OnUdpReceive -= OnUdpReceiveOfSync;
 
             if (!success)
             {
@@ -130,7 +130,7 @@ namespace Network
             }
 
             // 同期パケットを返す
-            MyNetworkManager.Singleton.SendToAll(packet);
+            NetworkManager.Singleton.SendToAll(packet);
         }
     }
 }

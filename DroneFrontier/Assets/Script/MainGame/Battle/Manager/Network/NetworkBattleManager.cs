@@ -11,7 +11,7 @@ using UnityEngine.UI;
 
 namespace Network
 {
-    public class NetworkBattleManager : MyNetworkBehaviour
+    public class NetworkBattleManager : NetworkBehaviour
     {
         /// <summary>
         /// プレイヤー情報
@@ -135,7 +135,7 @@ namespace Network
             }
 
             // イベント設定
-            MyNetworkManager.Singleton.OnDisconnect += OnDisconnect;
+            NetworkManager.Singleton.OnDisconnect += OnDisconnect;
             _config.OnButtonClick += OnConfigBackClick;
 
             // Config初期化
@@ -157,7 +157,7 @@ namespace Network
             UnityEngine.Random.InitState(seed);
 
             // ドローンをスポーン
-            if (MyNetworkManager.Singleton.IsHost)
+            if (NetworkManager.Singleton.IsHost)
             {
                 foreach (var player in PlayerList)
                 {
@@ -186,7 +186,7 @@ namespace Network
                     var drones = GameObject.FindGameObjectsWithTag(TagNameConst.PLAYER).Select(x => x.GetComponent<NetworkBattleDrone>()).ToArray();
 
                     // 全プレイヤー分生成されていない場合は待機
-                    if (drones.Length < MyNetworkManager.Singleton.PlayerCount)
+                    if (drones.Length < NetworkManager.Singleton.PlayerCount)
                     {
                         await UniTask.Delay(100);
                         continue;
@@ -206,7 +206,7 @@ namespace Network
 
             // 同期してランダムシード値も共有
             object value = await new SyncHandler().SyncValueAsync(seed);
-            if (MyNetworkManager.Singleton.IsClient)
+            if (NetworkManager.Singleton.IsClient)
             {
                 UnityEngine.Random.InitState(Convert.ToInt32(value));
             }
@@ -274,7 +274,7 @@ namespace Network
 
             // イベント削除
             _droneSpawnManager.DroneDestroyEvent -= DroneDestroy;
-            MyNetworkManager.Singleton.OnDisconnect -= OnDisconnect;
+            NetworkManager.Singleton.OnDisconnect -= OnDisconnect;
 
             // プレイヤー情報初期化
             PlayerList.Clear();
@@ -283,7 +283,7 @@ namespace Network
             _cancelToken.Cancel();
 
             // 切断
-            MyNetworkManager.Singleton.Disconnect();
+            NetworkManager.Singleton.Disconnect();
         }
 
         /// <summary>
@@ -294,7 +294,7 @@ namespace Network
         private async void OnDisconnect(string name, bool isHost)
         {
             // ホストから切断、又はプレイヤーが自分のみの場合はエラーメッセージ表示
-            if (isHost || MyNetworkManager.Singleton.PlayerCount == 1)
+            if (isHost || NetworkManager.Singleton.PlayerCount == 1)
             {
                 _errMsgCanvas.enabled = true;
 
@@ -417,7 +417,7 @@ namespace Network
         /// </summary>
         private void SendFinishGame()
         {
-            if (MyNetworkManager.Singleton.IsClient) return;
+            if (NetworkManager.Singleton.IsClient) return;
 
             // [残ストック数 DESC, 破壊された時間 DESC]でソートしてランキング設定
             string[] ranking = PlayerList.OrderByDescending(x => x.StockNum)
@@ -440,7 +440,7 @@ namespace Network
             }
 
             // 切断イベント削除
-            MyNetworkManager.Singleton.OnDisconnect -= OnDisconnect;
+            NetworkManager.Singleton.OnDisconnect -= OnDisconnect;
 
             // キャンセルトークン発行
             _cancelToken.Cancel();
@@ -455,7 +455,7 @@ namespace Network
             await UniTask.Delay(TimeSpan.FromSeconds(3));
 
             // 通信切断
-            MyNetworkManager.Singleton.Disconnect();
+            NetworkManager.Singleton.Disconnect();
 
             // リザルト画面へ移動
             ResultSceneManager.SetRank(ranking);

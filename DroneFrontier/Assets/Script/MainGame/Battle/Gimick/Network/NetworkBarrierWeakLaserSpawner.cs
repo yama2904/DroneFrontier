@@ -16,13 +16,13 @@ namespace Battle.Network
         private void Start()
         {
             // 受信イベント設定
-            MyNetworkManager.Singleton.OnUdpReceiveOnMainThread += OnReceive;
+            NetworkManager.Singleton.OnUdpReceiveOnMainThread += OnReceive;
 
             // シーン上のレーザー初期化
             foreach (BarrierWeakLaser lazer in _lazersOnScene)
             {
                 // ホストの場合は発生イベント設定
-                if (MyNetworkManager.Singleton.IsHost)
+                if (NetworkManager.Singleton.IsHost)
                 {
                     lazer.OnSpawn += OnSpawn;
                 }
@@ -37,10 +37,10 @@ namespace Battle.Network
         private void OnDestroy()
         {
             // 受信イベント削除
-            MyNetworkManager.Singleton.OnUdpReceiveOnMainThread -= OnReceive;
+            NetworkManager.Singleton.OnUdpReceiveOnMainThread -= OnReceive;
 
             // ホストの場合はシーン上のレーザーからイベント削除
-            if (MyNetworkManager.Singleton.IsHost)
+            if (NetworkManager.Singleton.IsHost)
             {
                 foreach (BarrierWeakLaser lazer in _lazersOnScene)
                 {
@@ -85,7 +85,7 @@ namespace Battle.Network
         private void OnSpawn(object sender, EventArgs e)
         {
             // ホストのみ処理
-            if (MyNetworkManager.Singleton.IsClient) return;
+            if (NetworkManager.Singleton.IsClient) return;
 
             // 発生したレーザー情報をクライアントへ送信
             BarrierWeakLaser lazer = sender as BarrierWeakLaser;
@@ -96,7 +96,7 @@ namespace Battle.Network
                                                                        lazer.CurrentRotateSpeed,
                                                                        lazer.gameObject.transform.position,
                                                                        lazer.gameObject.transform.rotation);
-            MyNetworkManager.Singleton.SendToAll(packet);
+            NetworkManager.Singleton.SendToAll(packet);
         }
 
         /// <summary>
@@ -107,7 +107,7 @@ namespace Battle.Network
         private void OnDespawn(object sender, EventArgs e)
         {
             // クライアントのみ処理
-            if (MyNetworkManager.Singleton.IsHost) return;
+            if (NetworkManager.Singleton.IsHost) return;
 
             // 消滅したレーザー削除
             BarrierWeakLaser lazer = sender as BarrierWeakLaser;

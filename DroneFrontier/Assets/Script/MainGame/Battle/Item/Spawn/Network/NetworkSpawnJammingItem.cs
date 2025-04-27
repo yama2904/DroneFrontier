@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Network
 {
-    public class NetworkSpawnJammingItem : MyNetworkBehaviour, ISpawnItem, IRadarable
+    public class NetworkSpawnJammingItem : NetworkBehaviour, ISpawnItem, IRadarable
     {
         /// <summary>
         /// スポーンアイテム消滅イベント

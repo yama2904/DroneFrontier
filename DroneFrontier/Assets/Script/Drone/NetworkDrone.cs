@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Drone.Network
 {
-    public class NetworkDrone : MyNetworkBehaviour
+    public class NetworkDrone : NetworkBehaviour
     {
         public string Name { get; protected set; } = "";
 
@@ -106,7 +106,7 @@ namespace Drone.Network
             _boostComponent.Initialize();
 
             // プレイヤー名を基に操作するか識別
-            if (Name == MyNetworkManager.Singleton.MyPlayerName)
+            if (Name == NetworkManager.Singleton.MyPlayerName)
             {
                 IsControl = true;
             }
@@ -118,7 +118,7 @@ namespace Drone.Network
                 _canvas.enabled = false;
 
                 // 受信イベント設定
-                MyNetworkManager.Singleton.OnUdpReceiveOnMainThread += OnReceiveUdpOfOtherPlayer;
+                NetworkManager.Singleton.OnUdpReceiveOnMainThread += OnReceiveUdpOfOtherPlayer;
 
                 // 補間をオフにしないと瞬間移動する
                 _rigidbody.interpolation = RigidbodyInterpolation.None;
@@ -140,13 +140,13 @@ namespace Drone.Network
                 if (_input.DownedKeys.Contains(KeyCode.Space))
                 {
                     _boostComponent.StartBoost();
-                    MyNetworkManager.Singleton.SendToAll(new DroneBoostPacket(true, false));
+                    NetworkManager.Singleton.SendToAll(new DroneBoostPacket(true, false));
                 }
                 // ブースト停止
                 if (_input.UppedKeys.Contains(KeyCode.Space))
                 {
                     _boostComponent.StopBoost();
-                    MyNetworkManager.Singleton.SendToAll(new DroneBoostPacket(false, true));
+                    NetworkManager.Singleton.SendToAll(new DroneBoostPacket(false, true));
                 }
 
                 // 入力情報更新
@@ -208,7 +208,7 @@ namespace Drone.Network
 
             if (_isControl)
             {
-                MyNetworkManager.Singleton.SendToAll(new InputPacket(_input));
+                NetworkManager.Singleton.SendToAll(new InputPacket(_input));
             }
         }
 
@@ -218,7 +218,7 @@ namespace Drone.Network
 
             // 受信イベント設定
             if (!_isControl)
-                MyNetworkManager.Singleton.OnUdpReceiveOnMainThread -= OnReceiveUdpOfOtherPlayer;
+                NetworkManager.Singleton.OnUdpReceiveOnMainThread -= OnReceiveUdpOfOtherPlayer;
         }
 
         /// <summary>

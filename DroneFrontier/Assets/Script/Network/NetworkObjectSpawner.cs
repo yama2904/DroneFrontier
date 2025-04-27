@@ -9,9 +9,9 @@ namespace Network
     /// <summary>
     /// 全ての通信相手とのゲームオブジェクトの生成・削除を管理するクラス
     /// </summary>
-    public class NetworkObjectSpawner
+    public class NetworkObjectSpawner : MonoBehaviour
     {
-        public static Dictionary<string, MyNetworkBehaviour> SpawnedObjects { get; private set; } = new Dictionary<string, MyNetworkBehaviour>();
+        public static Dictionary<string, NetworkBehaviour> SpawnedObjects { get; private set; } = new Dictionary<string, NetworkBehaviour>();
 
         private static bool _initialized = false;
 
@@ -20,7 +20,7 @@ namespace Network
             if (_initialized) return;
 
             // 受信イベント設定
-            MyNetworkManager.Singleton.OnUdpReceiveOnMainThread += OnUdpReceive;
+            NetworkManager.Singleton.OnUdpReceiveOnMainThread += OnUdpReceive;
 
             _initialized = true;
         }
@@ -29,13 +29,13 @@ namespace Network
         /// 指定したオブジェクトを全プレイヤーに生成させる
         /// </summary>
         /// <param name="obj">生成させるオブジェクト</param>
-        public static void Spawn(MyNetworkBehaviour obj)
+        public static void Spawn(NetworkBehaviour obj)
         {
             // オブジェクトID設定
             obj.ObjectId = Guid.NewGuid().ToString("N");
 
             // パケット送信
-            MyNetworkManager.Singleton.SendToAll(new SpawnPacket(obj));
+            NetworkManager.Singleton.SendToAll(new SpawnPacket(obj));
 
             // 削除イベント設定
             obj.OnDestroyObject += OnDestroy;
@@ -48,9 +48,9 @@ namespace Network
         /// 指定したオブジェクトを全プレイヤーから削除する
         /// </summary>
         /// <param name="obj">削除するオブジェクト</param>
-        public static void Destroy(MyNetworkBehaviour obj)
+        public static void Destroy(NetworkBehaviour obj)
         {
-            MyNetworkManager.Singleton.SendToAll(new DestroyPacket(obj.ObjectId));
+            NetworkManager.Singleton.SendToAll(new DestroyPacket(obj.ObjectId));
             SpawnedObjects.Remove(obj.ObjectId);
         }
 
@@ -69,7 +69,7 @@ namespace Network
 
                 // オブジェクト生成
                 GameObject obj = await Addressables.InstantiateAsync(spawnPacket.AddressKey, spawnPacket.Position, spawnPacket.Rotation).Task;
-                MyNetworkBehaviour spawn = obj.GetComponent<MyNetworkBehaviour>();
+                NetworkBehaviour spawn = obj.GetComponent<NetworkBehaviour>();
 
                 // ID設定
                 spawn.ObjectId = spawnPacket.ObjectId;
@@ -108,7 +108,7 @@ namespace Network
         private static void OnDestroy(object sender, EventArgs args)
         {
             // 削除オブジェクト取得
-            MyNetworkBehaviour obj = sender as MyNetworkBehaviour;
+            NetworkBehaviour obj = sender as NetworkBehaviour;
 
             // 削除イベント除去
             obj.OnDestroyObject -= OnDestroy;

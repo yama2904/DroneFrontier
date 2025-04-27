@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace Network
 {
-    public class NetworkWeaponSelectScreen : MyNetworkBehaviour, IScreen
+    public class NetworkWeaponSelectScreen : NetworkBehaviour, IScreen
     {
         /// <summary>
         /// ボタン種類
@@ -115,13 +115,13 @@ namespace Network
             _selectedWeapons.Clear();
             EnabledButtons(true);
 
-            if (MyNetworkManager.Singleton.IsClient)
+            if (NetworkManager.Singleton.IsClient)
             {
                 _itemCanvas.enabled = false;
             }
 
             // 通信イベント設定
-            MyNetworkManager.Singleton.OnDisconnect += OnDisconnect;
+            NetworkManager.Singleton.OnDisconnect += OnDisconnect;
         }
 
         public void ClickShotgun()
@@ -204,7 +204,7 @@ namespace Network
             SoundManager.Play(SoundManager.SE.Select);
 
             // 選択武器送信
-            SendMethod(() => SelectWeapon(MyNetworkManager.Singleton.MyPlayerName, _selectedWeapon));
+            SendMethod(() => SelectWeapon(NetworkManager.Singleton.MyPlayerName, _selectedWeapon));
 
             // ボタン非活性
             EnabledButtons(false);
@@ -256,8 +256,8 @@ namespace Network
             _selectedWeapons.Add(player, weapon);
             
             // 全てのプレイヤーが選択済みの場合はゲーム開始
-            if (_selectedWeapons.Count == MyNetworkManager.Singleton.PlayerCount
-                && MyNetworkManager.Singleton.IsHost)
+            if (_selectedWeapons.Count == NetworkManager.Singleton.PlayerCount
+                && NetworkManager.Singleton.IsHost)
             {
                 // NetworkBattleManagerにプレイヤー情報送信
                 foreach (DictionaryEntry entity in _selectedWeapons)
@@ -266,7 +266,7 @@ namespace Network
                     {
                         Name = entity.Key as string,
                         Weapon = (WeaponType)entity.Value,
-                        IsControl = name == MyNetworkManager.Singleton.MyPlayerName
+                        IsControl = name == NetworkManager.Singleton.MyPlayerName
                     };
                     NetworkBattleManager.PlayerList.Add(data);
                 }
@@ -287,7 +287,7 @@ namespace Network
         private void StartGame()
         {
             // イベント削除
-            MyNetworkManager.Singleton.OnDisconnect -= OnDisconnect;
+            NetworkManager.Singleton.OnDisconnect -= OnDisconnect;
 
             // 次の画面へ遷移
             SelectedButton = ButtonType.Ok;
@@ -302,10 +302,10 @@ namespace Network
         private void OnDisconnect(string name, bool isHost)
         {
             // イベント削除
-            MyNetworkManager.Singleton.OnDisconnect -= OnDisconnect;
+            NetworkManager.Singleton.OnDisconnect -= OnDisconnect;
 
             // 通信切断
-            MyNetworkManager.Singleton.Disconnect();
+            NetworkManager.Singleton.Disconnect();
 
             // エラーメッセージ表示
             _errMsgCanvas.enabled = true;

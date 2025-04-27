@@ -28,7 +28,7 @@ namespace Network.Udp
         /// コンストラクタ
         /// </summary>
         /// <param name="obj">生成オブジェクト</param>
-        public SpawnPacket(MyNetworkBehaviour obj)
+        public SpawnPacket(NetworkBehaviour obj)
         {
             AddressKey = obj.GetAddressKey();
             ObjectId = obj.ObjectId;

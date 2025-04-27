@@ -131,12 +131,12 @@ public class MatchingScreen : MonoBehaviour, IScreen
         _playerName = _inputField.text;
 
         // 通信イベント設定
-        MyNetworkManager.Singleton.OnConnect += OnConnect;
-        MyNetworkManager.Singleton.OnDisconnect += OnDisconnect;
-        MyNetworkManager.Singleton.OnDiscoveryCompleted += OnDiscoveryComplete;
+        NetworkManager.Singleton.OnConnect += OnConnect;
+        NetworkManager.Singleton.OnDisconnect += OnDisconnect;
+        NetworkManager.Singleton.OnDiscoveryCompleted += OnDiscoveryComplete;
 
         // ホストとして通信を開始
-        MyNetworkManager.Singleton.StartHost(_playerName).Forget();
+        NetworkManager.Singleton.StartHost(_playerName).Forget();
         _isDiscovery = true;
 
         // プレイヤー一覧へ移動
@@ -162,9 +162,9 @@ public class MatchingScreen : MonoBehaviour, IScreen
         UpdatePlayerNames();
 
         // 通信イベント設定
-        MyNetworkManager.Singleton.OnConnect += OnConnect;
-        MyNetworkManager.Singleton.OnDisconnect += OnDisconnect;
-        MyNetworkManager.Singleton.OnDiscoveryCompleted += OnDiscoveryComplete;
+        NetworkManager.Singleton.OnConnect += OnConnect;
+        NetworkManager.Singleton.OnDisconnect += OnDisconnect;
+        NetworkManager.Singleton.OnDiscoveryCompleted += OnDiscoveryComplete;
 
         // クライアントとして通信を開始
         UniTask.Void(async () =>
@@ -172,7 +172,7 @@ public class MatchingScreen : MonoBehaviour, IScreen
             try
             {
                 _isDiscovery = true;
-                await MyNetworkManager.Singleton.StartClient(_playerName);
+                await NetworkManager.Singleton.StartClient(_playerName);
             }
             catch (NetworkException ex)
             {
@@ -192,7 +192,7 @@ public class MatchingScreen : MonoBehaviour, IScreen
     public void ClickOk()
     {
         // プレイヤー探索終了
-        MyNetworkManager.Singleton.StopDiscovery();
+        NetworkManager.Singleton.StopDiscovery();
     }
 
     /// <summary>
@@ -206,10 +206,10 @@ public class MatchingScreen : MonoBehaviour, IScreen
         // 探索中の場合は切断
         if (_isDiscovery)
         {
-            MyNetworkManager.Singleton.Disconnect();
-            MyNetworkManager.Singleton.OnConnect -= OnConnect;
-            MyNetworkManager.Singleton.OnDisconnect -= OnDisconnect;
-            MyNetworkManager.Singleton.OnDiscoveryCompleted -= OnDiscoveryComplete;
+            NetworkManager.Singleton.Disconnect();
+            NetworkManager.Singleton.OnConnect -= OnConnect;
+            NetworkManager.Singleton.OnDisconnect -= OnDisconnect;
+            NetworkManager.Singleton.OnDiscoveryCompleted -= OnDiscoveryComplete;
             _isDiscovery = false;
         }
 
@@ -235,10 +235,10 @@ public class MatchingScreen : MonoBehaviour, IScreen
         SoundManager.Play(SoundManager.SE.Cancel);
 
         // 切断
-        MyNetworkManager.Singleton.Disconnect();
-        MyNetworkManager.Singleton.OnConnect -= OnConnect;
-        MyNetworkManager.Singleton.OnDisconnect -= OnDisconnect;
-        MyNetworkManager.Singleton.OnDiscoveryCompleted -= OnDiscoveryComplete;
+        NetworkManager.Singleton.Disconnect();
+        NetworkManager.Singleton.OnConnect -= OnConnect;
+        NetworkManager.Singleton.OnDisconnect -= OnDisconnect;
+        NetworkManager.Singleton.OnDiscoveryCompleted -= OnDiscoveryComplete;
         _isDiscovery = false;
 
         // 決定ボタン非表示
@@ -256,9 +256,9 @@ public class MatchingScreen : MonoBehaviour, IScreen
             SoundManager.Play(SoundManager.SE.Select);
 
             // 通信イベント削除
-            MyNetworkManager.Singleton.OnConnect -= OnConnect;
-            MyNetworkManager.Singleton.OnDisconnect -= OnDisconnect;
-            MyNetworkManager.Singleton.OnDiscoveryCompleted -= OnDiscoveryComplete;
+            NetworkManager.Singleton.OnConnect -= OnConnect;
+            NetworkManager.Singleton.OnDisconnect -= OnDisconnect;
+            NetworkManager.Singleton.OnDiscoveryCompleted -= OnDiscoveryComplete;
             _isDiscovery = false;
 
             // 初期化して前画面へ戻る
@@ -276,7 +276,7 @@ public class MatchingScreen : MonoBehaviour, IScreen
     private void OnConnect(string player)
     {
         // ホストの場合は決定ボタン表示
-        if (MyNetworkManager.Singleton.IsHost)
+        if (NetworkManager.Singleton.IsHost)
         {
             if (!_okButton.activeSelf)
                 _okButton.SetActive(true);
@@ -302,7 +302,7 @@ public class MatchingScreen : MonoBehaviour, IScreen
     private void OnDisconnect(string name, bool isHost)
     {
         // ホストかつ、参加者が0人になった場合は決定ボタン非表示
-        if (MyNetworkManager.Singleton.IsHost && MyNetworkManager.Singleton.PlayerCount <= 1)
+        if (NetworkManager.Singleton.IsHost && NetworkManager.Singleton.PlayerCount <= 1)
         {
             _okButton.SetActive(false);
         }
@@ -329,9 +329,9 @@ public class MatchingScreen : MonoBehaviour, IScreen
     private void OnDiscoveryComplete(object sender, EventArgs e)
     {
         // イベント削除
-        MyNetworkManager.Singleton.OnConnect -= OnConnect;
-        MyNetworkManager.Singleton.OnDisconnect -= OnDisconnect;
-        MyNetworkManager.Singleton.OnDiscoveryCompleted -= OnDiscoveryComplete;
+        NetworkManager.Singleton.OnConnect -= OnConnect;
+        NetworkManager.Singleton.OnDisconnect -= OnDisconnect;
+        NetworkManager.Singleton.OnDiscoveryCompleted -= OnDiscoveryComplete;
 
         // 探索終了
         _isDiscovery = false;
@@ -370,9 +370,9 @@ public class MatchingScreen : MonoBehaviour, IScreen
         _4pText.color = _nonPlayerTextColor;
 
         // プレイヤー名更新
-        for (int i = 0; i < MyNetworkManager.Singleton.PlayerCount; i++)
+        for (int i = 0; i < NetworkManager.Singleton.PlayerCount; i++)
         {
-            string player = MyNetworkManager.Singleton.PlayerNames[i];
+            string player = NetworkManager.Singleton.PlayerNames[i];
 
             switch (i)
             {

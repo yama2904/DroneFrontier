@@ -181,7 +181,7 @@ namespace Drone.Battle.Network
             _searchComponent.ObjectStayEvent += ObjectSearchEvent;
 
             // イベント受信イベント設定
-            MyNetworkManager.Singleton.OnUdpReceiveOnMainThread += OnReceiveUdpOfEvent;
+            NetworkManager.Singleton.OnUdpReceiveOnMainThread += OnReceiveUdpOfEvent;
 
             // 自プレイヤーの場合は定期的にステータス同期
             if (IsControl)
@@ -192,7 +192,7 @@ namespace Drone.Battle.Network
                     {
                         await UniTask.Delay(_syncStatusInterval * 1000, ignoreTimeScale: true, cancellationToken: _cancel.Token);
                         float moveSpeed = _moveComponent.MoveSpeed;
-                        MyNetworkManager.Singleton.SendToAll(new DroneStatusPacket(HP, moveSpeed));
+                        NetworkManager.Singleton.SendToAll(new DroneStatusPacket(HP, moveSpeed));
                     }
                 });
             }
@@ -292,7 +292,7 @@ namespace Drone.Battle.Network
 
                 // アクション情報送信
                 if (sendPacket)
-                    MyNetworkManager.Singleton.SendToAll(new DroneActionPacket(startLockOn, stopLockOn, useItem1, useItem2));
+                    NetworkManager.Singleton.SendToAll(new DroneActionPacket(startLockOn, stopLockOn, useItem1, useItem2));
             }
         }
 
@@ -324,7 +324,7 @@ namespace Drone.Battle.Network
             _barrierComponent.BarrierBreakEvent -= OnBarrierBreak;
             _barrierComponent.BarrierResurrectEvent -= OnBarrierResurrect;
             _searchComponent.ObjectStayEvent -= ObjectSearchEvent;
-            MyNetworkManager.Singleton.OnUdpReceiveOnMainThread -= OnReceiveUdpOfEvent;
+            NetworkManager.Singleton.OnUdpReceiveOnMainThread -= OnReceiveUdpOfEvent;
 
             // キャンセル発行
             _cancel.Cancel();
@@ -337,7 +337,7 @@ namespace Drone.Battle.Network
         /// <param name="e">イベント引数</param>
         private void OnBarrierBreak(object sender, EventArgs e)
         {
-            MyNetworkManager.Singleton.SendToAll(new DroneEventPacket(Name, true, false, false));
+            NetworkManager.Singleton.SendToAll(new DroneEventPacket(Name, true, false, false));
         }
 
         /// <summary>
@@ -347,7 +347,7 @@ namespace Drone.Battle.Network
         /// <param name="e">イベント引数</param>
         private void OnBarrierResurrect(object sender, EventArgs e)
         {
-            MyNetworkManager.Singleton.SendToAll(new DroneEventPacket(Name, false, true, false));
+            NetworkManager.Singleton.SendToAll(new DroneEventPacket(Name, false, true, false));
         }
 
         /// <summary>
@@ -371,7 +371,7 @@ namespace Drone.Battle.Network
                     if (_itemComponent.SetItem(item.DroneItem))
                     {
                         // 取得アイテム情報送信
-                        MyNetworkManager.Singleton.SendToAll(new GetItemPacket(item.DroneItem));
+                        NetworkManager.Singleton.SendToAll(new GetItemPacket(item.DroneItem));
 
                         // 取得したアイテム削除
                         Destroy(other.gameObject);
@@ -494,7 +494,7 @@ namespace Drone.Battle.Network
             _rigidbody.velocity = Vector3.zero;
 
             // 死亡情報送信
-            MyNetworkManager.Singleton.SendToAll(new DroneEventPacket(Name, false, false, true));
+            NetworkManager.Singleton.SendToAll(new DroneEventPacket(Name, false, false, true));
 
             // コンポーネント停止
             _moveComponent.enabled = false;

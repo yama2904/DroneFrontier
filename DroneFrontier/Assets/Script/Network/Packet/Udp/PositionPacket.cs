@@ -23,7 +23,7 @@ namespace Network.Udp
         /// コンストラクタ
         /// </summary>
         /// <param name="obj">座標を同期するオブジェクト</param>
-        public PositionPacket(MyNetworkBehaviour obj)
+        public PositionPacket(NetworkBehaviour obj)
         {
             ObjectId = obj.ObjectId;
             Position = obj.transform.position;

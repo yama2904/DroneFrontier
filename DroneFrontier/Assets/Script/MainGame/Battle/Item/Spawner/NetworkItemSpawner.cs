@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Network
 {
-    public class NetworkItemSpawner : MyNetworkBehaviour, IItemSpawner
+    public class NetworkItemSpawner : NetworkBehaviour, IItemSpawner
     {
         /// <summary>
         /// スポーン確率（0～1）
@@ -14,7 +14,7 @@ namespace Network
         }
 
         [SerializeField, Tooltip("スポーンさせるアイテム一覧")]
-        private MyNetworkBehaviour[] _spawnItems = null;
+        private NetworkBehaviour[] _spawnItems = null;
 
         [SerializeField, Tooltip("スポーン確率(0～1)")]
         private float _spawnPercent = 0.5f;
@@ -32,7 +32,7 @@ namespace Network
         {
             // ランダムなアイテムをスポーン
             int index = Random.Range(0, _spawnItems.Length);
-            MyNetworkBehaviour item = Instantiate(_spawnItems[index], _transform);
+            NetworkBehaviour item = Instantiate(_spawnItems[index], _transform);
             item.transform.SetParent(_transform);
 
             // 全クライアントにスポーンさせる
