@@ -2,10 +2,8 @@ using System;
 
 namespace Network.Udp
 {
-    public class FrameRatePacket : UdpPacket
+    public class FrameRatePacket : BasePacket
     {
-        public override UdpHeader Header => UdpHeader.FrameRate;
-
         /// <summary>
         /// フレームレート
         /// </summary>
@@ -25,7 +23,7 @@ namespace Network.Udp
             FrameRate = frameRate;
         }
 
-        protected override IPacket ParseBody(byte[] body)
+        protected override BasePacket ParseBody(byte[] body)
         {
             return new FrameRatePacket(BitConverter.ToInt32(body));
         }

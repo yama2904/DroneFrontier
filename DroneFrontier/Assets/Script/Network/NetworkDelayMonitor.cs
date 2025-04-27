@@ -32,7 +32,7 @@ public class NetworkDelayMonitor : MonoBehaviour
             while (true)
             {
                 await Task.Delay(interval, cancellationToken: _cancel.Token);
-                NetworkManager.Singleton.SendToAll(new FrameSyncPacket(TotalSeconds));
+                NetworkManager.Singleton.SendUdpToAll(new FrameSyncPacket(TotalSeconds));
             }
         });
     }
@@ -47,40 +47,36 @@ public class NetworkDelayMonitor : MonoBehaviour
     /// UDPパケット受信イベント
     /// </summary>
     /// <param name="name">プレイヤー名</param>
-    /// <param name="header">受信したUDPパケットのヘッダ</param>
     /// <param name="packet">受信したUDPパケット</param>
-    private void OnUdpReceive(string name, UdpHeader header, UdpPacket packet)
+    private void OnUdpReceive(string name, BasePacket packet)
     {
-        if (header != UdpHeader.FrameSync) return;
-
-        // パケット情報取得
-        FrameSyncPacket syncPacket = packet as FrameSyncPacket;
-        float sec = syncPacket.TotalSeconds;
-        
-        // 遅延中のプレイヤーがいない場合は遅延チェック
-        if (_delayPlayer == null)
+        if (packet is FrameSyncPacket syncPacket)
         {
-            // 相手が遅延している場合はゲームを止める
-            if (TotalSeconds - sec >= _maxDelaySec)
+            // 遅延中のプレイヤーがいない場合は遅延チェック
+            if (_delayPlayer == null)
             {
-                _delayPlayer = name;
-                Time.timeScale = 0;
-                _stopwatch.Stop();
-                IsPause = true;
+                // 相手が遅延している場合はゲームを止める
+                if (TotalSeconds - syncPacket.TotalSeconds >= _maxDelaySec)
+                {
+                    _delayPlayer = name;
+                    Time.timeScale = 0;
+                    _stopwatch.Stop();
+                    IsPause = true;
+                }
             }
-        }
-        else
-        {
-            // 遅延しているプレイヤー以外は無視
-            if (_delayPlayer != name) return;
-
-            // 遅延が解消した場合は再開
-            if (TotalSeconds - sec < _maxDelaySec)
+            else
             {
-                _delayPlayer = null;
-                Time.timeScale = 1;
-                _stopwatch.Start();
-                IsPause = false;
+                // 遅延しているプレイヤー以外は無視
+                if (_delayPlayer != name) return;
+
+                // 遅延が解消した場合は再開
+                if (TotalSeconds - syncPacket.TotalSeconds < _maxDelaySec)
+                {
+                    _delayPlayer = null;
+                    Time.timeScale = 1;
+                    _stopwatch.Start();
+                    IsPause = false;
+                }
             }
         }
     }

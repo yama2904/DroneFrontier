@@ -5,9 +5,8 @@ using UnityEngine;
 
 namespace Network.Udp
 {
-    public class PositionPacket : UdpPacket
+    public class PositionPacket : BasePacket
     {
-        public override UdpHeader Header => UdpHeader.Position;
         public string ObjectId { get; private set; } = string.Empty;
 
         public Vector3 Position { get; private set; } = Vector3.zero;
@@ -43,7 +42,7 @@ namespace Network.Udp
             Rotation = rotation;
         }
 
-        protected override IPacket ParseBody(byte[] body)
+        protected override BasePacket ParseBody(byte[] body)
         {
             int offset = 0;
 

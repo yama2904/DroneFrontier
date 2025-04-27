@@ -35,7 +35,7 @@ namespace Network
             obj.ObjectId = Guid.NewGuid().ToString("N");
 
             // パケット送信
-            NetworkManager.Singleton.SendToAll(new SpawnPacket(obj));
+            NetworkManager.Singleton.SendUdpToAll(new SpawnPacket(obj));
 
             // 削除イベント設定
             obj.OnDestroyObject += OnDestroy;
@@ -50,7 +50,7 @@ namespace Network
         /// <param name="obj">削除するオブジェクト</param>
         public static void Destroy(NetworkBehaviour obj)
         {
-            NetworkManager.Singleton.SendToAll(new DestroyPacket(obj.ObjectId));
+            NetworkManager.Singleton.SendUdpToAll(new DestroyPacket(obj.ObjectId));
             SpawnedObjects.Remove(obj.ObjectId);
         }
 
@@ -58,15 +58,12 @@ namespace Network
         /// UDPパケット受信イベント
         /// </summary>
         /// <param name="name">プレイヤー名</param>
-        /// <param name="header">受信したUDPパケットのヘッダ</param>
         /// <param name="packet">受信したUDPパケット</param>
-        private static async void OnUdpReceive(string name, UdpHeader header, UdpPacket packet)
+        private static async void OnUdpReceive(string name, BasePacket packet)
         {
             // オブジェクト生成パケット
-            if (header == UdpHeader.Spawn)
+            if (packet is SpawnPacket spawnPacket)
             {
-                SpawnPacket spawnPacket = packet as SpawnPacket;
-
                 // オブジェクト生成
                 GameObject obj = await Addressables.InstantiateAsync(spawnPacket.AddressKey, spawnPacket.Position, spawnPacket.Rotation).Task;
                 NetworkBehaviour spawn = obj.GetComponent<NetworkBehaviour>();
@@ -88,13 +85,13 @@ namespace Network
             }
 
             // オブジェクト削除パケット
-            if (header == UdpHeader.Destroy)
+            if (packet is DestroyPacket destroy)
             {
-                string id = (packet as DestroyPacket).Id;
+                string id = destroy.Id;
                 if (SpawnedObjects.ContainsKey(id))
                 {
                     SpawnedObjects[id].OnDestroyObject -= OnDestroy;
-                    UnityEngine.Object.Destroy(SpawnedObjects[id].gameObject);
+                    Destroy(SpawnedObjects[id].gameObject);
                     SpawnedObjects.Remove(id);
                 }
             }

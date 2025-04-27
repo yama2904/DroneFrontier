@@ -4,10 +4,8 @@ using System.Text;
 
 namespace Network.Udp
 {
-    public class SendMethodPacket : UdpPacket
+    public class SendMethodPacket : BasePacket
     {
-        public override UdpHeader Header => UdpHeader.SendMethod;
-
         /// <summary>
         /// 実行させるメソッドを持つクラス名
         /// </summary>
@@ -48,7 +46,7 @@ namespace Network.Udp
             Arguments = args == null ? new object[0] : args;
         }
 
-        protected override IPacket ParseBody(byte[] body)
+        protected override BasePacket ParseBody(byte[] body)
         {
             int offset = 0;
 

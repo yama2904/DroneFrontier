@@ -1,13 +1,10 @@
 using Common;
 using Network;
-using Network.Udp;
 
 namespace Drone.Battle.Network
 {
-    public class DroneActionPacket : UdpPacket
+    public class DroneActionPacket : BasePacket
     {
-        public override UdpHeader Header => UdpHeader.DroneAction;
-
         /// <summary>
         /// ロックオン開始
         /// </summary>
@@ -41,7 +38,7 @@ namespace Drone.Battle.Network
             UseItem2 = useItem2;
         }
 
-        protected override IPacket ParseBody(byte[] body)
+        protected override BasePacket ParseBody(byte[] body)
         {
             byte data = body[0];
             int offset = 0;

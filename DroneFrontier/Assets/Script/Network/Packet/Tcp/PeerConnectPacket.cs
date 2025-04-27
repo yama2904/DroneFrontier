@@ -5,10 +5,8 @@ namespace Network.Tcp
     /// <summary>
     /// クライアント同士の接続用TCPパケット
     /// </summary>
-    public class PeerConnectPacket : TcpPacket
+    public class PeerConnectPacket : BasePacket
     {
-        public override TcpHeader Header => TcpHeader.PeerConnect;
-
         /// <summary>
         /// プレイヤー名
         /// </summary>
@@ -28,7 +26,7 @@ namespace Network.Tcp
             Name = name;
         }
 
-        protected override IPacket ParseBody(byte[] body)
+        protected override BasePacket ParseBody(byte[] body)
         {
             return new PeerConnectPacket(Encoding.UTF8.GetString(body));
         }

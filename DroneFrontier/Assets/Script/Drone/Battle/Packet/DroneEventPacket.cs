@@ -1,15 +1,12 @@
 using Common;
 using Network;
-using Network.Udp;
 using System.Linq;
 using System.Text;
 
 namespace Drone.Battle.Network
 {
-    public class DroneEventPacket : UdpPacket
+    public class DroneEventPacket : BasePacket
     {
-        public override UdpHeader Header => UdpHeader.DroneEvent;
-
         /// <summary>
         /// ÉhÉçÅ[Éìñº
         /// </summary>
@@ -43,7 +40,7 @@ namespace Drone.Battle.Network
             Destroy = destroy;
         }
 
-        protected override IPacket ParseBody(byte[] body)
+        protected override BasePacket ParseBody(byte[] body)
         {
             int byteOffset = 0;
             

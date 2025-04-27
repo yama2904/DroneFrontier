@@ -5,10 +5,8 @@ using System.Text;
 
 namespace Network.Udp
 {
-    public class DiscoverResponsePacket : UdpPacket
+    internal class DiscoverResponsePacket : BasePacket
     {
-        public override UdpHeader Header => UdpHeader.DiscoverResponse;
-
         /// <summary>
         /// ホストのプレイヤー名
         /// </summary>
@@ -35,7 +33,7 @@ namespace Network.Udp
             ClientAddresses = clientAdrs;
         }
 
-        protected override IPacket ParseBody(byte[] body)
+        protected override BasePacket ParseBody(byte[] body)
         {
             int offset = 0;
 

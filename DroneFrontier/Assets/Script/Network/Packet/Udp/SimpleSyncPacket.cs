@@ -1,9 +1,7 @@
 ﻿namespace Network.Udp
 {
-    public class SimpleSyncPacket : UdpPacket
+    public class SimpleSyncPacket : BasePacket
     {
-        public override UdpHeader Header => UdpHeader.SimpleSync;
-
         public object Value { get; private set; } = new object();
 
         public SimpleSyncPacket() { }
@@ -13,7 +11,7 @@
             Value = value;
         }
 
-        protected override IPacket ParseBody(byte[] body)
+        protected override BasePacket ParseBody(byte[] body)
         {
             return new SimpleSyncPacket(NetworkUtil.ConvertToObject<object>(body));
         }

@@ -2,10 +2,8 @@ using System.Text;
 
 namespace Network.Udp
 {
-    public class DiscoverPacket : UdpPacket
+    internal class DiscoverPacket : BasePacket
     {
-        public override UdpHeader Header => UdpHeader.Discover;
-
         /// <summary>
         /// プレイヤー名
         /// </summary>
@@ -25,7 +23,7 @@ namespace Network.Udp
             Name = name;
         }
 
-        protected override IPacket ParseBody(byte[] body)
+        protected override BasePacket ParseBody(byte[] body)
         {
             // プレイヤー名取得
             string name = Encoding.UTF8.GetString(body);

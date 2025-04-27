@@ -1,15 +1,12 @@
 using Network;
-using Network.Udp;
 using System;
 using System.Linq;
 using UnityEngine;
 
 namespace Battle.Packet
 {
-    public class MagnetSpawnPacket : UdpPacket
+    public class MagnetSpawnPacket : BasePacket
     {
-        public override UdpHeader Header => UdpHeader.None;
-
         public float DownPercent { get; private set; } = 0;
 
         public float ActiveTime { get; private set; } = 0;
@@ -58,7 +55,7 @@ namespace Battle.Packet
                               .ToArray();
         }
 
-        protected override IPacket ParseBody(byte[] body)
+        protected override BasePacket ParseBody(byte[] body)
         {
             int offset = 0;
 

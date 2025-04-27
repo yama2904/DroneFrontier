@@ -2,10 +2,8 @@ using System;
 
 namespace Network.Udp
 {
-    public class ErrorPacket : UdpPacket
+    public class ErrorPacket : BasePacket
     {
-        public override UdpHeader Header => UdpHeader.Error;
-
         /// <summary>
         /// エラーコード
         /// </summary>
@@ -25,7 +23,7 @@ namespace Network.Udp
             ErrorCode = code;
         }
 
-        protected override IPacket ParseBody(byte[] body)
+        protected override BasePacket ParseBody(byte[] body)
         {
             ErrorCode code = (ErrorCode)BitConverter.ToInt32(body);
             return new ErrorPacket(code);

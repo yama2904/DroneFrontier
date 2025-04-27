@@ -1,5 +1,4 @@
 ﻿using Network;
-using Network.Udp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,10 +6,8 @@ using UnityEngine;
 
 namespace Drone.Network
 {
-    public class InputPacket : UdpPacket
+    public class InputPacket : BasePacket
     {
-        public override UdpHeader Header => UdpHeader.Input;
-
         public InputData Input { get; private set; } = null;
 
         /// <summary>
@@ -23,7 +20,7 @@ namespace Drone.Network
             Input = input;
         }
 
-        protected override IPacket ParseBody(byte[] body)
+        protected override BasePacket ParseBody(byte[] body)
         {
             int offset = 0;
 

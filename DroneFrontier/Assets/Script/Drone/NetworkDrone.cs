@@ -140,13 +140,13 @@ namespace Drone.Network
                 if (_input.DownedKeys.Contains(KeyCode.Space))
                 {
                     _boostComponent.StartBoost();
-                    NetworkManager.Singleton.SendToAll(new DroneBoostPacket(true, false));
+                    NetworkManager.Singleton.SendUdpToAll(new DroneBoostPacket(true, false));
                 }
                 // ブースト停止
                 if (_input.UppedKeys.Contains(KeyCode.Space))
                 {
                     _boostComponent.StopBoost();
-                    NetworkManager.Singleton.SendToAll(new DroneBoostPacket(false, true));
+                    NetworkManager.Singleton.SendUdpToAll(new DroneBoostPacket(false, true));
                 }
 
                 // 入力情報更新
@@ -208,7 +208,7 @@ namespace Drone.Network
 
             if (_isControl)
             {
-                NetworkManager.Singleton.SendToAll(new InputPacket(_input));
+                NetworkManager.Singleton.SendUdpToAll(new InputPacket(_input));
             }
         }
 
@@ -225,16 +225,15 @@ namespace Drone.Network
         /// 他プレイヤー情報受信イベント
         /// </summary>
         /// <param name="player">送信元プレイヤー</param>
-        /// <param name="header">受信したUDPパケットのヘッダ</param>
         /// <param name="packet">受信したUDPパケット</param>
-        protected virtual void OnReceiveUdpOfOtherPlayer(string player, UdpHeader header, UdpPacket packet)
+        protected virtual void OnReceiveUdpOfOtherPlayer(string player, BasePacket packet)
         {
             if (player != Name) return;
 
             // 入力情報
-            if (header == UdpHeader.Input)
+            if (packet is InputPacket input)
             {
-                _input = (packet as InputPacket).Input;
+                _input = input.Input;
             }
 
             // ブースト

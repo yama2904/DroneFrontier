@@ -1,6 +1,5 @@
 タワー周辺にオブジェクトある
 割合のSerializeFieldをRange
-UdpPacketとTcpPacket統合
 NetworkManager見直し
 　→Connecter、Receiver、Senderに分けれる？
 ステータス同期

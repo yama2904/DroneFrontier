@@ -1,15 +1,12 @@
 using Network;
-using Network.Udp;
 using System;
 using System.Linq;
 using UnityEngine;
 
 namespace Battle.Packet
 {
-    public class BarrierWeakLaserPacket : UdpPacket
+    public class BarrierWeakLaserPacket : BasePacket
     {
-        public override UdpHeader Header => UdpHeader.None;
-
         public float WeakTime { get; private set; } = 0;
 
         public float LazerRange { get; private set; } = 0;
@@ -68,7 +65,7 @@ namespace Battle.Packet
                            .ToArray();
         }
 
-        protected override IPacket ParseBody(byte[] body)
+        protected override BasePacket ParseBody(byte[] body)
         {
             int offset = 0;
 

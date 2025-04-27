@@ -5,10 +5,8 @@ using UnityEngine;
 
 namespace Network.Udp
 {
-    public class SpawnPacket : UdpPacket
+    public class SpawnPacket : BasePacket
     {
-        public override UdpHeader Header => UdpHeader.Spawn;
-
         public string AddressKey { get; private set; } = string.Empty;
 
         public string ObjectId { get; private set; } = string.Empty;
@@ -54,7 +52,7 @@ namespace Network.Udp
             SpawnData = data;
         }
 
-        protected override IPacket ParseBody(byte[] body)
+        protected override BasePacket ParseBody(byte[] body)
         {
             int offset = 0;
             

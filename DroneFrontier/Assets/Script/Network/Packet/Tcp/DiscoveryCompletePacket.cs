@@ -1,15 +1,13 @@
 namespace Network.Tcp
 {
-    public class DiscoveryCompletePacket : TcpPacket
+    public class DiscoveryCompletePacket : BasePacket
     {
-        public override TcpHeader Header => TcpHeader.DiscoveryComplete;
-
         /// <summary>
         /// コンストラクタ
         /// </summary>
         public DiscoveryCompletePacket() { }
 
-        protected override IPacket ParseBody(byte[] body)
+        protected override BasePacket ParseBody(byte[] body)
         {
             return new DiscoveryCompletePacket();
         }

@@ -1,12 +1,9 @@
 using Network;
-using Network.Udp;
 
 namespace Drone.Battle.Network
 {
-    public class GetItemPacket : UdpPacket
+    public class GetItemPacket : BasePacket
     {
-        public override UdpHeader Header => UdpHeader.GetItem;
-
         /// <summary>
         /// Žæ“¾ƒAƒCƒeƒ€
         /// </summary>
@@ -23,7 +20,7 @@ namespace Drone.Battle.Network
             Item = item;
         }
 
-        protected override IPacket ParseBody(byte[] body)
+        protected override BasePacket ParseBody(byte[] body)
         {
             return new GetItemPacket(NetworkUtil.ConvertToObject<IDroneItem>(body));
         }

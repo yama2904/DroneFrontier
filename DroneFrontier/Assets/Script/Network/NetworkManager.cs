@@ -86,9 +86,8 @@ namespace Network
         /// TCPパケット受信イベントハンドラー
         /// </summary>
         /// <param name="name">プレイヤー名</param>
-        /// <param name="header">受信したTCPパケットのヘッダ</param>
         /// <param name="packet">受信したTCPパケット</param>
-        public delegate void TcpReceiveHandle(string name, TcpHeader header, TcpPacket packet);
+        public delegate void TcpReceiveHandle(string name, BasePacket packet);
 
         /// <summary>
         /// TCPパケット受信イベント
@@ -103,9 +102,8 @@ namespace Network
         /// UDPパケット受信イベントハンドラー
         /// </summary>
         /// <param name="name">プレイヤー名</param>
-        /// <param name="header">受信したUDPパケットのヘッダ</param>
         /// <param name="packet">受信したUDPパケット</param>
-        public delegate void UdpReceiveHandle(string name, UdpHeader header, UdpPacket packet);
+        public delegate void UdpReceiveHandle(string name, BasePacket packet);
 
         /// <summary>
         /// UDPパケット受信イベント
@@ -158,7 +156,7 @@ namespace Network
         private CancellationTokenSource _discoverCancel = new CancellationTokenSource();
 
         private ConcurrentQueue<(byte[] data, IPEndPoint ep)> _receivedUdpQueue = new ConcurrentQueue<(byte[] data, IPEndPoint ep)>();
-        private ConcurrentQueue<(string name, UdpHeader header, UdpPacket packet)> _invokeUdpQueue = new ConcurrentQueue<(string name, UdpHeader header, UdpPacket packet)>();
+        private ConcurrentQueue<(string name, BasePacket packet)> _invokeUdpQueue = new ConcurrentQueue<(string name, BasePacket packet)>();
 
         private bool _tcpReceiving = false;
         private bool _udpReceiving = false;
@@ -203,8 +201,8 @@ namespace Network
                     Debug.Log("受信：" + receive.RemoteEndPoint);
 
                     // プレイヤー探索パケット以外の場合はスキップ
-                    if (UdpPacket.GetUdpHeader(receive.Buffer) != UdpHeader.Discover) continue;
-
+                    if (BasePacket.GetPacketType(receive.Buffer) != typeof(DiscoverPacket)) continue;
+                    
                     // プレイヤー名重複チェック
                     DiscoverPacket receivePacket = new DiscoverPacket().Parse(receive.Buffer) as DiscoverPacket;
                     if (receivePacket.Name == name || _peers.ContainsKey(receivePacket.Name))
@@ -411,11 +409,8 @@ namespace Network
                     var receive = receiveTask.Result;
                     Debug.Log("受信：" + receive.RemoteEndPoint);
 
-                    // ヘッダ取得
-                    UdpHeader header = UdpPacket.GetUdpHeader(receive.Buffer);
-
                     // エラーチェック
-                    if (header == UdpHeader.Error)
+                    if (BasePacket.GetPacketType(receive.Buffer) == typeof(ErrorPacket))
                     {
                         // エラーパケット解析
                         ErrorPacket errPacket = new ErrorPacket().Parse(receive.Buffer) as ErrorPacket;
@@ -438,7 +433,7 @@ namespace Network
                     }
 
                     // 応答パケット以外の場合はスキップ
-                    if (header != UdpHeader.DiscoverResponse) continue;
+                    if (BasePacket.GetPacketType(receive.Buffer) != typeof(DiscoverResponsePacket)) continue;
 
                     // 応答パケット解析
                     DiscoverResponsePacket responsePacket = new DiscoverResponsePacket().Parse(receive.Buffer) as DiscoverResponsePacket;
@@ -561,8 +556,8 @@ namespace Network
                                 byte[] connectBuf = new byte[1024];
                                 await tcpClient.GetStream().ReadAsync(connectBuf);
 
-                                // ヘッダーチェック
-                                if (TcpPacket.GetTcpHeader(connectBuf) != TcpHeader.PeerConnect)
+                                // クライアント接続パケット以外の場合は無視
+                                if (BasePacket.GetPacketType(connectBuf) != typeof(PeerConnectPacket))
                                 {
                                     client.Close();
                                     client.Dispose();
@@ -643,7 +638,7 @@ namespace Network
 
             // クライアントへ探索完了を通知
             if (IsHost)
-                SendToAll(new DiscoveryCompletePacket());
+                SendTcpToAll(new DiscoveryCompletePacket());
 
             // UDP受信開始
             _udpClient = new UdpClient(LOCAL_ENDPOINT);
@@ -700,10 +695,10 @@ namespace Network
         }
 
         /// <summary>
-        /// ホストへパケットを送信する
+        /// ホストへUDPパケットを送信する
         /// </summary>
         /// <param name="packet">送信パケット</param>
-        public void SendToHost(UdpPacket packet)
+        public void SendUdpToHost(BasePacket packet)
         {
             if (IsHost) return;
 
@@ -724,10 +719,10 @@ namespace Network
         }
 
         /// <summary>
-        /// ホストへパケットを送信する
+        /// ホストへTCPパケットを送信する
         /// </summary>
         /// <param name="packet">送信パケット</param>
-        public void SendToHost(TcpPacket packet)
+        public void SendTcpToHost(BasePacket packet)
         {
             if (IsHost) return;
 
@@ -748,10 +743,10 @@ namespace Network
         }
 
         /// <summary>
-        /// 全ての通信相手へパケットを送信する
+        /// 全ての通信相手へUDPパケットを送信する
         /// </summary>
         /// <param name="packet">送信パケット</param>
-        public void SendToAll(UdpPacket packet)
+        public void SendUdpToAll(BasePacket packet)
         {
             byte[] data = packet.ConvertToPacket();
             UniTask.Void(async () =>
@@ -766,10 +761,10 @@ namespace Network
         }
 
         /// <summary>
-        /// 全ての通信相手へパケットを送信する
+        /// 全ての通信相手へTCPパケットを送信する
         /// </summary>
         /// <param name="packet">送信パケット</param>
-        public void SendToAll(TcpPacket packet)
+        public void SendTcpToAll(BasePacket packet)
         {
             byte[] data = packet.ConvertToPacket();
             UniTask.Void(async () =>
@@ -846,16 +841,16 @@ namespace Network
                         }
 
                         // 型名取得
-                        Type type = TcpPacket.GetTcpType(buf);
+                        Type type = BasePacket.GetPacketType(buf);
 
                         // 型名を基にコンストラクタ情報を取得
                         var constructor = type.GetConstructor(Type.EmptyTypes);
-                        var expression = Expression.Lambda<Func<IPacket>>(Expression.New(constructor)).Compile();
+                        var expression = Expression.Lambda<Func<BasePacket>>(Expression.New(constructor)).Compile();
                         // コンストラクタ実行
-                        IPacket packet = expression();
+                        BasePacket packet = expression();
 
                         // イベント発火
-                        OnTcpReceive?.Invoke(player, TcpPacket.GetTcpHeader(buf), packet.Parse(buf) as TcpPacket);
+                        OnTcpReceive?.Invoke(player, packet.Parse(buf));
                     }
                 }
                 catch (SocketException)
@@ -942,20 +937,24 @@ namespace Network
                         }
 
                         // 型名取得
-                        Type type = UdpPacket.GetUdpType(data.data);
+                        Type type = BasePacket.GetPacketType(data.data);
 
                         // 型名を基にコンストラクタ情報を取得
                         var constructor = type.GetConstructor(Type.EmptyTypes);
-                        var expression = Expression.Lambda<Func<IPacket>>(Expression.New(constructor)).Compile();
+                        var expression = Expression.Lambda<Func<BasePacket>>(Expression.New(constructor)).Compile();
                         // コンストラクタ実行
-                        IPacket packet = expression();
+                        BasePacket packet = expression();
 
-                        UdpHeader header = UdpPacket.GetUdpHeader(data.data);
-                        UdpPacket udpPacket = packet.Parse(data.data) as UdpPacket;
-                        _invokeUdpQueue.Enqueue((sendPlayer, header, udpPacket));
+                        // パケット解析
+                        BasePacket udpPacket = packet.Parse(data.data);
+
+                        // メインスレッド実行用キューへ解析パケット追加
+                        _invokeUdpQueue.Enqueue((sendPlayer, udpPacket));
+
+                        // ワーカースレッドでUDP受信イベント発火
                         UniTask.Void(async () =>
                         {
-                            OnUdpReceive?.Invoke(sendPlayer, header, udpPacket);
+                            OnUdpReceive?.Invoke(sendPlayer, udpPacket);
                             await UniTask.CompletedTask;
                         });
                     }
@@ -974,7 +973,7 @@ namespace Network
                 {
                     while (_invokeUdpQueue.TryDequeue(out var data))
                     {
-                        OnUdpReceiveOnMainThread?.Invoke(data.name, data.header, data.packet);
+                        OnUdpReceiveOnMainThread?.Invoke(data.name, data.packet);
                     }
                 }
 
@@ -1008,11 +1007,10 @@ namespace Network
         /// 探索完了パケット受信イベント
         /// </summary>
         /// <param name="name">プレイヤー名</param>
-        /// <param name="header">受信したTCPパケットのヘッダ</param>
         /// <param name="packet">受信したTCPパケット</param>
-        private void OnDiscoveryCompleteReceive(string name, TcpHeader header, TcpPacket packet)
+        private void OnDiscoveryCompleteReceive(string name, BasePacket packet)
         {
-            if (header == TcpHeader.DiscoveryComplete)
+            if (packet is DiscoveryCompletePacket)
             {
                 OnTcpReceive -= OnDiscoveryCompleteReceive;
                 StopDiscovery();

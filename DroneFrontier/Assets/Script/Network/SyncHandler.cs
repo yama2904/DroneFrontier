@@ -48,7 +48,7 @@ namespace Network
             NetworkManager.Singleton.OnUdpReceive += OnUdpReceiveOfSync;
 
             // 受信前に同期パケット送信
-            UdpPacket packet = new SimpleSyncPacket();
+            BasePacket packet = new SimpleSyncPacket();
             if (NetworkManager.Singleton.IsHost)
             {
                 if (value != null)
@@ -56,7 +56,7 @@ namespace Network
                     packet = new SimpleSyncPacket(value);
                     _syncValue = value;
                 }
-                NetworkManager.Singleton.SendToAll(packet);
+                NetworkManager.Singleton.SendUdpToAll(packet);
             }
 
             // タイムアウト計測用ストップウォッチ開始
@@ -89,7 +89,7 @@ namespace Network
                 // 1秒ごとにリトライ
                 if (retryStopwatch.Elapsed.Seconds >= 1)
                 {
-                    NetworkManager.Singleton.SendToAll(packet);
+                    NetworkManager.Singleton.SendUdpToAll(packet);
                     retryStopwatch.Restart();
                 }
 
@@ -112,25 +112,25 @@ namespace Network
         /// 同期パケット受信イベント
         /// </summary>
         /// <param name="name">プレイヤー名</param>
-        /// <param name="header">受信したUDPパケットのヘッダ</param>
         /// <param name="packet">受信したUDPパケット</param>
-        private void OnUdpReceiveOfSync(string name, UdpHeader header, UdpPacket packet)
+        private void OnUdpReceiveOfSync(string name, BasePacket packet)
         {
-            // 同期パケット以外は無視
-            if (header != UdpHeader.SimpleSync) return;
-
-            if (!_receivedPlayers.Contains(name))
+            // 同期パケットの場合
+            if (packet is SimpleSyncPacket syncPacket)
             {
-                _receivedPlayers.Add(name);
-            }
+                if (!_receivedPlayers.Contains(name))
+                {
+                    _receivedPlayers.Add(name);
+                }
 
-            if (_syncValue == null)
-            {
-                _syncValue = (packet as SimpleSyncPacket).Value;
-            }
+                if (_syncValue == null)
+                {
+                    _syncValue = syncPacket.Value;
+                }
 
-            // 同期パケットを返す
-            NetworkManager.Singleton.SendToAll(packet);
+                // 同期パケットを返す
+                NetworkManager.Singleton.SendUdpToAll(packet);
+            }
         }
     }
 }

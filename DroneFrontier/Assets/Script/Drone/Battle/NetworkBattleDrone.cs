@@ -2,7 +2,6 @@ using Common;
 using Cysharp.Threading.Tasks;
 using Drone.Network;
 using Network;
-using Network.Udp;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -192,7 +191,7 @@ namespace Drone.Battle.Network
                     {
                         await UniTask.Delay(_syncStatusInterval * 1000, ignoreTimeScale: true, cancellationToken: _cancel.Token);
                         float moveSpeed = _moveComponent.MoveSpeed;
-                        NetworkManager.Singleton.SendToAll(new DroneStatusPacket(HP, moveSpeed));
+                        NetworkManager.Singleton.SendUdpToAll(new DroneStatusPacket(HP, moveSpeed));
                     }
                 });
             }
@@ -292,7 +291,7 @@ namespace Drone.Battle.Network
 
                 // アクション情報送信
                 if (sendPacket)
-                    NetworkManager.Singleton.SendToAll(new DroneActionPacket(startLockOn, stopLockOn, useItem1, useItem2));
+                    NetworkManager.Singleton.SendUdpToAll(new DroneActionPacket(startLockOn, stopLockOn, useItem1, useItem2));
             }
         }
 
@@ -337,7 +336,7 @@ namespace Drone.Battle.Network
         /// <param name="e">イベント引数</param>
         private void OnBarrierBreak(object sender, EventArgs e)
         {
-            NetworkManager.Singleton.SendToAll(new DroneEventPacket(Name, true, false, false));
+            NetworkManager.Singleton.SendUdpToAll(new DroneEventPacket(Name, true, false, false));
         }
 
         /// <summary>
@@ -347,7 +346,7 @@ namespace Drone.Battle.Network
         /// <param name="e">イベント引数</param>
         private void OnBarrierResurrect(object sender, EventArgs e)
         {
-            NetworkManager.Singleton.SendToAll(new DroneEventPacket(Name, false, true, false));
+            NetworkManager.Singleton.SendUdpToAll(new DroneEventPacket(Name, false, true, false));
         }
 
         /// <summary>
@@ -371,7 +370,7 @@ namespace Drone.Battle.Network
                     if (_itemComponent.SetItem(item.DroneItem))
                     {
                         // 取得アイテム情報送信
-                        NetworkManager.Singleton.SendToAll(new GetItemPacket(item.DroneItem));
+                        NetworkManager.Singleton.SendUdpToAll(new GetItemPacket(item.DroneItem));
 
                         // 取得したアイテム削除
                         Destroy(other.gameObject);
@@ -385,19 +384,16 @@ namespace Drone.Battle.Network
         /// 他プレイヤー情報受信イベント
         /// </summary>
         /// <param name="player">送信元プレイヤー</param>
-        /// <param name="header">受信したUDPパケットのヘッダ</param>
         /// <param name="packet">受信したUDPパケット</param>
-        protected override void OnReceiveUdpOfOtherPlayer(string player, UdpHeader header, UdpPacket packet)
+        protected override void OnReceiveUdpOfOtherPlayer(string player, BasePacket packet)
         {
-            base.OnReceiveUdpOfOtherPlayer(player, header, packet);
+            base.OnReceiveUdpOfOtherPlayer(player, packet);
 
             if (player != Name) return;
 
             // アクション
-            if (header == UdpHeader.DroneAction)
+            if (packet is DroneActionPacket action)
             {
-                DroneActionPacket action = packet as DroneActionPacket;
-
                 if (action.StartLockOn)
                 {
                     _lockOnComponent.StartLockOn();
@@ -417,15 +413,14 @@ namespace Drone.Battle.Network
             }
 
             // アイテム取得
-            if (header == UdpHeader.GetItem)
+            if (packet is GetItemPacket item)
             {
-                _itemComponent.SetItem((packet as GetItemPacket).Item);
+                _itemComponent.SetItem(item.Item);
             }
 
             // ステータス
-            if (header == UdpHeader.DroneStatus)
+            if (packet is DroneStatusPacket status)
             {
-                DroneStatusPacket status = packet as DroneStatusPacket;
                 HP = status.Hp;
                 _moveComponent.MoveSpeed = status.MoveSpeed;
             }
@@ -435,32 +430,29 @@ namespace Drone.Battle.Network
         /// ドローンイベント受信イベント
         /// </summary>
         /// <param name="player">送信元プレイヤー</param>
-        /// <param name="header">受信したUDPパケットのヘッダ</param>
         /// <param name="packet">受信したUDPパケット</param>
-        private void OnReceiveUdpOfEvent(string player, UdpHeader header, UdpPacket packet)
+        private void OnReceiveUdpOfEvent(string player, BasePacket packet)
         {
-            if (header != UdpHeader.DroneEvent) return;
-
-            // パケット取得
-            DroneEventPacket evnt = packet as DroneEventPacket;
-
-            // イベント発生者のドローン以外は処理しない
-            if (Name != evnt.Name) return;
-
-            if (evnt.BarrierBreak)
+            if (packet is DroneEventPacket evnt)
             {
-                // バリアに最大ダメージを与えて破壊
-                _barrierComponent.Damage(_barrierComponent.MaxHP);
-            }
-            if (evnt.BarrierResurrect)
-            {
-                // バリア復活
-                _barrierComponent.ResurrectBarrier();
-            }
-            if (evnt.Destroy)
-            {
-                // ドローン破壊
-                Destroy().Forget();
+                // イベント発生者のドローン以外は処理しない
+                if (Name != evnt.Name) return;
+
+                if (evnt.BarrierBreak)
+                {
+                    // バリアに最大ダメージを与えて破壊
+                    _barrierComponent.Damage(_barrierComponent.MaxHP);
+                }
+                if (evnt.BarrierResurrect)
+                {
+                    // バリア復活
+                    _barrierComponent.ResurrectBarrier();
+                }
+                if (evnt.Destroy)
+                {
+                    // ドローン破壊
+                    Destroy().Forget();
+                }
             }
         }
 
@@ -494,7 +486,7 @@ namespace Drone.Battle.Network
             _rigidbody.velocity = Vector3.zero;
 
             // 死亡情報送信
-            NetworkManager.Singleton.SendToAll(new DroneEventPacket(Name, false, false, true));
+            NetworkManager.Singleton.SendUdpToAll(new DroneEventPacket(Name, false, false, true));
 
             // コンポーネント停止
             _moveComponent.enabled = false;

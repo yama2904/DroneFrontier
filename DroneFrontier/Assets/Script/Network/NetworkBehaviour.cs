@@ -38,7 +38,7 @@ namespace Network
                         while (true)
                         {
                             await UniTask.Delay(interval, cancellationToken: _cancel.Token);
-                            NetworkManager.Singleton.SendToAll(new PositionPacket(this));
+                            NetworkManager.Singleton.SendUdpToAll(new PositionPacket(this));
                         }
                     });
                 }
@@ -154,8 +154,8 @@ namespace Network
             }
 
             // パケット送信
-            UdpPacket packet = new SendMethodPacket(ObjectId, _className, name, args.ToArray());
-            NetworkManager.Singleton.SendToAll(packet);
+            BasePacket packet = new SendMethodPacket(ObjectId, _className, name, args.ToArray());
+            NetworkManager.Singleton.SendUdpToAll(packet);
 
             // メソッド実行
             // ★DateTime.Now.Millisecondのようなその瞬間によって値が変わる場合にプレイヤー同士で差異が出るため変更
@@ -167,49 +167,45 @@ namespace Network
         /// メソッド実行パケット受信イベント
         /// </summary>
         /// <param name="name">プレイヤー名</param>
-        /// <param name="header">受信したUDPパケットのヘッダ</param>
         /// <param name="packet">受信したUDPパケット</param>
-        private void OnUdpReceiveOfSendMethod(string name, UdpHeader header, UdpPacket packet)
+        private void OnUdpReceiveOfSendMethod(string name, BasePacket packet)
         {
-            // メソッド実行パケット以外は無視
-            if (header != UdpHeader.SendMethod) return;
+            // メソッド実行パケットの場合
+            if (packet is SendMethodPacket methodPacket)
+            {
+                // 実行クラスが異なる場合は無視
+                if (methodPacket.ClassName != _className) return;
 
-            // 実行クラスが異なる場合は無視
-            SendMethodPacket methodPacket = packet as SendMethodPacket;
-            if (methodPacket.ClassName != _className) return;
+                // IDが異なる場合は無視
+                if (methodPacket.ObjectId != ObjectId) return;
 
-            // IDが異なる場合は無視
-            if (methodPacket.ObjectId != ObjectId) return;
-
-            // メソッド実行
-            InvokeMethod(methodPacket.MethodName, methodPacket.Arguments);
+                // メソッド実行
+                InvokeMethod(methodPacket.MethodName, methodPacket.Arguments);
+            }
         }
 
         /// <summary>
         /// 座標同期パケット受信イベント
         /// </summary>
         /// <param name="name">プレイヤー名</param>
-        /// <param name="header">受信したUDPパケットのヘッダ</param>
         /// <param name="packet">受信したUDPパケット</param>
-        private void OnUdpReceiveOfPosition(string name, UdpHeader header, UdpPacket packet)
+        private void OnUdpReceiveOfPosition(string name, BasePacket packet)
         {
-            // 座標同期パケット以外無視
-            if (header != UdpHeader.Position) return;
-
-            // パケット取得
-            PositionPacket posPacket = packet as PositionPacket;
-
-            // 同一オブジェクトID以外無視
-            if (posPacket.ObjectId != ObjectId) return;
-
-            // 座標適用
-            var t = transform;
-            var pos = posPacket.Position;
-            var rotate = posPacket.Rotation;
-            if (Vector3.Distance(t.position, pos) >= _syncPositionDistance)
+            // 座標同期パケットの場合
+            if (packet is PositionPacket posPacket)
             {
-                t.position = new Vector3(pos.x, pos.y, pos.z);
-                t.rotation = new Quaternion(rotate.x, rotate.y, rotate.z, rotate.w);
+                // 同一オブジェクトID以外無視
+                if (posPacket.ObjectId != ObjectId) return;
+
+                // 座標適用
+                var t = transform;
+                var pos = posPacket.Position;
+                var rotate = posPacket.Rotation;
+                if (Vector3.Distance(t.position, pos) >= _syncPositionDistance)
+                {
+                    t.position = new Vector3(pos.x, pos.y, pos.z);
+                    t.rotation = new Quaternion(rotate.x, rotate.y, rotate.z, rotate.w);
+                }
             }
         }
 

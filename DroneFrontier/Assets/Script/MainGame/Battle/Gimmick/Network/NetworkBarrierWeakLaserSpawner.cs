@@ -1,6 +1,5 @@
 using Battle.Packet;
 using Network;
-using Network.Udp;
 using System;
 using UnityEngine;
 
@@ -54,9 +53,8 @@ namespace Battle.Gimmick.Network
         /// UDPパケット受信イベント
         /// </summary>
         /// <param name="name">プレイヤー名</param>
-        /// <param name="header">受信したUDPパケットのヘッダ</param>
         /// <param name="packet">受信したUDPパケット</param>
-        private void OnReceive(string name, UdpHeader header, UdpPacket packet)
+        private void OnReceive(string name, BasePacket packet)
         {
             if (packet is BarrierWeakLaserPacket lazerPacket)
             {
@@ -97,7 +95,7 @@ namespace Battle.Gimmick.Network
                                                                        lazer.CurrentRotateSpeed,
                                                                        lazer.gameObject.transform.position,
                                                                        lazer.gameObject.transform.rotation);
-            NetworkManager.Singleton.SendToAll(packet);
+            NetworkManager.Singleton.SendUdpToAll(packet);
         }
 
         /// <summary>

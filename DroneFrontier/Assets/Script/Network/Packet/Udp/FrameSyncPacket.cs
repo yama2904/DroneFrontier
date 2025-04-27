@@ -2,10 +2,8 @@ using System;
 
 namespace Network.Udp
 {
-    public class FrameSyncPacket : UdpPacket
+    public class FrameSyncPacket : BasePacket
     {
-        public override UdpHeader Header => UdpHeader.FrameSync;
-
         public float TotalSeconds { get; private set; } = 0;
 
         /// <summary>
@@ -22,7 +20,7 @@ namespace Network.Udp
             TotalSeconds = totalSeconds;
         }
 
-        protected override IPacket ParseBody(byte[] body)
+        protected override BasePacket ParseBody(byte[] body)
         {
             // インスタンスを作成して返す
             return new FrameSyncPacket(BitConverter.ToSingle(body));

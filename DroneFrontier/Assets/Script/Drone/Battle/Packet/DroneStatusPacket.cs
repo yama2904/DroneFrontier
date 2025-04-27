@@ -1,14 +1,11 @@
 using Network;
-using Network.Udp;
 using System;
 using System.Linq;
 
 namespace Drone.Battle.Network
 {
-    public class DroneStatusPacket : UdpPacket
+    public class DroneStatusPacket : BasePacket
     {
-        public override UdpHeader Header => UdpHeader.DroneStatus;
-
         /// <summary>
         /// HP
         /// </summary>
@@ -30,7 +27,7 @@ namespace Drone.Battle.Network
             MoveSpeed = moveSpeed;
         }
 
-        protected override IPacket ParseBody(byte[] body)
+        protected override BasePacket ParseBody(byte[] body)
         {
             int offset = 0;
 

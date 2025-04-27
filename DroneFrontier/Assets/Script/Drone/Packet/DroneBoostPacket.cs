@@ -1,13 +1,10 @@
 using Common;
 using Network;
-using Network.Udp;
 
 namespace Drone.Network
 {
-    public class DroneBoostPacket : UdpPacket
+    public class DroneBoostPacket : BasePacket
     {
-        public override UdpHeader Header => UdpHeader.None;
-
         public bool StartBoost { get; private set; } = false;
 
         public bool StopBoost { get; private set; } = false;
@@ -23,7 +20,7 @@ namespace Drone.Network
             StopBoost = stop;
         }
 
-        protected override IPacket ParseBody(byte[] body)
+        protected override BasePacket ParseBody(byte[] body)
         {
             byte data = body[0];
             int offset = 0;

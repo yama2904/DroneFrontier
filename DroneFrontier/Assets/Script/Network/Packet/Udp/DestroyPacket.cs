@@ -2,10 +2,8 @@ using System.Text;
 
 namespace Network.Udp
 {
-    public class DestroyPacket : UdpPacket
+    public class DestroyPacket : BasePacket
     {
-        public override UdpHeader Header => UdpHeader.Destroy;
-
         /// <summary>
         /// 削除するオブジェクトの共有ID
         /// </summary>
@@ -25,7 +23,7 @@ namespace Network.Udp
             Id = id;
         }
 
-        protected override IPacket ParseBody(byte[] body)
+        protected override BasePacket ParseBody(byte[] body)
         {
             // インスタンスを作成して返す
             return new DestroyPacket(Encoding.UTF8.GetString(body));
