@@ -1,4 +1,5 @@
 using Drone.Network;
+using Drone.Race.Network;
 using UnityEngine;
 
 namespace Race.Network
@@ -6,7 +7,7 @@ namespace Race.Network
     public class NetworkSpawnManager : MonoBehaviour
     {
         [SerializeField, Tooltip("プレイヤードローン")]
-        private NetworkDrone _playerDrone = null;
+        private NetworkRaceDrone _playerDrone = null;
 
         [SerializeField, Tooltip("ドローンスポーン位置")]
         private Transform[] _droneSpawnPositions = null;
@@ -22,13 +23,13 @@ namespace Race.Network
         /// <param name="name">スポーンさせるドローンの名前</param>
         /// <param name="weapon">スポーンさせるドローンのサブ武器</param>
         /// <returns>スポーンさせたドローン</returns>
-        public NetworkDrone SpawnDrone(string name)
+        public NetworkRaceDrone SpawnDrone(string name)
         {
             // スポーン位置取得
             Transform spawnPos = _droneSpawnPositions[_nextSpawnIndex];
 
             // ドローン生成
-            NetworkDrone drone = Instantiate(_playerDrone, spawnPos.position, spawnPos.rotation);
+            NetworkRaceDrone drone = Instantiate(_playerDrone, spawnPos.position, spawnPos.rotation);
             drone.Initialize(name);
             drone.enabled = false;
 

@@ -54,6 +54,11 @@ namespace Drone.Network
         /// </summary>
         protected InputData _input = new InputData();
 
+        /// <summary>
+        /// 初期化済みであるか
+        /// </summary>
+        protected bool _initialized = false;
+
         // コンポーネントキャッシュ
         protected Rigidbody _rigidbody = null;
         protected AudioListener _listener = null;
@@ -61,6 +66,26 @@ namespace Drone.Network
         protected DroneRotateComponent _rotateComponent = null;
         protected DroneSoundComponent _soundComponent = null;
         protected DroneBoostComponent _boostComponent = null;
+
+        public override string GetAddressKey()
+        {
+            return "NetworkDrone";
+        }
+
+        public override object CreateSpawnData()
+        {
+            return Name;
+        }
+
+        public override void ImportSpawnData(object data)
+        {
+            Name = (string)data;
+        }
+
+        public override void InitializeSpawn()
+        {
+            Initialize(Name);
+        }
 
         public virtual void Initialize(string name)
         {
@@ -101,10 +126,14 @@ namespace Drone.Network
 
             // プロペラ音再生
             _soundComponent.Play(SoundManager.SE.Propeller, 1, true);
+
+            _initialized = true;
         }
 
         protected virtual void Update()
         {
+            if (!_initialized) return;
+
             if (_isControl)
             {
                 // ブースト開始
@@ -127,6 +156,8 @@ namespace Drone.Network
 
         protected virtual void FixedUpdate()
         {
+            if (!_initialized) return;
+
             // 前進
             if (_input.Keys.Contains(KeyCode.W))
             {

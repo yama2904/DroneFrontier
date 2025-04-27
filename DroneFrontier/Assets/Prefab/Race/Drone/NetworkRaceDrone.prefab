@@ -137,7 +137,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 474087749837010744}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -295,7 +295,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1570685089460695110}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -415,7 +415,7 @@ GameObject:
   - component: {fileID: 1928914962739237484}
   - component: {fileID: 3215491144051122298}
   - component: {fileID: 3215491144051122297}
-  - component: {fileID: 8509727404470772741}
+  - component: {fileID: 2985516338137257080}
   - component: {fileID: 2238579385506905459}
   - component: {fileID: 68437608766635187}
   - component: {fileID: 7496543867865622458}
@@ -426,7 +426,7 @@ GameObject:
   - component: {fileID: 5289615619027310699}
   - component: {fileID: 407479971553330670}
   m_Layer: 0
-  m_Name: RaceDrone
+  m_Name: NetworkRaceDrone
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -498,7 +498,7 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 28
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &8509727404470772741
+--- !u!114 &2985516338137257080
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -507,13 +507,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 3215491144051122303}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 954b3cc32921d6a43aa498f6e4b4c9ab, type: 3}
+  m_Script: {fileID: 11500000, guid: 270c0552a8acbd04b8419805d812d014, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _syncPosition: 0
   _syncInterval: 1
   _syncPositionDistance: 20
-  _droneObject: {fileID: 8468956971570744406}
+  _droneObject: {fileID: 1928914962739237484}
   _camera: {fileID: 4395704207437532612}
   _canvas: {fileID: 474087748484501955}
 --- !u!114 &2238579385506905459

@@ -16,6 +16,11 @@ namespace Drone
         /// </summary>
         protected InputData _input = new InputData();
 
+        /// <summary>
+        /// 初期化済みであるか
+        /// </summary>
+        protected bool _initialized = false;
+
         // コンポーネントキャッシュ
         protected Rigidbody _rigidbody = null;
         protected DroneMoveComponent _moveComponent = null;
@@ -43,10 +48,14 @@ namespace Drone
 
             // プロペラ音再生
             _soundComponent.Play(SoundManager.SE.Propeller, 1, true);
+
+            _initialized = true;
         }
 
         protected virtual void Update()
         {
+            if (!_initialized) return;
+
             // 入力情報更新
             _input.UpdateInput();
 
@@ -64,6 +73,8 @@ namespace Drone
 
         protected virtual void FixedUpdate()
         {
+            if (!_initialized) return;
+
             // 前進
             if (_input.Keys.Contains(KeyCode.W))
             {

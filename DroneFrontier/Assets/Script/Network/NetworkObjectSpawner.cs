@@ -13,10 +13,16 @@ namespace Network
     {
         public static Dictionary<string, MyNetworkBehaviour> SpawnedObjects { get; private set; } = new Dictionary<string, MyNetworkBehaviour>();
 
+        private static bool _initialized = false;
+
         public static void Initialize() 
         {
+            if (_initialized) return;
+
             // 受信イベント設定
             MyNetworkManager.Singleton.OnUdpReceiveOnMainThread += OnUdpReceive;
+
+            _initialized = true;
         }
 
         /// <summary>

@@ -1,6 +1,7 @@
 ﻿using Common;
 using Cysharp.Threading.Tasks;
 using Drone.Network;
+using Drone.Race.Network;
 using Network;
 using System;
 using System.Collections.Generic;
@@ -30,9 +31,27 @@ namespace Race.Network
         private Canvas _errMsgCanvas = null;
 
         /// <summary>
+        /// ゴール用ロックオブジェクト
+        /// </summary>
+        private object _goalLock = new object();
+
+        /// <summary>
+        /// ゲーム終了フラグ
+        /// </summary>
+        private bool _isFinished = false;
+
+        /// <summary>
         /// 通信エラーが発生したか
         /// </summary>
         private bool _isError = false;
+
+        /// <summary>
+        /// 設定ボタン選択
+        /// </summary>
+        public void ClickConfig()
+        {
+            SwitchConfig();
+        }
 
         protected override void Awake()
         {
@@ -62,12 +81,12 @@ namespace Race.Network
             UnityEngine.Random.InitState(seed);
 
             // ドローンをスポーン
-            List<NetworkDrone> drones = new List<NetworkDrone>();
+            List<NetworkRaceDrone> drones = new List<NetworkRaceDrone>();
             if (MyNetworkManager.Singleton.IsHost)
             {
                 foreach (string name in MyNetworkManager.Singleton.PlayerNames)
                 {
-                    NetworkDrone spawnDrone = _droneSpawnManager.SpawnDrone(name);
+                    NetworkRaceDrone spawnDrone = _droneSpawnManager.SpawnDrone(name);
                     drones.Add(spawnDrone);
                     NetworkObjectSpawner.Spawn(spawnDrone);
                 }
@@ -77,7 +96,7 @@ namespace Race.Network
                 while (true)
                 {
                     // ドローン検索
-                    drones = GameObject.FindGameObjectsWithTag(TagNameConst.PLAYER).OfType<NetworkDrone>().ToList();
+                    drones = GameObject.FindGameObjectsWithTag(TagNameConst.PLAYER).Select(x => x.GetComponent<NetworkRaceDrone>()).ToList();
 
                     // 全プレイヤー分生成されていない場合は待機
                     if (drones.Count < MyNetworkManager.Singleton.PlayerCount)
@@ -203,12 +222,25 @@ namespace Race.Network
         {
             RaceGoalTrigger trigger = sender as RaceGoalTrigger;
 
-            // 最後の1人が残ったら終了
-            if (trigger.GoalPlayers.Count == MyNetworkManager.Singleton.PlayerCount - 1)
+            lock (_goalLock)
             {
-                if (MyNetworkManager.Singleton.IsHost)
+                if (_isFinished) return;
+
+                // 最後の1人が残ったら終了
+                if (trigger.GoalPlayers.Count == MyNetworkManager.Singleton.PlayerCount - 1)
                 {
-                    SendMethod(() => FinishGame(trigger.GoalPlayers.ToArray()));
+                    if (MyNetworkManager.Singleton.IsHost)
+                    {
+                        // 最後のプレイヤー取得
+                        string lastPlayer = MyNetworkManager.Singleton.PlayerNames.Where(x => !trigger.GoalPlayers.Contains(x)).First();
+
+                        // ゴール済みプレイヤーの最後に未ゴールプレイヤーを追加してランキング設定
+                        string[] ranking = trigger.GoalPlayers.Concat(new string[] { lastPlayer }).ToArray();
+
+                        // ゲーム終了
+                        SendMethod(() => FinishGame(ranking));
+                        _isFinished = true;
+                    }
                 }
             }
         }

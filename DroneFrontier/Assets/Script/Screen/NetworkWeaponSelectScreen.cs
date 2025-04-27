@@ -188,7 +188,6 @@ namespace Network
                 //SE再生
                 SoundManager.Play(SoundManager.SE.Select);
 
-                //BattleManager.IsItemSpawn = false;
                 _itemOnButton.image.color = notSelectButtonColor;
                 _itemOffButton.image.color = selectItemButtonColor;
 

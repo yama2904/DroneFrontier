@@ -189,7 +189,6 @@ MonoBehaviour:
   _config: {fileID: 1284433739}
   _finishAnimator: {fileID: 1344619825}
   _errMsgCanvas: {fileID: 931971161}
-  _debug: 1
 --- !u!4 &322926430
 Transform:
   m_ObjectHideFlags: 0
@@ -583,8 +582,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: Network.NetworkBattleManager, Assembly-CSharp
+      - m_Target: {fileID: 322926429}
+        m_TargetAssemblyTypeName: Race.Network.NetworkRaceManager, Assembly-CSharp
         m_MethodName: ClickConfig
         m_Mode: 1
         m_Arguments:
@@ -1168,7 +1167,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2fb83802fb636594d87bcc16e3f015a6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _playerDrone: {fileID: 8509727404470772741, guid: 54a58e15937ed7c4e83960a830b2d326,
+  _playerDrone: {fileID: 2985516338137257080, guid: 54a58e15937ed7c4e83960a830b2d326,
     type: 3}
   _droneSpawnPositions:
   - {fileID: 501207204}

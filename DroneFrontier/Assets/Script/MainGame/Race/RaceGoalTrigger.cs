@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Common;
 using Drone.Network;
+using Drone.Race.Network;
 using UnityEngine;
 
 namespace Race
@@ -22,7 +23,7 @@ namespace Race
         {
             if (other.CompareTag(TagNameConst.PLAYER))
             {
-                GoalPlayers.Add(other.gameObject.GetComponent<NetworkDrone>().Name);
+                GoalPlayers.Add(other.gameObject.GetComponent<NetworkRaceDrone>().Name);
                 OnGoal?.Invoke(this, EventArgs.Empty);
             }
         }

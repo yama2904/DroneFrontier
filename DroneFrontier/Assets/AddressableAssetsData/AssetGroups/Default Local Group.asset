@@ -47,6 +47,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 54a58e15937ed7c4e83960a830b2d326
+    m_Address: NetworkRaceDrone
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5605f4dc9579efd42afc3b6d6bb27df0
     m_Address: GatlingWeapon
     m_ReadOnly: 0
