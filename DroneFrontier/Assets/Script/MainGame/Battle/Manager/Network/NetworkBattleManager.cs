@@ -132,7 +132,7 @@ namespace Battle.Network
                 PlayerData player = new PlayerData()
                 {
                     Name = "Player",
-                    Weapon = WeaponType.SHOTGUN,
+                    Weapon = WeaponType.Shotgun,
                     IsControl = true
                 };
                 PlayerList.Add(player);

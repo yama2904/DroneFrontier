@@ -11,19 +11,19 @@ namespace Battle.Weapon
             string addressKey = "";
             switch (weapon)
             {
-                case WeaponType.GATLING:
+                case WeaponType.Gatling:
                     addressKey = GatlingWeapon.ADDRESS_KEY;
                     break;
 
-                case WeaponType.SHOTGUN:
+                case WeaponType.Shotgun:
                     addressKey = ShotgunWeapon.ADDRESS_KEY;
                     break;
 
-                case WeaponType.MISSILE:
+                case WeaponType.Missile:
                     addressKey = MissileWeapon.ADDRESS_KEY;
                     break;
 
-                case WeaponType.LASER:
+                case WeaponType.Lazer:
                     addressKey = LaserWeapon.ADDRESS_KEY;
                     break;
             }

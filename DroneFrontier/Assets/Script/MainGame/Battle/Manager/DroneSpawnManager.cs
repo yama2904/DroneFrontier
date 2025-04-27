@@ -54,7 +54,7 @@ namespace Battle
 
             // ドローン生成
             IBattleDrone drone = CreateDrone(spawnPos, isPlayer);
-            IWeapon main = WeaponCreater.CreateWeapon(WeaponType.GATLING);
+            IWeapon main = WeaponCreater.CreateWeapon(WeaponType.Gatling);
             IWeapon sub = WeaponCreater.CreateWeapon(weapon);
             drone.Initialize(name, main, sub, drone.StockNum);
 
@@ -126,7 +126,7 @@ namespace Battle
                 }
 
                 // ドローン初期化
-                IWeapon main = WeaponCreater.CreateWeapon(WeaponType.GATLING);
+                IWeapon main = WeaponCreater.CreateWeapon(WeaponType.Gatling);
                 IWeapon sub = WeaponCreater.CreateWeapon(initData.weapon);
                 respawnDrone.Initialize(drone.Name, main, sub, drone.StockNum - 1);
             }

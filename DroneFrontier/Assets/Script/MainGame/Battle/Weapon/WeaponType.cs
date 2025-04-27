@@ -5,23 +5,23 @@ namespace Battle.Weapon
         /// <summary>
         /// ガトリング
         /// </summary>
-        GATLING,
+        Gatling,
 
         /// <summary>
         /// ショットガン
         /// </summary>
-        SHOTGUN,
+        Shotgun,
 
         /// <summary>
         /// ミサイル
         /// </summary>
-        MISSILE,
+        Missile,
 
         /// <summary>
         /// レーザー
         /// </summary>
-        LASER,
+        Lazer,
 
-        NONE
+        None
     }
 }

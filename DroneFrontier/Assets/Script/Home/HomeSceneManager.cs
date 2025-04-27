@@ -207,7 +207,7 @@ public class HomeSceneManager : MonoBehaviour
         WeaponSelectScreen screen = sender as WeaponSelectScreen;
 
         // 決定選択
-        if (screen.SelectedButton == WeaponSelectScreen.ButtonType.OK)
+        if (screen.SelectedButton == WeaponSelectScreen.ButtonType.Ok)
         {
             _weaponSelect.gameObject.SetActive(false);
             _cpuSelect.gameObject.SetActive(true);
@@ -231,7 +231,7 @@ public class HomeSceneManager : MonoBehaviour
         CPUSelectScreen screen = sender as CPUSelectScreen;
 
         // 決定選択
-        if (screen.SelectedButton == CPUSelectScreen.ButtonType.OK)
+        if (screen.SelectedButton == CPUSelectScreen.ButtonType.Ok)
         {
             SceneManager.LoadScene("BattleScene");
         }

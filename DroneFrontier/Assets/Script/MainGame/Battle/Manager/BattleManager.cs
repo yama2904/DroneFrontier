@@ -34,7 +34,7 @@ namespace Battle
         /// <summary>
         /// プレイヤーのサブ武器
         /// </summary>
-        public static WeaponType PlayerWeapon { get; set; } = WeaponType.NONE;
+        public static WeaponType PlayerWeapon { get; set; } = WeaponType.None;
 
         /// <summary>
         /// アイテムを出現させるか

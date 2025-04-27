@@ -38,13 +38,13 @@ namespace Screen
 
         private enum Help
         {
-            BASIC,
-            BATTLE,
-            RACE,
+            Basic,
+            Battle,
+            Race,
 
-            NONE
+            None
         }
-        Help selectHelp = Help.NONE;
+        Help selectHelp = Help.None;
 
         public void Initialize() { }
 
@@ -54,7 +54,7 @@ namespace Screen
             SoundManager.Play(SoundManager.SE.Select);
 
             HelpBasicOperationDescription.SetActive(true);
-            selectHelp = Help.BASIC;
+            selectHelp = Help.Basic;
         }
 
         //バトルモード
@@ -63,7 +63,7 @@ namespace Screen
             SoundManager.Play(SoundManager.SE.Select);
 
             HelpBattleModeDescription.SetActive(true);
-            selectHelp = Help.BATTLE;
+            selectHelp = Help.Battle;
         }
 
         //レースモード
@@ -72,7 +72,7 @@ namespace Screen
             SoundManager.Play(SoundManager.SE.Select);
 
             HelpRaceModeDescription.SetActive(true);
-            selectHelp = Help.RACE;
+            selectHelp = Help.Race;
         }
 
         //戻る
@@ -82,15 +82,15 @@ namespace Screen
 
             switch (selectHelp)
             {
-                case Help.BASIC:
+                case Help.Basic:
                     HelpBasicOperationDescription.SetActive(false);
                     break;
 
-                case Help.BATTLE:
+                case Help.Battle:
                     HelpBattleModeDescription.SetActive(false);
                     break;
 
-                case Help.RACE:
+                case Help.Race:
                     HelpRaceModeDescription.SetActive(false);
                     break;
 
@@ -100,7 +100,7 @@ namespace Screen
                     break;
             }
 
-            selectHelp = Help.NONE;
+            selectHelp = Help.None;
         }
     }
 }

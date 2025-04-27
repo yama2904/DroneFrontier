@@ -15,14 +15,14 @@ namespace Drone.Battle
             /// <summary>
             /// メイン武器
             /// </summary>
-            MAIN,
+            Main,
 
             /// <summary>
             /// サブ武器
             /// </summary>
-            SUB,
+            Sub,
 
-            NONE
+            None
         }
 
         /// <summary>
@@ -106,11 +106,11 @@ namespace Drone.Battle
             (MainWeapon as MonoBehaviour).transform.SetParent(_mainWeaponPos, false);
             MainWeapon.OnBulletFull += (o, e) =>
             {
-                OnBulletFull?.Invoke(this, Weapon.MAIN, MainWeapon);
+                OnBulletFull?.Invoke(this, Weapon.Main, MainWeapon);
             };
             MainWeapon.OnBulletEmpty += (o, e) =>
             {
-                OnBulletEmpty?.Invoke(this, Weapon.MAIN, MainWeapon);
+                OnBulletEmpty?.Invoke(this, Weapon.Main, MainWeapon);
             };
 
             // サブ武器読み込み
@@ -118,11 +118,11 @@ namespace Drone.Battle
             (SubWeapon as MonoBehaviour).transform.SetParent(_subWeaponPos, false);
             SubWeapon.OnBulletFull += (o, e) =>
             {
-                OnBulletFull?.Invoke(this, Weapon.SUB, SubWeapon);
+                OnBulletFull?.Invoke(this, Weapon.Sub, SubWeapon);
             };
             SubWeapon.OnBulletEmpty += (o, e) =>
             {
-                OnBulletEmpty?.Invoke(this, Weapon.SUB, SubWeapon);
+                OnBulletEmpty?.Invoke(this, Weapon.Sub, SubWeapon);
             };
         }
 
@@ -134,7 +134,7 @@ namespace Drone.Battle
         public void Shot(Weapon weapon, GameObject target = null)
         {
             // メイン武器攻撃
-            if (weapon == Weapon.MAIN)
+            if (weapon == Weapon.Main)
             {
                 MainWeapon.Shot(target);
 
@@ -149,7 +149,7 @@ namespace Drone.Battle
             }
 
             // サブ武器攻撃
-            if (weapon == Weapon.SUB)
+            if (weapon == Weapon.Sub)
             {
                 SubWeapon.Shot(target);
 

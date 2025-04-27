@@ -124,7 +124,7 @@ namespace Battle.Drone
         /// <summary>
         /// 攻撃中の武器
         /// </summary>
-        private DroneWeaponComponent.Weapon _useWeapon = DroneWeaponComponent.Weapon.NONE;
+        private DroneWeaponComponent.Weapon _useWeapon = DroneWeaponComponent.Weapon.None;
 
         /// <summary>
         /// 死亡フラグ
@@ -275,15 +275,15 @@ namespace Battle.Drone
             else
             {
                 // 使用武器をランダムに決定
-                if (_useWeapon == DroneWeaponComponent.Weapon.NONE)
+                if (_useWeapon == DroneWeaponComponent.Weapon.None)
                 {
                     if (UnityEngine.Random.Range(0, 2) == 0)
                     {
-                        _useWeapon = DroneWeaponComponent.Weapon.MAIN;
+                        _useWeapon = DroneWeaponComponent.Weapon.Main;
                     }
                     else
                     {
-                        _useWeapon = DroneWeaponComponent.Weapon.SUB;
+                        _useWeapon = DroneWeaponComponent.Weapon.Sub;
                     }
 
                     // 攻撃時間をランダムに決定
@@ -418,7 +418,7 @@ namespace Battle.Drone
             _moveComponent.RotateDir(_rotateDirs[0], _rotateDirs[1]);
 
             // 攻撃
-            if (_useWeapon != DroneWeaponComponent.Weapon.NONE)
+            if (_useWeapon != DroneWeaponComponent.Weapon.None)
             {
                 _weaponComponent.Shot(_useWeapon, _lockOnComponent.Target);
             }
@@ -470,12 +470,12 @@ namespace Battle.Drone
         public void OnBulletFull(DroneWeaponComponent component, DroneWeaponComponent.Weapon type, IWeapon weapon)
         {
             // サブ武器以外は何もしない
-            if (type != DroneWeaponComponent.Weapon.SUB) return;
+            if (type != DroneWeaponComponent.Weapon.Sub) return;
 
             // サブ武器攻撃へ切り替える
             _attackCancel.Cancel();
             _attackCancel = new CancellationTokenSource();
-            _useWeapon = DroneWeaponComponent.Weapon.SUB;
+            _useWeapon = DroneWeaponComponent.Weapon.Sub;
             SetWeaopnStopTimer().Forget();
         }
 
@@ -488,12 +488,12 @@ namespace Battle.Drone
         public void OnBulletEmpty(DroneWeaponComponent component, DroneWeaponComponent.Weapon type, IWeapon weapon)
         {
             // サブ武器以外は何もしない
-            if (type != DroneWeaponComponent.Weapon.SUB) return;
+            if (type != DroneWeaponComponent.Weapon.Sub) return;
 
             // メイン武器攻撃へ切り替える
             _attackCancel.Cancel();
             _attackCancel = new CancellationTokenSource();
-            _useWeapon = DroneWeaponComponent.Weapon.MAIN;
+            _useWeapon = DroneWeaponComponent.Weapon.Main;
             SetWeaopnStopTimer().Forget();
         }
 
@@ -522,7 +522,7 @@ namespace Battle.Drone
             // 攻撃停止
             _attackCancel.Cancel();
             _attackCancel = new CancellationTokenSource();
-            _useWeapon = DroneWeaponComponent.Weapon.NONE;
+            _useWeapon = DroneWeaponComponent.Weapon.None;
 
             // 移動停止
             _moveCancel.Cancel();
@@ -551,7 +551,7 @@ namespace Battle.Drone
         {
             int attackSec = UnityEngine.Random.Range(5, 11);
             await UniTask.Delay(TimeSpan.FromSeconds(attackSec), cancellationToken: _attackCancel.Token);
-            _useWeapon = DroneWeaponComponent.Weapon.NONE;
+            _useWeapon = DroneWeaponComponent.Weapon.None;
         }
 
         /// <summary>

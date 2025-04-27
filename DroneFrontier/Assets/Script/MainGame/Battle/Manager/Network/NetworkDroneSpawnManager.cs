@@ -52,7 +52,7 @@ namespace Battle.Network
 
             // ドローン生成
             NetworkBattleDrone drone = CreateDrone(spawnPos.position, spawnPos.rotation);
-            IWeapon main = WeaponCreater.CreateWeapon(WeaponType.GATLING);
+            IWeapon main = WeaponCreater.CreateWeapon(WeaponType.Gatling);
             IWeapon sub = WeaponCreater.CreateWeapon(weapon);
             drone.Initialize(name, main, sub, drone.StockNum);
             drone.enabled = false;
@@ -110,7 +110,7 @@ namespace Battle.Network
                 // リスポーン
                 respawnDrone = CreateDrone(initData.pos.position, initData.pos.rotation);
                 respawnDrone.enabled = true;
-                IWeapon main = WeaponCreater.CreateWeapon(WeaponType.GATLING);
+                IWeapon main = WeaponCreater.CreateWeapon(WeaponType.Gatling);
                 IWeapon sub = WeaponCreater.CreateWeapon(initData.weapon);
                 respawnDrone.Initialize(drone.Name, main, sub, drone.StockNum - 1);
 

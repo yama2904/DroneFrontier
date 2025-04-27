@@ -18,7 +18,7 @@ namespace Screen
             /// <summary>
             /// 決定
             /// </summary>
-            OK,
+            Ok,
 
             /// <summary>
             /// 戻る
@@ -41,11 +41,11 @@ namespace Screen
         /// </summary>
         private enum Weapon
         {
-            SHOTGUN,
-            MISSILE,
-            LASER,
+            Shotbun,
+            Missile,
+            Lazer,
 
-            NONE
+            None
         }
 
         #region SerializeField
@@ -94,7 +94,7 @@ namespace Screen
         /// <summary>
         /// 初期選択武器
         /// </summary>
-        private const Weapon INIT_SELECT_WEAPON = Weapon.SHOTGUN;
+        private const Weapon INIT_SELECT_WEAPON = Weapon.Shotbun;
 
         #endregion
 
@@ -161,16 +161,16 @@ namespace Screen
         public void ClickCPUShotgun(int cpuNumber)
         {
             // 同じ武器が選ばれた場合は処理しない
-            if (_cpuWeaponList[cpuNumber - 1] == Weapon.SHOTGUN) return;
+            if (_cpuWeaponList[cpuNumber - 1] == Weapon.Shotbun) return;
 
             // SE再生
             SoundManager.Play(SoundManager.SE.Select);
 
             // 武器更新
-            _cpuWeaponList[cpuNumber - 1] = Weapon.SHOTGUN;
+            _cpuWeaponList[cpuNumber - 1] = Weapon.Shotbun;
 
             // ボタン色変更
-            ChangeButtonsColor(_cpuWeaponButtonList[cpuNumber - 1], Weapon.SHOTGUN);
+            ChangeButtonsColor(_cpuWeaponButtonList[cpuNumber - 1], Weapon.Shotbun);
         }
 
         /// <summary>
@@ -180,16 +180,16 @@ namespace Screen
         public void ClickCPUMissile(int cpuNumber)
         {
             // 同じ武器が選ばれた場合は処理しない
-            if (_cpuWeaponList[cpuNumber - 1] == Weapon.MISSILE) return;
+            if (_cpuWeaponList[cpuNumber - 1] == Weapon.Missile) return;
 
             //SE再生
             SoundManager.Play(SoundManager.SE.Select);
 
             // 武器更新
-            _cpuWeaponList[cpuNumber - 1] = Weapon.MISSILE;
+            _cpuWeaponList[cpuNumber - 1] = Weapon.Missile;
 
             // ボタン色変更
-            ChangeButtonsColor(_cpuWeaponButtonList[cpuNumber - 1], Weapon.MISSILE);
+            ChangeButtonsColor(_cpuWeaponButtonList[cpuNumber - 1], Weapon.Missile);
         }
 
         /// <summary>
@@ -199,16 +199,16 @@ namespace Screen
         public void ClickCPULaser(int cpuNumber)
         {
             // 同じ武器が選ばれた場合は処理しない
-            if (_cpuWeaponList[cpuNumber - 1] == Weapon.LASER) return;
+            if (_cpuWeaponList[cpuNumber - 1] == Weapon.Lazer) return;
 
             //SE再生
             SoundManager.Play(SoundManager.SE.Select);
 
             // 武器更新
-            _cpuWeaponList[cpuNumber - 1] = Weapon.LASER;
+            _cpuWeaponList[cpuNumber - 1] = Weapon.Lazer;
 
             // ボタン色変更
-            ChangeButtonsColor(_cpuWeaponButtonList[cpuNumber - 1], Weapon.LASER);
+            ChangeButtonsColor(_cpuWeaponButtonList[cpuNumber - 1], Weapon.Lazer);
         }
 
         /// <summary>
@@ -226,16 +226,16 @@ namespace Screen
 
                 switch (_cpuWeaponList[i])
                 {
-                    case Weapon.SHOTGUN:
-                        cpu.Weapon = WeaponType.SHOTGUN;
+                    case Weapon.Shotbun:
+                        cpu.Weapon = WeaponType.Shotgun;
                         break;
 
-                    case Weapon.MISSILE:
-                        cpu.Weapon = WeaponType.MISSILE;
+                    case Weapon.Missile:
+                        cpu.Weapon = WeaponType.Missile;
                         break;
 
-                    case Weapon.LASER:
-                        cpu.Weapon = WeaponType.LASER;
+                    case Weapon.Lazer:
+                        cpu.Weapon = WeaponType.Lazer;
                         break;
 
                     default:
@@ -246,7 +246,7 @@ namespace Screen
             }
 
             SoundManager.Play(SoundManager.SE.Select);
-            SelectedButton = ButtonType.OK;
+            SelectedButton = ButtonType.Ok;
             OnButtonClick(this, EventArgs.Empty);
         }
 
@@ -281,10 +281,10 @@ namespace Screen
                 _cpuWeaponObjectList.Add(weaponObject.gameObject);
 
                 // ボタンリストに追加
-                Button[] buttons = new Button[(int)Weapon.NONE];
-                buttons[(int)Weapon.SHOTGUN] = weaponObject.Find("SelectShotgunButton").GetComponent<Button>();
-                buttons[(int)Weapon.MISSILE] = weaponObject.Find("SelectMissileButton").GetComponent<Button>();
-                buttons[(int)Weapon.LASER] = weaponObject.Find("SelectLaserButton").GetComponent<Button>();
+                Button[] buttons = new Button[(int)Weapon.None];
+                buttons[(int)Weapon.Shotbun] = weaponObject.Find("SelectShotgunButton").GetComponent<Button>();
+                buttons[(int)Weapon.Missile] = weaponObject.Find("SelectMissileButton").GetComponent<Button>();
+                buttons[(int)Weapon.Lazer] = weaponObject.Find("SelectLaserButton").GetComponent<Button>();
                 _cpuWeaponButtonList.Add(buttons);
 
                 // 初期選択CPU数を超える場合

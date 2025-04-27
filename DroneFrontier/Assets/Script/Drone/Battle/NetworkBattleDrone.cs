@@ -231,13 +231,13 @@ namespace Drone.Battle.Network
             // メイン武器攻撃（サブ武器攻撃中の場合は不可）
             if (_input.MouseButtonL && !_weaponComponent.ShootingSubWeapon)
             {
-                _weaponComponent.Shot(DroneWeaponComponent.Weapon.MAIN, _lockOnComponent.Target);
+                _weaponComponent.Shot(DroneWeaponComponent.Weapon.Main, _lockOnComponent.Target);
             }
 
             // サブ武器攻撃（メイン武器攻撃中の場合は不可）
             if (_input.MouseButtonR && !_weaponComponent.ShootingMainWeapon)
             {
-                _weaponComponent.Shot(DroneWeaponComponent.Weapon.SUB, _lockOnComponent.Target);
+                _weaponComponent.Shot(DroneWeaponComponent.Weapon.Sub, _lockOnComponent.Target);
             }
 
             if (IsControl)
