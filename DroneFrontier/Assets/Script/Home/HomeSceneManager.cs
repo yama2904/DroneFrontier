@@ -18,6 +18,12 @@ public class HomeSceneManager : MonoBehaviour
     private GameObject _gameModeSelectUI;
 
     [SerializeField]
+    private GameObject _configButton;
+
+    [SerializeField]
+    private GameObject _helpButton;
+
+    [SerializeField]
     private ConfigScreen _config;
 
     [SerializeField]
@@ -99,6 +105,10 @@ public class HomeSceneManager : MonoBehaviour
     {
         SoundManager.Play(SoundManager.SE.Select);
         _selectMode = GameMode.Rece;
+        _matching.PreScreen = _gameModeSelectUI;
+        _matching.gameObject.SetActive(true);
+        _configButton.SetActive(false);
+        _helpButton.SetActive(false);
     }
 
     /// <summary>
@@ -174,7 +184,7 @@ public class HomeSceneManager : MonoBehaviour
         // マルチモード選択
         if (screen.SelectedButton == SoloMultiSelectScreen.ButtonType.MultiMode)
         {
-            _soloMultiSelect.gameObject.SetActive(false);
+            _matching.PreScreen = _soloMultiSelect.gameObject;
             _matching.gameObject.SetActive(true);
         }
 
@@ -246,14 +256,27 @@ public class HomeSceneManager : MonoBehaviour
         if (screen.SelectedButton == MatchingScreen.ButtonType.Ok)
         {
             _matching.gameObject.SetActive(false);
-            _networkWeaponSelect.gameObject.SetActive(true);
+
+            if (_selectMode == GameMode.Battle)
+            {
+                _networkWeaponSelect.gameObject.SetActive(true);
+            }
+            else
+            {
+                SceneManager.LoadScene("RaceScene");
+            }
         }
 
         // 戻る選択
         if (screen.SelectedButton == MatchingScreen.ButtonType.Back)
         {
             _matching.gameObject.SetActive(false);
-            _soloMultiSelect.gameObject.SetActive(true);
+
+            if (_selectMode == GameMode.Rece)
+            {
+                _configButton.SetActive(true);
+                _helpButton.SetActive(true);
+            }
         }
     }
 

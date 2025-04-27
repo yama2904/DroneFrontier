@@ -322,6 +322,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _gameModeSelectUI: {fileID: 861988838}
+  _configButton: {fileID: 1060326091}
+  _helpButton: {fileID: 2094936863}
   _config: {fileID: 1558576556}
   _help: {fileID: 1639048084}
   _soloMultiSelect: {fileID: 106109281}
@@ -2319,6 +2321,7 @@ SceneRoots:
   - {fileID: 963194228}
   - {fileID: 705507995}
   - {fileID: 455481527}
+  - {fileID: 116716901}
   - {fileID: 2047500467}
   - {fileID: 861988839}
   - {fileID: 1558576555}
@@ -2328,5 +2331,4 @@ SceneRoots:
   - {fileID: 2135081768}
   - {fileID: 647894190}
   - {fileID: 2040931426}
-  - {fileID: 116716901}
   - {fileID: 2025470925299203855}

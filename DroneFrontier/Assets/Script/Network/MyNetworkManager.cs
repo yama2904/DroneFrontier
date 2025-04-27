@@ -357,7 +357,7 @@ namespace Network
                     await Task.Delay(500);
                 }
             });
-
+            
             // ホスト探索開始
             try
             {
@@ -589,8 +589,12 @@ namespace Network
                             }
 
                             // 1秒間隔でチェック
-                            await Task.Delay(1000);
+                            await Task.Delay(1000, _discoverCancel.Token);
                         }
+                    }
+                    catch (TaskCanceledException)
+                    {
+                        // キャンセル
                     }
                     catch (Exception ex)
                     {
@@ -663,6 +667,9 @@ namespace Network
 
             // 探索停止
             _discoverCancel.Cancel();
+            _discoverUdpClient?.Close();
+            _discoverUdpClient?.Dispose();
+            _discoverUdpClient = null;
 
             // 探索完了受信イベント削除
             OnTcpReceive -= OnDiscoveryCompleteReceive;
@@ -688,6 +695,8 @@ namespace Network
             // 受信キュー削除
             _receivedUdpQueue.Clear();
             _invokeUdpQueue.Clear();
+
+            Debug.Log("通信切断");
         }
 
         /// <summary>

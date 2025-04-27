@@ -1,250 +1,400 @@
 ﻿using Common;
+using Cysharp.Threading.Tasks;
+using Network;
 using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Network
+public class MatchingScreen : MonoBehaviour, IScreen
 {
-    public class MatchingScreen : MyNetworkBehaviour, IScreen
+    /// <summary>
+    /// ボタン種類
+    /// </summary>
+    public enum ButtonType
     {
         /// <summary>
-        /// ボタン種類
+        /// 決定
         /// </summary>
-        public enum ButtonType
+        Ok,
+
+        /// <summary>
+        /// 戻る
+        /// </summary>
+        Back
+    }
+
+    /// <summary>
+    /// 選択したボタン
+    /// </summary>
+    public ButtonType SelectedButton { get; private set; }
+
+    /// <summary>
+    /// 前画面
+    /// </summary>
+    public GameObject PreScreen { get; set; } = null;
+
+    /// <summary>
+    /// ボタンクリックイベント
+    /// </summary>
+    public event EventHandler OnButtonClick;
+
+    /// <summary>
+    /// 募集中枠のテキスト
+    /// </summary>
+    private const string NON_PLAYER_TEXT = "参加者受付中...";
+
+    /// <summary>
+    /// ホスト切断時のエラーメッセージ
+    /// </summary>
+    private const string HOST_DISCONNECT = "ホストとの通信が切断されました。";
+
+    [SerializeField, Tooltip("名前入力欄のCanvas")]
+    private Canvas _inputFieldCanvas = null;
+
+    [SerializeField, Tooltip("名前入力欄")]
+    private InputField _inputField = null;
+
+    [SerializeField, Tooltip("ホスト探索中のマスク")]
+    private Image _discoverMask = null;
+
+    [SerializeField, Tooltip("プレイヤー一覧のCanvas")]
+    private Canvas _playerListCanvas = null;
+
+    [SerializeField, Tooltip("1P表示テキスト")]
+    private Text _1pText = null;
+
+    [SerializeField, Tooltip("2P表示テキスト")]
+    private Text _2pText = null;
+
+    [SerializeField, Tooltip("3P表示テキスト")]
+    private Text _3pText = null;
+
+    [SerializeField, Tooltip("4P表示テキスト")]
+    private Text _4pText = null;
+
+    [SerializeField, Tooltip("決定ボタン")]
+    private GameObject _okButton = null;
+
+    [SerializeField, Tooltip("エラーメッセージのCanvas")]
+    private Canvas _errMsgCanvas = null;
+
+    [SerializeField, Tooltip("エラーメッセージ表示用テキスト")]
+    private Text _errMsgText = null;
+
+    [SerializeField, Tooltip("プレイヤーのテキスト色")]
+    private Color _playerTextColor = new Color(0.2f, 0.2f, 0.2f, 1f);
+
+    [SerializeField, Tooltip("募集中のテキスト色")]
+    private Color _nonPlayerTextColor = new Color(0.32f, 0.41f, 0.72f, 1f);
+
+    /// <summary>
+    /// 入力したプレイヤー名
+    /// </summary>
+    private string _playerName = string.Empty;
+
+    /// <summary>
+    /// 通信相手探索中であるか
+    /// </summary>
+    private bool _isDiscovery = false;
+
+    /// <summary>
+    /// 通信中にエラーが発生したか
+    /// </summary>
+    private bool _isError = false;
+
+    public void Initialize()
+    {
+        // 名前入力欄表示
+        _inputFieldCanvas.enabled = true;
+
+        // エラーメッセージ非表示
+        _errMsgCanvas.enabled = false;
+        _errMsgText.text = "";
+        _isError = false;
+
+        // 決定ボタン非表示
+        _okButton.SetActive(false);
+
+        // 名前入力欄で初期化
+        ShowPlayerList(false);
+    }
+
+    /// <summary>
+    /// 募集ボタン選択
+    /// </summary>
+    public void ClickHost()
+    {
+        // 名前を入力していなかったら処理しない
+        if (_inputField.text == "") return;
+
+        // 入力したプレイヤー名保存
+        _playerName = _inputField.text;
+
+        // 通信イベント設定
+        MyNetworkManager.Singleton.OnConnect += OnConnect;
+        MyNetworkManager.Singleton.OnDisconnect += OnDisconnect;
+        MyNetworkManager.Singleton.OnDiscoveryCompleted += OnDiscoveryComplete;
+
+        // ホストとして通信を開始
+        MyNetworkManager.Singleton.StartHost(_playerName).Forget();
+        _isDiscovery = true;
+
+        // プレイヤー一覧へ移動
+        UpdatePlayerNames();
+        ShowPlayerList(true);
+    }
+
+    /// <summary>
+    /// 参加ボタン選択
+    /// </summary>
+    public void ClickClient()
+    {
+        // 名前を入力していなかったら処理しない
+        if (_inputField.text == "") return;
+
+        // 入力したプレイヤー名保存
+        _playerName = _inputField.text;
+
+        // SE再生
+        SoundManager.Play(SoundManager.SE.Select);
+
+        // プレイヤー名表示
+        UpdatePlayerNames();
+
+        // 通信イベント設定
+        MyNetworkManager.Singleton.OnConnect += OnConnect;
+        MyNetworkManager.Singleton.OnDisconnect += OnDisconnect;
+        MyNetworkManager.Singleton.OnDiscoveryCompleted += OnDiscoveryComplete;
+
+        // クライアントとして通信を開始
+        UniTask.Void(async () =>
         {
-            /// <summary>
-            /// 決定
-            /// </summary>
-            Ok,
+            try
+            {
+                _isDiscovery = true;
+                await MyNetworkManager.Singleton.StartClient(_playerName);
+            }
+            catch (NetworkException ex)
+            {
+                _errMsgCanvas.enabled = true;
+                _errMsgText.text = ex.Message;
+                _isError = true;
+            }
+        });
 
-            /// <summary>
-            /// 戻る
-            /// </summary>
-            Back
-        }
+        // ホスト探索中マスク表示
+        _discoverMask.enabled = true;
+    }
 
-        /// <summary>
-        /// 選択したボタン
-        /// </summary>
-        public ButtonType SelectedButton { get; private set; }
+    /// <summary>
+    /// 決定選択
+    /// </summary>
+    public void ClickOk()
+    {
+        // プレイヤー探索終了
+        MyNetworkManager.Singleton.StopDiscovery();
+    }
 
-        /// <summary>
-        /// ボタンクリックイベント
-        /// </summary>
-        public event EventHandler OnButtonClick;
+    /// <summary>
+    /// 名前入力欄の戻るボタン選択
+    /// </summary>
+    public void ClickBackOfNameInput()
+    {
+        // SE再生
+        SoundManager.Play(SoundManager.SE.Cancel);
 
-        /// <summary>
-        /// 募集中枠のテキスト
-        /// </summary>
-        private const string NON_PLAYER_TEXT = "参加者受付中...";
-
-        /// <summary>
-        /// ホスト切断時のエラーメッセージ
-        /// </summary>
-        private const string HOST_DISCONNECT = "ホストとの通信が切断されました。";
-
-        [SerializeField, Tooltip("1P表示テキスト")] 
-        private Text _1pText = null;
-
-        [SerializeField, Tooltip("2P表示テキスト")]
-        private Text _2pText = null;
-
-        [SerializeField, Tooltip("3P表示テキスト")]
-        private Text _3pText = null;
-
-        [SerializeField, Tooltip("4P表示テキスト")]
-        private Text _4pText = null;
-
-        [SerializeField, Tooltip("決定ボタン")]
-        private GameObject _okButton = null;
-
-        [SerializeField, Tooltip("エラーメッセージのCanvas")]
-        private Canvas _errMsgCanvas = null;
-
-        [SerializeField, Tooltip("エラーメッセージ表示用テキスト")]
-        private Text _errMsgText = null;
-
-        [SerializeField, Tooltip("プレイヤーのテキスト色")]
-        private Color _playerTextColor = new Color(0.2f, 0.2f, 0.2f, 1f);
-
-        [SerializeField, Tooltip("募集中のテキスト色")]
-        private Color _nonPlayerTextColor = new Color(0.32f, 0.41f, 0.72f, 1f);
-
-        /// <summary>
-        /// 通信中にエラーが発生したか
-        /// </summary>
-        private bool _isError = false;
-
-        public void Initialize() { }
-
-        /// <summary>
-        /// 決定選択
-        /// </summary>
-        public void ClickOk()
+        // 探索中の場合は切断
+        if (_isDiscovery)
         {
-            // プレイヤー探索終了
-            MyNetworkManager.Singleton.StopDiscovery();
-        }
-
-        /// <summary>
-        /// 戻る選択
-        /// </summary>
-        public void ClickBack()
-        {
-            // イベント削除
+            MyNetworkManager.Singleton.Disconnect();
             MyNetworkManager.Singleton.OnConnect -= OnConnect;
             MyNetworkManager.Singleton.OnDisconnect -= OnDisconnect;
             MyNetworkManager.Singleton.OnDiscoveryCompleted -= OnDiscoveryComplete;
+            _isDiscovery = false;
+        }
 
-            // 通信切断
-            MyNetworkManager.Singleton.Disconnect();
-            
-            // ボタン選択イベント発火
-            SoundManager.Play(SoundManager.SE.Cancel);
+        // マスク表示中の場合はマスク解除
+        if (_discoverMask.enabled)
+        {
+            _discoverMask.enabled = false;
+            return;
+        }
+
+        // 前画面へ戻る
+        PreScreen = null;
+        SelectedButton = ButtonType.Back;
+        OnButtonClick(this, EventArgs.Empty);
+    }
+
+    /// <summary>
+    /// プレイヤー一覧の戻る選択
+    /// </summary>
+    public void ClickBackOfPlayerList()
+    {
+        // SE再生
+        SoundManager.Play(SoundManager.SE.Cancel);
+
+        // 切断
+        MyNetworkManager.Singleton.Disconnect();
+        MyNetworkManager.Singleton.OnConnect -= OnConnect;
+        MyNetworkManager.Singleton.OnDisconnect -= OnDisconnect;
+        MyNetworkManager.Singleton.OnDiscoveryCompleted -= OnDiscoveryComplete;
+        _isDiscovery = false;
+
+        // 決定ボタン非表示
+        _okButton.SetActive(false);
+
+        // プレイヤー名入力欄へ戻る
+        ShowPlayerList(false);
+    }
+
+    private void Update()
+    {
+        if (_isError && Input.GetMouseButtonUp(0))
+        {
+            // SE再生
+            SoundManager.Play(SoundManager.SE.Select);
+
+            // 通信イベント削除
+            MyNetworkManager.Singleton.OnConnect -= OnConnect;
+            MyNetworkManager.Singleton.OnDisconnect -= OnDisconnect;
+            MyNetworkManager.Singleton.OnDiscoveryCompleted -= OnDiscoveryComplete;
+            _isDiscovery = false;
+
+            // 初期化して前画面へ戻る
+            Initialize();
+            PreScreen = null;
             SelectedButton = ButtonType.Back;
             OnButtonClick(this, EventArgs.Empty);
         }
+    }
 
-        private void Update()
+    /// <summary>
+    /// 通信接続イベント
+    /// </summary>
+    /// <param name="player">通信相手のプレイヤー名</param>
+    private void OnConnect(string player)
+    {
+        // ホストの場合は決定ボタン表示
+        if (MyNetworkManager.Singleton.IsHost)
         {
-            if (_isError && Input.GetMouseButtonUp(0))
-            {
-                // SE再生
-                SoundManager.Play(SoundManager.SE.Select);
-
-                // エラーメッセージ非表示
-                _errMsgCanvas.enabled = false;
-                _errMsgText.text = "";
-                _isError = false;
-
-                // 前の画面に戻る
-                ClickBack();
-            }
-        }
-
-        private void OnEnable()
-        {
-            // プレイヤー名表示
-            UpdatePlayerNames();
-
-            // 通信イベント設定
-            MyNetworkManager.Singleton.OnConnect += OnConnect;
-            MyNetworkManager.Singleton.OnDisconnect += OnDisconnect;
-            MyNetworkManager.Singleton.OnDiscoveryCompleted += OnDiscoveryComplete;
-
-            // ホスト、かつ参加者がいる場合は決定ボタン表示
-            if (MyNetworkManager.Singleton.IsHost && MyNetworkManager.Singleton.PlayerCount >= 2)
-            {
+            if (!_okButton.activeSelf)
                 _okButton.SetActive(true);
-            }
-            else
+        }
+        else
+        {
+            // クライアントの場合はプレイヤー一覧へ移動
+            if (_inputField.enabled)
             {
-                _okButton.SetActive(false);
+                ShowPlayerList(true);
             }
         }
 
-        /// <summary>
-        /// 通信接続イベント
-        /// </summary>
-        /// <param name="player">通信相手のプレイヤー名</param>
-        private void OnConnect(string player)
-        {
-            // ホストの場合は決定ボタン表示
-            if (MyNetworkManager.Singleton.IsHost && !_okButton.activeSelf)
-            {
-                _okButton.SetActive(true);
-            }
+        // プレイヤー名更新
+        UpdatePlayerNames();
+    }
 
-            // プレイヤー名更新
-            UpdatePlayerNames();
+    /// <summary>
+    /// プレイヤー切断イベント
+    /// </summary>
+    /// <param name="name">切断したプレイヤー名</param>
+    /// <param name="isHost">切断したプレイヤーがホストであるか</param>
+    private void OnDisconnect(string name, bool isHost)
+    {
+        // ホストかつ、参加者が0人になった場合は決定ボタン非表示
+        if (MyNetworkManager.Singleton.IsHost && MyNetworkManager.Singleton.PlayerCount <= 1)
+        {
+            _okButton.SetActive(false);
         }
 
-        /// <summary>
-        /// プレイヤー切断イベント
-        /// </summary>
-        /// <param name="name">切断したプレイヤー名</param>
-        /// <param name="isHost">切断したプレイヤーがホストであるか</param>
-        private void OnDisconnect(string name, bool isHost)
+        // ホストから切断された場合はエラーメッセージ表示
+        if (isHost)
         {
-            // ホストかつ、参加者が0人になった場合は決定ボタン非表示
-            if (MyNetworkManager.Singleton.IsHost && MyNetworkManager.Singleton.PlayerCount <= 1)
-            {
-                _okButton.SetActive(false);
-            }
-
-            // ホストから切断された場合はエラーメッセージ表示
-            if (isHost)
-            {
-                _errMsgCanvas.enabled = true;
-                _errMsgText.text = HOST_DISCONNECT;
-                _isError = true;
-                return;
-            }
-
-            // プレイヤー名更新
-            UpdatePlayerNames();
+            // エラーメッセージ表示
+            _errMsgCanvas.enabled = true;
+            _errMsgText.text = HOST_DISCONNECT;
+            _isError = true;
+            return;
         }
 
-        /// <summary>
-        /// プレイヤー探索完了イベント
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void OnDiscoveryComplete(object sender, EventArgs e)
+        // プレイヤー名更新
+        UpdatePlayerNames();
+    }
+
+    /// <summary>
+    /// プレイヤー探索完了イベント
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private void OnDiscoveryComplete(object sender, EventArgs e)
+    {
+        // イベント削除
+        MyNetworkManager.Singleton.OnConnect -= OnConnect;
+        MyNetworkManager.Singleton.OnDisconnect -= OnDisconnect;
+        MyNetworkManager.Singleton.OnDiscoveryCompleted -= OnDiscoveryComplete;
+
+        // 探索終了
+        _isDiscovery = false;
+
+        NetworkObjectSpawner.Initialize();
+
+        // ボタン選択イベント発火
+        SoundManager.Play(SoundManager.SE.Select);
+        SelectedButton = ButtonType.Ok;
+        OnButtonClick(this, EventArgs.Empty);
+    }
+
+    /// <summary>
+    /// プレイヤー一覧画面の表示を切り替える
+    /// </summary>
+    /// <param name="show">表示する場合はtrue</param>
+    private void ShowPlayerList(bool show)
+    {
+        _inputFieldCanvas.enabled = !show;
+        _playerListCanvas.enabled = show;
+        PreScreen?.SetActive(!show);
+        _discoverMask.enabled = false;
+    }
+
+    /// <summary>
+    /// 各プレイヤー名を最新に更新
+    /// </summary>
+    private void UpdatePlayerNames()
+    {
+        // 募集中へ初期化
+        _2pText.text = NON_PLAYER_TEXT;
+        _2pText.color = _nonPlayerTextColor;
+        _3pText.text = NON_PLAYER_TEXT;
+        _3pText.color = _nonPlayerTextColor;
+        _4pText.text = NON_PLAYER_TEXT;
+        _4pText.color = _nonPlayerTextColor;
+
+        // プレイヤー名更新
+        for (int i = 0; i < MyNetworkManager.Singleton.PlayerCount; i++)
         {
-            // イベント削除
-            MyNetworkManager.Singleton.OnConnect -= OnConnect;
-            MyNetworkManager.Singleton.OnDisconnect -= OnDisconnect;
-            MyNetworkManager.Singleton.OnDiscoveryCompleted -= OnDiscoveryComplete;
+            string player = MyNetworkManager.Singleton.PlayerNames[i];
 
-            NetworkObjectSpawner.Initialize();
-
-            // ボタン選択イベント発火
-            SoundManager.Play(SoundManager.SE.Select);
-            SelectedButton = ButtonType.Ok;
-            OnButtonClick(this, EventArgs.Empty);
-        }
-
-        /// <summary>
-        /// 各プレイヤー名を最新に更新
-        /// </summary>
-        private void UpdatePlayerNames()
-        {
-            // 募集中へ初期化
-            _2pText.text = NON_PLAYER_TEXT;
-            _2pText.color = _nonPlayerTextColor;
-            _3pText.text = NON_PLAYER_TEXT;
-            _3pText.color = _nonPlayerTextColor;
-            _4pText.text = NON_PLAYER_TEXT;
-            _4pText.color = _nonPlayerTextColor;
-
-            // プレイヤー名更新
-            for (int i = 0; i < MyNetworkManager.Singleton.PlayerCount; i++)
+            switch (i)
             {
-                string player = MyNetworkManager.Singleton.PlayerNames[i];
+                case 0:
+                    _1pText.text = player;
+                    _1pText.color = _playerTextColor;
+                    break;
 
-                switch (i)
-                {
-                    case 0:
-                        _1pText.text = player;
-                        _1pText.color = _playerTextColor;
-                        break;
+                case 1:
+                    _2pText.text = player;
+                    _2pText.color = _playerTextColor;
+                    break;
 
-                    case 1:
-                        _2pText.text = player;
-                        _2pText.color = _playerTextColor;
-                        break;
+                case 2:
+                    _3pText.text = player;
+                    _3pText.color = _playerTextColor;
+                    break;
 
-                    case 2:
-                        _3pText.text = player;
-                        _3pText.color = _playerTextColor;
-                        break;
-
-                    case 3:
-                        _4pText.text = player;
-                        _4pText.color = _playerTextColor;
-                        break;
-                }
+                case 3:
+                    _4pText.text = player;
+                    _4pText.color = _playerTextColor;
+                    break;
             }
         }
     }
