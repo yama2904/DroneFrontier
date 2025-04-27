@@ -1,6 +1,10 @@
-﻿using Common;
+﻿using Battle.Spawner;
+using Battle.Weapon;
+using Common;
 using Cysharp.Threading.Tasks;
 using Drone.Battle.Network;
+using Network;
+using Screen;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +13,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-namespace Network
+namespace Battle.Network
 {
     public class NetworkBattleManager : NetworkBehaviour
     {

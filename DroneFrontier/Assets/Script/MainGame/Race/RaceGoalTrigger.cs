@@ -1,8 +1,7 @@
+using Common;
+using Drone.Race.Network;
 using System;
 using System.Collections.Generic;
-using Common;
-using Drone.Network;
-using Drone.Race.Network;
 using UnityEngine;
 
 namespace Race

@@ -1,7 +1,8 @@
 using Drone.Battle;
+using Network;
 using UnityEngine;
 
-namespace Network
+namespace Battle.Spawner.Network
 {
     public class NetworkItemSpawner : NetworkBehaviour, IItemSpawner
     {

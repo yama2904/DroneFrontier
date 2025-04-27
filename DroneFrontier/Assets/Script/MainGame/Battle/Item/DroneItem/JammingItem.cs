@@ -1,37 +1,41 @@
-﻿using Drone.Battle;
+﻿using Battle.Item;
+using Drone.Battle;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.UI;
 
-public class JammingItem : IDroneItem
+namespace Battle.DroneItem
 {
-    /// <summary>
-    /// ジャミングボットの生存時間（秒）
-    /// </summary>
-    public float DestroySec { get; set; } = 60.0f;
-
-    /// <summary>
-    /// ボット生成時の移動時間（秒）
-    /// </summary>
-    public float InitMoveSec { get; set; } = 1;
-
-    public Image InstantiateIcon()
+    public class JammingItem : IDroneItem
     {
-        return Addressables.InstantiateAsync("JammingIconImage").WaitForCompletion().GetComponent<Image>();
-    }
+        /// <summary>
+        /// ジャミングボットの生存時間（秒）
+        /// </summary>
+        public float DestroySec { get; set; } = 60.0f;
 
-    public bool UseItem(GameObject drone)
-    {
-        // ジャミングボット生成
-        JammingBot bot = Addressables.InstantiateAsync("JammingBot", drone.transform.position, Quaternion.identity)
-                                     .WaitForCompletion()
-                                     .GetComponent<JammingBot>();
+        /// <summary>
+        /// ボット生成時の移動時間（秒）
+        /// </summary>
+        public float InitMoveSec { get; set; } = 1;
 
-        // パラメータ設定
-        bot.Creater = drone;
-        bot.DestroySec = DestroySec;
-        bot.InitMoveSec = InitMoveSec;
+        public Image InstantiateIcon()
+        {
+            return Addressables.InstantiateAsync("JammingIconImage").WaitForCompletion().GetComponent<Image>();
+        }
 
-        return true;
+        public bool UseItem(GameObject drone)
+        {
+            // ジャミングボット生成
+            JammingBot bot = Addressables.InstantiateAsync("JammingBot", drone.transform.position, Quaternion.identity)
+                                         .WaitForCompletion()
+                                         .GetComponent<JammingBot>();
+
+            // パラメータ設定
+            bot.Creater = drone;
+            bot.DestroySec = DestroySec;
+            bot.InitMoveSec = InitMoveSec;
+
+            return true;
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Common;
-using Network;
+using Screen;
+using Screen.Network;
 using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;

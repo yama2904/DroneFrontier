@@ -1,24 +1,27 @@
-public enum WeaponType
+namespace Battle.Weapon
 {
-    /// <summary>
-    /// ガトリング
-    /// </summary>
-    GATLING,
+    public enum WeaponType
+    {
+        /// <summary>
+        /// ガトリング
+        /// </summary>
+        GATLING,
 
-    /// <summary>
-    /// ショットガン
-    /// </summary>
-    SHOTGUN,
+        /// <summary>
+        /// ショットガン
+        /// </summary>
+        SHOTGUN,
 
-    /// <summary>
-    /// ミサイル
-    /// </summary>
-    MISSILE,
+        /// <summary>
+        /// ミサイル
+        /// </summary>
+        MISSILE,
 
-    /// <summary>
-    /// レーザー
-    /// </summary>
-    LASER,
+        /// <summary>
+        /// レーザー
+        /// </summary>
+        LASER,
 
-    NONE
+        NONE
+    }
 }

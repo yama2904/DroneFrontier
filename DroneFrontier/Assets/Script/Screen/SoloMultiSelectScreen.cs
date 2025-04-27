@@ -2,72 +2,75 @@
 using System;
 using UnityEngine;
 
-public class SoloMultiSelectScreen : MonoBehaviour, IScreen
+namespace Screen
 {
-    /// <summary>
-    /// ボタン種類
-    /// </summary>
-    public enum ButtonType
+    public class SoloMultiSelectScreen : MonoBehaviour, IScreen
     {
         /// <summary>
-        /// ソロモード
+        /// ボタン種類
         /// </summary>
-        SoloMode,
+        public enum ButtonType
+        {
+            /// <summary>
+            /// ソロモード
+            /// </summary>
+            SoloMode,
+
+            /// <summary>
+            /// マルチモード
+            /// </summary>
+            MultiMode,
+
+            /// <summary>
+            /// 戻る
+            /// </summary>
+            Back
+        }
 
         /// <summary>
-        /// マルチモード
+        /// 選択したボタン
         /// </summary>
-        MultiMode,
+        public ButtonType SelectedButton { get; private set; }
 
         /// <summary>
-        /// 戻る
+        /// ボタンクリックイベント
         /// </summary>
-        Back
-    }
+        public event EventHandler OnButtonClick;
 
-    /// <summary>
-    /// 選択したボタン
-    /// </summary>
-    public ButtonType SelectedButton { get; private set; }
+        public void Initialize() { }
 
-    /// <summary>
-    /// ボタンクリックイベント
-    /// </summary>
-    public event EventHandler OnButtonClick;
+        /// <summary>
+        /// ソロモード選択
+        /// </summary>
+        public void ClickSolo()
+        {
+            SoundManager.Play(SoundManager.SE.Select);
+            SelectedButton = ButtonType.SoloMode;
+            OnButtonClick(this, EventArgs.Empty);
+        }
 
-    public void Initialize() { }
+        /// <summary>
+        /// マルチモード選択
+        /// </summary>
+        public void ClickMulti()
+        {
+            // SE再生
+            SoundManager.Play(SoundManager.SE.Select);
 
-    /// <summary>
-    /// ソロモード選択
-    /// </summary>
-    public void ClickSolo()
-    {
-        SoundManager.Play(SoundManager.SE.Select);
-        SelectedButton = ButtonType.SoloMode;
-        OnButtonClick(this, EventArgs.Empty);
-    }
+            // ボタン選択イベント発火
+            SoundManager.Play(SoundManager.SE.Select);
+            SelectedButton = ButtonType.MultiMode;
+            OnButtonClick(this, EventArgs.Empty);
+        }
 
-    /// <summary>
-    /// マルチモード選択
-    /// </summary>
-    public void ClickMulti()
-    {
-        // SE再生
-        SoundManager.Play(SoundManager.SE.Select);
-
-        // ボタン選択イベント発火
-        SoundManager.Play(SoundManager.SE.Select);
-        SelectedButton = ButtonType.MultiMode;
-        OnButtonClick(this, EventArgs.Empty);
-    }
-
-    /// <summary>
-    /// 戻るボタン選択
-    /// </summary>
-    public void ClickBack()
-    {
-        SoundManager.Play(SoundManager.SE.Cancel);
-        SelectedButton = ButtonType.Back;
-        OnButtonClick(this, EventArgs.Empty);
+        /// <summary>
+        /// 戻るボタン選択
+        /// </summary>
+        public void ClickBack()
+        {
+            SoundManager.Play(SoundManager.SE.Cancel);
+            SelectedButton = ButtonType.Back;
+            OnButtonClick(this, EventArgs.Empty);
+        }
     }
 }

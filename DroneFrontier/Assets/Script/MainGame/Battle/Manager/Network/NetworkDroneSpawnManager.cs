@@ -1,3 +1,4 @@
+using Battle.Weapon;
 using Common;
 using Drone;
 using Drone.Battle;
@@ -6,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Network
+namespace Battle.Network
 {
     public class NetworkDroneSpawnManager : MonoBehaviour
     {

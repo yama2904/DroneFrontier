@@ -4,7 +4,7 @@ using System;
 using System.Linq;
 using UnityEngine;
 
-namespace Battle.Network
+namespace Battle.Packet
 {
     public class MagnetSpawnPacket : UdpPacket
     {

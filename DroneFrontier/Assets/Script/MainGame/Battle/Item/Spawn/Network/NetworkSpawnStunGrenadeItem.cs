@@ -1,9 +1,11 @@
+using Battle.DroneItem;
 using Drone.Battle;
+using Network;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Network
+namespace Battle.SpawnItem.Network
 {
     public class NetworkSpawnStunGrenadeItem : NetworkBehaviour, ISpawnItem, IRadarable
     {

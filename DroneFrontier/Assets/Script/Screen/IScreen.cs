@@ -1,4 +1,7 @@
-public interface IScreen
+namespace Screen
 {
-    void Initialize();
+    public interface IScreen
+    {
+        void Initialize();
+    }
 }

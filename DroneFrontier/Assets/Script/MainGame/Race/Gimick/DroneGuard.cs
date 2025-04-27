@@ -1,7 +1,7 @@
 using Common;
 using UnityEngine;
 
-namespace Race
+namespace Race.Gimmick
 {
     public class DroneGuard : MonoBehaviour
     {

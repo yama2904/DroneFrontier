@@ -1,11 +1,14 @@
-﻿using Common;
+﻿using Battle.Network;
+using Battle.Weapon;
+using Common;
+using Network;
 using System;
 using System.Collections;
 using System.Collections.Specialized;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Network
+namespace Screen.Network
 {
     public class NetworkWeaponSelectScreen : NetworkBehaviour, IScreen
     {

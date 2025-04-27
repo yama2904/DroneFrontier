@@ -1,9 +1,10 @@
+using Battle.Packet;
 using Network;
 using Network.Udp;
 using System;
 using UnityEngine;
 
-namespace Battle.Network
+namespace Battle.Gimmick.Network
 {
     public class NetworkBarrierWeakLaserSpawner : MonoBehaviour
     {
