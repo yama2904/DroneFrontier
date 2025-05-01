@@ -1,4 +1,5 @@
-﻿using Battle.Spawner;
+﻿using Battle.Packet;
+using Battle.Spawner;
 using Battle.Weapon;
 using Common;
 using Cysharp.Threading.Tasks;
@@ -73,9 +74,6 @@ namespace Battle.Network
 
         [SerializeField, Tooltip("アイテムスポーン管理オブジェクト")]
         private ItemSpawnManager _itemSpawnManager = null;
-
-        [SerializeField, Tooltip("観戦モード用オブジェクト")]
-        private NetworkDroneWatchar _watchingGame = null;
 
         [SerializeField, Tooltip("残り時間を表示するTextUI")]
         private Text _timeText = null;
@@ -331,11 +329,12 @@ namespace Battle.Network
                 // 操作ドローンの場合は観戦モード起動
                 if (destroyDrone.IsControl)
                 {
-                    _watchingGame.enabled = true;
+                    NetworkDroneWatcher.Run();
                 }
                 else
                 {
-                    // ★ToDo:観戦送信
+                    // 観戦送信
+                    NetworkManager.SendTcpToPlayer(new DroneWatchPacket(), destroyDrone.Name);
                 }
             }
             else

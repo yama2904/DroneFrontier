@@ -1492,7 +1492,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1201505801}
   - component: {fileID: 1201505800}
-  - component: {fileID: 1201505802}
   m_Layer: 0
   m_Name: DroneWatcher
   m_TagString: Untagged
@@ -1507,7 +1506,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1201505799}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ffa91c88a12a58a46bcccc00fcec90e5, type: 3}
   m_Name: 
@@ -1528,14 +1527,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!81 &1201505802
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1201505799}
-  m_Enabled: 0
 --- !u!4 &1201986674 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6644320004432626967, guid: e3dee221c815d0644b4f2bfdb2cea55c,

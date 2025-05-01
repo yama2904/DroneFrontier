@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Battle.Drone
 {
@@ -35,9 +36,9 @@ namespace Battle.Drone
 
         public int StockNum => _stockNum;
 
-        public Canvas Canvas => null;
+        public Canvas Canvas => _canvas;
 
-        public Canvas BulletCanvas => null;
+        public Canvas BulletCanvas => _bulletCanvas;
 
         public bool IsLockableOn { get; } = true;
 
@@ -58,6 +59,8 @@ namespace Battle.Drone
             set
             {
                 _camera.depth = value ? 5 : 0;
+                _listener.enabled = value;
+                _canvas.enabled = value;
                 _isWatch = value;
             }
         }
@@ -92,8 +95,17 @@ namespace Battle.Drone
         [SerializeField, Tooltip("ドローン死亡時の爆発オブジェクト")]
         private GameObject _explosion = null;
 
+        [SerializeField, Tooltip("ストック数を表示するTextコンポーネント")]
+        private Text _stockText = null;
+
         [SerializeField, Tooltip("オブジェクト探索コンポーネント")]
         private ObjectSearchComponent _searchComponent = null;
+
+        [SerializeField, Tooltip("UI表示用Canvas")]
+        private Canvas _canvas = null;
+
+        [SerializeField, Tooltip("弾丸UI表示用Canvas")]
+        private Canvas _bulletCanvas = null;
 
         [SerializeField, Tooltip("CPUのカメラ")]
         private Camera _camera = null;
@@ -150,6 +162,7 @@ namespace Battle.Drone
         private Transform _transform = null;
         private Rigidbody _rigidbody = null;
         private Animator _animator = null;
+        private AudioListener _listener = null;
         private DroneMoveComponent _moveComponent = null;
         private DroneRotateComponent _rotateComponent = null;
         private DroneDamageComponent _damageComponent = null;
@@ -175,6 +188,7 @@ namespace Battle.Drone
 
             // ストック数設定
             _stockNum = stock;
+            _stockText.text = _stockNum.ToString();
 
             // ダメージイベント設定
             _damageComponent.OnDamage += OnDamage;
@@ -236,6 +250,7 @@ namespace Battle.Drone
             _rigidbody = GetComponent<Rigidbody>();
             _transform = _rigidbody.transform;
             _animator = GetComponent<Animator>();
+            _listener = GetComponent<AudioListener>();
             _moveComponent = GetComponent<DroneMoveComponent>();
             _rotateComponent = GetComponent<DroneRotateComponent>();
             _damageComponent = GetComponent<DroneDamageComponent>();

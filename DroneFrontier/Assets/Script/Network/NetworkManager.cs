@@ -277,6 +277,44 @@ namespace Network
         }
 
         /// <summary>
+        /// 指定したプレイヤーへTCPパケットを送信する
+        /// </summary>
+        /// <param name="packet">送信パケット</param>
+        /// <param name="player">送信先プレイヤー名</param>
+        public static void SendTcpToPlayer(BasePacket packet, string player)
+        {
+            UniTask.Void(async () =>
+            {
+                foreach (PeerClient client in _peerClients)
+                {
+                    if (client.RemoteName != player) continue;
+                    client.SendTcp(packet);
+                }
+
+                await UniTask.CompletedTask;
+            });
+        }
+
+        /// <summary>
+        /// 指定したプレイヤーへUDPパケットを送信する
+        /// </summary>
+        /// <param name="packet">送信パケット</param>
+        /// <param name="player">送信先プレイヤー名</param>
+        public static void SendUdpToPlayer(BasePacket packet, string player)
+        {
+            UniTask.Void(async () =>
+            {
+                foreach (PeerClient client in _peerClients)
+                {
+                    if (client.RemoteName != player) continue;
+                    client.SendUdp(packet);
+                }
+
+                await UniTask.CompletedTask;
+            });
+        }
+
+        /// <summary>
         /// 全ての通信相手へUDPパケットを送信する
         /// </summary>
         /// <param name="packet">送信パケット</param>

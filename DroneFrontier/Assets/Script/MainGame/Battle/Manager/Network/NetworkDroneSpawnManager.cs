@@ -1,6 +1,4 @@
 using Battle.Weapon;
-using Common;
-using Drone;
 using Drone.Battle;
 using Drone.Battle.Network;
 using System;

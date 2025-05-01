@@ -1,20 +1,22 @@
-using Battle.Drone;
+using Common;
 using Drone.Battle;
+using Drone.Battle.Network;
+using Network;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace Battle
+namespace Battle.Network
 {
-    public class DroneWatcher : MonoBehaviour
+    public class NetworkDroneWatcher : MonoBehaviour
     {
         [SerializeField, Tooltip("ドローンスポーン管理オブジェクト")]
-        private DroneSpawnManager _droneSpawnManager = null;
+        private NetworkDroneSpawnManager _droneSpawnManager = null;
 
         /// <summary>
         /// 観戦中のドローン
         /// </summary>
-        private static List<CpuBattleDrone> _watchDrones = new List<CpuBattleDrone>();
+        private static List<NetworkBattleDrone> _watchDrones = new List<NetworkBattleDrone>();
 
         /// <summary>
         /// 現在カメラ参照中のドローンのインデックス
@@ -28,11 +30,11 @@ namespace Battle
             if (_isRunning) return;
             _isRunning = true;
 
-            // 試合中のCPU取得
-            _watchDrones = FindObjectsByType<CpuBattleDrone>(FindObjectsSortMode.None).ToList();
+            // 試合中のプレイヤー取得
+            _watchDrones = GameObject.FindGameObjectsWithTag(TagNameConst.PLAYER).Select(x => x.GetComponent<NetworkBattleDrone>()).ToList();
 
             // 全てのドローンのカメラ参照初期化
-            foreach (CpuBattleDrone drone in _watchDrones)
+            foreach (NetworkBattleDrone drone in _watchDrones)
             {
                 drone.IsWatch = false;
             }
@@ -45,6 +47,7 @@ namespace Battle
         private void Awake()
         {
             // イベント設定
+            NetworkManager.OnTcpReceived += OnTcpReceived;
             _droneSpawnManager.OnDroneDestroy += OnDroneDestroy;
         }
 
@@ -52,7 +55,7 @@ namespace Battle
         {
             if (_watchDrones.Count <= 0) return;
 
-            // スペースキーで次のCPUへカメラ切り替え
+            // スペースキーで次のプレイヤーへカメラ切り替え
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 WatchNextDrone();
@@ -64,7 +67,13 @@ namespace Battle
             _isRunning = false;
 
             // イベント削除
+            NetworkManager.OnTcpReceived -= OnTcpReceived;
             _droneSpawnManager.OnDroneDestroy -= OnDroneDestroy;
+        }
+
+        private void OnTcpReceived(string name, BasePacket packet)
+        {
+            Run();
         }
 
         /// <summary>
@@ -77,11 +86,11 @@ namespace Battle
             if (!_isRunning) return;
 
             // 破壊されたドローンをリストから削除
-            int droneIndex = _watchDrones.IndexOf(destroyDrone as CpuBattleDrone);
+            int droneIndex = _watchDrones.IndexOf(destroyDrone as NetworkBattleDrone);
             _watchDrones.RemoveAt(droneIndex);
 
             // リスポーンドローン取得
-            var drone = respawnDrone as CpuBattleDrone;
+            var drone = respawnDrone as NetworkBattleDrone;
 
             // リスポーンされた場合は再度観戦対象に追加
             if (respawnDrone != null)
@@ -89,10 +98,10 @@ namespace Battle
                 _watchDrones.Insert(droneIndex, drone);
             }
 
-            // 破壊されたドローンが現在観戦中のCPUの場合
+            // 破壊されたドローンが現在観戦中のプレイヤーの場合
             if (droneIndex == _watchingDrone)
             {
-                // 残機0の場合は次のCPUへ切り替え
+                // 残機0の場合は次のプレイヤーへ切り替え
                 if (respawnDrone == null)
                 {
                     WatchNextDrone();
@@ -112,7 +121,7 @@ namespace Battle
         {
             _watchDrones[_watchingDrone].IsWatch = false;
 
-            // 次のCPU
+            // 次のプレイヤー
             _watchingDrone++;
             if (_watchingDrone >= _watchDrones.Count)
             {

@@ -1,6 +1,5 @@
 using Common;
 using Network;
-using Network.Udp;
 using UnityEngine;
 
 namespace Drone.Network
@@ -34,6 +33,7 @@ namespace Drone.Network
             {
                 _camera.depth = value ? 5 : 0;
                 _listener.enabled = value;
+                _canvas.enabled = value;
                 _isWatch = value;
             }
         }
@@ -114,9 +114,6 @@ namespace Drone.Network
             // 他プレイヤーの場合
             if (!_isControl)
             {
-                // UI非表示
-                _canvas.enabled = false;
-
                 // 受信イベント設定
                 NetworkManager.OnUdpReceivedOnMainThread += OnReceiveUdpOfOtherPlayer;
 
