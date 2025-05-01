@@ -128,10 +128,12 @@ namespace Network
         }
 
         /// <summary>
-        /// ホストとして通信を開始してクライアントからの接続を待機する
+        /// ホストとして通信を開始してクライアントからの接続を待機する。<br/>
+        /// 複数のゲームモードを扱う場合はgameModeを指定することで、同一のゲームモードからのみ接続を許可する。
         /// </summary>
         /// <param name="name">自分のプレイヤー名</param>
-        public static async UniTask StartAccept(string name)
+        /// <param name="gameMode">ゲームモード</param>
+        public static async UniTask StartAccept(string name, string gameMode = "")
         {
             Initialize();
             MyPlayerName = name;
@@ -144,7 +146,7 @@ namespace Network
                 _listener.OnConnected += OnConnectedPeer;
                 _listener.OnAcceptCompleted += OnDiscoveryCompletedPeer;
                 
-                await _listener.StartAccept(name, _disconnectCancel.Token);
+                await _listener.StartAccept(name, gameMode, _disconnectCancel.Token);
             }
             catch (TaskCanceledException)
             {
@@ -161,10 +163,12 @@ namespace Network
         }
 
         /// <summary>
-        /// クライアントとして通信を開始して他プレイヤーの探索を行う
+        /// クライアントとして通信を開始して他プレイヤーの探索を行う。<br/>
+        /// 複数のゲームモードを扱う場合はgameModeを指定することで、同一のゲームモードのプレイヤーを探索する。
         /// </summary>
         /// <param name="name">自分のプレイヤー名</param>
-        public static async UniTask StartDiscovery(string name)
+        /// <param name="gameMode">ゲームモード</param>
+        public static async UniTask StartDiscovery(string name, string gameMode = "")
         {
             Initialize();
             MyPlayerName = name;
@@ -178,7 +182,7 @@ namespace Network
                 discover.OnConnected += OnConnectedPeer;
                 discover.OnDiscoveryCompleted += OnDiscoveryCompletedPeer;
 
-                await discover.StartDiscovery(name, _disconnectCancel.Token);
+                await discover.StartDiscovery(name, gameMode, _disconnectCancel.Token);
             }
             catch (TaskCanceledException)
             {

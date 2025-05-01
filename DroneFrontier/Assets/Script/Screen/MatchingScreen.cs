@@ -37,6 +37,11 @@ namespace Screen
         public GameObject PreScreen { get; set; } = null;
 
         /// <summary>
+        /// ゲームモード
+        /// </summary>
+        public string GameMode { get; set; } = string.Empty;
+
+        /// <summary>
         /// ボタンクリックイベント
         /// </summary>
         public event EventHandler OnButtonClick;
@@ -150,7 +155,7 @@ namespace Screen
                 try
                 {
                     _isDiscovery = true;
-                    await NetworkManager.StartAccept(_playerName);
+                    await NetworkManager.StartAccept(_playerName, GameMode);
                 }
                 catch (NetworkException ex)
                 {
@@ -193,7 +198,7 @@ namespace Screen
                 try
                 {
                     _isDiscovery = true;
-                    await NetworkManager.StartDiscovery(_playerName);
+                    await NetworkManager.StartDiscovery(_playerName, GameMode);
                 }
                 catch (NetworkException ex)
                 {

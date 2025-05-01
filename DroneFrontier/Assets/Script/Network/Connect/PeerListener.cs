@@ -68,9 +68,10 @@ namespace Network.Connect
         /// キャンセルを発行した場合は接続済みの全てのクライアントと切断する
         /// </summary>
         /// <param name="name">自分のプレイヤー名</param>
+        /// <param name="gameMode">ゲームモード</param>
         /// <param name="token">キャンセルトークン</param>
         /// <exception cref="TaskCanceledException"></exception>
-        public async UniTask StartAccept(string name, CancellationToken token)
+        public async UniTask StartAccept(string name, string gameMode, CancellationToken token)
         {
             // クライアントからの探索受信用UDP
             UdpClient broadcastUdp = null;
@@ -104,9 +105,12 @@ namespace Network.Connect
                     // プレイヤー探索パケット以外の場合はスキップ
                     if (BasePacket.GetPacketType(receive.Buffer) != typeof(DiscoverPacket)) continue;
 
+                    // ゲームモードが異なる場合はスキップ
+                    DiscoverPacket discoverPacket = new DiscoverPacket().Parse(receive.Buffer) as DiscoverPacket;
+                    if (discoverPacket.GameMode != gameMode) continue;
+
                     // プレイヤー名重複チェック
-                    DiscoverPacket receivePacket = new DiscoverPacket().Parse(receive.Buffer) as DiscoverPacket;
-                    if (receivePacket.Name == name || _connectedTcpEPs.Any(x => x.name == receivePacket.Name))
+                    if (discoverPacket.Name == name || _connectedTcpEPs.Any(x => x.name == discoverPacket.Name))
                     {
                         Debug.Log("プレイヤー名重複");
 
@@ -144,8 +148,8 @@ namespace Network.Connect
                     }
 
                     // 接続先クライアント保存
-                    PeerClient peerClient = new PeerClient(receivePacket.Name, PeerType.Client, udpClient, tcpClient);
-                    _connectedTcpEPs.Add((receivePacket.Name, NetworkUtil.ConvertToString(receive.RemoteEndPoint)));
+                    PeerClient peerClient = new PeerClient(discoverPacket.Name, PeerType.Client, udpClient, tcpClient);
+                    _connectedTcpEPs.Add((discoverPacket.Name, NetworkUtil.ConvertToString(receive.RemoteEndPoint)));
                     _connectedClients.Add(peerClient);
 
                     // 切断イベント設定

@@ -107,6 +107,7 @@ public class HomeSceneManager : MonoBehaviour
         SoundManager.Play(SoundManager.SE.Select);
         _selectMode = GameMode.Rece;
         _matching.PreScreen = _gameModeSelectUI;
+        _matching.GameMode = _selectMode.ToString();
         _matching.gameObject.SetActive(true);
         _configButton.SetActive(false);
         _helpButton.SetActive(false);
@@ -186,6 +187,7 @@ public class HomeSceneManager : MonoBehaviour
         if (screen.SelectedButton == SoloMultiSelectScreen.ButtonType.MultiMode)
         {
             _matching.PreScreen = _soloMultiSelect.gameObject;
+            _matching.GameMode = _selectMode.ToString();
             _matching.gameObject.SetActive(true);
         }
 

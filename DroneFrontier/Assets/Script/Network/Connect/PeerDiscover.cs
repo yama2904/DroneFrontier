@@ -72,14 +72,15 @@ namespace Network.Connect
         /// キャンセルを発行した場合は接続済みの全てのホスト/クライアントと切断する
         /// </summary>
         /// <param name="name">自分のプレイヤー名</param>
+        /// <param name="gameMode">ゲームモード</param>
         /// <param name="token">キャンセルトークン</param>
         /// <exception cref="TaskCanceledException"></exception>
-        public async UniTask StartDiscovery(string name, CancellationToken token)
+        public async UniTask StartDiscovery(string name, string gameMode, CancellationToken token)
         {
             try
             {
                 // ホストを探索して接続確立
-                await DiscoverHost(name, token);
+                await DiscoverHost(name, gameMode, token);
 
                 // 新規プレイヤーからの接続受付
                 await AcceptFromClient(name, token);
@@ -128,10 +129,11 @@ namespace Network.Connect
         /// ホストを探索して接続確立
         /// </summary>
         /// <param name="name">自分のプレイヤー名</param>
+        /// <param name="gameMode">ゲームモード</param>
         /// <param name="token">キャンセルトークン</param>
         /// <exception cref="NetworkException"></exception>
         /// <exception cref="TaskCanceledException"></exception>
-        private async UniTask DiscoverHost(string name, CancellationToken token)
+        private async UniTask DiscoverHost(string name, string gameMode, CancellationToken token)
         {
             // キャンセル発行検知用タスク
             Task cancelTask = Task.Run(() =>
@@ -147,7 +149,7 @@ namespace Network.Connect
                 hostUdp.EnableBroadcast = true;
 
                 // ブロードキャストで探索パケット送信
-                byte[] data = new DiscoverPacket(name).ConvertToPacket();
+                byte[] data = new DiscoverPacket(name, gameMode).ConvertToPacket();
                 await hostUdp.SendAsync(data, data.Length, new IPEndPoint(IPAddress.Broadcast, PORT));
                 hostUdp.EnableBroadcast = false;
 
