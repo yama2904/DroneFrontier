@@ -38,7 +38,7 @@ namespace Network
                         while (true)
                         {
                             await UniTask.Delay(interval, cancellationToken: _cancel.Token);
-                            NetworkManager.Singleton.SendUdpToAll(new PositionPacket(this));
+                            NetworkManager.SendUdpToAll(new PositionPacket(this));
                         }
                     });
                 }
@@ -117,15 +117,15 @@ namespace Network
                                             BindingFlags.DeclaredOnly);
             
             // 受信イベント設定
-            NetworkManager.Singleton.OnUdpReceiveOnMainThread += OnUdpReceiveOfSendMethod;
-            NetworkManager.Singleton.OnUdpReceiveOnMainThread += OnUdpReceiveOfPosition;
+            NetworkManager.OnUdpReceivedOnMainThread += OnUdpReceiveOfSendMethod;
+            NetworkManager.OnUdpReceivedOnMainThread += OnUdpReceiveOfPosition;
         }
 
         protected virtual void OnDestroy()
         {
             // 受信イベント削除
-            NetworkManager.Singleton.OnUdpReceiveOnMainThread -= OnUdpReceiveOfSendMethod;
-            NetworkManager.Singleton.OnUdpReceiveOnMainThread -= OnUdpReceiveOfPosition;
+            NetworkManager.OnUdpReceivedOnMainThread -= OnUdpReceiveOfSendMethod;
+            NetworkManager.OnUdpReceivedOnMainThread -= OnUdpReceiveOfPosition;
 
             // キャンセル発行
             _cancel.Cancel();
@@ -155,7 +155,7 @@ namespace Network
 
             // パケット送信
             BasePacket packet = new SendMethodPacket(ObjectId, _className, name, args.ToArray());
-            NetworkManager.Singleton.SendUdpToAll(packet);
+            NetworkManager.SendUdpToAll(packet);
 
             // メソッド実行
             // ★DateTime.Now.Millisecondのようなその瞬間によって値が変わる場合にプレイヤー同士で差異が出るため変更

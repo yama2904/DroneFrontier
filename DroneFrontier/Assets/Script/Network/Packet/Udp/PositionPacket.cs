@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Network.Udp
 {
-    public class PositionPacket : BasePacket
+    internal class PositionPacket : BasePacket
     {
         public string ObjectId { get; private set; } = string.Empty;
 

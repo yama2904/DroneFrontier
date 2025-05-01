@@ -58,7 +58,7 @@ namespace Race.Network
             base.Awake();
 
             // イベント設定
-            NetworkManager.Singleton.OnDisconnect += OnDisconnect;
+            NetworkManager.OnDisconnected += OnDisconnect;
             _config.OnButtonClick += OnConfigBackClick;
             RaceGoalTrigger.OnGoal += OnGoal;
 
@@ -82,9 +82,9 @@ namespace Race.Network
 
             // ドローンをスポーン
             List<NetworkRaceDrone> drones = new List<NetworkRaceDrone>();
-            if (NetworkManager.Singleton.IsHost)
+            if (NetworkManager.PeerType == PeerType.Host)
             {
-                foreach (string name in NetworkManager.Singleton.PlayerNames)
+                foreach (string name in NetworkManager.PlayerNames)
                 {
                     NetworkRaceDrone spawnDrone = _droneSpawnManager.SpawnDrone(name);
                     drones.Add(spawnDrone);
@@ -99,7 +99,7 @@ namespace Race.Network
                     drones = GameObject.FindGameObjectsWithTag(TagNameConst.PLAYER).Select(x => x.GetComponent<NetworkRaceDrone>()).ToList();
 
                     // 全プレイヤー分生成されていない場合は待機
-                    if (drones.Count < NetworkManager.Singleton.PlayerCount)
+                    if (drones.Count < NetworkManager.PlayerCount)
                     {
                         await UniTask.Delay(100);
                         continue;
@@ -110,7 +110,7 @@ namespace Race.Network
 
             // 同期してランダムシード値も共有
             object value = await new SyncHandler().SyncValueAsync(seed);
-            if (NetworkManager.Singleton.IsClient)
+            if (NetworkManager.PeerType == PeerType.Client)
             {
                 UnityEngine.Random.InitState(Convert.ToInt32(value));
             }
@@ -176,21 +176,21 @@ namespace Race.Network
             Cursor.visible = true;
 
             // イベント削除
-            NetworkManager.Singleton.OnDisconnect -= OnDisconnect;
+            NetworkManager.OnDisconnected -= OnDisconnect;
 
             // 切断
-            NetworkManager.Singleton.Disconnect();
+            NetworkManager.Disconnect();
         }
 
         /// <summary>
         /// プレイヤー切断イベント
         /// </summary>
         /// <param name="name">切断したプレイヤー名</param>
-        /// <param name="isHost">切断したプレイヤーがホストであるか</param>
-        private async void OnDisconnect(string name, bool isHost)
+        /// <param name="type">切断したプレイヤーのホスト/クライアント種別</param>
+        private async void OnDisconnect(string name, PeerType type)
         {
             // ホストから切断、又はプレイヤーが自分のみの場合はエラーメッセージ表示
-            if (isHost || NetworkManager.Singleton.PlayerCount == 1)
+            if (type == PeerType.Host || NetworkManager.PlayerCount == 1)
             {
                 _errMsgCanvas.enabled = true;
 
@@ -227,12 +227,12 @@ namespace Race.Network
                 if (_isFinished) return;
 
                 // 最後の1人が残ったら終了
-                if (trigger.GoalPlayers.Count == NetworkManager.Singleton.PlayerCount - 1)
+                if (trigger.GoalPlayers.Count == NetworkManager.PlayerCount - 1)
                 {
-                    if (NetworkManager.Singleton.IsHost)
+                    if (NetworkManager.PeerType == PeerType.Host)
                     {
                         // 最後のプレイヤー取得
-                        string lastPlayer = NetworkManager.Singleton.PlayerNames.Where(x => !trigger.GoalPlayers.Contains(x)).First();
+                        string lastPlayer = NetworkManager.PlayerNames.Where(x => !trigger.GoalPlayers.Contains(x)).First();
 
                         // ゴール済みプレイヤーの最後に未ゴールプレイヤーを追加してランキング設定
                         string[] ranking = trigger.GoalPlayers.Concat(new string[] { lastPlayer }).ToArray();
@@ -260,19 +260,20 @@ namespace Race.Network
         private async void FinishGame(string[] ranking)
         {
             // 切断イベント削除
-            NetworkManager.Singleton.OnDisconnect -= OnDisconnect;
+            NetworkManager.OnDisconnected -= OnDisconnect;
 
             // ゲーム終了アニメーション再生
             _finishAnimator.SetBool("SetFinish", true);
 
             // ゲーム終了SE再生
+            await UniTask.Delay(TimeSpan.FromSeconds(1));
             SoundManager.Play(SoundManager.SE.Finish);
 
             // 3秒後リザルト画面に移動
             await UniTask.Delay(TimeSpan.FromSeconds(3));
 
             // 通信切断
-            NetworkManager.Singleton.Disconnect();
+            NetworkManager.Disconnect();
 
             // リザルト画面へ移動
             ResultSceneManager.SetRank(ranking);

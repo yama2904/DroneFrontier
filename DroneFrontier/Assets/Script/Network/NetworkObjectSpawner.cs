@@ -13,16 +13,15 @@ namespace Network
     {
         public static Dictionary<string, NetworkBehaviour> SpawnedObjects { get; private set; } = new Dictionary<string, NetworkBehaviour>();
 
-        private static bool _initialized = false;
-
-        public static void Initialize() 
+        public static void Run()
         {
-            if (_initialized) return;
+            NetworkManager.OnUdpReceivedOnMainThread += OnUdpReceive;
+        }
 
-            // 受信イベント設定
-            NetworkManager.Singleton.OnUdpReceiveOnMainThread += OnUdpReceive;
-
-            _initialized = true;
+        public static void Stop()
+        {
+            NetworkManager.OnUdpReceivedOnMainThread -= OnUdpReceive;
+            SpawnedObjects.Clear();
         }
 
         /// <summary>
@@ -35,7 +34,7 @@ namespace Network
             obj.ObjectId = Guid.NewGuid().ToString("N");
 
             // パケット送信
-            NetworkManager.Singleton.SendUdpToAll(new SpawnPacket(obj));
+            NetworkManager.SendUdpToAll(new SpawnPacket(obj));
 
             // 削除イベント設定
             obj.OnDestroyObject += OnDestroy;
@@ -50,7 +49,7 @@ namespace Network
         /// <param name="obj">削除するオブジェクト</param>
         public static void Destroy(NetworkBehaviour obj)
         {
-            NetworkManager.Singleton.SendUdpToAll(new DestroyPacket(obj.ObjectId));
+            NetworkManager.SendUdpToAll(new DestroyPacket(obj.ObjectId));
             SpawnedObjects.Remove(obj.ObjectId);
         }
 

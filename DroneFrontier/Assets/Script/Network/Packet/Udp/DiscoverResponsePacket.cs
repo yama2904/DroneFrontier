@@ -13,9 +13,9 @@ namespace Network.Udp
         public string HostName { get; private set; } = string.Empty;
 
         /// <summary>
-        /// 各クライアントのプレイヤー名とIPアドレス
+        /// 各クライアントのTCPアドレス
         /// </summary>
-        public Dictionary<string, string> ClientAddresses = new Dictionary<string, string>();
+        public List<string> ClientAddresses = new List<string>();
 
         /// <summary>
         /// コンストラクタ
@@ -26,8 +26,8 @@ namespace Network.Udp
         /// コンストラクタ
         /// </summary>
         /// <param name="hostName">ホストのプレイヤー名</param>
-        /// <param name="clientAdrs">各クライアントのプレイヤー名とIPアドレス</param>
-        public DiscoverResponsePacket(string hostName, Dictionary<string, string> clientAdrs)
+        /// <param name="clientAdrs">各クライアントのTCPアドレス</param>
+        public DiscoverResponsePacket(string hostName, List<string> clientAdrs)
         {
             HostName = hostName;
             ClientAddresses = clientAdrs;
@@ -49,27 +49,19 @@ namespace Network.Udp
             int num = BitConverter.ToInt32(body, offset);
             offset += sizeof(int);
 
-            // 各プレイヤー名とIPアドレス取得
-            Dictionary<string, string> addresses = new Dictionary<string, string>();
+            // 各プレイヤーのTCPアドレス取得
+            List<string> addresses = new List<string>();
             for (int i = 0; i < num; i++)
             {
-                // プレイヤー名のバイト長取得
-                int nameLen = BitConverter.ToInt32(body, offset);
-                offset += sizeof(int);
-
-                // プレイヤー名取得
-                string name = Encoding.UTF8.GetString(body, offset, nameLen);
-                offset += nameLen;
-
-                // IPアドレスのバイト長取得
+                // アドレスのバイト長取得
                 int addressLen = BitConverter.ToInt32(body, offset);
                 offset += sizeof(int);
 
-                // IPアドレス取得
+                // アドレス取得
                 string address = Encoding.UTF8.GetString(body, offset, addressLen);
                 offset += addressLen;
 
-                addresses.Add(name, address);
+                addresses.Add(address);
             }
 
             // インスタンスを作成して返す
@@ -93,23 +85,17 @@ namespace Network.Udp
             // [ホストプレイヤー名バイト長] [ホストプレイヤー名] [プレイヤー数] の順に結合
             body = hostLen.Concat(hostByte).Concat(num).ToArray();
 
-            // 各プレイヤー名とIPアドレスをパケットに結合する
-            foreach (string name in ClientAddresses.Keys)
+            // TCPアドレスをパケットに結合する
+            foreach (string address in ClientAddresses)
             {
-                // プレイヤー名をバイト変換
-                byte[] nameByte = Encoding.UTF8.GetBytes(name);
+                // アドレスをバイト変換
+                byte[] addressByte = Encoding.UTF8.GetBytes(address);
 
-                // プレイヤー名のバイト長を取得
-                byte[] nameLen = BitConverter.GetBytes(nameByte.Length);
-
-                // IPアドレスをバイト変換
-                byte[] addressByte = Encoding.UTF8.GetBytes(ClientAddresses[name]);
-
-                // IPアドレスのバイト長を取得
+                // アドレスのバイト長を取得
                 byte[] addressLen = BitConverter.GetBytes(addressByte.Length);
 
-                // [プレイヤー名バイト長] [プレイヤー名] [IPアドレスバイト長] [IPアドレス] の順に結合
-                body = body.Concat(nameLen).Concat(nameByte).Concat(addressLen).Concat(addressByte).ToArray();
+                // [アドレスバイト長] [アドレス] の順に結合
+                body = body.Concat(addressLen).Concat(addressByte).ToArray();
             }
 
             return body;

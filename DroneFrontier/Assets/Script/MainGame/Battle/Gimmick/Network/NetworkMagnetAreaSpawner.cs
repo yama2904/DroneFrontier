@@ -16,13 +16,13 @@ namespace Battle.Gimmick.Network
         private void Start()
         {
             // 受信イベント設定
-            NetworkManager.Singleton.OnUdpReceiveOnMainThread += OnReceive;
+            NetworkManager.OnUdpReceivedOnMainThread += OnReceive;
 
             // シーン上の磁気エリア初期化
             foreach (MagnetArea area in _magnetAreasOnScene)
             {
                 // ホストの場合は発生イベント設定
-                if (NetworkManager.Singleton.IsHost)
+                if (NetworkManager.PeerType == PeerType.Host)
                 {
                     area.OnSpawn += OnSpawn;
                 }
@@ -37,10 +37,10 @@ namespace Battle.Gimmick.Network
         private void OnDestroy()
         {
             // 受信イベント削除
-            NetworkManager.Singleton.OnUdpReceiveOnMainThread -= OnReceive;
+            NetworkManager.OnUdpReceivedOnMainThread -= OnReceive;
 
             // ホストの場合はシーン上の磁気エリアからイベント削除
-            if (NetworkManager.Singleton.IsHost)
+            if (NetworkManager.PeerType == PeerType.Host)
             {
                 foreach (MagnetArea area in _magnetAreasOnScene)
                 {
@@ -80,7 +80,7 @@ namespace Battle.Gimmick.Network
         private void OnSpawn(object sender, EventArgs e)
         {
             // ホストのみ処理
-            if (NetworkManager.Singleton.IsClient) return;
+            if (NetworkManager.PeerType == PeerType.Client) return;
 
             // 発生したエリア情報をクライアントへ送信
             MagnetArea area = sender as MagnetArea;
@@ -89,7 +89,7 @@ namespace Battle.Gimmick.Network
                                                              area.CurrentAreaSize, 
                                                              area.gameObject.transform.position, 
                                                              area.gameObject.transform.rotation);
-            NetworkManager.Singleton.SendUdpToAll(packet);
+            NetworkManager.SendUdpToAll(packet);
         }
 
         /// <summary>
@@ -100,7 +100,7 @@ namespace Battle.Gimmick.Network
         private void OnDespawn(object sender, EventArgs e)
         {
             // クライアントのみ処理
-            if (NetworkManager.Singleton.IsHost) return;
+            if (NetworkManager.PeerType == PeerType.Host) return;
 
             // 消滅した磁気エリア削除
             MagnetArea area = sender as MagnetArea;

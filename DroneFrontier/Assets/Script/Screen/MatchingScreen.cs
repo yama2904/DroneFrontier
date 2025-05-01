@@ -1,4 +1,5 @@
-﻿using Common;
+﻿using Battle.Network;
+using Common;
 using Cysharp.Threading.Tasks;
 using Network;
 using System;
@@ -119,6 +120,9 @@ namespace Screen
 
             // 名前入力欄で初期化
             ShowPlayerList(false);
+
+            NetworkManager.Initialize();
+            NetworkBattleManager.Initialize();
         }
 
         /// <summary>
@@ -133,13 +137,28 @@ namespace Screen
             _playerName = _inputField.text;
 
             // 通信イベント設定
-            NetworkManager.Singleton.OnConnect += OnConnect;
-            NetworkManager.Singleton.OnDisconnect += OnDisconnect;
-            NetworkManager.Singleton.OnDiscoveryCompleted += OnDiscoveryComplete;
+            NetworkManager.OnConnected += OnConnected;
+            NetworkManager.OnDisconnected += OnDisconnected;
+            NetworkManager.OnDiscoveryCompleted += OnDiscoveryCompleted;
+
+            // SE再生
+            SoundManager.Play(SoundManager.SE.Select);
 
             // ホストとして通信を開始
-            NetworkManager.Singleton.StartHost(_playerName).Forget();
-            _isDiscovery = true;
+            UniTask.Void(async () =>
+            {
+                try
+                {
+                    _isDiscovery = true;
+                    await NetworkManager.StartAccept(_playerName);
+                }
+                catch (NetworkException ex)
+                {
+                    _errMsgCanvas.enabled = true;
+                    _errMsgText.text = ex.Message;
+                    _isError = true;
+                }
+            });
 
             // プレイヤー一覧へ移動
             UpdatePlayerNames();
@@ -164,9 +183,9 @@ namespace Screen
             UpdatePlayerNames();
 
             // 通信イベント設定
-            NetworkManager.Singleton.OnConnect += OnConnect;
-            NetworkManager.Singleton.OnDisconnect += OnDisconnect;
-            NetworkManager.Singleton.OnDiscoveryCompleted += OnDiscoveryComplete;
+            NetworkManager.OnConnected += OnConnected;
+            NetworkManager.OnDisconnected += OnDisconnected;
+            NetworkManager.OnDiscoveryCompleted += OnDiscoveryCompleted;
 
             // クライアントとして通信を開始
             UniTask.Void(async () =>
@@ -174,7 +193,7 @@ namespace Screen
                 try
                 {
                     _isDiscovery = true;
-                    await NetworkManager.Singleton.StartClient(_playerName);
+                    await NetworkManager.StartDiscovery(_playerName);
                 }
                 catch (NetworkException ex)
                 {
@@ -194,7 +213,7 @@ namespace Screen
         public void ClickOk()
         {
             // プレイヤー探索終了
-            NetworkManager.Singleton.StopDiscovery();
+            NetworkManager.StartGame();
         }
 
         /// <summary>
@@ -208,10 +227,10 @@ namespace Screen
             // 探索中の場合は切断
             if (_isDiscovery)
             {
-                NetworkManager.Singleton.Disconnect();
-                NetworkManager.Singleton.OnConnect -= OnConnect;
-                NetworkManager.Singleton.OnDisconnect -= OnDisconnect;
-                NetworkManager.Singleton.OnDiscoveryCompleted -= OnDiscoveryComplete;
+                NetworkManager.Disconnect();
+                NetworkManager.OnConnected -= OnConnected;
+                NetworkManager.OnDisconnected -= OnDisconnected;
+                NetworkManager.OnDiscoveryCompleted -= OnDiscoveryCompleted;
                 _isDiscovery = false;
             }
 
@@ -237,10 +256,10 @@ namespace Screen
             SoundManager.Play(SoundManager.SE.Cancel);
 
             // 切断
-            NetworkManager.Singleton.Disconnect();
-            NetworkManager.Singleton.OnConnect -= OnConnect;
-            NetworkManager.Singleton.OnDisconnect -= OnDisconnect;
-            NetworkManager.Singleton.OnDiscoveryCompleted -= OnDiscoveryComplete;
+            NetworkManager.Disconnect();
+            NetworkManager.OnConnected -= OnConnected;
+            NetworkManager.OnDisconnected -= OnDisconnected;
+            NetworkManager.OnDiscoveryCompleted -= OnDiscoveryCompleted;
             _isDiscovery = false;
 
             // 決定ボタン非表示
@@ -258,27 +277,32 @@ namespace Screen
                 SoundManager.Play(SoundManager.SE.Select);
 
                 // 通信イベント削除
-                NetworkManager.Singleton.OnConnect -= OnConnect;
-                NetworkManager.Singleton.OnDisconnect -= OnDisconnect;
-                NetworkManager.Singleton.OnDiscoveryCompleted -= OnDiscoveryComplete;
+                NetworkManager.OnConnected -= OnConnected;
+                NetworkManager.OnDisconnected -= OnDisconnected;
+                NetworkManager.OnDiscoveryCompleted -= OnDiscoveryCompleted;
                 _isDiscovery = false;
 
                 // 初期化して前画面へ戻る
-                Initialize();
                 PreScreen = null;
                 SelectedButton = ButtonType.Back;
                 OnButtonClick(this, EventArgs.Empty);
             }
         }
 
+        private void OnEnable()
+        {
+            Initialize();
+        }
+
         /// <summary>
         /// 通信接続イベント
         /// </summary>
         /// <param name="player">通信相手のプレイヤー名</param>
-        private void OnConnect(string player)
+        /// <param name="type">接続したプレイヤーのホスト/クライアント種別</param>
+        private void OnConnected(string player, PeerType type)
         {
             // ホストの場合は決定ボタン表示
-            if (NetworkManager.Singleton.IsHost)
+            if (NetworkManager.PeerType == PeerType.Host)
             {
                 if (!_okButton.activeSelf)
                     _okButton.SetActive(true);
@@ -300,17 +324,17 @@ namespace Screen
         /// プレイヤー切断イベント
         /// </summary>
         /// <param name="name">切断したプレイヤー名</param>
-        /// <param name="isHost">切断したプレイヤーがホストであるか</param>
-        private void OnDisconnect(string name, bool isHost)
+        /// <param name="type">切断したプレイヤーのホスト/クライアント種別</param>
+        private void OnDisconnected(string name, PeerType type)
         {
             // ホストかつ、参加者が0人になった場合は決定ボタン非表示
-            if (NetworkManager.Singleton.IsHost && NetworkManager.Singleton.PlayerCount <= 1)
+            if (NetworkManager.PeerType == PeerType.Host && NetworkManager.PlayerCount <= 1)
             {
                 _okButton.SetActive(false);
             }
 
             // ホストから切断された場合はエラーメッセージ表示
-            if (isHost)
+            if (type == PeerType.Host)
             {
                 // エラーメッセージ表示
                 _errMsgCanvas.enabled = true;
@@ -328,17 +352,15 @@ namespace Screen
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void OnDiscoveryComplete(object sender, EventArgs e)
+        private void OnDiscoveryCompleted(object sender, EventArgs e)
         {
             // イベント削除
-            NetworkManager.Singleton.OnConnect -= OnConnect;
-            NetworkManager.Singleton.OnDisconnect -= OnDisconnect;
-            NetworkManager.Singleton.OnDiscoveryCompleted -= OnDiscoveryComplete;
+            NetworkManager.OnConnected -= OnConnected;
+            NetworkManager.OnDisconnected -= OnDisconnected;
+            NetworkManager.OnDiscoveryCompleted -= OnDiscoveryCompleted;
 
             // 探索終了
             _isDiscovery = false;
-
-            NetworkObjectSpawner.Initialize();
 
             // ボタン選択イベント発火
             SoundManager.Play(SoundManager.SE.Select);
@@ -372,9 +394,9 @@ namespace Screen
             _4pText.color = _nonPlayerTextColor;
 
             // プレイヤー名更新
-            for (int i = 0; i < NetworkManager.Singleton.PlayerCount; i++)
+            for (int i = 0; i < NetworkManager.PlayerCount; i++)
             {
-                string player = NetworkManager.Singleton.PlayerNames[i];
+                string player = NetworkManager.PlayerNames[i];
 
                 switch (i)
                 {

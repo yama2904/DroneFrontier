@@ -1,4 +1,6 @@
 ﻿using Newtonsoft.Json;
+using System.Drawing;
+using System.Net;
 using System.Text;
 
 namespace Network
@@ -30,6 +32,32 @@ namespace Network
         {
             string json = Encoding.UTF8.GetString(bytes);
             return JsonConvert.DeserializeObject<T>(json, _settings);
+        }
+
+        /// <summary>
+        /// IPエンドポイントを文字列へ変換する
+        /// </summary>
+        /// <param name="ep">文字列へ変換するエンドポイント</param>
+        /// <returns>変換した文字列</returns>
+        public static string ConvertToString(IPEndPoint ep)
+        {
+            string ip = ep.Address.ToString();
+            string port = ep.Port.ToString();
+            return $"{ip}:{port}";
+        }
+
+        /// <summary>
+        /// 文字列変換されたIPエンドポイントをIPEndPointクラスへ変換する
+        /// </summary>
+        /// <param name="ep">IPEndPointクラスへ変換する文字列</param>
+        /// <returns>変換したIPEndPoint</returns>
+        public static IPEndPoint ConvertToIPEndPoint(string ep)
+        {
+            string[] splitEp = ep.Split(":");
+            IPAddress ip = IPAddress.Parse(splitEp[0]);
+            int port = int.Parse(splitEp[1]);
+
+            return new IPEndPoint(ip, port);
         }
     }
 }

@@ -49,6 +49,11 @@ namespace Drone.Battle.Network
         public List<GameObject> NotRadarableList { get; } = new List<GameObject>();
 
         /// <summary>
+        /// リスポーンしたか
+        /// </summary>
+        public bool IsRespawn { get; set; } = false;
+
+        /// <summary>
         /// ドローン破壊イベント
         /// </summary>
         public event EventHandler OnDroneDestroy;
@@ -125,7 +130,8 @@ namespace Drone.Battle.Network
                 { "MainWeapon", MainWeapon.GetAddressKey() },
                 { "SubWeapon", SubWeapon.GetAddressKey() },
                 { "Stock", StockNum },
-                { "enabled", enabled }
+                { "enabled", enabled },
+                { "IsRespawn", IsRespawn }
             };
         }
 
@@ -137,6 +143,7 @@ namespace Drone.Battle.Network
             SubWeapon = Addressables.InstantiateAsync((string)dic["SubWeapon"]).WaitForCompletion().GetComponent<IWeapon>();
             _stockNum = Convert.ToInt32(dic["Stock"]);
             enabled = Convert.ToBoolean(dic["enabled"]);
+            IsRespawn = Convert.ToBoolean(dic["IsRespawn"]);
         }
 
         public override void InitializeSpawn()
@@ -180,7 +187,7 @@ namespace Drone.Battle.Network
             _searchComponent.OnObjectStay += OnObjectSearch;
 
             // イベント受信イベント設定
-            NetworkManager.Singleton.OnUdpReceiveOnMainThread += OnReceiveUdpOfEvent;
+            NetworkManager.OnUdpReceivedOnMainThread += OnReceiveUdpOfEvent;
 
             // 自プレイヤーの場合は定期的にステータス同期
             if (IsControl)
@@ -191,7 +198,7 @@ namespace Drone.Battle.Network
                     {
                         await UniTask.Delay(_syncStatusInterval * 1000, ignoreTimeScale: true, cancellationToken: _cancel.Token);
                         float moveSpeed = _moveComponent.MoveSpeed;
-                        NetworkManager.Singleton.SendUdpToAll(new DroneStatusPacket(HP, moveSpeed));
+                        NetworkManager.SendUdpToAll(new DroneStatusPacket(HP, moveSpeed));
                     }
                 });
             }
@@ -203,6 +210,12 @@ namespace Drone.Battle.Network
             _weaponComponent.Initialize();
             _barrierComponent.Initialize();
             GetComponent<DroneStatusComponent>().IsPlayer = IsControl;
+
+            // リスポーンした場合は復活SE再生
+            if (IsRespawn)
+            {
+                _soundComponent.Play(SoundManager.SE.Respawn);
+            }
         }
 
         public void Damage(float value)
@@ -291,7 +304,7 @@ namespace Drone.Battle.Network
 
                 // アクション情報送信
                 if (sendPacket)
-                    NetworkManager.Singleton.SendUdpToAll(new DroneActionPacket(startLockOn, stopLockOn, useItem1, useItem2));
+                    NetworkManager.SendUdpToAll(new DroneActionPacket(startLockOn, stopLockOn, useItem1, useItem2));
             }
         }
 
@@ -323,7 +336,7 @@ namespace Drone.Battle.Network
             _barrierComponent.OnBarrierBreak -= OnBarrierBreak;
             _barrierComponent.OnBarrierResurrect -= OnBarrierResurrect;
             _searchComponent.OnObjectStay -= OnObjectSearch;
-            NetworkManager.Singleton.OnUdpReceiveOnMainThread -= OnReceiveUdpOfEvent;
+            NetworkManager.OnUdpReceivedOnMainThread -= OnReceiveUdpOfEvent;
 
             // キャンセル発行
             _cancel.Cancel();
@@ -336,7 +349,7 @@ namespace Drone.Battle.Network
         /// <param name="e">イベント引数</param>
         private void OnBarrierBreak(object sender, EventArgs e)
         {
-            NetworkManager.Singleton.SendUdpToAll(new DroneEventPacket(Name, true, false, false));
+            NetworkManager.SendUdpToAll(new DroneEventPacket(Name, true, false, false));
         }
 
         /// <summary>
@@ -346,7 +359,7 @@ namespace Drone.Battle.Network
         /// <param name="e">イベント引数</param>
         private void OnBarrierResurrect(object sender, EventArgs e)
         {
-            NetworkManager.Singleton.SendUdpToAll(new DroneEventPacket(Name, false, true, false));
+            NetworkManager.SendUdpToAll(new DroneEventPacket(Name, false, true, false));
         }
 
         /// <summary>
@@ -370,7 +383,7 @@ namespace Drone.Battle.Network
                     if (_itemComponent.SetItem(item.DroneItem))
                     {
                         // 取得アイテム情報送信
-                        NetworkManager.Singleton.SendUdpToAll(new GetItemPacket(item.DroneItem));
+                        NetworkManager.SendUdpToAll(new GetItemPacket(item.DroneItem));
 
                         // 取得したアイテム削除
                         Destroy(other.gameObject);
@@ -486,7 +499,7 @@ namespace Drone.Battle.Network
             _rigidbody.velocity = Vector3.zero;
 
             // 死亡情報送信
-            NetworkManager.Singleton.SendUdpToAll(new DroneEventPacket(Name, false, false, true));
+            NetworkManager.SendUdpToAll(new DroneEventPacket(Name, false, false, true));
 
             // コンポーネント停止
             _moveComponent.enabled = false;

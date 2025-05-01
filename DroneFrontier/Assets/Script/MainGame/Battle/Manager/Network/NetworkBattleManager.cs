@@ -115,6 +115,13 @@ namespace Battle.Network
         /// </summary>
         private bool _isError = false;
 
+        public static void Initialize()
+        {
+            PlayerList.Clear();
+            IsItemSpawn = true;
+            IsConfig = false;
+        }
+
         /// <summary>
         /// 設定ボタン選択
         /// </summary>
@@ -139,7 +146,7 @@ namespace Battle.Network
             }
 
             // イベント設定
-            NetworkManager.Singleton.OnDisconnect += OnDisconnect;
+            NetworkManager.OnDisconnected += OnDisconnect;
             _config.OnButtonClick += OnConfigBackClick;
 
             // Config初期化
@@ -161,7 +168,7 @@ namespace Battle.Network
             UnityEngine.Random.InitState(seed);
 
             // ドローンをスポーン
-            if (NetworkManager.Singleton.IsHost)
+            if (NetworkManager.PeerType == PeerType.Host)
             {
                 foreach (var player in PlayerList)
                 {
@@ -190,7 +197,7 @@ namespace Battle.Network
                     var drones = GameObject.FindGameObjectsWithTag(TagNameConst.PLAYER).Select(x => x.GetComponent<NetworkBattleDrone>()).ToArray();
 
                     // 全プレイヤー分生成されていない場合は待機
-                    if (drones.Length < NetworkManager.Singleton.PlayerCount)
+                    if (drones.Length < NetworkManager.PlayerCount)
                     {
                         await UniTask.Delay(100);
                         continue;
@@ -210,7 +217,7 @@ namespace Battle.Network
 
             // 同期してランダムシード値も共有
             object value = await new SyncHandler().SyncValueAsync(seed);
-            if (NetworkManager.Singleton.IsClient)
+            if (NetworkManager.PeerType == PeerType.Client)
             {
                 UnityEngine.Random.InitState(Convert.ToInt32(value));
             }
@@ -278,27 +285,27 @@ namespace Battle.Network
 
             // イベント削除
             _droneSpawnManager.OnDroneDestroy -= OnDroneDestroy;
-            NetworkManager.Singleton.OnDisconnect -= OnDisconnect;
+            NetworkManager.OnDisconnected -= OnDisconnect;
 
-            // プレイヤー情報初期化
-            PlayerList.Clear();
+            // 初期化
+            Initialize();
 
             // キャンセルトークン発行
             _cancelToken.Cancel();
 
             // 切断
-            NetworkManager.Singleton.Disconnect();
+            NetworkManager.Disconnect();
         }
 
         /// <summary>
         /// プレイヤー切断イベント
         /// </summary>
         /// <param name="name">切断したプレイヤー名</param>
-        /// <param name="isHost">切断したプレイヤーがホストであるか</param>
-        private async void OnDisconnect(string name, bool isHost)
+        /// <param name="type">切断したプレイヤーのホスト/クライアント種別</param>
+        private async void OnDisconnect(string name, PeerType type)
         {
             // ホストから切断、又はプレイヤーが自分のみの場合はエラーメッセージ表示
-            if (isHost || NetworkManager.Singleton.PlayerCount == 1)
+            if (type == PeerType.Host || NetworkManager.PlayerCount == 1)
             {
                 _errMsgCanvas.enabled = true;
 
@@ -421,7 +428,7 @@ namespace Battle.Network
         /// </summary>
         private void SendFinishGame()
         {
-            if (NetworkManager.Singleton.IsClient) return;
+            if (NetworkManager.PeerType == PeerType.Client) return;
 
             // [残ストック数 DESC, 破壊された時間 DESC]でソートしてランキング設定
             string[] ranking = PlayerList.OrderByDescending(x => x.StockNum)
@@ -444,7 +451,7 @@ namespace Battle.Network
             }
 
             // 切断イベント削除
-            NetworkManager.Singleton.OnDisconnect -= OnDisconnect;
+            NetworkManager.OnDisconnected -= OnDisconnect;
 
             // キャンセルトークン発行
             _cancelToken.Cancel();
@@ -453,13 +460,14 @@ namespace Battle.Network
             _finishAnimator.SetBool("SetFinish", true);
 
             // ゲーム終了SE再生
+            await UniTask.Delay(TimeSpan.FromSeconds(1));
             SoundManager.Play(SoundManager.SE.Finish);
 
             // 3秒後リザルト画面に移動
             await UniTask.Delay(TimeSpan.FromSeconds(3));
 
             // 通信切断
-            NetworkManager.Singleton.Disconnect();
+            NetworkManager.Disconnect();
 
             // リザルト画面へ移動
             ResultSceneManager.SetRank(ranking);

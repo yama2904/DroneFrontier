@@ -2,7 +2,7 @@ using System;
 
 namespace Network.Udp
 {
-    public class FrameRatePacket : BasePacket
+    internal class FrameRatePacket : BasePacket
     {
         /// <summary>
         /// フレームレート

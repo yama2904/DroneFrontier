@@ -252,7 +252,7 @@ namespace Screen.Network
             SoundManager.Play(SoundManager.SE.Select);
 
             // 選択武器送信
-            SendMethod(() => SelectWeapon(NetworkManager.Singleton.MyPlayerName, _selectedWeapon));
+            SendMethod(() => SelectWeapon(NetworkManager.MyPlayerName, _selectedWeapon));
 
             // ボタン非活性
             EnabledButtons(false);
@@ -285,13 +285,13 @@ namespace Screen.Network
             _selectedWeapons.Clear();
 
             // クライアントの場合はアイテムon/off選択不可
-            if (NetworkManager.Singleton.IsClient)
+            if (NetworkManager.PeerType == PeerType.Client)
             {
                 _itemCanvas.enabled = false;
             }
 
             // 通信イベント設定
-            NetworkManager.Singleton.OnDisconnect += OnDisconnect;
+            NetworkManager.OnDisconnected += OnDisconnect;
         }
 
         /// <summary>
@@ -373,8 +373,8 @@ namespace Screen.Network
             _selectedWeapons.Add(player, weapon);
             
             // 全てのプレイヤーが選択済みの場合はゲーム開始
-            if (_selectedWeapons.Count == NetworkManager.Singleton.PlayerCount
-                && NetworkManager.Singleton.IsHost)
+            if (_selectedWeapons.Count == NetworkManager.PlayerCount
+                && NetworkManager.PeerType == PeerType.Host)
             {
                 // NetworkBattleManagerにプレイヤー情報送信
                 foreach (DictionaryEntry entity in _selectedWeapons)
@@ -383,7 +383,7 @@ namespace Screen.Network
                     {
                         Name = entity.Key as string,
                         Weapon = (WeaponType)entity.Value,
-                        IsControl = name == NetworkManager.Singleton.MyPlayerName
+                        IsControl = name == NetworkManager.MyPlayerName
                     };
                     NetworkBattleManager.PlayerList.Add(data);
                 }
@@ -404,7 +404,7 @@ namespace Screen.Network
         private void StartGame()
         {
             // イベント削除
-            NetworkManager.Singleton.OnDisconnect -= OnDisconnect;
+            NetworkManager.OnDisconnected -= OnDisconnect;
 
             // 次の画面へ遷移
             SelectedButton = ButtonType.Ok;
@@ -415,14 +415,14 @@ namespace Screen.Network
         /// プレイヤー切断イベント
         /// </summary>
         /// <param name="name">切断したプレイヤー名</param>
-        /// <param name="isHost">切断したプレイヤーがホストであるか</param>
-        private void OnDisconnect(string name, bool isHost)
+        /// <param name="type">切断したプレイヤーのホスト/クライアント種別</param>
+        private void OnDisconnect(string name, PeerType type)
         {
             // イベント削除
-            NetworkManager.Singleton.OnDisconnect -= OnDisconnect;
+            NetworkManager.OnDisconnected -= OnDisconnect;
 
             // 通信切断
-            NetworkManager.Singleton.Disconnect();
+            NetworkManager.Disconnect();
 
             // エラーメッセージ表示
             _errMsgCanvas.enabled = true;

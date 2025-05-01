@@ -1,9 +1,5 @@
-タワー周辺にオブジェクトある
 割合のSerializeFieldをRange
-NetworkManager見直し
-　→Connecter、Receiver、Senderに分けれる？
 ステータス同期
 バトルモードのWatcher
-ネットワーク系のまとめクラス
 武器選択情報の送信手順見直し
-pCube7
+マッチング時にゲームモード考慮

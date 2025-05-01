@@ -2,7 +2,7 @@ using System.Text;
 
 namespace Network.Udp
 {
-    public class DestroyPacket : BasePacket
+    internal class DestroyPacket : BasePacket
     {
         /// <summary>
         /// 削除するオブジェクトの共有ID

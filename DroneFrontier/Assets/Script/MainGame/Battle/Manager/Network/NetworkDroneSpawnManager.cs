@@ -110,12 +110,10 @@ namespace Battle.Network
                 // リスポーン
                 respawnDrone = CreateDrone(initData.pos.position, initData.pos.rotation);
                 respawnDrone.enabled = true;
+                respawnDrone.IsRespawn = true;
                 IWeapon main = WeaponCreater.CreateWeapon(WeaponType.Gatling);
                 IWeapon sub = WeaponCreater.CreateWeapon(initData.weapon);
                 respawnDrone.Initialize(drone.Name, main, sub, drone.StockNum - 1);
-
-                // 復活SE再生
-                respawnDrone.GetComponent<DroneSoundComponent>().Play(SoundManager.SE.Respawn);
             }
 
             // イベント発火

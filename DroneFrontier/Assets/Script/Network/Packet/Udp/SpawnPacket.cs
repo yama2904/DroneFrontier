@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Network.Udp
 {
-    public class SpawnPacket : BasePacket
+    internal class SpawnPacket : BasePacket
     {
         public string AddressKey { get; private set; } = string.Empty;
 

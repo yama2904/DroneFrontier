@@ -1,6 +1,6 @@
 ﻿namespace Network.Udp
 {
-    public class SimpleSyncPacket : BasePacket
+    internal class SimpleSyncPacket : BasePacket
     {
         public object Value { get; private set; } = new object();
 

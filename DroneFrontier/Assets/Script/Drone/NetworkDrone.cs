@@ -106,7 +106,7 @@ namespace Drone.Network
             _boostComponent.Initialize();
 
             // プレイヤー名を基に操作するか識別
-            if (Name == NetworkManager.Singleton.MyPlayerName)
+            if (Name == NetworkManager.MyPlayerName)
             {
                 IsControl = true;
             }
@@ -118,7 +118,7 @@ namespace Drone.Network
                 _canvas.enabled = false;
 
                 // 受信イベント設定
-                NetworkManager.Singleton.OnUdpReceiveOnMainThread += OnReceiveUdpOfOtherPlayer;
+                NetworkManager.OnUdpReceivedOnMainThread += OnReceiveUdpOfOtherPlayer;
 
                 // 補間をオフにしないと瞬間移動する
                 _rigidbody.interpolation = RigidbodyInterpolation.None;
@@ -140,13 +140,13 @@ namespace Drone.Network
                 if (_input.DownedKeys.Contains(KeyCode.Space))
                 {
                     _boostComponent.StartBoost();
-                    NetworkManager.Singleton.SendUdpToAll(new DroneBoostPacket(true, false));
+                    NetworkManager.SendUdpToAll(new DroneBoostPacket(true, false));
                 }
                 // ブースト停止
                 if (_input.UppedKeys.Contains(KeyCode.Space))
                 {
                     _boostComponent.StopBoost();
-                    NetworkManager.Singleton.SendUdpToAll(new DroneBoostPacket(false, true));
+                    NetworkManager.SendUdpToAll(new DroneBoostPacket(false, true));
                 }
 
                 // 入力情報更新
@@ -208,7 +208,7 @@ namespace Drone.Network
 
             if (_isControl)
             {
-                NetworkManager.Singleton.SendUdpToAll(new InputPacket(_input));
+                NetworkManager.SendUdpToAll(new InputPacket(_input));
             }
         }
 
@@ -218,7 +218,7 @@ namespace Drone.Network
 
             // 受信イベント設定
             if (!_isControl)
-                NetworkManager.Singleton.OnUdpReceiveOnMainThread -= OnReceiveUdpOfOtherPlayer;
+                NetworkManager.OnUdpReceivedOnMainThread -= OnReceiveUdpOfOtherPlayer;
         }
 
         /// <summary>

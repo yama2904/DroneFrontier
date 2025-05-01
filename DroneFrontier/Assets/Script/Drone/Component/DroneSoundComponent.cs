@@ -9,7 +9,7 @@ namespace Drone
         /// <summary>
         /// 同一SEの最大同時再生可能数
         /// </summary>
-        private const int MAX_SAME_PLAY = 2;
+        private const int MAX_SAME_PLAY = 4;
 
         /// <summary>
         /// AudioSource管理クラス

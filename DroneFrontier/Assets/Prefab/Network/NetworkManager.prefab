@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 8806399013098973744}
   - component: {fileID: 7982086452281279244}
   m_Layer: 0
-  m_Name: MyNetworkManager
+  m_Name: NetworkManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -44,3 +44,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91fa57b1651119d41a009cf85f1d8f33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _spawner: {fileID: 85633636988470527, guid: af6bbc2d34b5ecf4f9fd7f2e1e6038d0, type: 3}
+  _delayMonitor: {fileID: 5199215711085384129, guid: d42ca89928bcdd347a5df433d8103686,
+    type: 3}

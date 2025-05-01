@@ -337,7 +337,7 @@ namespace Battle.Drone
                 }
 
                 // ターゲットロックオン中は一定距離まで近づくと離れる
-                float distance = SubWeapon.GetType() == typeof(ShotgunWeapon) ? 100f : 250f;
+                float distance = SubWeapon is ShotgunWeapon ? 100f : 250f;
                 if (Vector3.Distance(_transform.position, _lockOnComponent.Target.transform.position) < distance)
                 {
                     _moveDir = BitFlagUtil.UpdateFlag(_moveDir, (int)DroneMoveComponent.Direction.Forward, false);

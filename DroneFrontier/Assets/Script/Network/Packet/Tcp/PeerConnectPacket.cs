@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System;
+using System.Linq;
+using System.Text;
 
 namespace Network.Tcp
 {
@@ -13,6 +15,11 @@ namespace Network.Tcp
         public string Name { get; private set; } = string.Empty;
 
         /// <summary>
+        /// UDPローカルポート
+        /// </summary>
+        public int UdpPort { get; private set; } = 0;
+
+        /// <summary>
         /// コンストラクタ
         /// </summary>
         public PeerConnectPacket() { }
@@ -21,19 +28,30 @@ namespace Network.Tcp
         /// コンストラクタ
         /// </summary>
         /// <param name="name">プレイヤー名</param>
-        public PeerConnectPacket(string name)
+        /// <param name="port">UDPローカルポート</param>
+        public PeerConnectPacket(string name, int port)
         {
             Name = name;
+            UdpPort = port;
         }
 
         protected override BasePacket ParseBody(byte[] body)
         {
-            return new PeerConnectPacket(Encoding.UTF8.GetString(body));
+            int offset = 0;
+
+            int port = BitConverter.ToInt32(body, offset);
+            offset += sizeof(int);
+
+            string name = Encoding.UTF8.GetString(body, offset, body.Length - offset);
+
+            return new PeerConnectPacket(name, port);
         }
 
         protected override byte[] ConvertToPacketBody()
         {
-            return Encoding.UTF8.GetBytes(Name);
+            byte[] port = BitConverter.GetBytes(UdpPort);
+            byte[] name = Encoding.UTF8.GetBytes(Name);
+            return port.Concat(name).ToArray();
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Network.Udp
 {
-    public class SendMethodPacket : BasePacket
+    internal class SendMethodPacket : BasePacket
     {
         /// <summary>
         /// 実行させるメソッドを持つクラス名

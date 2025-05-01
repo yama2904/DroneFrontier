@@ -2,7 +2,7 @@ using System;
 
 namespace Network.Udp
 {
-    public class FrameSyncPacket : BasePacket
+    internal class FrameSyncPacket : BasePacket
     {
         public float TotalSeconds { get; private set; } = 0;
 
