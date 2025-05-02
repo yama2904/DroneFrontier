@@ -108,6 +108,11 @@ namespace Network
         /// </summary>
         private static CancellationTokenSource _disconnectCancel = new CancellationTokenSource();
 
+        /// <summary>
+        /// オブジェクト生成済みであるか
+        /// </summary>
+        private static bool _isCreated = false;
+
         [SerializeField]
         private NetworkObjectSpawner _spawner;
 
@@ -350,6 +355,12 @@ namespace Network
 
         private void Awake()
         {
+            if (_isCreated)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            _isCreated = true;
             DontDestroyOnLoad(gameObject);
 
             // スポナー生成

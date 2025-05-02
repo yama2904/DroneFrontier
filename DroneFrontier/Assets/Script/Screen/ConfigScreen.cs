@@ -120,6 +120,7 @@ namespace Screen
         /// </summary>
         public void ClickBack()
         {
+            ConfigManager.WriteConfig();
             SoundManager.Play(SoundManager.SE.Cancel);
             SelectedButton = ButtonType.Back;
             OnButtonClick(this, EventArgs.Empty);

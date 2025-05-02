@@ -325,6 +325,11 @@ namespace Common
         private static object _lock = new object();
 
         /// <summary>
+        /// オブジェクト生成済みであるか
+        /// </summary>
+        private static bool _isCreated = false;
+
+        /// <summary>
         /// 指定したBGMのAudioClipを取得
         /// </summary>
         public static AudioClip GetAudioClip(BGM bgm)
@@ -648,6 +653,12 @@ namespace Common
 
         private void Awake()
         {
+            if (_isCreated)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            _isCreated = true;
             DontDestroyOnLoad(gameObject);
 
             #region SoundLoad

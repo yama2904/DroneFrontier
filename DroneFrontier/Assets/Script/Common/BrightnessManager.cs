@@ -20,26 +20,6 @@ namespace Common
         private const float INIT_BRIGHTNESS = 1f;
 
         /// <summary>
-        /// 明るさ調整用画像
-        /// </summary>
-        private static Image _maskImage = null;
-
-        /// <summary>
-        /// フェードイン/フェードアウト時の毎フレーム明るさ増減量
-        /// </summary>
-        private static float _fadeValue = 0;
-
-        /// <summary>
-        /// フェードイン中であるか
-        /// </summary>
-        private static bool _isFadeIn = false;
-
-        /// <summary>
-        /// フェードアウト中であるか
-        /// </summary>
-        private static bool _isFadeOut = false;
-
-        /// <summary>
         /// 明るさを0～1で調整<br/>
         /// 0→1へ近づくほど明るくなる
         /// </summary>
@@ -61,6 +41,31 @@ namespace Common
             }
         }
         private static float _brightness = INIT_BRIGHTNESS;
+
+        /// <summary>
+        /// 明るさ調整用画像
+        /// </summary>
+        private static Image _maskImage = null;
+
+        /// <summary>
+        /// フェードイン/フェードアウト時の毎フレーム明るさ増減量
+        /// </summary>
+        private static float _fadeValue = 0;
+
+        /// <summary>
+        /// フェードイン中であるか
+        /// </summary>
+        private static bool _isFadeIn = false;
+
+        /// <summary>
+        /// フェードアウト中であるか
+        /// </summary>
+        private static bool _isFadeOut = false;
+
+        /// <summary>
+        /// オブジェクト生成済みであるか
+        /// </summary>
+        private static bool _isCreated = false;
 
         /// <summary>
         /// フェードインを開始して徐々に明るくする
@@ -102,6 +107,12 @@ namespace Common
 
         private void Awake()
         {
+            if (_isCreated)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            _isCreated = true;
             DontDestroyOnLoad(gameObject);
 
             _maskImage = transform.Find("Canvas/Panel").GetComponent<Image>();

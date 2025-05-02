@@ -6,6 +6,7 @@ public class TitleSceneManager : MonoBehaviour
 {
     private void Start()
     {
+        ConfigManager.ReadConfig();
         SoundManager.Play(SoundManager.BGM.Home, 0.8f);
     }
 

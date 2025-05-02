@@ -37,6 +37,11 @@ namespace Common
         private static float _cameraSpeed = INIT_CAMERA_SPEED;
 
         /// <summary>
+        /// オブジェクト生成済みであるか
+        /// </summary>
+        private static bool _isCreated = false;
+
+        /// <summary>
         /// リバースモードの設定
         /// </summary>
         /// <param name="x">X軸</param>
@@ -49,6 +54,12 @@ namespace Common
 
         private void Start()
         {
+            if (_isCreated)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            _isCreated = true;
             DontDestroyOnLoad(gameObject);
         }
     }
