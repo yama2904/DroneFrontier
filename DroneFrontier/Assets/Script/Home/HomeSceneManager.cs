@@ -2,6 +2,7 @@
 using Screen;
 using Screen.Network;
 using System;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -49,15 +50,6 @@ public class HomeSceneManager : MonoBehaviour
 
     private void Start()
     {
-        // 画面初期化
-        _config.Initialize();
-        _help.Initialize();
-        _soloMultiSelect.Initialize();
-        _weaponSelect.Initialize();
-        _cpuSelect.Initialize();
-        _matching.Initialize();
-        _networkWeaponSelect.Initialize();
-
         // 設定画面のボタンイベント設定
         _config.OnButtonClick += OnButtonClickOfConfig;
 
@@ -96,7 +88,9 @@ public class HomeSceneManager : MonoBehaviour
         SoundManager.Play(SoundManager.SE.Select);
         _selectMode = GameMode.Battle;
         _gameModeSelectUI.SetActive(false);
-        _soloMultiSelect.gameObject.SetActive(true);
+
+        _soloMultiSelect.Initialize();
+        _soloMultiSelect.Show();
     }
 
     /// <summary>
@@ -106,11 +100,14 @@ public class HomeSceneManager : MonoBehaviour
     {
         SoundManager.Play(SoundManager.SE.Select);
         _selectMode = GameMode.Rece;
-        _matching.PreScreen = _gameModeSelectUI;
-        _matching.GameMode = _selectMode.ToString();
-        _matching.gameObject.SetActive(true);
+
         _configButton.SetActive(false);
         _helpButton.SetActive(false);
+
+        _matching.Initialize();
+        _matching.PreScreen = _gameModeSelectUI;
+        _matching.GameMode = _selectMode.ToString();
+        _matching.Show();
     }
 
     /// <summary>
@@ -121,7 +118,8 @@ public class HomeSceneManager : MonoBehaviour
         SoundManager.Play(SoundManager.SE.Select);
 
         _gameModeSelectUI.SetActive(false);
-        _config.gameObject.SetActive(true);
+        _config.Initialize();
+        _config.Show();
     }
 
     /// <summary>
@@ -132,7 +130,8 @@ public class HomeSceneManager : MonoBehaviour
         SoundManager.Play(SoundManager.SE.Select);
 
         _gameModeSelectUI.SetActive(false);
-        _help.gameObject.SetActive(true);
+        _help.Initialize();
+        _help.Show();
     }
 
     /// <summary>
@@ -153,7 +152,7 @@ public class HomeSceneManager : MonoBehaviour
     private void OnButtonClickOfConfig(object sender, EventArgs e)
     {
         _gameModeSelectUI.SetActive(true);
-        _config.gameObject.SetActive(false);
+        _config.Hide();
     }
 
     /// <summary>
@@ -164,7 +163,7 @@ public class HomeSceneManager : MonoBehaviour
     private void OnButtonClickOfHelp(object sender, EventArgs e)
     {
         _gameModeSelectUI.SetActive(true);
-        _help.gameObject.SetActive(false);
+        _help.Hide();
     }
 
     /// <summary>
@@ -179,22 +178,24 @@ public class HomeSceneManager : MonoBehaviour
         // ソロモード選択
         if (screen.SelectedButton == SoloMultiSelectScreen.ButtonType.SoloMode)
         {
-            _soloMultiSelect.gameObject.SetActive(false);
-            _weaponSelect.gameObject.SetActive(true);
+            _soloMultiSelect.Hide();
+            _weaponSelect.Initialize();
+            _weaponSelect.Show();
         }
 
         // マルチモード選択
         if (screen.SelectedButton == SoloMultiSelectScreen.ButtonType.MultiMode)
         {
+            _matching.Initialize();
             _matching.PreScreen = _soloMultiSelect.gameObject;
             _matching.GameMode = _selectMode.ToString();
-            _matching.gameObject.SetActive(true);
+            _matching.Show();
         }
 
         // 戻る選択
         if (screen.SelectedButton == SoloMultiSelectScreen.ButtonType.Back)
         {
-            _soloMultiSelect.gameObject.SetActive(false);
+            _soloMultiSelect.Hide();
             _gameModeSelectUI.SetActive(true);
         }
     }
@@ -211,15 +212,16 @@ public class HomeSceneManager : MonoBehaviour
         // 決定選択
         if (screen.SelectedButton == WeaponSelectScreen.ButtonType.Ok)
         {
-            _weaponSelect.gameObject.SetActive(false);
-            _cpuSelect.gameObject.SetActive(true);
+            _weaponSelect.Hide();
+            _cpuSelect.Initialize();
+            _cpuSelect.Show();
         }
 
         // 戻る選択
         if (screen.SelectedButton == WeaponSelectScreen.ButtonType.Back)
         {
-            _weaponSelect.gameObject.SetActive(false);
-            _soloMultiSelect.gameObject.SetActive(true);
+            _weaponSelect.Hide();
+            _soloMultiSelect.Show();
         }
     }
 
@@ -241,8 +243,8 @@ public class HomeSceneManager : MonoBehaviour
         // 戻る選択
         if (screen.SelectedButton == CPUSelectScreen.ButtonType.Back)
         {
-            _cpuSelect.gameObject.SetActive(false);
-            _weaponSelect.gameObject.SetActive(true);
+            _cpuSelect.Hide();
+            _weaponSelect.Show();
         }
     }
 
@@ -258,11 +260,12 @@ public class HomeSceneManager : MonoBehaviour
         // 決定選択
         if (screen.SelectedButton == MatchingScreen.ButtonType.Ok)
         {
-            _matching.gameObject.SetActive(false);
+            _matching.Hide();
 
             if (_selectMode == GameMode.Battle)
             {
-                _networkWeaponSelect.gameObject.SetActive(true);
+                _networkWeaponSelect.Initialize();
+                _networkWeaponSelect.Show();
             }
             else
             {
@@ -273,7 +276,7 @@ public class HomeSceneManager : MonoBehaviour
         // 戻る選択
         if (screen.SelectedButton == MatchingScreen.ButtonType.Back)
         {
-            _matching.gameObject.SetActive(false);
+            _matching.Hide();
 
             if (_selectMode == GameMode.Rece)
             {
@@ -301,8 +304,8 @@ public class HomeSceneManager : MonoBehaviour
         // 戻る選択
         if (screen.SelectedButton == NetworkWeaponSelectScreen.ButtonType.Back)
         {
-            _networkWeaponSelect.gameObject.SetActive(false);
-            _soloMultiSelect.gameObject.SetActive(true);
+            _networkWeaponSelect.Hide();
+            _soloMultiSelect.Show();
         }
     }
 

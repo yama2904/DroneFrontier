@@ -99,21 +99,49 @@ namespace Screen
         #endregion
 
         /// <summary>
-        /// 選択したCPU武器リスト
+        /// 選択したCPU武器
         /// </summary>
-        private List<Weapon> _cpuWeaponList = new List<Weapon>();
+        private List<Weapon> _selectedWeapons = new List<Weapon>();
 
         /// <summary>
-        /// CPU武器選択オブジェクトリスト
+        /// ゲームオブジェクト
         /// </summary>
-        private List<GameObject> _cpuWeaponObjectList = new List<GameObject>();
+        private List<(GameObject line, Button[] buttons)> _objects = new List<(GameObject line, Button[] buttons)>();
 
-        /// <summary>
-        /// 武器ボタンリスト
-        /// </summary>
-        private List<Button[]> _cpuWeaponButtonList = new List<Button[]>();
+        public void Initialize()
+        {
+            _selectedWeapons.Clear();
+            for (int number = 1; number <= _objects.Count; number++)
+            {
+                // 初期選択CPUはショットガンを選択
+                if (number <= INIT_CPU_NUM)
+                {
+                    _objects[number - 1].line.gameObject.SetActive(true);
 
-        public void Initialize() { }
+                    // CPU武器リストに追加
+                    _selectedWeapons.Add(INIT_SELECT_WEAPON);
+
+                    // ボタンをショットガン選択中にする
+                    ChangeButtonsColor(_objects[number - 1].buttons, INIT_SELECT_WEAPON);
+                }
+                else
+                {
+                    // リストを非表示
+                    _objects[number - 1].line.gameObject.SetActive(false);
+                }
+            }
+            _cpuNumText.text = INIT_CPU_NUM.ToString();
+        }
+
+        public void Show()
+        {
+            gameObject.SetActive(true);
+        }
+
+        public void Hide()
+        {
+            gameObject.SetActive(false);
+        }
 
         /// <summary>
         /// CPUの数を増やす
@@ -121,19 +149,19 @@ namespace Screen
         public void ClickNumUp()
         {
             // 上限に達している場合は処理しない
-            if (_cpuWeaponList.Count >= MAX_CPU_NUM) return;
+            if (_selectedWeapons.Count >= MAX_CPU_NUM) return;
 
             // CPU武器リストにショットガンで追加
-            _cpuWeaponList.Add(INIT_SELECT_WEAPON);
+            _selectedWeapons.Add(INIT_SELECT_WEAPON);
 
             // CPU数のテキストを変更
-            _cpuNumText.text = _cpuWeaponList.Count.ToString();
+            _cpuNumText.text = _selectedWeapons.Count.ToString();
 
             // CPU武器リストを1行表示
-            _cpuWeaponObjectList[_cpuWeaponList.Count - 1].SetActive(true);
+            _objects[_selectedWeapons.Count - 1].line.SetActive(true);
 
             // ショットガン選択中にする
-            ChangeButtonsColor(_cpuWeaponButtonList[_cpuWeaponList.Count - 1], INIT_SELECT_WEAPON);
+            ChangeButtonsColor(_objects[_selectedWeapons.Count - 1].buttons, INIT_SELECT_WEAPON);
         }
 
         /// <summary>
@@ -142,16 +170,16 @@ namespace Screen
         public void ClickNumDown()
         {
             // 下限に達している場合は処理しない
-            if (_cpuWeaponList.Count <= MIN_CPU_NUM) return;
+            if (_selectedWeapons.Count <= MIN_CPU_NUM) return;
 
             // CPU武器リストの末端を削除
-            _cpuWeaponList.RemoveAt(_cpuWeaponList.Count - 1);
+            _selectedWeapons.RemoveAt(_selectedWeapons.Count - 1);
 
             // CPU数のテキストを変更
-            _cpuNumText.text = _cpuWeaponList.Count.ToString();
+            _cpuNumText.text = _selectedWeapons.Count.ToString();
 
             // CPU武器リストを1行非表示
-            _cpuWeaponObjectList[_cpuWeaponList.Count].SetActive(false);
+            _objects[_selectedWeapons.Count].line.SetActive(false);
         }
 
         /// <summary>
@@ -161,16 +189,16 @@ namespace Screen
         public void ClickCPUShotgun(int cpuNumber)
         {
             // 同じ武器が選ばれた場合は処理しない
-            if (_cpuWeaponList[cpuNumber - 1] == Weapon.Shotbun) return;
+            if (_selectedWeapons[cpuNumber - 1] == Weapon.Shotbun) return;
 
             // SE再生
             SoundManager.Play(SoundManager.SE.Select);
 
             // 武器更新
-            _cpuWeaponList[cpuNumber - 1] = Weapon.Shotbun;
+            _selectedWeapons[cpuNumber - 1] = Weapon.Shotbun;
 
             // ボタン色変更
-            ChangeButtonsColor(_cpuWeaponButtonList[cpuNumber - 1], Weapon.Shotbun);
+            ChangeButtonsColor(_objects[cpuNumber - 1].buttons, Weapon.Shotbun);
         }
 
         /// <summary>
@@ -180,16 +208,16 @@ namespace Screen
         public void ClickCPUMissile(int cpuNumber)
         {
             // 同じ武器が選ばれた場合は処理しない
-            if (_cpuWeaponList[cpuNumber - 1] == Weapon.Missile) return;
+            if (_selectedWeapons[cpuNumber - 1] == Weapon.Missile) return;
 
             //SE再生
             SoundManager.Play(SoundManager.SE.Select);
 
             // 武器更新
-            _cpuWeaponList[cpuNumber - 1] = Weapon.Missile;
+            _selectedWeapons[cpuNumber - 1] = Weapon.Missile;
 
             // ボタン色変更
-            ChangeButtonsColor(_cpuWeaponButtonList[cpuNumber - 1], Weapon.Missile);
+            ChangeButtonsColor(_objects[cpuNumber - 1].buttons, Weapon.Missile);
         }
 
         /// <summary>
@@ -199,16 +227,16 @@ namespace Screen
         public void ClickCPULaser(int cpuNumber)
         {
             // 同じ武器が選ばれた場合は処理しない
-            if (_cpuWeaponList[cpuNumber - 1] == Weapon.Lazer) return;
+            if (_selectedWeapons[cpuNumber - 1] == Weapon.Lazer) return;
 
             //SE再生
             SoundManager.Play(SoundManager.SE.Select);
 
             // 武器更新
-            _cpuWeaponList[cpuNumber - 1] = Weapon.Lazer;
+            _selectedWeapons[cpuNumber - 1] = Weapon.Lazer;
 
             // ボタン色変更
-            ChangeButtonsColor(_cpuWeaponButtonList[cpuNumber - 1], Weapon.Lazer);
+            ChangeButtonsColor(_objects[cpuNumber - 1].buttons, Weapon.Lazer);
         }
 
         /// <summary>
@@ -217,14 +245,14 @@ namespace Screen
         public void ClickOK()
         {
             // BattleManagerにCPU情報適用
-            for (int i = 0; i < _cpuWeaponList.Count; i++)
+            for (int i = 0; i < _selectedWeapons.Count; i++)
             {
                 BattleManager.CpuData cpu = new BattleManager.CpuData
                 {
                     Name = "CPU" + i
                 };
 
-                switch (_cpuWeaponList[i])
+                switch (_selectedWeapons[i])
                 {
                     case Weapon.Shotbun:
                         cpu.Weapon = WeaponType.Shotgun;
@@ -263,49 +291,33 @@ namespace Screen
             OnButtonClick(this, EventArgs.Empty);
         }
 
-        private void Start()
+        private void Awake()
         {
             // CPU数の表示初期化
             _cpuNumText.text = INIT_CPU_NUM.ToString();
 
             // List1、List2...で子オブジェクトを検索して取得
-            int num = 1;
+            int number = 1;
             while (true)
             {
-                Transform weaponObject = _cpuListObject.transform.Find("List" + num);
+                Transform weaponObject = _cpuListObject.transform.Find("List" + number);
 
                 // オブジェクトが存在しない場合は終了
                 if (weaponObject == null) break;
-
-                // オブジェクトリストに追加
-                _cpuWeaponObjectList.Add(weaponObject.gameObject);
 
                 // ボタンリストに追加
                 Button[] buttons = new Button[(int)Weapon.None];
                 buttons[(int)Weapon.Shotbun] = weaponObject.Find("SelectShotgunButton").GetComponent<Button>();
                 buttons[(int)Weapon.Missile] = weaponObject.Find("SelectMissileButton").GetComponent<Button>();
                 buttons[(int)Weapon.Lazer] = weaponObject.Find("SelectLaserButton").GetComponent<Button>();
-                _cpuWeaponButtonList.Add(buttons);
 
-                // 初期選択CPU数を超える場合
-                if (num > INIT_CPU_NUM)
-                {
-                    // リストを非表示
-                    weaponObject.gameObject.SetActive(false);
-                }
-                else
-                {
-                    // 初期CPU数に達していない場合、ショットガンを初期選択
+                // オブジェクトリストに追加
+                _objects.Add((weaponObject.gameObject, buttons));
 
-                    // CPU武器リストに追加
-                    _cpuWeaponList.Add(INIT_SELECT_WEAPON);
-
-                    // ボタンをショットガン選択中にする
-                    ChangeButtonsColor(buttons, INIT_SELECT_WEAPON);
-                }
-
-                num++;
+                number++;
             }
+
+            Initialize();
         }
 
         /// <summary>

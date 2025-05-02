@@ -130,6 +130,16 @@ namespace Screen
             NetworkBattleManager.Initialize();
         }
 
+        public void Show()
+        {
+            gameObject.SetActive(true);
+        }
+
+        public void Hide()
+        {
+            gameObject.SetActive(false);
+        }
+
         /// <summary>
         /// 募集ボタン選択
         /// </summary>
@@ -292,11 +302,6 @@ namespace Screen
                 SelectedButton = ButtonType.Back;
                 OnButtonClick(this, EventArgs.Empty);
             }
-        }
-
-        private void OnEnable()
-        {
-            Initialize();
         }
 
         /// <summary>

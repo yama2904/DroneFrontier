@@ -137,6 +137,28 @@ namespace Screen.Network
             ChangeItemButtonsColor(true);
         }
 
+        public void Show()
+        {
+            // 選択情報クリア
+            _selectedWeapons.Clear();
+
+            // クライアントの場合はアイテムon/off選択不可
+            if (NetworkManager.PeerType == PeerType.Client)
+            {
+                _itemCanvas.enabled = false;
+            }
+
+            // 通信イベント設定
+            NetworkManager.OnDisconnected += OnDisconnect;
+
+            gameObject.SetActive(true);
+        }
+
+        public void Hide()
+        {
+            gameObject.SetActive(false);
+        }
+
         /// <summary>
         /// ショットガン選択
         /// </summary>
@@ -275,23 +297,6 @@ namespace Screen.Network
                 SelectedButton = ButtonType.Back;
                 OnButtonClick(this, EventArgs.Empty);
             }
-        }
-
-        private void OnEnable()
-        {
-            Initialize();
-
-            // 選択情報クリア
-            _selectedWeapons.Clear();
-
-            // クライアントの場合はアイテムon/off選択不可
-            if (NetworkManager.PeerType == PeerType.Client)
-            {
-                _itemCanvas.enabled = false;
-            }
-
-            // 通信イベント設定
-            NetworkManager.OnDisconnected += OnDisconnect;
         }
 
         /// <summary>

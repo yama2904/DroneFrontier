@@ -250,7 +250,14 @@ namespace Race.Network
         /// </summary>
         private void SwitchConfig()
         {
-            _config.gameObject.SetActive(!IsConfig);
+            if (IsConfig)
+            {
+                _config.Hide();
+            }
+            else
+            {
+                _config.Show();
+            }
             IsConfig = !IsConfig;
         }
 

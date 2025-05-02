@@ -253,7 +253,7 @@ namespace Battle
             droneData.DestroyTime = Time.time;
 
             // 残り1人になった場合はゲーム終了
-            List<DroneData> aliveDrones = _droneDatas.Where(x => x.Value.Drone == null)
+            List<DroneData> aliveDrones = _droneDatas.Where(x => x.Value.Drone != null)
                                                      .Select(x => x.Value)
                                                      .ToList();
             if (aliveDrones.Count == 1)
@@ -325,7 +325,14 @@ namespace Battle
         /// </summary>
         private void SwitchConfig()
         {
-            _config.gameObject.SetActive(!IsConfig);
+            if (IsConfig)
+            {
+                _config.Hide();
+            }
+            else
+            {
+                _config.Show();
+            }
             IsConfig = !IsConfig;
         }
 

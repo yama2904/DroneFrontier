@@ -70,6 +70,16 @@ namespace Screen
             _cameraValueText.text = ConvertToText(_cameraSlider.value);
         }
 
+        public void Show()
+        {
+            gameObject.SetActive(true);
+        }
+
+        public void Hide()
+        {
+            gameObject.SetActive(false);
+        }
+
         /// <summary>
         /// BGM調整
         /// </summary>

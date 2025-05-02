@@ -121,13 +121,13 @@ namespace Battle.Weapon
 
                         // 背景UIの生成
                         Image back = Instantiate(_bulletBackUI);
-                        back.transform.SetParent(_bulletUICanvas.transform);
+                        back.transform.SetParent(_bulletUICanvas.transform, false);
                         back.transform.localPosition = new Vector3(x, y, 0);
                         back.transform.localRotation = Quaternion.identity;
 
                         // 前面UIの生成
                         Image front = Instantiate(_bulletFrontUI);
-                        front.transform.SetParent(_bulletUICanvas.transform);
+                        front.transform.SetParent(_bulletUICanvas.transform, false);
                         front.transform.localPosition = new Vector3(x, y, 0);
                         front.transform.localRotation = Quaternion.identity;
 

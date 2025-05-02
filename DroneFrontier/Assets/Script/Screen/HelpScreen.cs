@@ -48,6 +48,16 @@ namespace Screen
 
         public void Initialize() { }
 
+        public void Show()
+        {
+            gameObject.SetActive(true);
+        }
+
+        public void Hide()
+        {
+            gameObject.SetActive(false);
+        }
+
         //基本操作
         public void ClickBasicOperation()
         {
