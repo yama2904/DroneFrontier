@@ -401,6 +401,9 @@ namespace Battle.Network
                     await UniTask.Delay(TimeSpan.FromSeconds(1), cancellationToken: _cancelToken.Token);
                 }
 
+                // 残り時間非表示
+                _timeText.enabled = false;
+
                 // 制限時間によるゲーム終了
                 SendFinishGame();
             }

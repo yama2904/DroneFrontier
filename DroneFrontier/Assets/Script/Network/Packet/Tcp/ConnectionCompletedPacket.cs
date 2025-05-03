@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Network.Tcp
 {
-    public class ConnectionCompletedPacket : BasePacket
+    internal class ConnectionCompletedPacket : BasePacket
     {
         public List<string> PlayerNames { get; private set; } = new List<string>();
 

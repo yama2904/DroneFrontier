@@ -7,7 +7,7 @@ namespace Network.Tcp
     /// <summary>
     /// クライアント同士の接続用TCPパケット
     /// </summary>
-    public class PeerConnectPacket : BasePacket
+    internal class PeerConnectPacket : BasePacket
     {
         /// <summary>
         /// プレイヤー名
@@ -39,19 +39,24 @@ namespace Network.Tcp
         {
             int offset = 0;
 
-            int port = BitConverter.ToInt32(body, offset);
+            int nameLen = BitConverter.ToInt32(body, offset);
             offset += sizeof(int);
 
-            string name = Encoding.UTF8.GetString(body, offset, body.Length - offset);
+            string name = Encoding.UTF8.GetString(body, offset, nameLen);
+            offset += nameLen;
+
+            int port = BitConverter.ToInt32(body, offset);
+            offset += sizeof(int);
 
             return new PeerConnectPacket(name, port);
         }
 
         protected override byte[] ConvertToPacketBody()
         {
-            byte[] port = BitConverter.GetBytes(UdpPort);
             byte[] name = Encoding.UTF8.GetBytes(Name);
-            return port.Concat(name).ToArray();
+            byte[] nameLen = BitConverter.GetBytes(name.Length);
+            byte[] port = BitConverter.GetBytes(UdpPort);
+            return nameLen.Concat(name).Concat(port).ToArray();
         }
     }
 }

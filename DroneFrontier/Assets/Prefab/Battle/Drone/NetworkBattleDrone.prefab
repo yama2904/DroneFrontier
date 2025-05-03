@@ -309,7 +309,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _syncPosition: 0
   _syncInterval: 1
-  _syncPositionDistance: 20
+  _syncPositionDistance: 15
   _droneObject: {fileID: 6103758830164412855}
   _camera: {fileID: 2032111343277000741}
   _canvas: {fileID: 2857361770926363682}
@@ -1580,7 +1580,7 @@ AudioListener:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 985328476376835486}
-  m_Enabled: 0
+  m_Enabled: 1
 --- !u!1 &1368695806288110126
 GameObject:
   m_ObjectHideFlags: 0

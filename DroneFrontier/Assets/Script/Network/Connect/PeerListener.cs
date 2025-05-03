@@ -38,9 +38,9 @@ namespace Network.Connect
         private readonly int MAX_CONNECT;
 
         /// <summary>
-        /// 接続済みプレイヤーのTCPアドレスリスト
+        /// 接続済みプレイヤーのTCPリッスン一覧
         /// </summary>
-        private List<(string name, string address)> _connectedTcpEPs = new List<(string name, string address)>();
+        private List<(string name, string address)> _clientListenAddresses = new List<(string name, string address)>();
 
         /// <summary>
         /// 接続済みクライアント
@@ -86,7 +86,7 @@ namespace Network.Connect
                 while (true) 
                 {
                     // 最大接続数に達した場合は受付しない
-                    if (_connectedTcpEPs.Count == MAX_CONNECT)
+                    if (_connectedClients.Count == MAX_CONNECT)
                     {
                         await Task.Delay(1 * 1000, _completedCancel.Token);
                         continue;
@@ -110,7 +110,7 @@ namespace Network.Connect
                     if (discoverPacket.GameMode != gameMode) continue;
 
                     // プレイヤー名重複チェック
-                    if (discoverPacket.Name == name || _connectedTcpEPs.Any(x => x.name == discoverPacket.Name))
+                    if (discoverPacket.Name == name || _clientListenAddresses.Any(x => x.name == discoverPacket.Name))
                     {
                         Debug.Log("プレイヤー名重複");
 
@@ -123,11 +123,11 @@ namespace Network.Connect
                     }
 
                     // 送受信用UDP初期化
-                    UdpClient udpClient = new UdpClient(0);
+                    UdpClient udpClient = new UdpClient(new IPEndPoint(IPAddress.Any, 0));
                     udpClient.Connect(receive.RemoteEndPoint);
 
                     // 接続済み情報を返す
-                    List<string> addresses = _connectedTcpEPs.Select(x => x.address).ToList();
+                    List<string> addresses = _clientListenAddresses.Select(x => x.address).ToList();
                     byte[] responseData = new DiscoverResponsePacket(name, addresses).ConvertToPacket();
                     await udpClient.SendAsync(responseData, responseData.Length);
 
@@ -135,21 +135,53 @@ namespace Network.Connect
                     TcpClient tcpClient = null;
                     try
                     {
-                        tcpClient = await ConnectUtil.AcceptTcpClientAsync(listener, PORT, 10, receive.RemoteEndPoint.Address, token, _completedCancel.Token);
+                        tcpClient = await ConnectUtil.AcceptTcpClientAsync(listener, 10, receive.RemoteEndPoint.Address, token, _completedCancel.Token);
                     }
                     catch (Exception ex)
                     {
+                        udpClient.Close();
+                        udpClient.Dispose();
+
                         // タイムアウトした場合は受信しなおし
                         if (ex is TimeoutException) continue;
 
-                        udpClient.Close();
-                        udpClient.Dispose();
                         throw;
                     }
 
+                    // クライアント同士の接続完了待ち
+                    byte[] buf = null;
+                    try
+                    {
+                        buf = await ConnectUtil.ReceiveTcpAsync(tcpClient, 10, token, _completedCancel.Token);
+                    }
+                    catch (Exception ex)
+                    {
+                        udpClient.Close();
+                        udpClient.Dispose();
+                        tcpClient.Close();
+                        tcpClient.Dispose();
+
+                        // タイムアウトした場合は受信しなおし
+                        if (ex is TimeoutException) continue;
+
+                        throw;
+                    }
+
+                    // クライアント同士の接続完了パケット以外の場合は不整合のためエラー
+                    if (BasePacket.GetPacketType(buf) != typeof(ConnectedClientsPacket))
+                    {
+                        udpClient.Close();
+                        udpClient.Dispose();
+                        tcpClient.Close();
+                        tcpClient.Dispose();
+                        throw new NetworkException(ExceptionError.UnexpectedError, "通信接続中に想定外のエラーが発生しました。");
+                    }
+
+                    // クライアントのリッスンアドレス保存
+                    _clientListenAddresses.Add((discoverPacket.Name, NetworkUtil.ConvertToString(receive.RemoteEndPoint.Address, discoverPacket.ListenPort)));
+
                     // 接続先クライアント保存
                     PeerClient peerClient = new PeerClient(discoverPacket.Name, PeerType.Client, udpClient, tcpClient);
-                    _connectedTcpEPs.Add((discoverPacket.Name, NetworkUtil.ConvertToString(receive.RemoteEndPoint)));
                     _connectedClients.Add(peerClient);
 
                     // 切断イベント設定
@@ -215,7 +247,7 @@ namespace Network.Connect
             {
                 client.Disconnect();
             }
-            _connectedTcpEPs.Clear();
+            _clientListenAddresses.Clear();
             _connectedClients.Clear();
         }
 
@@ -230,7 +262,7 @@ namespace Network.Connect
 
             // 接続済み情報から削除
             _connectedClients.Remove(client);
-            _connectedTcpEPs.RemoveAt(_connectedTcpEPs.FindIndex(x => x.name == client.RemoteName));
+            _clientListenAddresses.RemoveAt(_clientListenAddresses.FindIndex(x => x.name == client.RemoteName));
         }
     }
 }

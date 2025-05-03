@@ -68,14 +68,13 @@ namespace Network.Connect
         /// タイムアウトとキャンセルを考慮して非同期でTCPコネクションの受付を行う
         /// </summary>
         /// <param name="listener">コネクション受付を行うTCPリスナー</param>
-        /// <param name="port">ローカルポート番号</param>
         /// <param name="timeout">受付タイムアウト（秒）</param>
         /// <param name="allowIP">コネクションを許可するIPアドレス（全てのIPから許可する場合はIPAddress.Anyを指定）</param>
         /// <param name="tokens">キャンセルトークン</param>
         /// <returns>コネクションを確立したTCPクライアント</returns>
         /// <exception cref="TimeoutException"></exception>
         /// <exception cref="TaskCanceledException"></exception>
-        public static async Task<TcpClient> AcceptTcpClientAsync(TcpListener listener, int port, int timeout, IPAddress allowIP, params CancellationToken[] tokens)
+        public static async Task<TcpClient> AcceptTcpClientAsync(TcpListener listener, int timeout, IPAddress allowIP, params CancellationToken[] tokens)
         {
             // コネクション受付タスク
             CancellationTokenSource acceptCancel = new CancellationTokenSource();

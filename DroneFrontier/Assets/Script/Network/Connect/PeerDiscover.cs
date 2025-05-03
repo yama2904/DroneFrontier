@@ -58,6 +58,8 @@ namespace Network.Connect
         /// </summary>
         private CancellationTokenSource _hostDisconnectCancel = new CancellationTokenSource();
 
+        private TcpListener _listener = null;
+
         /// <summary>
         /// 初期化
         /// </summary>
@@ -79,6 +81,9 @@ namespace Network.Connect
         {
             try
             {
+                _listener = new TcpListener(IPAddress.Any, 0);
+                _listener.Start();
+
                 // ホストを探索して接続確立
                 await DiscoverHost(name, gameMode, token);
 
@@ -120,6 +125,11 @@ namespace Network.Connect
                     throw new NetworkException(ExceptionError.UnexpectedError, "想定外のエラーが発生しました。");
                 }
             }
+            finally
+            {
+                _listener?.Stop();
+                _listener = null;
+            }
 
             // 接続完了イベント発火
             OnDiscoveryCompleted?.Invoke(this, EventArgs.Empty);
@@ -141,6 +151,9 @@ namespace Network.Connect
                 token.WaitHandle.WaitOne();
             });
 
+            // TCPリッスンポート
+            int listenPort = (_listener.LocalEndpoint as IPEndPoint).Port;
+
             // 探索開始
             while (true)
             {
@@ -149,7 +162,7 @@ namespace Network.Connect
                 hostUdp.EnableBroadcast = true;
 
                 // ブロードキャストで探索パケット送信
-                byte[] data = new DiscoverPacket(name, gameMode).ConvertToPacket();
+                byte[] data = new DiscoverPacket(name, gameMode, listenPort).ConvertToPacket();
                 await hostUdp.SendAsync(data, data.Length, new IPEndPoint(IPAddress.Broadcast, PORT));
                 hostUdp.EnableBroadcast = false;
 
@@ -292,6 +305,10 @@ namespace Network.Connect
                     peerClient.OnDisconnected += OnDisconnectedPeer;
                 }
 
+                // クライアント同士の接続完了をホストに通知
+                byte[] connectedData = new ConnectedClientsPacket().ConvertToPacket();
+                await hostTcp.GetStream().WriteAsync(connectedData, 0, connectedData.Length);
+
                 // ホストからのTCP受信を開始する
                 hostPeer.OnTcpReceived += OnTcpReceivedFromHost;
 
@@ -310,54 +327,43 @@ namespace Network.Connect
         /// <exception cref="NetworkException"></exception>
         private async UniTask AcceptFromClient(string name, CancellationToken token)
         {
-            TcpListener listener = null;
-            try
+            while (true)
             {
-                listener = new TcpListener(IPAddress.Any, PORT);
-                listener.Start();
+                // 新規プレイヤーからの接続待機
+                TcpClient tcpClient = await ConnectUtil.AcceptTcpClientAsync(_listener, -1, IPAddress.Any, token, _completedCancel.Token, _completedCancel.Token, _hostDisconnectCancel.Token);
 
-                while (true)
+                // クライアント接続パケット受信待機
+                byte[] buf = await ConnectUtil.ReceiveTcpAsync(tcpClient, 10, token, _completedCancel.Token, _hostDisconnectCancel.Token);
+
+                // クライアント接続パケット以外の場合は想定外のためエラー
+                if (BasePacket.GetPacketType(buf) != typeof(PeerConnectPacket))
                 {
-                    // 新規プレイヤーからの接続待機
-                    TcpClient tcpClient = await ConnectUtil.AcceptTcpClientAsync(listener, PORT, -1, IPAddress.Any, token, _completedCancel.Token, _completedCancel.Token, _hostDisconnectCancel.Token);
-
-                    // クライアント接続パケット受信待機
-                    byte[] buf = await ConnectUtil.ReceiveTcpAsync(tcpClient, 10, token, _completedCancel.Token, _hostDisconnectCancel.Token);
-
-                    // クライアント接続パケット以外の場合は想定外のためエラー
-                    if (BasePacket.GetPacketType(buf) != typeof(PeerConnectPacket))
-                    {
-                        tcpClient.Close();
-                        tcpClient.Dispose();
-                        throw new NetworkException(ExceptionError.UnexpectedError, "通信接続中に想定外のエラーが発生しました。");
-                    }
-
-                    // パケット解析
-                    PeerConnectPacket connectPacket = new PeerConnectPacket().Parse(buf) as PeerConnectPacket;
-
-                    // UDP接続を確立
-                    UdpClient udpClient = new UdpClient(new IPEndPoint(IPAddress.Any, 0));
-                    udpClient.Connect((tcpClient.Client.RemoteEndPoint as IPEndPoint).Address, connectPacket.UdpPort);
-
-                    // プレイヤー名とUdpポート番号送信
-                    int udpPort = (udpClient.Client.LocalEndPoint as IPEndPoint).Port;
-                    byte[] peerConnectData = new PeerConnectPacket(name, udpPort).ConvertToPacket();
-                    await tcpClient.GetStream().WriteAsync(peerConnectData, 0, peerConnectData.Length);
-
-                    // 接続済み一覧に追加
-                    PeerClient peerClient = new PeerClient(connectPacket.Name, PeerType.Client, udpClient, tcpClient);
-                    _connectedClients.Add(peerClient);
-
-                    // 切断イベント設定
-                    peerClient.OnDisconnected += OnDisconnectedPeer;
-
-                    // 接続完了イベント発火
-                    OnConnected?.Invoke(this, peerClient);
+                    tcpClient.Close();
+                    tcpClient.Dispose();
+                    throw new NetworkException(ExceptionError.UnexpectedError, "通信接続中に想定外のエラーが発生しました。");
                 }
-            }
-            finally
-            {
-                listener?.Stop();
+
+                // パケット解析
+                PeerConnectPacket connectPacket = new PeerConnectPacket().Parse(buf) as PeerConnectPacket;
+
+                // UDP接続を確立
+                UdpClient udpClient = new UdpClient(new IPEndPoint(IPAddress.Any, 0));
+                udpClient.Connect((tcpClient.Client.RemoteEndPoint as IPEndPoint).Address, connectPacket.UdpPort);
+
+                // プレイヤー名とUdpポート番号送信
+                int udpPort = (udpClient.Client.LocalEndPoint as IPEndPoint).Port;
+                byte[] peerConnectData = new PeerConnectPacket(name, udpPort).ConvertToPacket();
+                await tcpClient.GetStream().WriteAsync(peerConnectData, 0, peerConnectData.Length);
+
+                // 接続済み一覧に追加
+                PeerClient peerClient = new PeerClient(connectPacket.Name, PeerType.Client, udpClient, tcpClient);
+                _connectedClients.Add(peerClient);
+
+                // 切断イベント設定
+                peerClient.OnDisconnected += OnDisconnectedPeer;
+
+                // 接続完了イベント発火
+                OnConnected?.Invoke(this, peerClient);
             }
         }
 

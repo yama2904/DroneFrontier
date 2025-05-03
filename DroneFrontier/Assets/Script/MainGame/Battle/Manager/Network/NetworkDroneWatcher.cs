@@ -31,7 +31,9 @@ namespace Battle.Network
             _isRunning = true;
 
             // 試合中のプレイヤー取得
-            _watchDrones = GameObject.FindGameObjectsWithTag(TagNameConst.PLAYER).Select(x => x.GetComponent<NetworkBattleDrone>()).ToList();
+            _watchDrones = GameObject.FindGameObjectsWithTag(TagNameConst.PLAYER)
+                                     .Where(x => !Useful.IsNullOrDestroyed(x))
+                                     .Select(x => x.GetComponent<NetworkBattleDrone>()).ToList();
 
             // 全てのドローンのカメラ参照初期化
             foreach (NetworkBattleDrone drone in _watchDrones)
@@ -87,7 +89,10 @@ namespace Battle.Network
 
             // 破壊されたドローンをリストから削除
             int droneIndex = _watchDrones.IndexOf(destroyDrone as NetworkBattleDrone);
-            _watchDrones.RemoveAt(droneIndex);
+            if (droneIndex >= 0)
+            {
+                _watchDrones.RemoveAt(droneIndex);
+            }
 
             // リスポーンドローン取得
             var drone = respawnDrone as NetworkBattleDrone;
@@ -95,7 +100,14 @@ namespace Battle.Network
             // リスポーンされた場合は再度観戦対象に追加
             if (respawnDrone != null)
             {
-                _watchDrones.Insert(droneIndex, drone);
+                if (droneIndex >= 0)
+                {
+                    _watchDrones.Insert(droneIndex, drone);
+                }
+                else
+                {
+                    _watchDrones.Add(drone);
+                }
             }
 
             // 破壊されたドローンが現在観戦中のプレイヤーの場合
@@ -119,7 +131,10 @@ namespace Battle.Network
         /// </summary>
         private void WatchNextDrone()
         {
-            _watchDrones[_watchingDrone].IsWatch = false;
+            if (_watchingDrone < _watchDrones.Count)
+            {
+                _watchDrones[_watchingDrone].IsWatch = false;
+            }
 
             // 次のプレイヤー
             _watchingDrone++;
@@ -128,8 +143,16 @@ namespace Battle.Network
                 _watchingDrone = 0;
             }
 
-            // カメラ参照設定
-            _watchDrones[_watchingDrone].IsWatch = true;
+            // カメラ参照設定（対象が破壊されている場合は不整合が起きているため削除して次のカメラへ切り替える）
+            if (_watchDrones[_watchingDrone] == null)
+            {
+                _watchDrones.RemoveAt(_watchingDrone);
+                WatchNextDrone();
+            }
+            else
+            {
+                _watchDrones[_watchingDrone].IsWatch = true;
+            }
         }
     }
 }

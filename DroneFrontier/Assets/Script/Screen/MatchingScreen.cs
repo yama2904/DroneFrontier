@@ -112,16 +112,10 @@ namespace Screen
 
         public void Initialize()
         {
-            // 名前入力欄表示
-            _inputFieldCanvas.enabled = true;
-
             // エラーメッセージ非表示
             _errMsgCanvas.enabled = false;
             _errMsgText.text = "";
             _isError = false;
-
-            // 決定ボタン非表示
-            _okButton.SetActive(false);
 
             // 名前入力欄で初期化
             ShowPlayerList(false);
@@ -277,9 +271,6 @@ namespace Screen
             NetworkManager.OnDiscoveryCompleted -= OnDiscoveryCompleted;
             _isDiscovery = false;
 
-            // 決定ボタン非表示
-            _okButton.SetActive(false);
-
             // プレイヤー名入力欄へ戻る
             ShowPlayerList(false);
         }
@@ -298,6 +289,7 @@ namespace Screen
                 _isDiscovery = false;
 
                 // 初期化して前画面へ戻る
+                ShowPlayerList(false);
                 PreScreen = null;
                 SelectedButton = ButtonType.Back;
                 OnButtonClick(this, EventArgs.Empty);
@@ -388,6 +380,12 @@ namespace Screen
             _playerListCanvas.enabled = show;
             PreScreen?.SetActive(!show);
             _discoverMask.enabled = false;
+
+            if (show)
+            {
+                // 決定ボタン非表示
+                _okButton.SetActive(false);
+            }
         }
 
         /// <summary>

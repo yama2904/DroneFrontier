@@ -9,12 +9,17 @@ namespace Network.Udp
         /// <summary>
         /// プレイヤー名
         /// </summary>
-        public string Name { get; set; } = string.Empty;
+        public string Name { get; private set; } = string.Empty;
 
         /// <summary>
         /// ゲームモード
         /// </summary>
-        public string GameMode { get; set; } = string.Empty;
+        public string GameMode { get; private set; } = string.Empty;
+
+        /// <summary>
+        /// TCPリッスンポート番号
+        /// </summary>
+        public int ListenPort { get; private set; } = 0;
 
         /// <summary>
         /// コンストラクタ
@@ -26,10 +31,12 @@ namespace Network.Udp
         /// </summary>
         /// <param name="name">プレイヤー名</param>
         /// <param name="gameMode">ゲームモード</param>
-        public DiscoverPacket(string name, string gameMode)
+        /// <param name="listenPort">TCPリッスンポート番号</param>
+        public DiscoverPacket(string name, string gameMode, int listenPort)
         {
             Name = name;
             GameMode = gameMode;
+            ListenPort = listenPort;
         }
 
         protected override BasePacket ParseBody(byte[] body)
@@ -48,12 +55,16 @@ namespace Network.Udp
             int modeLen = BitConverter.ToInt32(body, offset);
             offset += sizeof(int);
 
-            // プレイヤー名
+            // ゲームモード
             string mode = Encoding.UTF8.GetString(body, offset, modeLen);
             offset += modeLen;
 
+            // ポート
+            int port = BitConverter.ToInt32(body, offset);
+            offset += sizeof(int);
+
             // インスタンスを作成して返す
-            return new DiscoverPacket(name, mode);
+            return new DiscoverPacket(name, mode, port);
         }
 
         protected override byte[] ConvertToPacketBody()
@@ -66,9 +77,13 @@ namespace Network.Udp
             byte[] mode = Encoding.UTF8.GetBytes(GameMode);
             byte[] modeLen = BitConverter.GetBytes(mode.Length);
 
+            // ポート
+            byte[] port = BitConverter.GetBytes(ListenPort);
+
             return nameLen.Concat(name)
                           .Concat(modeLen)
                           .Concat(mode)
+                          .Concat(port)
                           .ToArray();
         }
     }

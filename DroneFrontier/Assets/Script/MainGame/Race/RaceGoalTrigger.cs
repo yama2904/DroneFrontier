@@ -22,7 +22,10 @@ namespace Race
         {
             if (other.CompareTag(TagNameConst.PLAYER))
             {
-                GoalPlayers.Add(other.gameObject.GetComponent<NetworkRaceDrone>().Name);
+                string player = other.gameObject.GetComponent<NetworkRaceDrone>().Name;
+                if (GoalPlayers.Contains(player)) return;
+
+                GoalPlayers.Add(player);
                 OnGoal?.Invoke(this, EventArgs.Empty);
             }
         }

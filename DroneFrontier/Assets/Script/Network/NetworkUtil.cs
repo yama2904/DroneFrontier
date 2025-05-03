@@ -34,6 +34,17 @@ namespace Network
         }
 
         /// <summary>
+        /// IPアドレスとポート番号の組み合わせを文字列へ変換する
+        /// </summary>
+        /// <param name="ip">IPアドレス</param>
+        /// <param name="port">ポート番号</param>
+        /// <returns>変換した文字列</returns>
+        public static string ConvertToString(IPAddress ip, int port)
+        {
+            return ConvertToString(new IPEndPoint(ip, port));
+        }
+
+        /// <summary>
         /// IPエンドポイントを文字列へ変換する
         /// </summary>
         /// <param name="ep">文字列へ変換するエンドポイント</param>

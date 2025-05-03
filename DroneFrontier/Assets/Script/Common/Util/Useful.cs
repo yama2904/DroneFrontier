@@ -32,7 +32,7 @@ namespace Common
         /// <returns>null、又はDestroy済みの場合はtrue</returns>
         public static bool IsNullOrDestroyed(GameObject obj)
         {
-            return obj is null || !obj;
+            return obj == null || obj is null || !obj;
         }
 
         /// <summary>

@@ -16,9 +16,9 @@ namespace Drone.Network
             get { return _isControl; }
             set
             {
-                _isControl = value;
                 IsWatch = value;
                 IsSyncPosition = value;
+                _isControl = value;
             }
         }
         private bool _isControl = false;
@@ -109,6 +109,10 @@ namespace Drone.Network
             if (Name == NetworkManager.MyPlayerName)
             {
                 IsControl = true;
+            }
+            else
+            {
+                IsControl = false;
             }
 
             // ëºÉvÉåÉCÉÑÅ[ÇÃèÍçá
