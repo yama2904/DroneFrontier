@@ -241,6 +241,8 @@ namespace Network
             NetworkDelayMonitor.Stop();
         }
 
+        #region Send
+
         /// <summary>
         /// ホストへUDPパケットを送信する
         /// </summary>
@@ -353,6 +355,8 @@ namespace Network
             });
         }
 
+        #endregion
+
         private void Awake()
         {
             if (_isCreated)
@@ -376,6 +380,8 @@ namespace Network
         {
             Disconnect();
         }
+
+        #region Event
 
         /// <summary>
         /// ホスト発見イベント
@@ -489,5 +495,7 @@ namespace Network
         {
             OnUdpReceivedOnMainThread?.Invoke(client.RemoteName, packet);
         }
+
+        #endregion
     }
 }

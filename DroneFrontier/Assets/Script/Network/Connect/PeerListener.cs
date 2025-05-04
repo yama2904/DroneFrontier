@@ -245,6 +245,7 @@ namespace Network.Connect
         {
             foreach (PeerClient client in _connectedClients)
             {
+                client.OnDisconnected -= OnDisconnectPeer;
                 client.Disconnect();
             }
             _clientListenAddresses.Clear();
@@ -259,6 +260,9 @@ namespace Network.Connect
         private void OnDisconnectPeer(object sender, EventArgs e)
         {
             PeerClient client = sender as PeerClient;
+
+            // ƒCƒxƒ“ƒgíœ
+            client.OnDisconnected -= OnDisconnectPeer;
 
             // Ú‘±Ï‚İî•ñ‚©‚çíœ
             _connectedClients.Remove(client);

@@ -392,6 +392,10 @@ namespace Network.Connect
         {
             PeerClient client = sender as PeerClient;
 
+            // イベント削除
+            client.OnTcpReceived -= OnTcpReceivedFromHost;
+            client.OnDisconnected -= OnDisconnectedPeer;
+
             // ホストから切断された場合はキャンセル発行
             if (client.RemoteType == PeerType.Host)
             {
@@ -412,13 +416,9 @@ namespace Network.Connect
             // 通信切断
             foreach (PeerClient client in _connectedClients)
             {
+                client.OnTcpReceived -= OnTcpReceivedFromHost;
+                client.OnDisconnected -= OnDisconnectedPeer;
                 client.Disconnect();
-            }
-
-            // ホストからの受信待機を停止
-            if (_connectedClients.Count > 0)
-            {
-                _connectedClients[0].OnTcpReceived -= OnTcpReceivedFromHost;
             }
             _connectedClients.Clear();
         }
