@@ -67,6 +67,9 @@ namespace Drone.Battle
             Item2
         }
 
+        [SerializeField, Tooltip("死亡時に非表示にするオブジェクト")]
+        private GameObject[] _destroyHides = null;
+
         [SerializeField, Tooltip("ドローン死亡時の爆発オブジェクト")]
         private GameObject _explosion = null;
 
@@ -145,6 +148,7 @@ namespace Drone.Battle
             _weaponComponent.Initialize();
             _boostComponent.Initialize();
             GetComponent<DroneBarrierComponent>().Initialize();
+            GetComponent<DroneDamageComponent>().Initialize();
             GetComponent<DroneStatusComponent>().IsPlayer = true;
 
             // プロペラ音再生
@@ -304,16 +308,19 @@ namespace Drone.Battle
             await UniTask.Delay(TimeSpan.FromSeconds(2.5f), ignoreTimeScale: true);
 
             // ドローンの非表示
-            _droneObject.gameObject.SetActive(false);
+            foreach (GameObject obj in _destroyHides)
+            {
+                obj.SetActive(false);
+            }
 
             // 当たり判定も消す
             GetComponent<Collider>().enabled = false;
 
-            // 爆破生成
-            _explosion.SetActive(true);
-
             // Update停止
             enabled = false;
+
+            // 爆破生成
+            Instantiate(_explosion, transform);
 
             // 爆破後一定時間でオブジェクト破棄
             await UniTask.Delay(5000);

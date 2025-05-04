@@ -16,12 +16,54 @@ namespace Drone.Battle
         /// <summary>
         /// バリアの残りHP
         /// </summary>
-        public float HP { get; private set; }
+        public float HP
+        {
+            get => _hp;
+            internal set
+            {
+                // 破壊検知
+                if (_hp > 0 && value <= 0)
+                {
+                    // バリア回復停止
+                    _regeneTimer = 0;
+                    _isRegening = false;
+
+                    // バリア破壊SE
+                    _soundComponent.Play(SoundManager.SE.DestroyBarrier);
+
+                    // バリア破壊イベント発火
+                    _hp = 0;
+                    OnBarrierBreak?.Invoke(this, EventArgs.Empty);
+                    Debug.Log($"{_drone.Name}:バリア破壊");
+                }
+
+                // 最小/最大HP内に補正
+                float hp = value;
+                if (hp < 0)
+                {
+                    hp = 0;
+                }
+                if (hp > MaxHP)
+                {
+                    hp = MaxHP;
+                }
+                _hp = hp;
+
+                // バリアの色更新
+                ApplyBarrierColor();
+            }
+        }
+        private float _hp = 0;
 
         /// <summary>
         /// バリアの最大HP
         /// </summary>
         public float MaxHP => _barrierMaxHP;
+
+        /// <summary>
+        /// バリアダメージイベント
+        /// </summary>
+        public event EventHandler OnBarrierDamage;
 
         /// <summary>
         /// バリア破壊イベント
@@ -122,13 +164,10 @@ namespace Drone.Battle
         public void Initialize()
         {
             // HP初期化
-            HP = _barrierMaxHP;
+            HP = MaxHP;
 
             // ドローンが破壊された場合は本コンポーネントを停止
             _drone.OnDroneDestroy += OnDroneDestroy;
-
-            // バリアカラー初期化
-            ApplyBarrierColor();
         }
 
         /// <summary>
@@ -155,25 +194,13 @@ namespace Drone.Battle
             {
                 _soundComponent.Play(SoundManager.SE.BarrierDamage, 0.7f);
             }
-            else
-            {
-                // 破壊された場合はバリア破壊SE
-                HP = 0;
-                _soundComponent.Play(SoundManager.SE.DestroyBarrier);
-
-                // バリア破壊イベント発火
-                OnBarrierBreak?.Invoke(this, EventArgs.Empty);
-                Debug.Log($"{_drone.Name}:バリア破壊");
-            }
 
             // バリア回復停止
             _regeneTimer = 0;
             _isRegening = false;
 
-            // バリアの色更新
-            ApplyBarrierColor();
-
-            //Debug.Log($"{_drone.Name}:バリアに{damage}のダメージ\n残りHP:{HP}");
+            // ダメージイベント発火
+            OnBarrierDamage?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -186,9 +213,6 @@ namespace Drone.Battle
             // 修復したら回復処理に移る
             HP = _resurrectBarrierHP;
             _isRegening = true;
-
-            // バリアの色更新
-            ApplyBarrierColor();
 
             // イベント発火
             OnBarrierResurrect?.Invoke(this, EventArgs.Empty);
@@ -320,7 +344,7 @@ namespace Drone.Battle
             if (_isWeak) return;
 
             // HPが減っている場合は回復処理
-            if (HP > 0 && HP < _barrierMaxHP)
+            if (HP > 0 && HP < MaxHP)
             {
                 // 回復中の場合は一定間隔ごとに回復
                 if (_isRegening)
@@ -328,16 +352,10 @@ namespace Drone.Battle
                     if (_regeneTimer >= _regeneIntervalSec)
                     {
                         // HP回復
-                        float hp = HP + _regeneValue;
-                        HP = hp >= _barrierMaxHP ? _barrierMaxHP : hp;  // 最大超過分を調整
-
-                        // バリアの色更新
-                        ApplyBarrierColor();
+                        HP += _regeneValue;
 
                         // 回復タイマーリセット
                         _regeneTimer = 0;
-
-                        //Debug.Log($"{_drone.Name}:バリア回復後HP->{HP}");
                     }
                 }
                 else
@@ -374,7 +392,7 @@ namespace Drone.Battle
         private void ApplyBarrierColor()
         {
             // 残りHPの割合で色合いを変化
-            float value = HP / _barrierMaxHP;
+            float value = HP / MaxHP;
 
             if (!_isStrengthen)
             {
@@ -393,9 +411,6 @@ namespace Drone.Battle
         /// <param name="e">イベント引数</param>
         private void OnDroneDestroy(object o, EventArgs e)
         {
-            HP = 0;
-            ApplyBarrierColor();
-
             // イベント削除
             _drone.OnDroneDestroy -= OnDroneDestroy;
         }

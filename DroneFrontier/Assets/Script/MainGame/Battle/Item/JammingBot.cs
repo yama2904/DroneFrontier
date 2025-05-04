@@ -8,19 +8,30 @@ namespace Battle.Item
 {
     public class JammingBot : MonoBehaviour, ILockableOn, IRadarable, IDamageable
     {
-        public GameObject Owner => Creater;
-
         /// <summary>
         /// ジャミングボット生成直後の移動量
         /// </summary>
         private const int BOT_MOVE_VALUE = 60;
+
+        public GameObject Owner => Creater;
 
         /// <summary>
         /// ジャミングボットの残りHP
         /// </summary>
         public float HP
         {
-            get { return _hp; }
+            get => _hp;
+            private set
+            {
+                if (value > 0)
+                {
+                    _hp = value;
+                }
+                else
+                {
+                    _hp = 0;
+                }
+            }
         }
 
         /// <summary>
@@ -79,6 +90,8 @@ namespace Battle.Item
         /// </summary>
         public float InitMoveSec { get; set; } = 1;
 
+        public event DamageHandler OnDamage;
+
         /// <summary>
         /// ジャミングボット破壊イベント
         /// </summary>
@@ -115,9 +128,13 @@ namespace Battle.Item
             // 小数点第2以下切り捨て
             value = Useful.Floor(value, 1);
             _hp -= value;
+
+            // ダメージイベント発火
+            OnDamage?.Invoke(this, source, value);
+
+            // HP0の場合はジャミングボット破壊
             if (_hp < 0)
             {
-                // オブジェクト削除
                 Destroy(gameObject);
             }
 

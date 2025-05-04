@@ -9,18 +9,12 @@ namespace Drone.Battle
     {
         public GameObject Owner => gameObject;
 
-        /// <summary>
-        /// ダメージハンドラー
-        /// </summary>
-        /// <param name="sender">イベントオブジェクト</param>
-        /// <param name="source">ダメージを与えたオブジェクト</param>
-        /// <param name="damage">ダメージ量</param>
-        public delegate void DamageHandler(DroneDamageComponent sender, GameObject source, float damage);
+        public event DamageHandler OnDamage;
 
         /// <summary>
-        /// ダメージイベント
+        /// ダメージ可能であるか
         /// </summary>
-        public event DamageHandler OnDamage;
+        internal bool _damageable = true;
 
         [SerializeField, Tooltip("復活後の無敵時間（秒）")]
         private int _notDamageableSec = 4;
@@ -39,16 +33,21 @@ namespace Drone.Battle
         private DroneBarrierComponent _barrier = null;
 
         /// <summary>
-        /// ダメージ可能であるか
-        /// </summary>
-        private bool _damageable = false;
-
-        /// <summary>
         /// 1フレーム内のダメージ回数
         /// </summary>
         private int _damageCount = 0;
 
-        public void Initialize() { }
+        /// <summary>
+        /// 初期化済みであるか
+        /// </summary>
+        private bool _isInitialized = false;
+
+        public async void Initialize() 
+        {
+            // 起動直後は一定時間無敵
+            await UniTask.Delay(TimeSpan.FromSeconds(_notDamageableSec));
+            _isInitialized = true;
+        }
 
         /// <summary>
         /// ドローンへダメージを与える
@@ -57,6 +56,9 @@ namespace Drone.Battle
         /// <param name="value">ダメージ量</param>
         public bool Damage(GameObject source, float value)
         {
+            // 初期化後にダメージ可能
+            if (!_isInitialized) return false;
+
             // 自分の攻撃は受けない
             if (source == gameObject) return false;
 
@@ -78,7 +80,6 @@ namespace Drone.Battle
             {
                 // バリアが破壊されている場合はドローン本体へダメージ
                 _drone.Damage(value);
-                //Debug.Log($"{_drone.Name}:ドローンに{value}のダメージ 残りHP:{_drone.HP}");
             }
 
             // ダメージ回数加算
@@ -88,6 +89,23 @@ namespace Drone.Battle
             OnDamage?.Invoke(this, source, value);
 
             return true;
+        }
+
+        internal void Damage(float value)
+        {
+            // 小数点第2以下切り捨て
+            value = Useful.Floor(value, 1);
+
+            // バリアが破壊されていない場合はバリアにダメージ
+            if (_barrier.HP > 0)
+            {
+                _barrier.Damage(value);
+            }
+            else
+            {
+                // バリアが破壊されている場合はドローン本体へダメージ
+                _drone.Damage(value);
+            }
         }
 
         private void Awake()
@@ -104,14 +122,6 @@ namespace Drone.Battle
         {
             // ダメージ回数リセット
             _damageCount = 0;
-        }
-
-        private async void OnEnable()
-        {
-            // 起動直後は一定時間無敵
-            _damageable = false;
-            await UniTask.Delay(TimeSpan.FromSeconds(_notDamageableSec));
-            _damageable = true;
         }
 
         /// <summary>

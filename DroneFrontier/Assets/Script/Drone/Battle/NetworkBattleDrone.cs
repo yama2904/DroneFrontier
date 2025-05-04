@@ -20,11 +20,19 @@ namespace Drone.Battle.Network
             get { return _hp; }
             private set
             {
-                _hp = value;
-                if (value < 0)
+                // 破壊検知
+                if (_hp > 0 && value <= 0)
                 {
-                    _hp = 0;
+                    Destroy().Forget();
                 }
+
+                // 最小HP内に補正
+                float hp = value;
+                if (hp < 0)
+                {
+                    hp = 0;
+                }
+                _hp = hp;
             }
         }
 
@@ -76,6 +84,9 @@ namespace Drone.Battle.Network
             Item2
         }
 
+        [SerializeField, Tooltip("死亡時に非表示にするオブジェクト")]
+        private GameObject[] _destroyHides = null;
+
         [SerializeField, Tooltip("ドローン死亡時の爆発オブジェクト")]
         private GameObject _explosion = null;
 
@@ -111,6 +122,7 @@ namespace Drone.Battle.Network
 
         // コンポーネントキャッシュ
         private Animator _animator = null;
+        private DroneDamageComponent _damageComponent = null;
         private DroneLockOnComponent _lockOnComponent = null;
         private DroneRadarComponent _radarComponent = null;
         private DroneItemComponent _itemComponent = null;
@@ -169,6 +181,7 @@ namespace Drone.Battle.Network
 
             // コンポーネントの取得
             _animator = GetComponent<Animator>();
+            _damageComponent = GetComponent<DroneDamageComponent>();
             _lockOnComponent = GetComponent<DroneLockOnComponent>();
             _radarComponent = GetComponent<DroneRadarComponent>();
             _itemComponent = GetComponent<DroneItemComponent>();
@@ -179,36 +192,50 @@ namespace Drone.Battle.Network
             NotLockableOnList.Add(gameObject);
             NotRadarableList.Add(gameObject);
 
-            // バリアイベント設定
-            _barrierComponent.OnBarrierBreak += OnBarrierBreak;
-            _barrierComponent.OnBarrierResurrect += OnBarrierResurrect;
-
             // オブジェクト探索イベント設定
             _searchComponent.OnObjectStay += OnObjectSearch;
 
             // イベント受信イベント設定
             NetworkManager.OnUdpReceivedOnMainThread += OnReceiveUdpOfEvent;
 
-            // 自プレイヤーの場合は定期的にステータス同期
-            if (IsControl)
+            // ホストの場合
+            if (NetworkManager.PeerType == PeerType.Host)
             {
+                // 定期的に全てのドローンのステータス同期
                 UniTask.Void(async () =>
                 {
                     while (true)
                     {
                         await UniTask.Delay(_syncStatusInterval * 1000, ignoreTimeScale: true, cancellationToken: _cancel.Token);
                         float moveSpeed = _moveComponent.MoveSpeed;
-                        NetworkManager.SendUdpToAll(new DroneStatusPacket(HP, moveSpeed));
+                        NetworkManager.SendUdpToAll(new DroneStatusPacket(Name, HP, _barrierComponent.HP, moveSpeed));
                     }
                 });
+
+                // 全てのドローンのダメージを監視してクライアントへ送信
+                _damageComponent.OnDamage += OnDamage;
+            }
+            else
+            {
+                // クライアントはホストからのダメージ通知のみでダメージを行う
+                _damageComponent._damageable = false;
+            }
+
+            // 自分のドローンにバリアイベント設定
+            if (IsControl)
+            {
+                _barrierComponent.OnBarrierBreak += OnBarrierBreak;
+                _barrierComponent.OnBarrierResurrect += OnBarrierResurrect;
             }
 
             // コンポーネント初期化
+            _damageComponent.Initialize();
             _lockOnComponent.Initialize();
             _radarComponent.Initialize();
             _itemComponent.Initialize();
             _weaponComponent.Initialize();
             _barrierComponent.Initialize();
+            _searchComponent.Initialize();
             GetComponent<DroneStatusComponent>().IsPlayer = IsControl;
 
             // リスポーンした場合は復活SE再生
@@ -220,17 +247,8 @@ namespace Drone.Battle.Network
 
         public void Damage(float value)
         {
-            // ドローンが破壊されている場合は何もしない
-            if (_hp <= 0) return;
-
             // 小数点第2以下切り捨てでダメージ適用
             HP -= Useful.Floor(value, 1);
-
-            // HPが0になったら破壊処理
-            if (_hp <= 0)
-            {
-                Destroy().Forget();
-            }
         }
 
         protected override void Update()
@@ -333,6 +351,7 @@ namespace Drone.Battle.Network
             base.OnDestroy();
 
             // イベント削除
+            _damageComponent.OnDamage -= OnDamage;
             _barrierComponent.OnBarrierBreak -= OnBarrierBreak;
             _barrierComponent.OnBarrierResurrect -= OnBarrierResurrect;
             _searchComponent.OnObjectStay -= OnObjectSearch;
@@ -340,6 +359,17 @@ namespace Drone.Battle.Network
 
             // キャンセル発行
             _cancel.Cancel();
+        }
+
+        /// <summary>
+        /// ダメージイベント
+        /// </summary>
+        /// <param name="sender">イベントオブジェクト</param>
+        /// <param name="source">ダメージを与えたオブジェクト</param>
+        /// <param name="damage">ダメージ量</param>
+        private void OnDamage(IDamageable sender, GameObject source, float damage)
+        {
+            NetworkManager.SendUdpToAll(new DamagePacket(Name, damage));
         }
 
         /// <summary>
@@ -434,8 +464,12 @@ namespace Drone.Battle.Network
             // ステータス
             if (packet is DroneStatusPacket status)
             {
-                HP = status.Hp;
-                _moveComponent.MoveSpeed = status.MoveSpeed;
+                if (status.Name == Name)
+                {
+                    HP = status.Hp;
+                    _barrierComponent.HP = status.BarrierHp;
+                    _moveComponent.MoveSpeed = status.MoveSpeed;
+                }
             }
         }
 
@@ -466,6 +500,12 @@ namespace Drone.Battle.Network
                     // ドローン破壊
                     Destroy().Forget();
                 }
+            }
+
+            if (packet is DamagePacket damage)
+            {
+                if (Name != damage.Name) return;
+                _damageComponent.Damage(damage.Damage);
             }
         }
 
@@ -514,19 +554,19 @@ namespace Drone.Battle.Network
             await UniTask.Delay(TimeSpan.FromSeconds(2.5f), ignoreTimeScale: true);
 
             // ドローンの非表示
-            _droneObject.gameObject.SetActive(false);
+            foreach (GameObject obj in _destroyHides)
+            {
+                obj.SetActive(false);
+            }
 
             // 当たり判定も消す
             GetComponent<Collider>().enabled = false;
 
-            // ロックオン不可に設定
-            IsLockableOn = false;
-
-            // 爆破生成
-            _explosion.SetActive(true);
-
             // Update停止
             enabled = false;
+
+            // 爆破生成
+            Instantiate(_explosion, transform);
 
             // 爆破後一定時間でオブジェクト破棄
             await UniTask.Delay(5000);

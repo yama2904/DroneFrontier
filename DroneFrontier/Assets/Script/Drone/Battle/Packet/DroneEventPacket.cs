@@ -1,5 +1,6 @@
 using Common;
 using Network;
+using System;
 using System.Linq;
 using System.Text;
 
@@ -42,22 +43,23 @@ namespace Drone.Battle.Network
 
         protected override BasePacket ParseBody(byte[] body)
         {
-            int byteOffset = 0;
+            int bodyOffset = 0;
             
             // ビットフラグ取得
-            byte data = body[byteOffset];
-            byteOffset += sizeof(byte);
+            byte bitFlag = body[bodyOffset];
+            bodyOffset += sizeof(byte);
 
             // ドローン名取得
-            int nameLen = body.Length - byteOffset;
-            string name = Encoding.UTF8.GetString(body, byteOffset, nameLen);
-            byteOffset += nameLen;
+            int nameLen = BitConverter.ToInt32(body, bodyOffset);
+            bodyOffset += sizeof(int);
+            string name = Encoding.UTF8.GetString(body, bodyOffset, nameLen);
+            bodyOffset += nameLen;
 
             // ビットフラグから各フラグ取得
             int bitOffset = 0;
-            bool barrierBreak = BitFlagUtil.CheckFlag(data, bitOffset++);
-            bool resurrectBarrier = BitFlagUtil.CheckFlag(data, bitOffset++);
-            bool destroy = BitFlagUtil.CheckFlag(data, bitOffset++);
+            bool barrierBreak = BitFlagUtil.CheckFlag(bitFlag, bitOffset++);
+            bool resurrectBarrier = BitFlagUtil.CheckFlag(bitFlag, bitOffset++);
+            bool destroy = BitFlagUtil.CheckFlag(bitFlag, bitOffset++);
 
             // インスタンスを作成して返す
             return new DroneEventPacket(name, barrierBreak, resurrectBarrier, destroy);
@@ -65,13 +67,20 @@ namespace Drone.Battle.Network
 
         protected override byte[] ConvertToPacketBody()
         {
+            // ビットフラグ
             byte bitFlag = 0;
             int offset = 0;
             bitFlag = BitFlagUtil.UpdateFlag(bitFlag, offset++, BarrierBreak);
             bitFlag = BitFlagUtil.UpdateFlag(bitFlag, offset++, BarrierResurrect);
             bitFlag = BitFlagUtil.UpdateFlag(bitFlag, offset++, Destroy);
+
+            // ドローン名
+            byte[] name = Encoding.UTF8.GetBytes(Name);
+            byte[] nameLen = BitConverter.GetBytes(name.Length);
+
             return new byte[] { bitFlag }
-                    .Concat(Encoding.UTF8.GetBytes(Name))
+                    .Concat(nameLen)
+                    .Concat(name)
                     .ToArray();
         }
     }
