@@ -1557,7 +1557,7 @@ Camera:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1210020551}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_ClearFlags: 1
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
@@ -1586,7 +1586,7 @@ Camera:
   field of view: 60
   orthographic: 0
   orthographic size: 5
-  m_Depth: -100
+  m_Depth: 100
   m_CullingMask:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -2708,7 +2708,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _droneSpawnManager: {fileID: 722117023}
   _itemSpawnManager: {fileID: 1011074923}
-  _watchingGame: {fileID: 1201505800}
   _timeText: {fileID: 1484383619830667237}
   _gameTime: 5
   _finishAnimator: {fileID: 8439109433076402537}
