@@ -38,7 +38,7 @@ namespace Drone.Battle.Network
 
         public Canvas BulletCanvas => _bulletCanvas;
 
-        public bool IsLockableOn { get; } = true;
+        public bool IsLockableOn { get; private set; } = true;
 
         public List<GameObject> NotLockableOnList { get; } = new List<GameObject>();
 
@@ -518,6 +518,9 @@ namespace Drone.Battle.Network
 
             // 当たり判定も消す
             GetComponent<Collider>().enabled = false;
+
+            // ロックオン不可に設定
+            IsLockableOn = false;
 
             // 爆破生成
             _explosion.SetActive(true);

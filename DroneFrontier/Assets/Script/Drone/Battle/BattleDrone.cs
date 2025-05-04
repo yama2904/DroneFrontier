@@ -34,7 +34,7 @@ namespace Drone.Battle
 
         public Canvas BulletCanvas => _bulletCanvas;
 
-        public bool IsLockableOn { get; } = true;
+        public bool IsLockableOn { get; private set; } = true;
 
         public List<GameObject> NotLockableOnList { get; } = new List<GameObject>();
 
@@ -293,6 +293,9 @@ namespace Drone.Battle
             _boostComponent.enabled = false;
             _lockOnComponent.StopLockOn();
             _radarComponent.StopRadar();
+
+            // ロックオン不可に設定
+            IsLockableOn = false;
 
             // 死亡SE再生
             _soundComponent.Play(SoundManager.SE.Death);

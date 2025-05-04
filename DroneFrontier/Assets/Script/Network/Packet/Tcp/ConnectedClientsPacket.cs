@@ -1,4 +1,4 @@
-namespace Network
+namespace Network.Tcp
 {
     /// <summary>
     /// クライアント同士の接続完了通知パケット

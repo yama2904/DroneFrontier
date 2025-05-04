@@ -132,20 +132,23 @@ namespace Drone.Battle
                                                 _lockOnDistance);
 
             // ロックオン中のオブジェクトが存在するかチェック
-            foreach (RaycastHit hit in hits)
+            if (Target != null && Target.GetComponent<ILockableOn>().IsLockableOn)
             {
-                // 存在する場合はターゲットの方へ追従して終了
-                if (Target == hit.transform.gameObject)
+                foreach (RaycastHit hit in hits)
                 {
-                    // ターゲットとの距離計算
-                    Vector3 diff = _targetTransform.position - _cameraTransform.position;
+                    // 存在する場合はターゲットの方へ追従して終了
+                    if (Target == hit.transform.gameObject)
+                    {
+                        // ターゲットとの距離計算
+                        Vector3 diff = _targetTransform.position - _cameraTransform.position;
 
-                    // 追従方向
-                    Quaternion rotation = Quaternion.LookRotation(diff);
+                        // 追従方向
+                        Quaternion rotation = Quaternion.LookRotation(diff);
 
-                    // ターゲットの方へ向く
-                    _droneTransform.rotation = Quaternion.Slerp(_droneTransform.rotation, rotation, _aimSpeed * Time.deltaTime);
-                    return;
+                        // ターゲットの方へ向く
+                        _droneTransform.rotation = Quaternion.Slerp(_droneTransform.rotation, rotation, _aimSpeed * Time.deltaTime);
+                        return;
+                    }
                 }
             }
 

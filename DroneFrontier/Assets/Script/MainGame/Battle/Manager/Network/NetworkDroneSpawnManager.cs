@@ -1,6 +1,8 @@
+using Battle.Packet;
 using Battle.Weapon;
 using Drone.Battle;
 using Drone.Battle.Network;
+using Network;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -54,6 +56,7 @@ namespace Battle.Network
             IWeapon sub = WeaponCreater.CreateWeapon(weapon);
             drone.Initialize(name, main, sub, drone.StockNum);
             drone.enabled = false;
+            NetworkObjectSpawner.Spawn(drone);
 
             // スポーン時点情報を保存
             _initDatas.Add(drone.Name, (weapon, spawnPos));
@@ -112,7 +115,11 @@ namespace Battle.Network
                 IWeapon main = WeaponCreater.CreateWeapon(WeaponType.Gatling);
                 IWeapon sub = WeaponCreater.CreateWeapon(initData.weapon);
                 respawnDrone.Initialize(drone.Name, main, sub, drone.StockNum - 1);
+                NetworkObjectSpawner.Spawn(respawnDrone);
             }
+
+            // 破壊イベントをクライアントへ通知
+            NetworkManager.SendUdpToAll(new DroneDestroyPacket(drone.Name, respawnDrone?.ObjectId));
 
             // イベント発火
             OnDroneDestroy?.Invoke(drone, respawnDrone);

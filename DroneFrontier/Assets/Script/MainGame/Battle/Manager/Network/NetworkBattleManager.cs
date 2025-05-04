@@ -174,8 +174,6 @@ namespace Battle.Network
                     player.Drone = spawnDrone;
                     player.StockNum = spawnDrone.StockNum;
                     player.DestroyTime = 0;
-
-                    NetworkObjectSpawner.Spawn(spawnDrone);
                 }
 
                 // ドローン破壊イベント設定
@@ -336,10 +334,6 @@ namespace Battle.Network
                     // 観戦送信
                     NetworkManager.SendTcpToPlayer(new DroneWatchPacket(), destroyDrone.Name);
                 }
-            }
-            else
-            {
-                NetworkObjectSpawner.Spawn(respawnDrone);
             }
 
             // 破壊されたドローン情報更新

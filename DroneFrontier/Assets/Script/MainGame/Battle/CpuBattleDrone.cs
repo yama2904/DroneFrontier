@@ -40,7 +40,7 @@ namespace Battle.Drone
 
         public Canvas BulletCanvas => _bulletCanvas;
 
-        public bool IsLockableOn { get; } = true;
+        public bool IsLockableOn { get; private set; } = true;
 
         public List<GameObject> NotLockableOnList { get; } = new List<GameObject>();
 
@@ -585,6 +585,9 @@ namespace Battle.Drone
 
             // ロックオン・レーダー解除
             _lockOnComponent.StopLockOn();
+
+            // ロックオン不可に設定
+            IsLockableOn = false;
 
             // 死亡SE再生
             _soundComponent.Play(SoundManager.SE.Death);
