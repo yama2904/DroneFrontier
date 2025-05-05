@@ -54,7 +54,7 @@ MonoBehaviour:
   _maxShotTime: 10
   _maxRecastTime: 8
   _damage: 5
-  _trackingPower: 0.1
+  _trackingPower: 2
 --- !u!1 &5924858263039860000
 GameObject:
   m_ObjectHideFlags: 0
@@ -160,6 +160,16 @@ PrefabInstance:
       propertyPath: m_LocalScale.x
       value: 30
       objectReference: {fileID: 0}
+    - target: {fileID: 2387285701591430415, guid: fb819132d31986f459ffa2ccafc9e8c3,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 2387285701591430415, guid: fb819132d31986f459ffa2ccafc9e8c3,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 30
+      objectReference: {fileID: 0}
     - target: {fileID: 2921584884671820239, guid: fb819132d31986f459ffa2ccafc9e8c3,
         type: 3}
       propertyPath: m_LocalScale.x
@@ -208,12 +218,12 @@ PrefabInstance:
     - target: {fileID: 4865538844566885093, guid: fb819132d31986f459ffa2ccafc9e8c3,
         type: 3}
       propertyPath: InitialModule.startSizeY.scalar
-      value: 0.75
+      value: 0.77
       objectReference: {fileID: 0}
     - target: {fileID: 4865538844566885093, guid: fb819132d31986f459ffa2ccafc9e8c3,
         type: 3}
       propertyPath: InitialModule.startSizeY.minScalar
-      value: 0.75
+      value: 0.77
       objectReference: {fileID: 0}
     - target: {fileID: 7225798336519985533, guid: fb819132d31986f459ffa2ccafc9e8c3,
         type: 3}
