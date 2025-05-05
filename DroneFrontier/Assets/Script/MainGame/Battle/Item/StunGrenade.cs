@@ -2,8 +2,8 @@ using Battle.Status;
 using Common;
 using Cysharp.Threading.Tasks;
 using Drone.Battle;
-using Drone.Battle.Network;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
@@ -53,6 +53,11 @@ namespace Battle.Item
         /// 投擲中であるか
         /// </summary>
         private bool _isThrowing = false;
+
+        /// <summary>
+        /// ヒット済みオブジェクトリスト
+        /// </summary>
+        private List<GameObject> _hitteds = new List<GameObject>();
 
         /// <summary>
         /// キャンセルトークン発行クラス
@@ -117,7 +122,6 @@ namespace Battle.Item
 
             _cancel.Cancel();   // グレネードが当たって着弾する場合は時間経過による着弾を停止
             DoImpact().Forget();
-            _isThrowing = false;
         }
 
         /// <summary>
@@ -131,22 +135,22 @@ namespace Battle.Item
 
             if (other.CompareTag(TagNameConst.PLAYER))
             {
-                if (other.TryGetComponent<BattleDrone>(out var component))
+                lock (_hitteds)
                 {
-                    other.GetComponent<DroneStatusComponent>().AddStatus(new StunStatus(), StunSec, true);
+                    if (_hitteds.Contains(other.gameObject)) return;
+                    _hitteds.Add(other.gameObject);
                 }
-                else
-                {
-                    if (other.GetComponent<NetworkBattleDrone>().IsControl)
-                    {
-                        other.GetComponent<DroneStatusComponent>().AddStatus(new StunStatus(), StunSec, true);
-                    }
-                }
+                other.GetComponent<DroneStatusComponent>().AddStatus(new StunStatus(), StunSec);
             }
 
             if (other.CompareTag(TagNameConst.CPU))
             {
-                other.GetComponent<DroneStatusComponent>().AddStatus(new StunStatus(), StunSec * 0.5f, false);
+                lock (_hitteds)
+                {
+                    if (_hitteds.Contains(other.gameObject)) return;
+                    _hitteds.Add(other.gameObject);
+                }
+                other.GetComponent<DroneStatusComponent>().AddStatus(new StunStatus(), StunSec * 0.5f);
             }
         }
 
@@ -155,6 +159,8 @@ namespace Battle.Item
         /// </summary>
         private async UniTask DoImpact()
         {
+            _isThrowing = false;
+
             // グレネード非表示
             _grenadeObject.SetActive(false);
 

@@ -9754,7 +9754,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 08d746f68d4763c4e844319ed790acd6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _downPercent: 0.7
+  _downPercent: 0.5
   _spawnPercent: 50
   _spawnInterval: 30
   _activeTime: 20

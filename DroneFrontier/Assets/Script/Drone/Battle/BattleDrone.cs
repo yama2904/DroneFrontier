@@ -255,9 +255,8 @@ namespace Drone.Battle
             // Eキーでアイテム取得
             if (_input.Keys.Contains(KeyCode.E))
             {
-                if (other.CompareTag(TagNameConst.ITEM))
+                if (other.TryGetComponent(out ISpawnItem item))
                 {
-                    ISpawnItem item = other.GetComponent<ISpawnItem>();
                     if (_itemComponent.SetItem(item.DroneItem))
                     {
                         Destroy(other.gameObject);

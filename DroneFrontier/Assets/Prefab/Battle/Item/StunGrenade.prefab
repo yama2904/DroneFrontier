@@ -4962,7 +4962,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 3
+  m_CollisionDetection: 0
 --- !u!114 &8431706655436838574
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14924,7 +14924,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5513815725300673581}
-  - component: {fileID: 3905626235657395527}
+  - component: {fileID: 7663793425746630852}
   m_Layer: 0
   m_Name: Impact
   m_TagString: Untagged
@@ -14950,7 +14950,7 @@ Transform:
   - {fileID: 8859075179736407687}
   m_Father: {fileID: 7989180463579663780}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!135 &3905626235657395527
+--- !u!135 &7663793425746630852
 SphereCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

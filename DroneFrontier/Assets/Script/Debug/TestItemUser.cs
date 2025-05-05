@@ -13,7 +13,8 @@ public class TestItemUser : MonoBehaviour
     {
         if (_timer > _useInterval)
         {
-            new JammingItem().UseItem(gameObject);
+            //new JammingItem().UseItem(gameObject);
+            new StunGrenadeItem().UseItem(gameObject);
             _timer = 0;
         }
 

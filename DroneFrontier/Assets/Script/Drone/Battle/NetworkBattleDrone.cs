@@ -407,9 +407,8 @@ namespace Drone.Battle.Network
             // Eキーでアイテム取得
             if (_input.Keys.Contains(KeyCode.E))
             {
-                if (other.CompareTag(TagNameConst.ITEM))
+                if (other.TryGetComponent(out ISpawnItem item))
                 {
-                    ISpawnItem item = other.GetComponent<ISpawnItem>();
                     if (_itemComponent.SetItem(item.DroneItem))
                     {
                         // 取得アイテム情報送信

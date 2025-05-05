@@ -1,3 +1,4 @@
+using Common;
 using Cysharp.Threading.Tasks;
 using Drone.Battle;
 using System;
@@ -11,8 +12,6 @@ namespace Battle.Status
     {
         public event EventHandler OnStatusEnd;
 
-        private FadeoutImage _createdMask;
-
         public Image InstantiateIcon()
         {
             return null;
@@ -20,20 +19,17 @@ namespace Battle.Status
 
         public bool Invoke(GameObject drone, float statusSec, params object[] addParams)
         {
-            // プレイヤーの場合はマスク生成
-            if ((bool)addParams[0])
+            // プレイヤーの場合はスタンによるマスク生成
+            if (drone.CompareTag(TagNameConst.PLAYER))
             {
-                Addressables.InstantiateAsync("StunMask").Completed += handle =>
-                {
-                    _createdMask = handle.Result.GetComponent<FadeoutImage>();
-                    _createdMask.FadeoutSec = statusSec;
-                    _createdMask.OnFadeoutEnd += OnFadeoutEnd;
-                };
+                StunMask mask = Addressables.InstantiateAsync("StunMask").WaitForCompletion().GetComponent<StunMask>();
+                mask.OnStunEnd += OnStunEnd;
+                mask.Run(drone.GetComponent<IBattleDrone>().Canvas, statusSec);
             }
-            else
-            {
-                // プレイヤー以外の場合はマスクしない
 
+            // CPUの場合はロックオン停止
+            if (drone.CompareTag(TagNameConst.CPU))
+            {
                 // スタンの間ロックオン機能停止
                 DroneLockOnComponent lockon = drone.GetComponent<DroneLockOnComponent>();
                 lockon.SetEnableLockOn(false);
@@ -46,22 +42,24 @@ namespace Battle.Status
                     OnStatusEnd?.Invoke(this, EventArgs.Empty);
                 });
             }
+
             return true;
         }
 
         /// <summary>
-        /// フェードアウト終了イベント
+        /// スタン終了イベント
         /// </summary>
-        /// <param name="o">イベントオブジェクト</param>
+        /// <param name="sender">イベントオブジェクト</param>
         /// <param name="e">イベント引数</param>
-        private void OnFadeoutEnd(object o, EventArgs e)
+        private void OnStunEnd(object sender, EventArgs e)
         {
             // ステータス終了イベント発火
             OnStatusEnd?.Invoke(this, EventArgs.Empty);
 
             // イベント削除してオブジェクト破棄
-            _createdMask.OnFadeoutEnd -= OnFadeoutEnd;
-            UnityEngine.Object.Destroy(_createdMask.gameObject);
+            StunMask mask = sender as StunMask;
+            mask.OnStunEnd -= OnStunEnd;
+            UnityEngine.Object.Destroy(mask.gameObject);
         }
     }
 }

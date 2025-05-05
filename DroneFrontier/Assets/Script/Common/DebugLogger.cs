@@ -3,32 +3,35 @@ using System.IO;
 using System.Text;
 using UnityEngine;
 
-public class DebugLogger
+namespace Common
 {
-    private const string LOG_FOLODER = "Log";
-    private const string LOG_FILE_NAME = "debug.log";
-    private static readonly Encoding LOG_ENCODING = Encoding.UTF8;
-    private static object _lock = new object();
-
-    public static void OutLog(object message)
+    public class DebugLogger
     {
-        OutLog(message.ToString());
-    }
+        private const string LOG_FOLODER = "Log";
+        private const string LOG_FILE_NAME = "debug.log";
+        private static readonly Encoding LOG_ENCODING = Encoding.UTF8;
+        private static object _lock = new object();
 
-    public static void OutLog(string message)
-    {
-        lock (_lock)
+        public static void OutLog(object message)
         {
-            if (!Directory.Exists(LOG_FOLODER))
-            {
-                Directory.CreateDirectory(LOG_FOLODER);
-            }
+            OutLog(message.ToString());
+        }
 
-            using (StreamWriter writer = new StreamWriter(Path.Combine(LOG_FOLODER, LOG_FILE_NAME), true, LOG_ENCODING))
+        public static void OutLog(string message)
+        {
+            lock (_lock)
             {
-                string msg = $"{DateTime.Now} {message}";
-                writer.WriteLine(msg);
-                Debug.Log(msg);
+                if (!Directory.Exists(LOG_FOLODER))
+                {
+                    Directory.CreateDirectory(LOG_FOLODER);
+                }
+
+                using (StreamWriter writer = new StreamWriter(Path.Combine(LOG_FOLODER, LOG_FILE_NAME), true, LOG_ENCODING))
+                {
+                    string msg = $"{DateTime.Now} {message}";
+                    writer.WriteLine(msg);
+                    Debug.Log(msg);
+                }
             }
         }
     }
