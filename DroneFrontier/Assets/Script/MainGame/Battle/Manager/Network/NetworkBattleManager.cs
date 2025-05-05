@@ -60,6 +60,11 @@ namespace Battle.Network
         public static List<PlayerData> PlayerList = new List<PlayerData>();
 
         /// <summary>
+        /// 生存中のプレイヤー数
+        /// </summary>
+        public static int AlivePlayerCount => PlayerList.Where(x => x.Drone != null).Count();
+
+        /// <summary>
         /// アイテムを出現させるか
         /// </summary>
         public static bool IsItemSpawn { get; set; } = true;
@@ -300,15 +305,10 @@ namespace Battle.Network
         /// <param name="type">切断したプレイヤーのホスト/クライアント種別</param>
         private async void OnDisconnect(string name, PeerType type)
         {
-            // ホストから切断、又はプレイヤーが自分のみの場合はエラーメッセージ表示
-            if (type == PeerType.Host || NetworkManager.PlayerCount == 1)
-            {
-                _errMsgCanvas.enabled = true;
-
-                await UniTask.Delay(1000, ignoreTimeScale: true);
-                _isError = true;
-                return;
-            }
+            // エラーメッセージ表示
+            _errMsgCanvas.enabled = true;
+            await UniTask.Delay(1000, ignoreTimeScale: true);
+            _isError = true;
         }
 
         /// <summary>
@@ -342,8 +342,7 @@ namespace Battle.Network
             droneData.DestroyTime = Time.time;
 
             // 残り1人になった場合はゲーム終了
-            List<PlayerData> aliveDrones = PlayerList.Where(x => x.Drone != null).ToList();
-            if (aliveDrones.Count == 1)
+            if (AlivePlayerCount == 1)
             {
                 SendFinishGame();
             }

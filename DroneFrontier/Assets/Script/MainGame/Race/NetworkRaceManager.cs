@@ -88,7 +88,6 @@ namespace Race.Network
                 {
                     NetworkRaceDrone spawnDrone = _droneSpawnManager.SpawnDrone(name);
                     drones.Add(spawnDrone);
-                    NetworkObjectSpawner.Spawn(spawnDrone);
                 }
             }
             else
@@ -189,15 +188,10 @@ namespace Race.Network
         /// <param name="type">切断したプレイヤーのホスト/クライアント種別</param>
         private async void OnDisconnect(string name, PeerType type)
         {
-            // ホストから切断、又はプレイヤーが自分のみの場合はエラーメッセージ表示
-            if (type == PeerType.Host || NetworkManager.PlayerCount == 1)
-            {
-                _errMsgCanvas.enabled = true;
-
-                await UniTask.Delay(1000, ignoreTimeScale: true);
-                _isError = true;
-                return;
-            }
+            // エラーメッセージ表示
+            _errMsgCanvas.enabled = true;
+            await UniTask.Delay(1000, ignoreTimeScale: true);
+            _isError = true;
         }
 
         /// <summary>
@@ -220,6 +214,9 @@ namespace Race.Network
         /// <param name="e">イベント引数</param>
         private void OnGoal(object sender, EventArgs e)
         {
+            // ホストのみ処理
+            if (NetworkManager.PeerType == PeerType.Client) return;
+            
             RaceGoalTrigger trigger = sender as RaceGoalTrigger;
 
             lock (_goalLock)
@@ -229,18 +226,15 @@ namespace Race.Network
                 // 最後の1人が残ったら終了
                 if (trigger.GoalPlayers.Count == NetworkManager.PlayerCount - 1)
                 {
-                    if (NetworkManager.PeerType == PeerType.Host)
-                    {
-                        // 最後のプレイヤー取得
-                        string lastPlayer = NetworkManager.PlayerNames.Where(x => !trigger.GoalPlayers.Contains(x)).First();
+                    // 最後のプレイヤー取得
+                    string lastPlayer = NetworkManager.PlayerNames.Where(x => !trigger.GoalPlayers.Contains(x)).First();
 
-                        // ゴール済みプレイヤーの最後に未ゴールプレイヤーを追加してランキング設定
-                        string[] ranking = trigger.GoalPlayers.Concat(new string[] { lastPlayer }).ToArray();
+                    // ゴール済みプレイヤーの最後に未ゴールプレイヤーを追加してランキング設定
+                    string[] ranking = trigger.GoalPlayers.Concat(new string[] { lastPlayer }).ToArray();
 
-                        // ゲーム終了
-                        SendMethod(() => FinishGame(ranking));
-                        _isFinished = true;
-                    }
+                    // ゲーム終了
+                    SendMethod(() => FinishGame(ranking));
+                    _isFinished = true;
                 }
             }
         }

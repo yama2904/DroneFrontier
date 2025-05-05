@@ -59,9 +59,9 @@ namespace Battle.Network
         private void Awake()
         {
             // イベント設定
+            _droneSpawnManager.OnDroneDestroy += OnDroneDestroy;
             NetworkManager.OnTcpReceived += OnTcpReceived;
             NetworkManager.OnUdpReceivedOnMainThread += OnUdpReceived;
-            _droneSpawnManager.OnDroneDestroy += OnDroneDestroy;
         }
 
         private void Update()
@@ -81,17 +81,9 @@ namespace Battle.Network
             _cancel.Cancel();
 
             // イベント削除
+            _droneSpawnManager.OnDroneDestroy -= OnDroneDestroy;
             NetworkManager.OnTcpReceived -= OnTcpReceived;
             NetworkManager.OnUdpReceivedOnMainThread -= OnUdpReceived;
-            _droneSpawnManager.OnDroneDestroy -= OnDroneDestroy;
-        }
-
-        private void OnTcpReceived(string name, BasePacket packet)
-        {
-            if (packet is DroneWatchPacket)
-            {
-                Run();
-            }
         }
 
         /// <summary>
@@ -102,6 +94,20 @@ namespace Battle.Network
         private void OnDroneDestroy(IBattleDrone destroyDrone, IBattleDrone respawnDrone)
         {
             UpdateWatchDrones(destroyDrone.Name, respawnDrone);
+        }
+
+        /// <summary>
+        /// TCP受信イベント
+        /// </summary>
+        /// <param name="name">送信元プレイヤー</param>
+        /// <param name="packet">受信したTCPパケット</param>
+        private void OnTcpReceived(string name, BasePacket packet)
+        {
+            // 観戦開始
+            if (packet is DroneWatchPacket)
+            {
+                Run();
+            }
         }
 
         /// <summary>
@@ -148,6 +154,8 @@ namespace Battle.Network
             {
                 _watchDrones.RemoveAt(droneIndex);
             }
+
+            if (_watchDrones.Count == 0) return;
 
             // リスポーンドローン取得
             var drone = respawnDrone as NetworkBattleDrone;

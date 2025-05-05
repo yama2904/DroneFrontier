@@ -50,7 +50,10 @@ namespace Network
         public static void Destroy(NetworkBehaviour obj)
         {
             NetworkManager.SendUdpToAll(new DestroyPacket(obj.ObjectId));
-            SpawnedObjects.Remove(obj.ObjectId);
+            if (SpawnedObjects.ContainsKey(obj.ObjectId))
+            {
+                SpawnedObjects.Remove(obj.ObjectId);
+            }
         }
 
         /// <summary>
@@ -90,8 +93,11 @@ namespace Network
                 if (SpawnedObjects.ContainsKey(id))
                 {
                     SpawnedObjects[id].OnDestroyObject -= OnDestroy;
-                    Destroy(SpawnedObjects[id].gameObject);
-                    SpawnedObjects.Remove(id);
+                    if (SpawnedObjects.ContainsKey(id))
+                    {
+                        Destroy(SpawnedObjects[id].gameObject);
+                        SpawnedObjects.Remove(id);
+                    }
                 }
             }
         }

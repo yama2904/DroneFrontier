@@ -1,4 +1,5 @@
 using Drone.Race.Network;
+using Network;
 using UnityEngine;
 
 namespace Race.Network
@@ -31,6 +32,7 @@ namespace Race.Network
             NetworkRaceDrone drone = Instantiate(_playerDrone, spawnPos.position, spawnPos.rotation);
             drone.Initialize(name);
             drone.enabled = false;
+            NetworkObjectSpawner.Spawn(drone);
 
             // 次のスポーン位置
             _nextSpawnIndex++;
@@ -45,7 +47,7 @@ namespace Race.Network
         private void Awake()
         {
             // 初期スポーン位置をランダムに選択
-            _nextSpawnIndex = UnityEngine.Random.Range(0, _droneSpawnPositions.Length);
+            _nextSpawnIndex = Random.Range(0, _droneSpawnPositions.Length);
         }
     }
 }
