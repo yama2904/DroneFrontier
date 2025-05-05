@@ -253,7 +253,7 @@ namespace Battle.Weapon.Bullet
             _audioSource = GetComponent<AudioSource>();
 
             // 全てのParticleSystemコンポーネント取得
-            _particleList = GetParticleObjects(transform);
+            _particleList = GetParticleObjects(_transform);
 
             // プロパティ初期化
             ChargeSec = _chargeSec;
@@ -350,13 +350,11 @@ namespace Battle.Weapon.Bullet
         private void ApplyLaserLineLength(float length)
         {
             // レーザーの長さ反映
-            Vector3 scale = _laserLineObject.localScale;
-            _laserLineObject.localScale = new Vector3(length, scale.y, scale.z);
+            _laserLineObject.localScale = new Vector3(length, length, length);
 
             // レーザーの末端の位置を合わせて移動
             _laserEndObject.position = _transform.position + _transform.forward * length;
         }
-
 
         /// <summary>
         /// レーザー停止
