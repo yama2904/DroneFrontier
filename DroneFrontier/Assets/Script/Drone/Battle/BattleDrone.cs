@@ -149,7 +149,7 @@ namespace Drone.Battle
             _boostComponent.Initialize();
             GetComponent<DroneBarrierComponent>().Initialize();
             GetComponent<DroneDamageComponent>().Initialize();
-            GetComponent<DroneStatusComponent>().IsPlayer = true;
+            GetComponent<DroneStatusComponent>().Initialize();
 
             // プロペラ音再生
             _soundComponent.Play(SoundManager.SE.Propeller, -1, true);

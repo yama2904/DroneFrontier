@@ -236,7 +236,7 @@ namespace Drone.Battle.Network
             _weaponComponent.Initialize();
             _barrierComponent.Initialize();
             _searchComponent.Initialize();
-            GetComponent<DroneStatusComponent>().IsPlayer = IsControl;
+            GetComponent<DroneStatusComponent>().Initialize();
 
             // ƒŠƒXƒ|[ƒ“‚µ‚½ê‡‚Í•œŠˆSEÄ¶
             if (IsRespawn)

@@ -92,9 +92,6 @@ namespace Battle.Drone
         [SerializeField, Tooltip("死亡時に非表示にするオブジェクト")]
         private GameObject[] _destroyHides = null;
 
-        [SerializeField, Tooltip("ドローン本体オブジェクト")]
-        private Transform _droneObject = null;
-
         [SerializeField, Tooltip("ドローン死亡時の爆発オブジェクト")]
         private GameObject _explosion = null;
 
@@ -218,6 +215,7 @@ namespace Battle.Drone
             _weaponComponent.Initialize();
             _boostComponent.Initialize();
             GetComponent<DroneBarrierComponent>().Initialize();
+            GetComponent<DroneStatusComponent>().Initialize();
 
             // プロペラ音再生
             _soundComponent.Play(SoundManager.SE.Propeller, -1, true);

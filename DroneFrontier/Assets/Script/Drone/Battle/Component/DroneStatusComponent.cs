@@ -14,11 +14,6 @@ namespace Drone.Battle
         public List<IDroneStatusChange> Statuses => _statuses.Select(x => x.status).ToList();
 
         /// <summary>
-        /// プレイヤーであるか
-        /// </summary>
-        public bool IsPlayer { get; set; } = false;
-
-        /// <summary>
         /// ステータス変化イベントハンドラー
         /// </summary>
         /// <param name="component">イベントコンポーネント</param>
@@ -70,20 +65,17 @@ namespace Drone.Battle
             {
                 // ステータス変化アイコンを表示
                 RectTransform iconTransform = null;
-                if (IsPlayer)
+                Image icon = status.InstantiateIcon();
+                if (icon != null)
                 {
-                    Image icon = status.InstantiateIcon();
-                    if (icon != null)
-                    {
-                        iconTransform = icon.rectTransform;
-                        iconTransform.SetParent(_statusIconCanvas, false);
+                    iconTransform = icon.rectTransform;
+                    iconTransform.SetParent(_statusIconCanvas, false);
 
-                        // アイコン表示位置調整
-                        int iconCount = _statuses.Where(x => x.icon != null).Count();
-                        iconTransform.localPosition = new Vector3(STATUS_ICON_WIDTH * iconCount,
-                                                                  iconTransform.localPosition.y,
-                                                                  iconTransform.localPosition.z);
-                    }
+                    // アイコン表示位置調整
+                    int iconCount = _statuses.Where(x => x.icon != null).Count();
+                    iconTransform.localPosition = new Vector3(STATUS_ICON_WIDTH * iconCount,
+                                                              iconTransform.localPosition.y,
+                                                              iconTransform.localPosition.z);
                 }
 
                 // ステータス一覧に追加
