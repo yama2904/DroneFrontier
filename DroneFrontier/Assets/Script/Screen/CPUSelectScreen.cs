@@ -247,30 +247,26 @@ namespace Screen
             // BattleManagerにCPU情報適用
             for (int i = 0; i < _selectedWeapons.Count; i++)
             {
-                BattleManager.CpuData cpu = new BattleManager.CpuData
-                {
-                    Name = "CPU" + i
-                };
-
+                WeaponType weapon;
                 switch (_selectedWeapons[i])
                 {
                     case Weapon.Shotbun:
-                        cpu.Weapon = WeaponType.Shotgun;
+                        weapon = WeaponType.Shotgun;
                         break;
 
                     case Weapon.Missile:
-                        cpu.Weapon = WeaponType.Missile;
+                        weapon = WeaponType.Missile;
                         break;
 
                     case Weapon.Lazer:
-                        cpu.Weapon = WeaponType.Lazer;
+                        weapon = WeaponType.Lazer;
                         break;
 
                     default:
                         throw new Exception("想定外の武器が選択されました。");
                 }
 
-                BattleManager.CpuList.Add(cpu);
+                BattleManager.AddCpu("CPU" + i, weapon);
             }
 
             SoundManager.Play(SoundManager.SE.Select);
@@ -283,9 +279,6 @@ namespace Screen
         /// </summary>
         public void ClickBack()
         {
-            // CPU情報クリア
-            BattleManager.CpuList.Clear();
-
             SoundManager.Play(SoundManager.SE.Cancel);
             SelectedButton = ButtonType.Back;
             OnButtonClick(this, EventArgs.Empty);

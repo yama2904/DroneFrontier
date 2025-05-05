@@ -91,10 +91,10 @@ namespace Screen
         {
             _selectedWeapon = WeaponType.None;
             _isSelectedItemOn = true;
-            BattleManager.PlayerWeapon = WeaponType.None;
             _descriptionText.text = "武器を選択してください。";
             ChangeWeaponButtonsColor(WeaponType.None);
             ChangeItemButtonsColor(true);
+            BattleManager.Initialize();
         }
 
         public void Show()

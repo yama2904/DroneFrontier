@@ -384,13 +384,7 @@ namespace Screen.Network
                 // NetworkBattleManagerにプレイヤー情報送信
                 foreach (DictionaryEntry entity in _selectedWeapons)
                 {
-                    NetworkBattleManager.PlayerData data = new NetworkBattleManager.PlayerData
-                    {
-                        Name = entity.Key as string,
-                        Weapon = (WeaponType)entity.Value,
-                        IsControl = name == NetworkManager.MyPlayerName
-                    };
-                    NetworkBattleManager.PlayerList.Add(data);
+                    NetworkBattleManager.AddPlayer(entity.Key as string, (WeaponType)entity.Value);
                 }
 
                 // アイテム有無をBattleManagerに送信

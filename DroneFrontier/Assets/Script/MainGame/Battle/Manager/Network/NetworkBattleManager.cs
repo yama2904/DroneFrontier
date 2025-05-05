@@ -21,7 +21,7 @@ namespace Battle.Network
         /// <summary>
         /// プレイヤー情報
         /// </summary>
-        public class PlayerData
+        private class PlayerData
         {
             /// <summary>
             /// プレイヤー名
@@ -32,11 +32,6 @@ namespace Battle.Network
             /// サブ武器
             /// </summary>
             public WeaponType Weapon { get; set; }
-
-            /// <summary>
-            /// 操作するドローンか
-            /// </summary>
-            public bool IsControl { get; set; }
 
             /// <summary>
             /// ドローン本体情報
@@ -55,14 +50,9 @@ namespace Battle.Network
         }
 
         /// <summary>
-        /// プレイヤーリスト
-        /// </summary>
-        public static List<PlayerData> PlayerList = new List<PlayerData>();
-
-        /// <summary>
         /// 生存中のプレイヤー数
         /// </summary>
-        public static int AlivePlayerCount => PlayerList.Where(x => x.Drone != null).Count();
+        public static int AlivePlayerCount => _playerList.Where(x => x.Drone != null).Count();
 
         /// <summary>
         /// アイテムを出現させるか
@@ -95,8 +85,10 @@ namespace Battle.Network
         [SerializeField, Tooltip("エラーメッセージのCanvas")]
         private Canvas _errMsgCanvas = null;
 
-        [SerializeField, Tooltip("デバッグソロモード")]
-        private bool _debug = false;
+        /// <summary>
+        /// プレイヤーリスト
+        /// </summary>
+        private static List<PlayerData> _playerList = new List<PlayerData>();
 
         /// <summary>
         /// 制限時間のカウントダウンキャンセルトークン
@@ -120,9 +112,18 @@ namespace Battle.Network
 
         public static void Initialize()
         {
-            PlayerList.Clear();
+            _playerList.Clear();
             IsItemSpawn = true;
             IsConfig = false;
+        }
+
+        public static void AddPlayer(string name, WeaponType subWeapon)
+        {
+            _playerList.Add(new PlayerData()
+            {
+                Name = name,
+                Weapon = subWeapon
+            });
         }
 
         /// <summary>
@@ -136,17 +137,6 @@ namespace Battle.Network
         protected override void Awake()
         {
             base.Awake();
-
-            if (_debug)
-            {
-                PlayerData player = new PlayerData()
-                {
-                    Name = "Player",
-                    Weapon = WeaponType.Shotgun,
-                    IsControl = true
-                };
-                PlayerList.Add(player);
-            }
 
             // イベント設定
             NetworkManager.OnDisconnected += OnDisconnect;
@@ -173,7 +163,7 @@ namespace Battle.Network
             // ドローンをスポーン
             if (NetworkManager.PeerType == PeerType.Host)
             {
-                foreach (var player in PlayerList)
+                foreach (var player in _playerList)
                 {
                     NetworkBattleDrone spawnDrone = _droneSpawnManager.SpawnDrone(player.Name, player.Weapon);
                     player.Drone = spawnDrone;
@@ -210,7 +200,7 @@ namespace Battle.Network
                         player.Drone = drone;
                         player.StockNum = drone.StockNum;
                         player.DestroyTime = 0;
-                        PlayerList.Add(player);
+                        _playerList.Add(player);
                     }
                     break;
                 }
@@ -233,7 +223,7 @@ namespace Battle.Network
             StartCountDown().Forget();
 
             // 各ドローンのスクリプト有効化
-            foreach (var drone in PlayerList)
+            foreach (var drone in _playerList)
             {
                 drone.Drone.enabled = true;
             }
@@ -319,7 +309,7 @@ namespace Battle.Network
         private void OnDroneDestroy(NetworkBattleDrone destroyDrone, NetworkBattleDrone respawnDrone)
         {
             // 破壊されたドローン情報取得
-            PlayerData droneData = PlayerList.Where(x => x.Name == destroyDrone.Name).FirstOrDefault();
+            PlayerData droneData = _playerList.Where(x => x.Name == destroyDrone.Name).FirstOrDefault();
 
             // リスポーンドローンがnullの場合は残機無し
             if (respawnDrone == null)
@@ -433,10 +423,10 @@ namespace Battle.Network
             if (NetworkManager.PeerType == PeerType.Client) return;
 
             // [残ストック数 DESC, 破壊された時間 DESC]でソートしてランキング設定
-            string[] ranking = PlayerList.OrderByDescending(x => x.StockNum)
-                                         .ThenByDescending(x => x.DestroyTime)
-                                         .Select(x => x.Name)
-                                         .ToArray();
+            string[] ranking = _playerList.OrderByDescending(x => x.StockNum)
+                                          .ThenByDescending(x => x.DestroyTime)
+                                          .Select(x => x.Name)
+                                          .ToArray();
             SendMethod(() => FinishGame(ranking));
         }
 

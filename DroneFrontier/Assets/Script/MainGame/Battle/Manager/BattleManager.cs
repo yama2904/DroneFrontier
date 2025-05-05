@@ -18,18 +18,40 @@ namespace Battle
     public class BattleManager : MonoBehaviour
     {
         /// <summary>
-        /// CPU情報
+        /// ドローン情報
         /// </summary>
-        public class CpuData
+        private class DroneData
         {
+            /// <summary>
+            /// ドローン名
+            /// </summary>
             public string Name { get; set; }
+
+            /// <summary>
+            /// サブ武器
+            /// </summary>
             public WeaponType Weapon { get; set; }
+
+            /// <summary>
+            /// ドローン本体情報
+            /// </summary>
+            public IBattleDrone Drone { get; set; } = null;
+
+            /// <summary>
+            /// 残ストック数
+            /// </summary>
+            public int StockNum { get; set; } = 0;
+
+            /// <summary>
+            /// 前回破壊された時間
+            /// </summary>
+            public float DestroyTime { get; set; } = 0;
         }
 
         /// <summary>
-        /// CPUリスト
+        /// 生存中のプレイヤー数
         /// </summary>
-        public static List<CpuData> CpuList = new List<CpuData>();
+        public static int AliveDroneCount => _droneList.Where(x => x.Drone != null).Count();
 
         /// <summary>
         /// プレイヤーのサブ武器
@@ -65,30 +87,9 @@ namespace Battle
         private ConfigScreen _config = null;
 
         /// <summary>
-        /// ドローン情報
-        /// </summary>
-        private class DroneData
-        {
-            /// <summary>
-            /// ドローン本体情報
-            /// </summary>
-            public IBattleDrone Drone { get; set; } = null;
-
-            /// <summary>
-            /// 残ストック数
-            /// </summary>
-            public int StockNum { get; set; } = 0;
-
-            /// <summary>
-            /// 前回破壊された時間
-            /// </summary>
-            public float DestroyTime { get; set; } = 0;
-        }
-
-        /// <summary>
         /// 各ドローン情報
         /// </summary>
-        private Dictionary<string, DroneData> _droneDatas = new Dictionary<string, DroneData>();
+        private static List<DroneData> _droneList = new List<DroneData>();
 
         /// <summary>
         /// 制限時間のカウントダウンキャンセルトークン
@@ -104,6 +105,23 @@ namespace Battle
         /// ロック用オブジェクト
         /// </summary>
         private readonly object _lock = new object();
+
+        public static void Initialize()
+        {
+            _droneList.Clear();
+            PlayerWeapon = WeaponType.None;
+            IsItemSpawn = true;
+            IsConfig = false;
+        }
+
+        public static void AddCpu(string name, WeaponType subWeapon)
+        {
+            _droneList.Add(new DroneData()
+            {
+                Name = name,
+                Weapon = subWeapon
+            });
+        }
 
         /// <summary>
         /// 設定ボタン選択
@@ -132,34 +150,28 @@ namespace Battle
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
 
+            // CPUドローンをスポーン
+            foreach (DroneData data in _droneList)
+            {
+                IBattleDrone cpuDrone = _droneSpawnManager.SpawnDrone(data.Name, data.Weapon, false);
+                (cpuDrone as CpuBattleDrone).enabled = false;
+                data.Drone = cpuDrone;
+                data.StockNum = cpuDrone.StockNum;
+                data.DestroyTime = 0;
+            }
+
             // プレイヤードローンをスポーン
             IBattleDrone spawnDrone = _droneSpawnManager.SpawnDrone("Player", PlayerWeapon, true);
+            (spawnDrone as BattleDrone).enabled = false;
             DroneData droneData = new DroneData()
             {
+                Name = "Player",
+                Weapon = PlayerWeapon,
                 Drone = spawnDrone,
                 StockNum = spawnDrone.StockNum,
                 DestroyTime = 0
             };
-            _droneDatas.Add(spawnDrone.Name, droneData);
-
-            // カウントダウン終了までスクリプト無効化
-            (spawnDrone as BattleDrone).enabled = false;
-
-            // CPUドローンをスポーン
-            foreach (CpuData cpu in CpuList)
-            {
-                spawnDrone = _droneSpawnManager.SpawnDrone(cpu.Name, cpu.Weapon, false);
-                droneData = new DroneData()
-                {
-                    Drone = spawnDrone,
-                    StockNum = spawnDrone.StockNum,
-                    DestroyTime = 0
-                };
-                _droneDatas.Add(cpu.Name, droneData);
-
-                // カウントダウン終了までスクリプト無効化
-                (spawnDrone as CpuBattleDrone).enabled = false;
-            }
+            _droneList.Insert(0, droneData);
 
             // ドローン破壊イベント設定
             _droneSpawnManager.OnDroneDestroy += OnDroneDestroy;
@@ -180,7 +192,7 @@ namespace Battle
             StartCountDown().Forget();
 
             // 各ドローンのスクリプト有効化
-            foreach (DroneData drone in _droneDatas.Values)
+            foreach (DroneData drone in _droneList)
             {
                 if (drone.Drone is BattleDrone player)
                 {
@@ -235,7 +247,7 @@ namespace Battle
         private void OnDroneDestroy(IBattleDrone destroyDrone, IBattleDrone respawnDrone)
         {
             // 破壊されたドローン情報取得
-            DroneData droneData = _droneDatas[destroyDrone.Name];
+            DroneData droneData = _droneList.Where(x => x.Name == destroyDrone.Name).FirstOrDefault();
 
             // リスポーンドローンがnullの場合は残機無し
             if (respawnDrone == null)
@@ -253,10 +265,7 @@ namespace Battle
             droneData.DestroyTime = Time.time;
 
             // 残り1人になった場合はゲーム終了
-            List<DroneData> aliveDrones = _droneDatas.Where(x => x.Value.Drone != null)
-                                                     .Select(x => x.Value)
-                                                     .ToList();
-            if (aliveDrones.Count == 1)
+            if (AliveDroneCount == 1)
             {
                 FinishGame();
             }
@@ -361,9 +370,10 @@ namespace Battle
             SoundManager.Play(SoundManager.SE.Finish);
 
             // [残ストック数 DESC, 破壊された時間 DESC]でソートしてランキング設定
-            string[] ranking = _droneDatas.OrderByDescending(x => x.Value.StockNum)
-                                          .ThenByDescending(x => x.Value.DestroyTime)
-                                          .Select(x => x.Key).ToArray();
+            string[] ranking = _droneList.OrderByDescending(x => x.StockNum)
+                                         .ThenByDescending(x => x.DestroyTime)
+                                         .Select(x => x.Name)
+                                         .ToArray();
             ResultSceneManager.SetRank(ranking);
 
             // 3秒後リザルト画面に移動
