@@ -90,7 +90,7 @@ MonoBehaviour:
   _speed: 500
   _explosionSec: 2
   _recastSec: 10
-  _trackingPower: 2.5
+  _trackingPower: 2
   _maxBulletNum: 3
 --- !u!1 &8681925349296267157
 GameObject:

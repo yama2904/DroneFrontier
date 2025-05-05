@@ -195,12 +195,12 @@ namespace Battle.Weapon.Bullet
                     // 敵の方向を計算
                     Vector3 diff = target.transform.position - _transform.position;
                     Quaternion rotation = Quaternion.LookRotation(diff);
-                    _transform.rotation = Quaternion.Slerp(_transform.rotation, rotation, trackingPower);
+                    _transform.rotation = Quaternion.Slerp(_transform.rotation, rotation, trackingPower * Time.deltaTime);
                 }
                 else
                 {
                     // ターゲットが存在しない場合は正面に戻す
-                    _transform.localRotation = Quaternion.Slerp(_transform.localRotation, Quaternion.identity, trackingPower);
+                    _transform.localRotation = Quaternion.Slerp(_transform.localRotation, Quaternion.identity, trackingPower * Time.deltaTime);
                 }
 
                 // レーザーの射線上にヒットした全てのオブジェクトを調べる

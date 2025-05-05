@@ -46,7 +46,7 @@ namespace Battle.Weapon
         private float _damage = 5f;
 
         [SerializeField, Tooltip("レーザーが敵を追う速度")]
-        private float _trackingPower = 0.01f;
+        private float _trackingPower = 0.1f;
 
         /// <summary>
         /// 武器所有者Canvas

@@ -94,24 +94,20 @@ namespace Battle.Weapon.Bullet
                 // 正面に対象が存在する場合のみ追従を行う
                 if (Vector3.Dot(diff, _transform.forward) > 0)
                 {
-                    // 弾丸から追従対象までの角度
-                    float angle = Vector3.Angle(_transform.forward, diff);
-                    if (angle > _trackingPower)
-                    {
-                        // 追従力以上の角度がある場合は修正
-                        angle = _trackingPower;
-                    }
+                    // 弾丸のローカル空間でのターゲット方向
+                    Vector3 localDiff = _transform.InverseTransformDirection(diff.normalized);
 
-                    // 追従方向を計算
-                    Vector3 axis = Vector3.Cross(_transform.forward, diff);
-                    int dirX = axis.y >= 0 ? 1 : -1;
-                    int dirY = axis.x >= 0 ? 1 : -1;
+                    // ヨー（左右）とピッチ（上下）の角度調整
+                    float yaw = Mathf.Atan2(localDiff.x, localDiff.z) * Mathf.Rad2Deg;
+                    float pitch = -Mathf.Atan2(localDiff.y, localDiff.z) * Mathf.Rad2Deg;
 
-                    // 左右の回転
-                    _transform.RotateAround(_transform.position, Vector3.up, angle * dirX);
+                    // 追従力で制限
+                    yaw = Mathf.Clamp(yaw, -_trackingPower, _trackingPower);
+                    pitch = Mathf.Clamp(pitch, -_trackingPower, _trackingPower);
 
-                    // 上下の回転
-                    _transform.RotateAround(_transform.position, Vector3.right, angle * dirY);
+                    // ローカル軸で回転
+                    _transform.Rotate(Vector3.up, yaw, Space.Self);      // 左右
+                    _transform.Rotate(Vector3.right, pitch, Space.Self); // 上下
                 }
             }
 

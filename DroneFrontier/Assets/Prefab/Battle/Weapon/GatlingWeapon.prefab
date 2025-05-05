@@ -311,4 +311,4 @@ MonoBehaviour:
   _shotPerSecond: 10
   _speed: 800
   _destroySec: 1
-  _trackingPower: 3
+  _trackingPower: 1
