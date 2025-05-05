@@ -588,9 +588,6 @@ namespace Battle.Drone
             // ロックオン・レーダー解除
             _lockOnComponent.StopLockOn();
 
-            // ロックオン不可に設定
-            IsLockableOn = false;
-
             // 死亡SE再生
             _soundComponent.Play(SoundManager.SE.Death);
 
@@ -605,6 +602,9 @@ namespace Battle.Drone
 
             // 当たり判定も消す
             GetComponent<Collider>().enabled = false;
+
+            // ロックオン不可
+            IsLockableOn = false;
 
             // Update停止
             enabled = false;

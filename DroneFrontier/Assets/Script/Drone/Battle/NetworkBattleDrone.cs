@@ -561,6 +561,9 @@ namespace Drone.Battle.Network
             // 当たり判定も消す
             GetComponent<Collider>().enabled = false;
 
+            // ロックオン不可
+            IsLockableOn = false;
+
             // Update停止
             enabled = false;
 
