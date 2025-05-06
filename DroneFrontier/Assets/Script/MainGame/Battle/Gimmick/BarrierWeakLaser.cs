@@ -179,7 +179,7 @@ namespace Battle.Gimmick
             _renderer = GetComponent<LineRenderer>();
 
             // レーザーの始点初期化
-            _renderer.SetPosition(0, _transform.position);
+            _transform.position = _renderer.GetPosition(0);
 
             // レーザー非表示
             _renderer.startWidth = 0;

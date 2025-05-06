@@ -408,7 +408,6 @@ MonoBehaviour:
   _finishAnimator: {fileID: 474539546}
   _config: {fileID: 1909084157}
   _errMsgCanvas: {fileID: 914954877}
-  _debug: 0
 --- !u!1 &240531427
 GameObject:
   m_ObjectHideFlags: 0
@@ -3228,17 +3227,17 @@ PrefabInstance:
     - target: {fileID: 1792025415574020454, guid: df90bb51d63d582488256ad2c127566d,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 149.2
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1792025415574020454, guid: df90bb51d63d582488256ad2c127566d,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1000
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1792025415574020454, guid: df90bb51d63d582488256ad2c127566d,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -292.9
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1792025415574020454, guid: df90bb51d63d582488256ad2c127566d,
         type: 3}
