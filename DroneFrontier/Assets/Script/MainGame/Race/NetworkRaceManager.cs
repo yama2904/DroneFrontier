@@ -30,6 +30,8 @@ namespace Race.Network
         [SerializeField, Tooltip("エラーメッセージのCanvas")]
         private Canvas _errMsgCanvas = null;
 
+        private List<string> _goalPlayers = new List<string>();
+
         /// <summary>
         /// ゴール用ロックオブジェクト
         /// </summary>
@@ -125,6 +127,7 @@ namespace Race.Network
             // 各ドローンのスクリプト有効化
             foreach (var drone in drones)
             {
+                if (drone == null) continue;
                 drone.enabled = true;
             }
         }
@@ -188,10 +191,25 @@ namespace Race.Network
         /// <param name="type">切断したプレイヤーのホスト/クライアント種別</param>
         private async void OnDisconnect(string name, PeerType type)
         {
-            // エラーメッセージ表示
-            _errMsgCanvas.enabled = true;
-            await UniTask.Delay(1000, ignoreTimeScale: true);
-            _isError = true;
+            // ホストから切断、又はプレイヤーが自分のみになった場合はエラーメッセージ表示
+            if (type == PeerType.Host || NetworkManager.PlayerCount == 1)
+            {
+                _errMsgCanvas.enabled = true;
+
+                await UniTask.Delay(1000, ignoreTimeScale: true);
+                _isError = true;
+                return;
+            }
+
+            // ホストのみ切断対応
+            if (NetworkManager.PeerType == PeerType.Host)
+            {
+                lock (_goalLock)
+                {
+                    if (_isFinished) return;
+                    CheckGameFinish();
+                }
+            }
         }
 
         /// <summary>
@@ -216,26 +234,35 @@ namespace Race.Network
         {
             // ホストのみ処理
             if (NetworkManager.PeerType == PeerType.Client) return;
-            
+
             RaceGoalTrigger trigger = sender as RaceGoalTrigger;
 
             lock (_goalLock)
             {
                 if (_isFinished) return;
 
-                // 最後の1人が残ったら終了
-                if (trigger.GoalPlayers.Count == NetworkManager.PlayerCount - 1)
-                {
-                    // 最後のプレイヤー取得
-                    string lastPlayer = NetworkManager.PlayerNames.Where(x => !trigger.GoalPlayers.Contains(x)).First();
+                _goalPlayers = trigger.GoalPlayers;
+                CheckGameFinish();
+            }
+        }
 
-                    // ゴール済みプレイヤーの最後に未ゴールプレイヤーを追加してランキング設定
-                    string[] ranking = trigger.GoalPlayers.Concat(new string[] { lastPlayer }).ToArray();
+        /// <summary>
+        /// ゲーム終了チェック
+        /// </summary>
+        private void CheckGameFinish()
+        {
+            // 最後の1人が残ったら終了
+            if (_goalPlayers.Count == NetworkManager.PlayerCount - 1)
+            {
+                // 最後のプレイヤー取得
+                string lastPlayer = NetworkManager.PlayerNames.Where(x => !_goalPlayers.Contains(x)).First();
 
-                    // ゲーム終了
-                    SendMethod(() => FinishGame(ranking));
-                    _isFinished = true;
-                }
+                // ゴール済みプレイヤーの最後に未ゴールプレイヤーを追加してランキング設定
+                string[] ranking = _goalPlayers.Concat(new string[] { lastPlayer }).ToArray();
+
+                // ゲーム終了
+                SendMethod(() => FinishGame(ranking));
+                _isFinished = true;
             }
         }
 

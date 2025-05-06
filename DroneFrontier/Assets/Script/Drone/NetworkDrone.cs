@@ -131,6 +131,12 @@ namespace Drone.Network
             _initialized = true;
         }
 
+        protected override void Awake()
+        {
+            base.Awake();
+            NetworkManager.OnDisconnected += OnDisconnect;
+        }
+
         protected virtual void Update()
         {
             if (!_initialized) return;
@@ -218,8 +224,8 @@ namespace Drone.Network
             base.OnDestroy();
 
             // 受信イベント設定
-            if (!_isControl)
-                NetworkManager.OnUdpReceivedOnMainThread -= OnReceiveUdpOfOtherPlayer;
+            NetworkManager.OnUdpReceivedOnMainThread -= OnReceiveUdpOfOtherPlayer;
+            NetworkManager.OnDisconnected -= OnDisconnect;
         }
 
         /// <summary>
@@ -248,6 +254,19 @@ namespace Drone.Network
                 {
                     _boostComponent.StopBoost();
                 }
+            }
+        }
+
+        /// <summary>
+        /// プレイヤー切断イベント
+        /// </summary>
+        /// <param name="name">切断したプレイヤー名</param>
+        /// <param name="type">切断したプレイヤーのホスト/クライアント種別</param>
+        protected virtual void OnDisconnect(string name, PeerType type)
+        {
+            if (name == Name)
+            {
+                Destroy(gameObject);
             }
         }
     }

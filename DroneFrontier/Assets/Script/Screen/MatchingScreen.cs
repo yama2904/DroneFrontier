@@ -118,6 +118,7 @@ namespace Screen
             _isError = false;
 
             // 名前入力欄で初期化
+            PreScreen = null;
             ShowPlayerList(false);
 
             NetworkManager.Initialize();
@@ -290,10 +291,15 @@ namespace Screen
 
                 // 初期化して前画面へ戻る
                 ShowPlayerList(false);
-                PreScreen = null;
                 SelectedButton = ButtonType.Back;
                 OnButtonClick(this, EventArgs.Empty);
             }
+        }
+
+        private void OnApplicationQuit()
+        {
+            // 切断
+            NetworkManager.Disconnect();
         }
 
         /// <summary>

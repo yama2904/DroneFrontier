@@ -91,6 +91,8 @@ namespace Network
         /// </summary>
         private MethodInfo[] _methods = null;
 
+        private bool _isAppQuit = false;
+
         public virtual string GetAddressKey() { return string.Empty; }
 
         public virtual object CreateSpawnData() { return null; }
@@ -115,7 +117,7 @@ namespace Network
                                             BindingFlags.NonPublic |
                                             BindingFlags.Static |
                                             BindingFlags.DeclaredOnly);
-            
+
             // 受信イベント設定
             NetworkManager.OnUdpReceivedOnMainThread += OnUdpReceiveOfSendMethod;
             NetworkManager.OnUdpReceivedOnMainThread += OnUdpReceiveOfPosition;
@@ -130,7 +132,15 @@ namespace Network
             // キャンセル発行
             _cancel.Cancel();
 
-            OnDestroyObject?.Invoke(this, EventArgs.Empty);
+            if (!_isAppQuit)
+            {
+                OnDestroyObject?.Invoke(this, EventArgs.Empty);
+            }
+        }
+
+        protected virtual void OnApplicationQuit()
+        {
+            _isAppQuit = true;
         }
 
         /// <summary>

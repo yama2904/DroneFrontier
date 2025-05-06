@@ -62,6 +62,7 @@ namespace Battle.Network
             _droneSpawnManager.OnDroneDestroy += OnDroneDestroy;
             NetworkManager.OnTcpReceived += OnTcpReceived;
             NetworkManager.OnUdpReceivedOnMainThread += OnUdpReceived;
+            NetworkManager.OnDisconnected += OnDisconnect;
         }
 
         private void Update()
@@ -84,6 +85,7 @@ namespace Battle.Network
             _droneSpawnManager.OnDroneDestroy -= OnDroneDestroy;
             NetworkManager.OnTcpReceived -= OnTcpReceived;
             NetworkManager.OnUdpReceivedOnMainThread -= OnUdpReceived;
+            NetworkManager.OnDisconnected -= OnDisconnect;
         }
 
         /// <summary>
@@ -137,6 +139,16 @@ namespace Battle.Network
 
                 UpdateWatchDrones(destroy.Name, respawnDrone);
             }
+        }
+
+        /// <summary>
+        /// プレイヤー切断イベント
+        /// </summary>
+        /// <param name="name">切断したプレイヤー名</param>
+        /// <param name="type">切断したプレイヤーのホスト/クライアント種別</param>
+        private void OnDisconnect(string name, PeerType type)
+        {
+            UpdateWatchDrones(name, null);
         }
 
         /// <summary>

@@ -225,6 +225,7 @@ namespace Battle.Network
             // 各ドローンのスクリプト有効化
             foreach (var drone in _playerList)
             {
+                if (drone.Drone == null) continue;
                 drone.Drone.enabled = true;
             }
         }
@@ -288,6 +289,12 @@ namespace Battle.Network
             NetworkManager.Disconnect();
         }
 
+        protected override void OnApplicationQuit()
+        {
+            // 切断
+            NetworkManager.Disconnect();
+        }
+
         /// <summary>
         /// プレイヤー切断イベント
         /// </summary>
@@ -295,10 +302,31 @@ namespace Battle.Network
         /// <param name="type">切断したプレイヤーのホスト/クライアント種別</param>
         private async void OnDisconnect(string name, PeerType type)
         {
-            // エラーメッセージ表示
-            _errMsgCanvas.enabled = true;
-            await UniTask.Delay(1000, ignoreTimeScale: true);
-            _isError = true;
+            // ホストから切断、又はプレイヤーが自分のみになった場合はエラーメッセージ表示
+            if (type == PeerType.Host || NetworkManager.PlayerCount == 1)
+            {
+                _errMsgCanvas.enabled = true;
+
+                await UniTask.Delay(1000, ignoreTimeScale: true);
+                _isError = true;
+                return;
+            }
+
+            // ホストのみ切断対応
+            if (NetworkManager.PeerType == PeerType.Host)
+            {
+                // 切断プレイヤー情報取得
+                PlayerData data = _playerList.Where(x => x.Name == name).FirstOrDefault();
+
+                // プレイヤーリストから削除
+                _playerList.Remove(data);
+
+                // 残り1人になった場合はゲーム終了
+                if (AlivePlayerCount == 1)
+                {
+                    SendFinishGame();
+                }
+            }
         }
 
         /// <summary>
