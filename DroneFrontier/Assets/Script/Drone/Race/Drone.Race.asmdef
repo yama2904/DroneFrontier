@@ -1,0 +1,17 @@
+{
+    "name": "Drone.Race",
+    "rootNamespace": "Drone.Race",
+    "references": [
+        "GUID:b370c5702eb754c418446b2d2f8432dc",
+        "GUID:b57510a51556f804d89a23b5f2c2dd28"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

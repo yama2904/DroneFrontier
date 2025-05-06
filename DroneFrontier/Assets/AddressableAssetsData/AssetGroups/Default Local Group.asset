@@ -1,0 +1,115 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Default Local Group
+  m_EditorClassIdentifier: 
+  m_GroupName: Default Local Group
+  m_Data:
+    m_SerializedData: []
+  m_GUID: 77a3b631f60219d4f90d070c6543a978
+  m_SerializeEntries:
+  - m_GUID: 020ba08994670fc42a791716f37eb94a
+    m_Address: JammingIcon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 207208a205ab31a4fba67586f4180f2c
+    m_Address: LaserWeapon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2bdfeffbaad7c4a4dad06059b234f84e
+    m_Address: NetworkSpawnStunGrenadeItem
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2d84d4d2a3dee1646a24af9e5df852b4
+    m_Address: ShotgunWeapon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4f64592b87bb18f46bf6a7fbc2a981e8
+    m_Address: JammingBot
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 52b578acb9298404d85417da13e71509
+    m_Address: NetworkSpawnJammingItem
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 54a58e15937ed7c4e83960a830b2d326
+    m_Address: NetworkRaceDrone
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5605f4dc9579efd42afc3b6d6bb27df0
+    m_Address: GatlingWeapon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6d6b6b44b8d6bae4ab0f90520f57f3bb
+    m_Address: StunGrenade
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8c2ea1de19e199245af77ca42744e83f
+    m_Address: StunMask
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ae3e1b7c5493a0746ab860ea220b8186
+    m_Address: MissileWeapon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b7ca1f1d0896cff408d815240bed4e11
+    m_Address: GrenadeIconImage
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c010ea8af69f67742bfa72cd3e095e91
+    m_Address: JammingIconImage
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c185333b265c4c944b3a763f2d9c61e5
+    m_Address: NetworkBattleDrone
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d436d6d0d3f34cb4e8e145549987d99e
+    m_Address: BarrierIconImage
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d78a8c1949fe50b43a58a550e64554ed
+    m_Address: SpeedDownIcon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: dec920d0f7a04b44fa05de1dcdea8001
+    m_Address: BarrierWeakIcon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f54898de3a1cb7048afd04e02f34308e
+    m_Address: NetworkSpawnBarrierStrengthenItem
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 2ed7313f90cd5ff42ba7024d5f958353, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: b911dabcf4909624bb6a023de45d3016, type: 2}
+    - {fileID: 11400000, guid: 6fdb8abe0c69e814083645613aba0d09, type: 2}
